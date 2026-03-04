@@ -57,7 +57,7 @@
         <div class="col-span-2 text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase font-semibold text-right">Aksi</div>
     </div>
 
-    @forelse($users->filter(fn($u) => !request('role') || $u->role === request('role')) as $user)
+    @forelse($users as $user)
     @php
         $roleColor = match($user->role) {
             'ppk'  => '#F4A261',
@@ -108,6 +108,72 @@
     </div>
     @endforelse
 </div>
+
+{{-- Pagination --}}
+@if($users->hasPages())
+<div class="flex items-center justify-between mt-4 flex-wrap gap-3">
+    <p class="text-xs dark:text-gray-500 text-gray-400">
+        Menampilkan <span class="font-semibold dark:text-gray-300 text-gray-600">{{ $users->firstItem() }}–{{ $users->lastItem() }}</span>
+        dari <span class="font-semibold dark:text-gray-300 text-gray-600">{{ $users->total() }}</span> user
+    </p>
+    <div class="flex items-center gap-1">
+        {{-- Prev --}}
+        @if($users->onFirstPage())
+            <span class="px-3 py-1.5 text-xs rounded-lg dark:text-gray-600 text-gray-300 cursor-not-allowed">← Prev</span>
+        @else
+            <a href="{{ $users->previousPageUrl() }}"
+               class="px-3 py-1.5 text-xs rounded-lg border dark:border-gray-700 border-gray-300 dark:text-gray-400 text-gray-500 dark:hover:bg-gray-700 hover:bg-gray-100 transition">
+                ← Prev
+            </a>
+        @endif
+
+        {{-- Page numbers --}}
+        @php
+            $current  = $users->currentPage();
+            $last     = $users->lastPage();
+            $start    = max(1, $current - 2);
+            $end      = min($last, $current + 2);
+        @endphp
+
+        @if($start > 1)
+            <a href="{{ $users->url(1) }}"
+               class="px-3 py-1.5 text-xs rounded-lg border dark:border-gray-700 border-gray-300 dark:text-gray-400 text-gray-500 dark:hover:bg-gray-700 hover:bg-gray-100 transition">1</a>
+            @if($start > 2)
+                <span class="px-2 text-xs dark:text-gray-600 text-gray-400">…</span>
+            @endif
+        @endif
+
+        @for($page = $start; $page <= $end; $page++)
+            @if($page == $current)
+                <span class="px-3 py-1.5 text-xs rounded-lg bg-red-600 text-white font-semibold">{{ $page }}</span>
+            @else
+                <a href="{{ $users->url($page) }}"
+                   class="px-3 py-1.5 text-xs rounded-lg border dark:border-gray-700 border-gray-300 dark:text-gray-400 text-gray-500 dark:hover:bg-gray-700 hover:bg-gray-100 transition">
+                    {{ $page }}
+                </a>
+            @endif
+        @endfor
+
+        @if($end < $last)
+            @if($end < $last - 1)
+                <span class="px-2 text-xs dark:text-gray-600 text-gray-400">…</span>
+            @endif
+            <a href="{{ $users->url($last) }}"
+               class="px-3 py-1.5 text-xs rounded-lg border dark:border-gray-700 border-gray-300 dark:text-gray-400 text-gray-500 dark:hover:bg-gray-700 hover:bg-gray-100 transition">{{ $last }}</a>
+        @endif
+
+        {{-- Next --}}
+        @if($users->hasMorePages())
+            <a href="{{ $users->nextPageUrl() }}"
+               class="px-3 py-1.5 text-xs rounded-lg border dark:border-gray-700 border-gray-300 dark:text-gray-400 text-gray-500 dark:hover:bg-gray-700 hover:bg-gray-100 transition">
+                Next →
+            </a>
+        @else
+            <span class="px-3 py-1.5 text-xs rounded-lg dark:text-gray-600 text-gray-300 cursor-not-allowed">Next →</span>
+        @endif
+    </div>
+</div>
+@endif
 
 @php
 $inputClass = "w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-4 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none";
@@ -301,103 +367,103 @@ $labelClass = "block text-xs font-semibold dark:text-gray-400 text-gray-600 uppe
 
 @push('scripts')
 <script>
-const allDesas = @json($desas->map(fn($d) => ['id'=>$d->id,'nama'=>$d->nama,'kecamatan_id'=>$d->kecamatan_id]));
-const allTps   = @json($tpsList->map(fn($t) => ['id'=>$t->id,'nama'=>$t->nama,'desa_id'=>$t->desa_id]));
+    const allDesas = @json($desas->map(fn($d) => ['id'=>$d->id,'nama'=>$d->nama,'kecamatan_id'=>$d->kecamatan_id]));
+    const allTps   = @json($tpsList->map(fn($t) => ['id'=>$t->id,'nama'=>$t->nama,'desa_id'=>$t->desa_id]));
 
-function openModal(type) {
-    document.getElementById('modal-' + type).classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-}
-function closeModal(type) {
-    document.getElementById('modal-' + type).classList.add('hidden');
-    document.body.style.overflow = '';
-}
-['tambah','edit'].forEach(type => {
-    document.getElementById('modal-' + type).addEventListener('click', function(e) {
-        if (e.target === this) closeModal(type);
-    });
-});
-
-function updateWilayahField(prefix) {
-    const role = document.getElementById(prefix + '-role').value;
-    const wrap = document.getElementById(prefix + '-wilayah');
-    ['kecamatan','kecamatan-pps','field-desa','kecamatan-kpps','field-desa-kpps','field-tps'].forEach(f => {
-        const el = document.getElementById(prefix + '-field-' + f);
-        if (el) el.classList.add('hidden');
-    });
-    if (!role) { wrap.classList.add('hidden'); return; }
-    wrap.classList.remove('hidden');
-    if (role === 'ppk')       document.getElementById(prefix + '-field-kecamatan').classList.remove('hidden');
-    else if (role === 'pps')  document.getElementById(prefix + '-field-kecamatan-pps').classList.remove('hidden');
-    else if (role === 'kpps') document.getElementById(prefix + '-field-kecamatan-kpps').classList.remove('hidden');
-}
-
-function loadDesa(prefix, kecId) {
-    const desas   = allDesas.filter(d => d.kecamatan_id == kecId);
-    let selId, fieldId;
-    if (prefix === 'tambah') { selId = 'tambah-desa-select'; fieldId = 'tambah-field-desa'; }
-    else                     { selId = 'tambah-desa-kpps';   fieldId = 'tambah-field-desa-kpps'; }
-    const sel = document.getElementById(selId);
-    sel.innerHTML = '<option value="">— Pilih Desa —</option>';
-    desas.forEach(d => sel.innerHTML += `<option value="${d.id}">${d.nama}</option>`);
-    document.getElementById(fieldId).classList.toggle('hidden', desas.length === 0);
-}
-
-function loadTps(prefix, desaId) {
-    const list = allTps.filter(t => t.desa_id == desaId);
-    const sel  = document.getElementById(prefix + '-tps-select');
-    sel.innerHTML = '<option value="">— Pilih TPS —</option>';
-    list.forEach(t => sel.innerHTML += `<option value="${t.id}">${t.nama}</option>`);
-    document.getElementById(prefix + '-field-tps').classList.toggle('hidden', list.length === 0);
-}
-
-function openEdit(user) {
-    document.getElementById('edit-name').value         = user.name;
-    document.getElementById('edit-username').value     = user.username;
-    document.getElementById('edit-role-display').value = user.role.toUpperCase();
-    document.getElementById('edit-form').action        = `/admin/users/${user.id}`;
-    ['ppk','pps','kpps'].forEach(r => document.getElementById('edit-wilayah-' + r).classList.add('hidden'));
-    if (user.role === 'ppk') {
-        document.getElementById('edit-wilayah-ppk').classList.remove('hidden');
-        if (user.kecamatan_id) document.getElementById('edit-kecamatan').value = user.kecamatan_id;
-    } else if (user.role === 'pps') {
-        document.getElementById('edit-wilayah-pps').classList.remove('hidden');
-        if (user.desa_id) {
-            const desa = allDesas.find(d => d.id == user.desa_id);
-            if (desa) { document.getElementById('edit-kec-pps').value = desa.kecamatan_id; loadDesaEdit(desa.kecamatan_id, user.desa_id); }
-        }
-    } else if (user.role === 'kpps') {
-        document.getElementById('edit-wilayah-kpps').classList.remove('hidden');
-        if (user.tps_id) {
-            const tps  = allTps.find(t => t.id == user.tps_id);
-            const desa = tps ? allDesas.find(d => d.id == tps.desa_id) : null;
-            if (desa) { document.getElementById('edit-kec-kpps').value = desa.kecamatan_id; loadDesaEditKpps(desa.kecamatan_id, tps.desa_id, user.tps_id); }
-        }
+    function openModal(type) {
+        document.getElementById('modal-' + type).classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
     }
-    openModal('edit');
-}
+    function closeModal(type) {
+        document.getElementById('modal-' + type).classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+    ['tambah','edit'].forEach(type => {
+        document.getElementById('modal-' + type).addEventListener('click', function(e) {
+            if (e.target === this) closeModal(type);
+        });
+    });
 
-function loadDesaEdit(kecId, selectedDesaId = null) {
-    const desas = allDesas.filter(d => d.kecamatan_id == kecId);
-    const sel   = document.getElementById('edit-desa-select');
-    sel.innerHTML = '<option value="">— Pilih Desa —</option>';
-    desas.forEach(d => sel.innerHTML += `<option value="${d.id}" ${d.id == selectedDesaId ? 'selected' : ''}>${d.nama}</option>`);
-}
+    function updateWilayahField(prefix) {
+        const role = document.getElementById(prefix + '-role').value;
+        const wrap = document.getElementById(prefix + '-wilayah');
+        ['kecamatan','kecamatan-pps','field-desa','kecamatan-kpps','field-desa-kpps','field-tps'].forEach(f => {
+            const el = document.getElementById(prefix + '-field-' + f);
+            if (el) el.classList.add('hidden');
+        });
+        if (!role) { wrap.classList.add('hidden'); return; }
+        wrap.classList.remove('hidden');
+        if (role === 'ppk')       document.getElementById(prefix + '-field-kecamatan').classList.remove('hidden');
+        else if (role === 'pps')  document.getElementById(prefix + '-field-kecamatan-pps').classList.remove('hidden');
+        else if (role === 'kpps') document.getElementById(prefix + '-field-kecamatan-kpps').classList.remove('hidden');
+    }
 
-function loadDesaEditKpps(kecId, selectedDesaId = null, selectedTpsId = null) {
-    const desas = allDesas.filter(d => d.kecamatan_id == kecId);
-    const sel   = document.getElementById('edit-desa-kpps');
-    sel.innerHTML = '<option value="">— Pilih Desa —</option>';
-    desas.forEach(d => sel.innerHTML += `<option value="${d.id}" ${d.id == selectedDesaId ? 'selected' : ''}>${d.nama}</option>`);
-    if (selectedDesaId) loadTpsEdit(selectedDesaId, selectedTpsId);
-}
+    function loadDesa(prefix, kecId) {
+        const desas   = allDesas.filter(d => d.kecamatan_id == kecId);
+        let selId, fieldId;
+        if (prefix === 'tambah') { selId = 'tambah-desa-select'; fieldId = 'tambah-field-desa'; }
+        else                     { selId = 'tambah-desa-kpps';   fieldId = 'tambah-field-desa-kpps'; }
+        const sel = document.getElementById(selId);
+        sel.innerHTML = '<option value="">— Pilih Desa —</option>';
+        desas.forEach(d => sel.innerHTML += `<option value="${d.id}">${d.nama}</option>`);
+        document.getElementById(fieldId).classList.toggle('hidden', desas.length === 0);
+    }
 
-function loadTpsEdit(desaId, selectedTpsId = null) {
-    const list = allTps.filter(t => t.desa_id == desaId);
-    const sel  = document.getElementById('edit-tps-select');
-    sel.innerHTML = '<option value="">— Pilih TPS —</option>';
-    list.forEach(t => sel.innerHTML += `<option value="${t.id}" ${t.id == selectedTpsId ? 'selected' : ''}>${t.nama}</option>`);
-}
+    function loadTps(prefix, desaId) {
+        const list = allTps.filter(t => t.desa_id == desaId);
+        const sel  = document.getElementById(prefix + '-tps-select');
+        sel.innerHTML = '<option value="">— Pilih TPS —</option>';
+        list.forEach(t => sel.innerHTML += `<option value="${t.id}">${t.nama}</option>`);
+        document.getElementById(prefix + '-field-tps').classList.toggle('hidden', list.length === 0);
+    }
+
+    function openEdit(user) {
+        document.getElementById('edit-name').value         = user.name;
+        document.getElementById('edit-username').value     = user.username;
+        document.getElementById('edit-role-display').value = user.role.toUpperCase();
+        document.getElementById('edit-form').action        = `/admin/users/${user.id}`;
+        ['ppk','pps','kpps'].forEach(r => document.getElementById('edit-wilayah-' + r).classList.add('hidden'));
+        if (user.role === 'ppk') {
+            document.getElementById('edit-wilayah-ppk').classList.remove('hidden');
+            if (user.kecamatan_id) document.getElementById('edit-kecamatan').value = user.kecamatan_id;
+        } else if (user.role === 'pps') {
+            document.getElementById('edit-wilayah-pps').classList.remove('hidden');
+            if (user.desa_id) {
+                const desa = allDesas.find(d => d.id == user.desa_id);
+                if (desa) { document.getElementById('edit-kec-pps').value = desa.kecamatan_id; loadDesaEdit(desa.kecamatan_id, user.desa_id); }
+            }
+        } else if (user.role === 'kpps') {
+            document.getElementById('edit-wilayah-kpps').classList.remove('hidden');
+            if (user.tps_id) {
+                const tps  = allTps.find(t => t.id == user.tps_id);
+                const desa = tps ? allDesas.find(d => d.id == tps.desa_id) : null;
+                if (desa) { document.getElementById('edit-kec-kpps').value = desa.kecamatan_id; loadDesaEditKpps(desa.kecamatan_id, tps.desa_id, user.tps_id); }
+            }
+        }
+        openModal('edit');
+    }
+
+    function loadDesaEdit(kecId, selectedDesaId = null) {
+        const desas = allDesas.filter(d => d.kecamatan_id == kecId);
+        const sel   = document.getElementById('edit-desa-select');
+        sel.innerHTML = '<option value="">— Pilih Desa —</option>';
+        desas.forEach(d => sel.innerHTML += `<option value="${d.id}" ${d.id == selectedDesaId ? 'selected' : ''}>${d.nama}</option>`);
+    }
+
+    function loadDesaEditKpps(kecId, selectedDesaId = null, selectedTpsId = null) {
+        const desas = allDesas.filter(d => d.kecamatan_id == kecId);
+        const sel   = document.getElementById('edit-desa-kpps');
+        sel.innerHTML = '<option value="">— Pilih Desa —</option>';
+        desas.forEach(d => sel.innerHTML += `<option value="${d.id}" ${d.id == selectedDesaId ? 'selected' : ''}>${d.nama}</option>`);
+        if (selectedDesaId) loadTpsEdit(selectedDesaId, selectedTpsId);
+    }
+
+    function loadTpsEdit(desaId, selectedTpsId = null) {
+        const list = allTps.filter(t => t.desa_id == desaId);
+        const sel  = document.getElementById('edit-tps-select');
+        sel.innerHTML = '<option value="">— Pilih TPS —</option>';
+        list.forEach(t => sel.innerHTML += `<option value="${t.id}" ${t.id == selectedTpsId ? 'selected' : ''}>${t.nama}</option>`);
+    }
 </script>
 @endpush
 

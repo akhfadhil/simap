@@ -13,10 +13,17 @@ class UserManagementController extends Controller
 {
     public function index()
     {
-        $users      = User::with('kecamatan', 'desa', 'tps')->where('role', '!=', 'admin')->latest()->get();
+        $users = User::with('kecamatan', 'desa', 'tps')
+                    ->where('role', '!=', 'admin')
+                    ->when(request('role'), fn($q) => $q->where('role', request('role')))
+                    ->latest()
+                    ->paginate(15)
+                    ->withQueryString();
+
         $kecamatans = Kecamatan::all();
         $desas      = Desa::with('kecamatan')->get();
         $tpsList    = Tps::with('desa')->get();
+
         return view('admin.users.index', compact('users', 'kecamatans', 'desas', 'tpsList'));
     }
 
