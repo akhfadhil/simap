@@ -5,60 +5,62 @@
 
 <div class="mb-8">
     <a href="{{ route('dashboard.pps') }}"
-       class="inline-flex items-center gap-2 font-mono2 text-[10px] tracking-[2px] text-gray-600 uppercase hover:text-brand transition mb-4">
-        ← KEMBALI KE DASHBOARD
+       class="inline-flex items-center gap-2 text-xs dark:text-gray-500 text-gray-400 hover:text-red-500 transition font-medium mb-4">
+        ← Kembali ke Dashboard
     </a>
-    <p class="font-mono2 text-[10px] tracking-[3px] text-gray-600 uppercase mb-2">// PPS — Data TPS</p>
-    <h1 class="font-display text-4xl tracking-[2px]" style="color:#2EC4B6">DATA TPS</h1>
-    <p class="text-gray-500 text-sm mt-1">{{ Auth::user()->desa->nama ?? '' }} · {{ Auth::user()->desa->kecamatan->nama ?? '' }}</p>
+    <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-2 font-semibold">// PPS — Data TPS</p>
+    <h1 class="font-display text-4xl tracking-[2px] text-teal-400">DATA TPS</h1>
+    <p class="dark:text-gray-400 text-gray-500 text-sm mt-1">
+        {{ Auth::user()->desa->nama ?? '' }} · {{ Auth::user()->desa->kecamatan->nama ?? '' }}
+    </p>
 </div>
 
 {{-- Stats --}}
-<div class="grid grid-cols-3 gap-px bg-gray-800 mb-8">
-    <div class="bg-[#141414] p-6">
-        <p class="font-mono2 text-[10px] tracking-[2px] text-gray-600 uppercase mb-3">Total TPS</p>
-        <p class="font-display text-4xl" style="color:#2EC4B6">{{ $tpsList->count() }}</p>
+<div class="grid grid-cols-3 gap-4 mb-8">
+    <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border dark:border-gray-700 border-gray-200 shadow-sm">
+        <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">Total TPS</p>
+        <p class="font-display text-4xl text-teal-400">{{ $tpsList->count() }}</p>
     </div>
-    <div class="bg-[#141414] p-6">
-        <p class="font-mono2 text-[10px] tracking-[2px] text-gray-600 uppercase mb-3">Sudah Upload</p>
+    <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border dark:border-gray-700 border-gray-200 shadow-sm">
+        <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">Sudah Upload</p>
         @php $sudahUpload = $tpsList->filter(fn($t) => $t->dokumens->count() > 0)->count(); @endphp
-        <p class="font-display text-4xl" style="color:#2EC4B6">{{ $sudahUpload }}/{{ $tpsList->count() }}</p>
+        <p class="font-display text-4xl text-teal-400">{{ $sudahUpload }}/{{ $tpsList->count() }}</p>
     </div>
-    <div class="bg-[#141414] p-6">
-        <p class="font-mono2 text-[10px] tracking-[2px] text-gray-600 uppercase mb-3">Terverifikasi</p>
+    <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border dark:border-gray-700 border-gray-200 shadow-sm">
+        <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">Terverifikasi</p>
         @php $terverif = $tpsList->sum(fn($t) => $t->dokumens->where('status','terverifikasi')->count()); @endphp
-        <p class="font-display text-4xl" style="color:#2EC4B6">{{ $terverif }}</p>
-        <p class="text-xs text-gray-600 mt-1">dokumen</p>
+        <p class="font-display text-4xl text-teal-400">{{ $terverif }}</p>
+        <p class="text-xs dark:text-gray-500 text-gray-400 mt-1">dokumen</p>
     </div>
 </div>
 
 {{-- Daftar TPS --}}
-<p class="font-mono2 text-[10px] tracking-[3px] text-gray-600 uppercase mb-4 pb-3 border-b border-gray-800">
+<p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-4 pb-3 border-b dark:border-gray-800 border-gray-200 font-semibold">
     // Daftar TPS
 </p>
 
-<div class="grid grid-cols-1 gap-px bg-gray-800">
+<div class="space-y-3">
 @forelse($tpsList as $tps)
 @php
-    $totalDok  = $tps->dokumens->count();
-    $terverif  = $tps->dokumens->where('status','terverifikasi')->count();
-    $kppsUser  = $tps->users->first();
-    $persen    = round(($totalDok / 5) * 100);
+    $totalDok = $tps->dokumens->count();
+    $terverif = $tps->dokumens->where('status','terverifikasi')->count();
+    $kppsUser = $tps->users->first();
+    $persen   = round(($totalDok / 5) * 100);
 @endphp
-<div class="bg-[#141414] p-6 flex items-center justify-between flex-wrap gap-4 hover:bg-[#1a1a1a] transition">
+<div class="dark:bg-gray-800 bg-white rounded-xl p-5 border dark:border-gray-700 border-gray-200 shadow-sm flex items-center justify-between flex-wrap gap-4">
     <div class="flex items-center gap-4">
-        <div class="w-[3px] h-12 rounded-sm flex-shrink-0" style="background:#2EC4B6"></div>
+        <div class="w-1 h-14 rounded-full flex-shrink-0 bg-teal-400"></div>
         <div>
-            <p class="font-semibold text-sm">{{ $tps->nama }}</p>
-            <p class="font-mono2 text-[10px] text-gray-600 mt-0.5">
+            <p class="font-semibold text-sm dark:text-gray-100 text-gray-800">{{ $tps->nama }}</p>
+            <p class="text-[11px] dark:text-gray-500 text-gray-400 mt-0.5">
                 KPPS: {{ $kppsUser->name ?? 'Belum assign' }}
             </p>
             <div class="flex items-center gap-2 mt-2">
-                <div class="w-32 h-1 bg-gray-800 rounded-full">
-                    <div class="h-1 rounded-full transition-all"
-                         style="width:{{ $persen }}%; background:#2EC4B6"></div>
+                <div class="w-32 h-1.5 dark:bg-gray-700 bg-gray-200 rounded-full">
+                    <div class="h-1.5 rounded-full bg-teal-400 transition-all"
+                         style="width:{{ $persen }}%"></div>
                 </div>
-                <span class="font-mono2 text-[10px] text-gray-600">
+                <span class="text-[11px] dark:text-gray-500 text-gray-400">
                     {{ $totalDok }}/5 dok · {{ $terverif }} terverifikasi
                 </span>
             </div>
@@ -66,15 +68,13 @@
     </div>
 
     <a href="{{ route('pps.view-tps', $tps) }}"
-       class="flex items-center gap-2 border px-4 py-2 font-mono2 text-[10px] uppercase tracking-widest transition"
-       style="border-color:#2EC4B644;color:#2EC4B6"
-       onmouseover="this.style.borderColor='#2EC4B6'" onmouseout="this.style.borderColor='#2EC4B644'">
-        👁 VIEW KPPS
+       class="px-4 py-2 rounded-lg text-xs font-semibold border border-teal-400 text-teal-400 hover:bg-teal-400 hover:text-white transition">
+        👁 View KPPS
     </a>
 </div>
 @empty
-<div class="bg-[#141414] px-6 py-16 text-center text-gray-700 font-mono2 text-xs tracking-widest">
-    BELUM ADA TPS DI DESA INI
+<div class="dark:bg-gray-800 bg-white rounded-xl px-6 py-16 text-center dark:text-gray-600 text-gray-400 text-sm border dark:border-gray-700 border-gray-200">
+    Belum ada TPS di desa ini.
 </div>
 @endforelse
 </div>

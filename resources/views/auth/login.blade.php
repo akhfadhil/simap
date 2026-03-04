@@ -5,50 +5,50 @@
 
     {{-- Brand --}}
     <div class="text-center mb-10">
-        <span class="inline-block bg-brand text-white font-mono2 text-[10px] tracking-[3px] px-3 py-1 mb-4">KPU RI — 2024</span>
-        <h1 class="font-display text-6xl tracking-[4px]">SIM<span class="text-brand">PEMILU</span></h1>
-        <p class="text-[11px] text-gray-600 tracking-[2px] uppercase mt-2">Sistem Informasi Manajemen Pemilu</p>
+        <span class="inline-block bg-red-600 text-white text-[10px] tracking-[3px] px-3 py-1 mb-4 rounded font-semibold">KPU RI — 2024</span>
+        <h1 class="font-display text-6xl tracking-[4px] dark:text-white text-gray-900">SIM<span class="text-red-600">PEMILU</span></h1>
+        <p class="text-[11px] dark:text-gray-500 text-gray-400 tracking-[2px] uppercase mt-2">Sistem Informasi Manajemen Pemilu</p>
     </div>
 
     {{-- Card --}}
-    <div class="bg-[#141414] border border-gray-800 p-9">
-        <p class="font-mono2 text-[10px] tracking-[3px] text-gray-600 uppercase mb-7">// Masuk ke Sistem</p>
+    <div class="dark:bg-gray-800 bg-white rounded-2xl border dark:border-gray-700 border-gray-200 p-9 shadow-xl">
+        <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-7 font-semibold">// Masuk ke Sistem</p>
 
         <form method="POST" action="{{ route('login.post') }}">
             @csrf
 
             @if ($errors->any())
-            <div class="bg-red-950 border border-red-800 text-red-400 px-4 py-3 font-mono2 text-xs mb-6">
+            <div class="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 text-xs mb-6 rounded-lg font-medium">
                 ⚠ {{ $errors->first() }}
             </div>
             @endif
 
             <div class="mb-5">
-                <label class="block font-mono2 text-[10px] tracking-[2px] text-gray-600 uppercase mb-2">Username</label>
+                <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">Username</label>
                 <input type="text" name="username" value="{{ old('username') }}" placeholder="Masukkan username"
-                       class="w-full bg-[#070707] border border-gray-800 text-gray-100 px-4 py-3.5 text-sm focus:border-brand focus:ring-0 focus:outline-none">
+                       class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-4 py-3.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
             </div>
 
             <div class="mb-6">
-                <label class="block font-mono2 text-[10px] tracking-[2px] text-gray-600 uppercase mb-2">Password</label>
+                <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">Password</label>
                 <input type="password" name="password" placeholder="••••••••"
-                       class="w-full bg-[#070707] border border-gray-800 text-gray-100 px-4 py-3.5 text-sm focus:border-brand focus:ring-0 focus:outline-none">
+                       class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-4 py-3.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
             </div>
 
             <button type="submit"
-                    class="w-full bg-brand text-white font-display text-xl tracking-[3px] py-4 hover:opacity-90 active:scale-[0.99] transition">
+                    class="w-full bg-red-600 hover:bg-red-700 text-white font-display text-xl tracking-[3px] py-4 rounded-xl active:scale-[0.99] transition">
                 MASUK →
             </button>
         </form>
     </div>
 
-    {{-- Hint --}}
-    <div class="border border-gray-800 p-4 mt-6">
-        <p class="font-mono2 text-[10px] tracking-[2px] text-gray-700 uppercase mb-3">// Akun Demo</p>
+    {{-- Akun Demo --}}
+    <div class="dark:bg-gray-800 bg-white border dark:border-gray-700 border-gray-200 rounded-xl p-4 mt-4 shadow-sm">
+        <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">// Akun Demo</p>
         @foreach(['admin'=>'admin123','ppk'=>'ppk123','pps'=>'pps123','kpps'=>'kpps123'] as $u => $p)
-        <div class="flex justify-between font-mono2 text-xs text-gray-700 py-1">
-            <span class="uppercase">{{ $u }}</span>
-            <span class="text-gray-400">{{ $u }} / {{ $p }}</span>
+        <div class="flex justify-between text-xs dark:text-gray-500 text-gray-400 py-1">
+            <span class="uppercase font-semibold">{{ $u }}</span>
+            <span class="dark:text-gray-400 text-gray-500">{{ $u }} / {{ $p }}</span>
         </div>
         @endforeach
     </div>

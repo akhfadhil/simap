@@ -4,10 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIMPEMILU — Login</title>
+    <script>
+        (function() {
+            const saved  = localStorage.getItem('theme') || 'dark';
+            document.documentElement.classList.toggle('dark', saved === 'dark');
+        })();
+    </script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-[#070707] text-gray-100 min-h-screen flex items-center justify-center relative">
-    <div class="absolute inset-0 pointer-events-none"
+<body class="dark:bg-gray-950 bg-slate-200 dark:text-gray-100 text-gray-800 min-h-screen flex items-center justify-center relative">
+    <div class="absolute inset-0 pointer-events-none dark:opacity-100 opacity-30"
          style="background-image: linear-gradient(rgba(230,57,70,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(230,57,70,0.04) 1px, transparent 1px); background-size: 60px 60px;"></div>
     @yield('content')
 </body>

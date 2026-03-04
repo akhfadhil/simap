@@ -4,15 +4,15 @@
 @section('content')
 <div class="mb-8">
     <a href="{{ route('dashboard.admin') }}"
-       class="inline-flex items-center gap-2 font-mono2 text-[10px] tracking-[2px] text-gray-600 uppercase hover:text-brand transition mb-4">
-        ← KEMBALI KE DASHBOARD
+       class="inline-flex items-center gap-2 text-xs dark:text-gray-500 text-gray-400 hover:text-red-500 transition font-medium mb-4">
+        ← Kembali ke Dashboard
     </a>
-    <p class="font-mono2 text-[10px] tracking-[3px] text-gray-600 uppercase mb-2">// Admin — Wilayah</p>
-    <h1 class="font-display text-4xl tracking-[2px] text-brand">KELOLA KECAMATAN</h1>
+    <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-2 font-semibold">// Admin — Wilayah</p>
+    <h1 class="font-display text-4xl tracking-[2px] text-red-600">KELOLA KECAMATAN</h1>
 </div>
 
 @if(session('success'))
-<div class="bg-green-950 border border-green-800 text-green-400 px-4 py-3 font-mono2 text-xs mb-6">
+<div class="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 px-4 py-3 text-xs mb-6 rounded-lg font-medium">
     ✓ {{ session('success') }}
 </div>
 @endif
@@ -20,75 +20,75 @@
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
     {{-- Form Tambah --}}
-    <div class="bg-[#141414] border border-gray-800 p-6">
-        <p class="font-mono2 text-[10px] tracking-[3px] text-gray-600 uppercase mb-5">// Tambah Kecamatan</p>
+    <div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 p-6 shadow-sm">
+        <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-5 font-semibold">// Tambah Kecamatan</p>
         <form method="POST" action="{{ route('admin.kecamatan.store') }}">
             @csrf
             <div class="mb-4">
-                <label class="block font-mono2 text-[10px] tracking-[2px] text-gray-600 uppercase mb-2">Nama Kecamatan</label>
+                <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">Nama Kecamatan</label>
                 <input type="text" name="nama" value="{{ old('nama') }}" placeholder="cth: Kecamatan Andir"
-                       class="w-full bg-[#070707] border border-gray-800 text-gray-100 px-4 py-3 text-sm focus:border-brand focus:ring-0 focus:outline-none">
+                       class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-4 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
                 @error('nama') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
             </div>
-            <button class="w-full bg-brand text-white font-display text-lg tracking-[2px] py-3 hover:opacity-90 transition">
-                TAMBAH →
+            <button class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-lg text-sm transition">
+                Tambah →
             </button>
         </form>
     </div>
 
     {{-- Tabel --}}
-    <div class="lg:col-span-2 bg-[#141414] border border-gray-800">
-        <div class="p-6 border-b border-gray-800">
-            <p class="font-mono2 text-[10px] tracking-[3px] text-gray-600 uppercase">// Daftar Kecamatan ({{ $kecamatans->count() }})</p>
+    <div class="lg:col-span-2 dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm overflow-hidden">
+        <div class="p-5 border-b dark:border-gray-700 border-gray-200">
+            <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold">// Daftar Kecamatan ({{ $kecamatans->count() }})</p>
         </div>
         @forelse($kecamatans as $kec)
-        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-900 hover:bg-[#1a1a1a] group">
+        <div class="flex items-center justify-between px-6 py-4 border-b dark:border-gray-700 border-gray-100 last:border-0 dark:hover:bg-gray-750 hover:bg-gray-50 transition group">
             <div>
-                <p class="text-sm font-medium">{{ $kec->nama }}</p>
-                <p class="text-xs text-gray-600 font-mono2 mt-0.5">{{ $kec->desas_count }} desa</p>
+                <p class="text-sm font-medium dark:text-gray-100 text-gray-800">{{ $kec->nama }}</p>
+                <p class="text-xs dark:text-gray-500 text-gray-400 mt-0.5">{{ $kec->desas_count }} desa</p>
             </div>
             <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition">
                 <a href="{{ route('admin.kecamatan.view', $kec) }}"
-                class="border border-gray-700 text-gray-500 px-3 py-1 font-mono2 text-[10px] uppercase tracking-widest hover:border-[#F4A261] hover:text-[#F4A261] transition">
-                    VIEW
+                   class="px-3 py-1.5 rounded-lg text-xs font-medium border border-orange-400 text-orange-400 hover:bg-orange-400 hover:text-white transition">
+                    View
                 </a>
-                <button onclick="openEdit('kec', {{ $kec->id }}, '{{ $kec->nama }}')"
-                        class="border border-gray-700 text-gray-500 px-3 py-1 font-mono2 text-[10px] uppercase tracking-widest hover:border-brand hover:text-brand transition">
-                    EDIT
+                <button onclick="openEdit({{ $kec->id }}, '{{ $kec->nama }}')"
+                        class="px-3 py-1.5 rounded-lg text-xs font-medium border dark:border-gray-600 border-gray-300 dark:text-gray-400 text-gray-500 dark:hover:bg-gray-700 hover:bg-gray-100 transition">
+                    Edit
                 </button>
                 <form method="POST" action="{{ route('admin.kecamatan.destroy', $kec) }}"
-                    onsubmit="return confirm('Hapus kecamatan ini? Semua desa & TPS di dalamnya akan terhapus.')">
+                      onsubmit="return confirm('Hapus kecamatan ini? Semua desa & TPS di dalamnya akan terhapus.')">
                     @csrf @method('DELETE')
-                    <button class="border border-gray-700 text-gray-500 px-3 py-1 font-mono2 text-[10px] uppercase tracking-widest hover:border-red-700 hover:text-red-500 transition">
-                        HAPUS
+                    <button class="px-3 py-1.5 rounded-lg text-xs font-medium border border-red-400 text-red-400 hover:bg-red-500 hover:text-white transition">
+                        Hapus
                     </button>
                 </form>
             </div>
         </div>
         @empty
-        <div class="px-6 py-10 text-center text-gray-700 font-mono2 text-xs">Belum ada kecamatan.</div>
+        <div class="px-6 py-10 text-center dark:text-gray-600 text-gray-400 text-sm">Belum ada kecamatan.</div>
         @endforelse
     </div>
 </div>
 
 {{-- Edit Modal --}}
-<div id="edit-modal" class="hidden fixed inset-0 bg-black/70 z-50 flex items-center justify-center">
-    <div class="bg-[#141414] border border-gray-800 p-8 w-full max-w-md">
-        <p class="font-mono2 text-[10px] tracking-[3px] text-gray-600 uppercase mb-5">// Edit Kecamatan</p>
+<div id="edit-modal" class="hidden fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+    <div class="dark:bg-gray-800 bg-white rounded-2xl border dark:border-gray-700 border-gray-200 p-8 w-full max-w-md shadow-2xl">
+        <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-5 font-semibold">// Edit Kecamatan</p>
         <form id="edit-form" method="POST">
             @csrf @method('PUT')
             <div class="mb-4">
-                <label class="block font-mono2 text-[10px] tracking-[2px] text-gray-600 uppercase mb-2">Nama Kecamatan</label>
+                <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">Nama Kecamatan</label>
                 <input type="text" id="edit-nama" name="nama"
-                       class="w-full bg-[#070707] border border-gray-800 text-gray-100 px-4 py-3 text-sm focus:border-brand focus:ring-0 focus:outline-none">
+                       class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-4 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
             </div>
-            <div class="flex gap-2">
+            <div class="flex gap-3">
                 <button type="button" onclick="closeEdit()"
-                        class="flex-1 border border-gray-800 text-gray-500 font-display text-lg tracking-[2px] py-3 hover:border-gray-600 transition">
-                    BATAL
+                        class="flex-1 border dark:border-gray-600 border-gray-300 dark:text-gray-400 text-gray-500 py-2.5 rounded-lg text-sm font-medium dark:hover:bg-gray-700 hover:bg-gray-100 transition">
+                    Batal
                 </button>
-                <button class="flex-1 bg-brand text-white font-display text-lg tracking-[2px] py-3 hover:opacity-90 transition">
-                    SIMPAN
+                <button class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2.5 rounded-lg text-sm font-semibold transition">
+                    Simpan
                 </button>
             </div>
         </form>
@@ -97,13 +97,15 @@
 
 @push('scripts')
 <script>
-function openEdit(type, id, nama) {
+function openEdit(id, nama) {
     document.getElementById('edit-nama').value = nama;
     document.getElementById('edit-form').action = `/admin/kecamatan/${id}`;
     document.getElementById('edit-modal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
 }
 function closeEdit() {
     document.getElementById('edit-modal').classList.add('hidden');
+    document.body.style.overflow = '';
 }
 </script>
 @endpush
