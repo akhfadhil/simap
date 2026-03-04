@@ -77,10 +77,10 @@
 
     <div class="flex items-center gap-2">
         @if($dok)
-        <a href="{{ route('dokumen.preview', $dok) }}" target="_blank"
-           class="border border-gray-700 text-gray-500 px-3 py-1.5 font-mono2 text-[10px] uppercase tracking-widest hover:border-gray-500 hover:text-gray-300 transition">
+        <button onclick="openPreview('{{ route('dokumen.preview', $dok) }}')" 
+                class="border border-gray-700 text-gray-500 px-3 py-1 font-mono2 text-[10px] uppercase tracking-widest hover:border-gray-500 hover:text-gray-300 transition">
             PREVIEW
-        </a>
+        </button>
         <a href="{{ route('dokumen.download', $dok) }}"
            class="border border-gray-700 text-gray-500 px-3 py-1.5 font-mono2 text-[10px] uppercase tracking-widest hover:border-gray-500 hover:text-gray-300 transition">
             DOWNLOAD

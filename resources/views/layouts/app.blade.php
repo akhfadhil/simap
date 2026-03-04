@@ -31,5 +31,35 @@
         @yield('content')
     </main>
     @stack('scripts')
+    {{-- Modal Preview PDF --}}
+    <div id="pdf-modal" class="hidden fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+        <div class="bg-[#141414] border border-gray-800 w-full max-w-5xl h-[90vh] flex flex-col">
+            <div class="flex items-center justify-between px-6 py-3 border-b border-gray-800 flex-shrink-0">
+                <span class="font-mono2 text-[10px] tracking-[2px] text-gray-600 uppercase">// Preview Dokumen</span>
+                <button onclick="closePreview()"
+                        class="text-gray-600 hover:text-gray-400 font-mono2 text-[10px] uppercase tracking-widest">
+                    ✕ TUTUP
+                </button>
+            </div>
+            <iframe id="pdf-frame" src="" class="flex-1 w-full bg-white"></iframe>
+        </div>
+    </div>
+
+    <script>
+    function openPreview(url) {
+        document.getElementById('pdf-frame').src = url;
+        document.getElementById('pdf-modal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+    function closePreview() {
+        document.getElementById('pdf-frame').src = '';
+        document.getElementById('pdf-modal').classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+    // Tutup kalau klik backdrop
+    document.getElementById('pdf-modal').addEventListener('click', function(e) {
+        if (e.target === this) closePreview();
+    });
+</script>
 </body>
 </html>

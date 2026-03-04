@@ -39,7 +39,7 @@ class DokumenController extends Controller
     {
         $user = Auth::user();
 
-        if ($user->role === 'admin' && session('admin_view_tps_id')) {
+        if (session('admin_view_tps_id')) {
             $tpsId = session('admin_view_tps_id');
         } else {
             abort_if(!$user->tps_id, 403, 'Akun belum di-assign ke TPS.');
@@ -51,8 +51,9 @@ class DokumenController extends Controller
             'file'  => 'required|file|mimes:pdf|max:10240',
         ]);
 
-        $tps = Tps::findOrFail($tpsId);
+        $tps = Tps::with('desa.kecamatan')->findOrFail($tpsId);
 
+        // Hapus file lama kalau ada
         $existing = Dokumen::where('tps_id', $tps->id)
             ->where('jenis', $request->jenis)
             ->first();
@@ -62,14 +63,23 @@ class DokumenController extends Controller
             $existing->delete();
         }
 
-        $file     = $request->file('file');
-        $fileName = $tps->id . '_' . $request->jenis . '_' . time() . '.pdf';
-        $path     = $file->storeAs('dokumen', $fileName);
+        // Buat path terstruktur
+        $kecFolder  = preg_replace('/[^A-Za-z0-9_\-]/', '_', $tps->desa->kecamatan->nama);
+        $desaFolder = preg_replace('/[^A-Za-z0-9_\-]/', '_', $tps->desa->nama);
+        $tpsFolder  = preg_replace('/[^A-Za-z0-9_\-]/', '_', $tps->nama);
+
+        $file = $request->file('file');
+        $path = $file->storeAs(
+            "documents/{$kecFolder}/desa/{$desaFolder}/{$tpsFolder}",
+            strtolower($request->jenis) . '.pdf'
+        );
 
         Dokumen::create([
             'tps_id'      => $tps->id,
+            'kecamatan_id'=> null,
             'uploaded_by' => $user->id,
             'jenis'       => $request->jenis,
+            'level'       => 'tps',
             'status'      => 'menunggu_verifikasi',
             'file_path'   => $path,
             'file_name'   => $file->getClientOriginalName(),
@@ -78,7 +88,6 @@ class DokumenController extends Controller
 
         return back()->with('success', Dokumen::JENIS[$request->jenis] . ' berhasil diupload.');
     }
-
     // ── PPS: Index ─────────────────────────────────────────────
     public function indexPps(Request $request)
     {
@@ -190,9 +199,14 @@ class DokumenController extends Controller
             $existing->delete();
         }
 
-        $file     = $request->file('file');
-        $fileName = 'kec_' . $kecamatan->id . '_' . $request->jenis . '_' . time() . '.pdf';
-        $path     = $file->storeAs('dokumen', $fileName);
+        // Buat path terstruktur
+        $kecFolder = preg_replace('/[^A-Za-z0-9_\-]/', '_', $kecamatan->nama);
+
+        $file = $request->file('file');
+        $path = $file->storeAs(
+            "documents/{$kecFolder}/d_hasil",
+            strtolower($request->jenis) . '.pdf'
+        );
 
         Dokumen::create([
             'kecamatan_id' => $kecamatan->id,
@@ -208,27 +222,8 @@ class DokumenController extends Controller
 
         return back()->with('success', Dokumen::JENIS[$request->jenis] . ' berhasil diupload.');
     }
-
+    
     // ── Admin: Index ───────────────────────────────────────────
-    // public function indexAdmin(Request $request)
-    // {
-    //     $kecamatans = Kecamatan::all();
-
-    //     $desaIds = $request->kecamatan_id
-    //         ? Desa::where('kecamatan_id', $request->kecamatan_id)->pluck('id')
-    //         : null;
-
-    //     $tpsList = Tps::with(['desa.kecamatan', 'dokumens.uploader', 'dokumens.verifier'])
-    //         ->when($desaIds,        fn($q) => $q->whereIn('desa_id', $desaIds))
-    //         ->when($request->desa_id, fn($q) => $q->where('desa_id', $request->desa_id))
-    //         ->get();
-
-    //     $desas = $request->kecamatan_id
-    //         ? Desa::where('kecamatan_id', $request->kecamatan_id)->get()
-    //         : collect();
-
-    //     return view('dokumen.admin', compact('tpsList', 'kecamatans', 'desas'));
-    // }
     public function indexAdmin(Request $request)
     {
         $kecamatans = Kecamatan::all();
@@ -277,25 +272,24 @@ class DokumenController extends Controller
     {
         $this->authorizeAccess($dokumen);
 
-        abort_if(!Storage::exists($dokumen->file_path), 404);
+        $path = Storage::path($dokumen->file_path);
 
-        return response()->file(
-            storage_path('app/' . $dokumen->file_path),
-            ['Content-Type' => 'application/pdf']
-        );
+        abort_if(!Storage::exists($dokumen->file_path), 404, 'File tidak ditemukan.');
+
+        return response()->file($path, [
+            'Content-Type'        => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . $dokumen->file_name . '"',
+        ]);
     }
-
+    
     // ── Download PDF ───────────────────────────────────────────
     public function download(Dokumen $dokumen)
     {
         $this->authorizeAccess($dokumen);
 
-        abort_if(!Storage::exists($dokumen->file_path), 404);
+        abort_if(!Storage::exists($dokumen->file_path), 404, 'File tidak ditemukan.');
 
-        return response()->download(
-            storage_path('app/' . $dokumen->file_path),
-            $dokumen->file_name
-        );
+        return Storage::download($dokumen->file_path, $dokumen->file_name);
     }
 
     // ── Guard: pastikan user boleh akses dokumen ini ───────────

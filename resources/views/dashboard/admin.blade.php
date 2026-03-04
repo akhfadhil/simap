@@ -4,7 +4,7 @@
 @section('content')
 <div class="mb-10">
     <p class="font-mono2 text-[10px] tracking-[3px] text-gray-600 uppercase mb-2">// Administrator</p>
-    <h1 class="font-display text-5xl tracking-[2px] text-brand">PUSAT KONTROL</h1>
+    <h1 class="font-display text-5xl tracking-[2px] text-brand">DASHBOARD</h1>
     <p class="text-gray-500 text-sm mt-2">Kelola seluruh sistem, wilayah, pengguna, dan dokumen pemilu.</p>
 </div>
 
