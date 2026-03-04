@@ -86,4 +86,48 @@ Route::middleware('auth')->group(function () {
         Route::get('/tps/{tps}/view',             [DashboardController::class, 'viewAsKpps'])->name('tps.view');
     });
 
+    // ── SETUP MASTER DATA (Admin only) ──────────────────────
+    Route::prefix('admin/setup')->name('admin.setup.')->middleware('role:admin')->group(function () {
+        Route::get('/',                          [App\Http\Controllers\Admin\SetupController::class, 'index'])->name('index');
+
+        // PPWP
+        Route::post('ppwp',                      [App\Http\Controllers\Admin\SetupController::class, 'storePpwp'])->name('ppwp.store');
+        Route::delete('ppwp/{calon}',            [App\Http\Controllers\Admin\SetupController::class, 'destroyPpwp'])->name('ppwp.destroy');
+
+        // DPD
+        Route::post('dpd',                       [App\Http\Controllers\Admin\SetupController::class, 'storeDpd'])->name('dpd.store');
+        Route::delete('dpd/{calon}',             [App\Http\Controllers\Admin\SetupController::class, 'destroyDpd'])->name('dpd.destroy');
+
+        // Partai + Caleg
+        Route::post('partai',                    [App\Http\Controllers\Admin\SetupController::class, 'storePartai'])->name('partai.store');
+        Route::delete('partai/{partai}',         [App\Http\Controllers\Admin\SetupController::class, 'destroyPartai'])->name('partai.destroy');
+        Route::post('partai/{partai}/caleg',     [App\Http\Controllers\Admin\SetupController::class, 'storeCaleg'])->name('caleg.store');
+        Route::delete('caleg/{caleg}',           [App\Http\Controllers\Admin\SetupController::class, 'destroyCaleg'])->name('caleg.destroy');
+    });
+
+    // ── REKAP INPUT (KPPS) ───────────────────────────────────
+    Route::prefix('rekap')->name('rekap.')->middleware('role:kpps')->group(function () {
+        Route::get('/',                          [App\Http\Controllers\Rekap\KppsController::class, 'index'])->name('index');
+        Route::get('{jenis}',                    [App\Http\Controllers\Rekap\KppsController::class, 'form'])->name('form');
+        Route::post('{jenis}',                   [App\Http\Controllers\Rekap\KppsController::class, 'store'])->name('store');
+        Route::post('{jenis}/finalisasi',        [App\Http\Controllers\Rekap\KppsController::class, 'finalisasi'])->name('finalisasi');
+    });
+
+    // ── REKAP VIEW (PPS) ─────────────────────────────────────
+    Route::prefix('pps/rekap')->name('pps.rekap.')->middleware('role:pps')->group(function () {
+        Route::get('/',                          [App\Http\Controllers\Rekap\PpsController::class, 'index'])->name('index');
+        Route::get('{jenis}',                    [App\Http\Controllers\Rekap\PpsController::class, 'show'])->name('show');
+    });
+
+    // ── REKAP VIEW (PPK) ─────────────────────────────────────
+    Route::prefix('ppk/rekap')->name('ppk.rekap.')->middleware('role:ppk')->group(function () {
+        Route::get('/',                          [App\Http\Controllers\Rekap\PpkController::class, 'index'])->name('index');
+        Route::get('{jenis}',                    [App\Http\Controllers\Rekap\PpkController::class, 'show'])->name('show');
+    });
+
+    // ── REKAP VIEW (Admin) ───────────────────────────────────
+    Route::prefix('admin/rekap')->name('admin.rekap.')->middleware('role:admin')->group(function () {
+        Route::get('/',                          [App\Http\Controllers\Rekap\AdminController::class, 'index'])->name('index');
+        Route::get('{jenis}',                    [App\Http\Controllers\Rekap\AdminController::class, 'show'])->name('show');
+    });
 });
