@@ -26,7 +26,7 @@
 
 {{-- Menu --}}
 <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-4 pb-3 border-b dark:border-gray-800 border-gray-200 font-semibold">// Menu Utama</p>
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 
     <a href="{{ route('admin.users.index') }}"
        class="dark:bg-gray-800 bg-white rounded-xl p-6 border-l-4 border border-l-red-600 dark:border-gray-700 border-gray-200 hover:shadow-md transition group block">
@@ -68,11 +68,21 @@
         <p class="text-xs dark:text-gray-500 text-gray-500 leading-relaxed">Lihat dan download semua dokumen dengan filter kecamatan & desa.</p>
     </a>
 
-    <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border-l-4 border border-l-gray-400 dark:border-gray-700 border-gray-200 opacity-50 cursor-not-allowed">
-        <div class="text-3xl mb-4">📤</div>
-        <p class="font-semibold text-sm mb-1 dark:text-gray-100 text-gray-800">Export Data</p>
-        <p class="text-xs dark:text-gray-500 text-gray-500 leading-relaxed">Ekspor data pemilu dalam format CSV.</p>
-    </div>
+    <a href="{{ route('admin.rekap.index') }}"
+    class="dark:bg-gray-800 bg-white rounded-xl p-6 border-l-4 border border-l-red-600 dark:border-gray-700 border-gray-200 hover:shadow-md transition group block">
+        <span class="float-right dark:text-gray-600 text-gray-300 group-hover:text-red-500 transition text-lg">→</span>
+        <div class="text-3xl mb-4">📈</div>
+        <p class="font-semibold text-sm mb-1 dark:text-gray-100 text-gray-800">Rekapitulasi Data</p>
+        <p class="text-xs dark:text-gray-500 text-gray-500 leading-relaxed">Lihat rekap suara dari semua kecamatan dan TPS.</p>
+    </a>
+
+    <a href="{{ route('admin.setup.index') }}"
+    class="dark:bg-gray-800 bg-white rounded-xl p-6 border-l-4 border border-l-red-600 dark:border-gray-700 border-gray-200 hover:shadow-md transition group block">
+        <span class="float-right dark:text-gray-600 text-gray-300 group-hover:text-red-500 transition text-lg">→</span>
+        <div class="text-3xl mb-4">⚙️</div>
+        <p class="font-semibold text-sm mb-1 dark:text-gray-100 text-gray-800">Setup Data Pemilu</p>
+        <p class="text-xs dark:text-gray-500 text-gray-500 leading-relaxed">Input paslon, calon DPD, partai, dan caleg untuk form rekap.</p>
+    </a>
 
 </div>
 @endsection

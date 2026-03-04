@@ -48,12 +48,14 @@
         <p class="font-semibold text-sm mb-1 dark:text-gray-100 text-gray-800">Upload Dokumen</p>
         <p class="text-xs dark:text-gray-500 text-gray-500 leading-relaxed">Upload 5 jenis dokumen PDF hasil pemungutan suara (PPWP, DPR RI, DPD, DPRD Prov, DPRD Kab).</p>
     </a>
-
-    <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border-l-4 border border-l-gray-400 dark:border-gray-700 border-gray-200 opacity-50 cursor-not-allowed">
+    
+    <a href="{{ route('rekap.index') }}"
+        class="dark:bg-gray-800 bg-white rounded-xl p-6 border-l-4 border border-l-sky-300 dark:border-gray-700 border-gray-200 hover:shadow-md transition group block">
+        <span class="float-right dark:text-gray-600 text-gray-300 group-hover:text-sky-300 transition text-lg">→</span>
         <div class="text-3xl mb-4">📊</div>
         <p class="font-semibold text-sm mb-1 dark:text-gray-100 text-gray-800">Isi Data Rekapitulasi</p>
         <p class="text-xs dark:text-gray-500 text-gray-500 leading-relaxed">Input data hasil suara ke dalam tabel rekapitulasi (PPWP, DPR RI, DPD, DPRD Prov, DPRD Kab).</p>
-    </div>
+    </a>
 
 </div>
 @endsection

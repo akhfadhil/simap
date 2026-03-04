@@ -41,7 +41,7 @@
 
 {{-- Menu --}}
 <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-4 pb-3 border-b dark:border-gray-800 border-gray-200 font-semibold">// Menu Utama</p>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 
     <a href="{{ route('dokumen.pps') }}"
        class="dark:bg-gray-800 bg-white rounded-xl p-6 border-l-4 border border-l-teal-400 dark:border-gray-700 border-gray-200 hover:shadow-md transition group block">
@@ -59,5 +59,12 @@
         <p class="text-xs dark:text-gray-500 text-gray-500 leading-relaxed">Pantau status TPS dan lihat dashboard tiap KPPS di desa.</p>
     </a>
 
+    <a href="{{ route('pps.rekap.index') }}"
+        class="dark:bg-gray-800 bg-white rounded-xl p-6 border-l-4 border border-l-teal-400 dark:border-gray-700 border-gray-200 hover:shadow-md transition group block">
+        <span class="float-right dark:text-gray-600 text-gray-300 group-hover:text-teal-400 transition text-lg">→</span>
+        <div class="text-3xl mb-4">📈</div>
+        <p class="font-semibold text-sm mb-1 dark:text-gray-100 text-gray-800">Rekapitulasi Data</p>
+        <p class="text-xs dark:text-gray-500 text-gray-500 leading-relaxed">Lihat rekap suara dari seluruh TPS di desa.</p>
+    </a>
 </div>
 @endsection

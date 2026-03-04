@@ -103,6 +103,11 @@ Route::middleware('auth')->group(function () {
         Route::delete('partai/{partai}',         [App\Http\Controllers\Admin\SetupController::class, 'destroyPartai'])->name('partai.destroy');
         Route::post('partai/{partai}/caleg',     [App\Http\Controllers\Admin\SetupController::class, 'storeCaleg'])->name('caleg.store');
         Route::delete('caleg/{caleg}',           [App\Http\Controllers\Admin\SetupController::class, 'destroyCaleg'])->name('caleg.destroy');
+
+        Route::post('dapil',             [App\Http\Controllers\Admin\SetupController::class, 'storeDapil'])->name('dapil.store');
+        Route::delete('dapil/{dapil}',   [App\Http\Controllers\Admin\SetupController::class, 'destroyDapil'])->name('dapil.destroy');
+        Route::post('kecamatan-dapil',           [App\Http\Controllers\Admin\SetupController::class, 'assignDapil'])->name('kecamatan.dapil');
+
     });
 
     // ── REKAP INPUT (KPPS) ───────────────────────────────────

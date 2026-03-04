@@ -52,5 +52,13 @@
         <p class="text-xs dark:text-gray-500 text-gray-500 leading-relaxed">Upload 5 jenis dokumen D hasil rekapitulasi kecamatan.</p>
     </a>
 
+    <a href="{{ route('ppk.rekap.index') }}"
+   class="dark:bg-gray-800 bg-white rounded-xl p-6 border-l-4 border border-l-orange-400 dark:border-gray-700 border-gray-200 hover:shadow-md transition group block">
+        <span class="float-right dark:text-gray-600 text-gray-300 group-hover:text-orange-400 transition text-lg">→</span>
+        <div class="text-3xl mb-4">📈</div>
+        <p class="font-semibold text-sm mb-1 dark:text-gray-100 text-gray-800">Rekapitulasi Data</p>
+        <p class="text-xs dark:text-gray-500 text-gray-500 leading-relaxed">Lihat rekap suara dari seluruh TPS di kecamatan.</p>
+    </a>
+    
 </div>
 @endsection

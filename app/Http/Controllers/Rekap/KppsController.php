@@ -89,26 +89,69 @@ class KppsController extends Controller
 
     private function getMasterData(string $jenis, ?RekapHeader $rekap): array
     {
-        $existingSuara = [];
-        if ($jenis === 'ppwp') {
-            if ($rekap) $existingSuara = $rekap->ppwpSuaras->pluck('suara','calon_id')->toArray();
-            return ['calons' => RekapPpwpCalon::orderBy('nomor_urut')->get(), 'suara' => $existingSuara];
-        }
-        if ($jenis === 'dpd') {
-            if ($rekap) $existingSuara = $rekap->dpdSuaras->pluck('suara','calon_id')->toArray();
-            return ['calons' => RekapDpdCalon::orderBy('nomor_urut')->get(), 'suara' => $existingSuara];
-        }
-        // dpr_ri / dprd_prov / dprd_kab
+        $existingSuara  = [];
         $existingPartai = [];
         $existingCaleg  = [];
+
         if ($rekap) {
             $existingPartai = $rekap->partaiSuaras->pluck('suara','partai_id')->toArray();
             $existingCaleg  = $rekap->calegSuaras->pluck('suara','caleg_id')->toArray();
         }
-        return [
-            'partais'        => RekapPartai::with('calegs')->where('jenis', $jenis)->orderBy('nomor_urut')->get(),
-            'suara_partai'   => $existingPartai,
-            'suara_caleg'    => $existingCaleg,
-        ];
+
+        if ($jenis === 'ppwp') {
+            if ($rekap) $existingSuara = $rekap->ppwpSuaras->pluck('suara','calon_id')->toArray();
+            return [
+                'calons' => RekapPpwpCalon::orderBy('nomor_urut')->get(),
+                'suara'  => $existingSuara,
+            ];
+        }
+
+        if ($jenis === 'dpd') {
+            if ($rekap) $existingSuara = $rekap->dpdSuaras->pluck('suara','calon_id')->toArray();
+            return [
+                'calons' => RekapDpdCalon::orderBy('nomor_urut')->get(),
+                'suara'  => $existingSuara,
+            ];
+        }
+
+        if ($jenis === 'dpr_ri') {
+            return [
+                'partais'       => RekapPartai::with('calegs')
+                                    ->where('jenis', 'dpr_ri')
+                                    ->orderBy('nomor_urut')
+                                    ->get(),
+                'suara_partai'  => $existingPartai,
+                'suara_caleg'   => $existingCaleg,
+            ];
+        }
+
+        if ($jenis === 'dprd_prov') {
+            return [
+                'partais'       => RekapPartai::with('calegs')
+                                    ->where('jenis', 'dprd_prov')
+                                    ->orderBy('nomor_urut')
+                                    ->get(),
+                'suara_partai'  => $existingPartai,
+                'suara_caleg'   => $existingCaleg,
+            ];
+        }
+
+        if ($jenis === 'dprd_kab') {
+            $kecamatan = Auth::user()->tps->desa->kecamatan;
+            $dapilId   = $kecamatan->dapil_id;
+
+            return [
+                'partais'       => RekapPartai::with('calegs')
+                                    ->where('jenis', 'dprd_kab')
+                                    ->where('dapil_id', $dapilId)
+                                    ->orderBy('nomor_urut')
+                                    ->get(),
+                'suara_partai'  => $existingPartai,
+                'suara_caleg'   => $existingCaleg,
+                'dapil'         => $kecamatan->dapil,
+            ];
+        }
+
+        return [];
     }
 }
