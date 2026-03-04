@@ -106,7 +106,7 @@
                 UNDUH
             </a>
             {{-- Tombol verifikasi hanya muncul kalau bukan admin view --}}
-            @if(!isset($isAdminView) && $dok->status === 'menunggu_verifikasi')
+            @if($dok->status === 'menunggu_verifikasi' && (!isset($isAdminView) || !$isAdminView))
             <form method="POST" action="{{ route('dokumen.verifikasi', $dok) }}">
                 @csrf
                 <button class="px-3 py-1 font-mono2 text-[10px] uppercase tracking-widest transition"

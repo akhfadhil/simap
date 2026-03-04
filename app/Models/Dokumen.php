@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 class Dokumen extends Model
 {
     protected $fillable = [
-        'tps_id', 'uploaded_by', 'jenis', 'status',
+        'tps_id', 'kecamatan_id', 'uploaded_by', 'jenis', 'level', 'status',
         'verified_by', 'verified_at', 'file_path', 'file_name', 'file_size',
     ];
 
@@ -33,6 +33,7 @@ class Dokumen extends Model
     ];
 
     public function tps()       { return $this->belongsTo(Tps::class); }
+    public function kecamatan() { return $this->belongsTo(Kecamatan::class); }
     public function uploader()  { return $this->belongsTo(User::class, 'uploaded_by'); }
     public function verifier()  { return $this->belongsTo(User::class, 'verified_by'); }
 }

@@ -50,11 +50,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/dokumen/kecamatan', [DokumenController::class, 'indexPpk'])->name('dokumen.ppk');
     });
 
-    // Dokumen — Admin
-    Route::middleware('role:admin')->group(function () {
-        Route::get('/dokumen/semua', [DokumenController::class, 'indexAdmin'])->name('dokumen.admin');
-    });
-
     // Dokumen — Preview & Download (semua role, guard di controller)
     Route::get('/dokumen/{dokumen}/preview',  [DokumenController::class, 'preview'])->name('dokumen.preview');
     Route::get('/dokumen/{dokumen}/download', [DokumenController::class, 'download'])->name('dokumen.download');
@@ -63,12 +58,20 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:ppk')->group(function () {
         Route::get('/ppk/data-pps',        [PpkController::class, 'dataPps'])->name('ppk.data-pps');
         Route::get('/ppk/view-pps/{desa}', [PpkController::class, 'viewPps'])->name('ppk.view-pps');
+        Route::get('/ppk/upload',          [DokumenController::class, 'uploadFormPpk'])->name('ppk.upload');
+        Route::post('/ppk/upload',         [DokumenController::class, 'storePpk'])->name('ppk.upload.store');
     });
 
     // PPS
     Route::middleware('role:pps')->group(function () {
         Route::get('/pps/data-tps',       [PpsController::class, 'dataTps'])->name('pps.data-tps');
         Route::get('/pps/view-tps/{tps}', [PpsController::class, 'viewTps'])->name('pps.view-tps');
+    });
+
+    // Admin
+    Route::middleware('role:admin')->group(function () {
+        Route::get('/dokumen/semua',                               [DokumenController::class, 'indexAdmin'])->name('dokumen.admin');
+        Route::post('/dokumen/{dokumen}/verifikasi-admin',         [DokumenController::class, 'verifikasiAdmin'])->name('dokumen.verifikasi.admin');
     });
 
     // Admin CRUD
