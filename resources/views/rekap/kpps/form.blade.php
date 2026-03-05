@@ -35,7 +35,7 @@
 
 {{-- ══ SECTION I: DATA PEMILIH ══ --}}
 <div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm mb-4 overflow-hidden">
-    <div class="px-6 py-4 border-b dark:border-gray-700 border-gray-200 dark:bg-gray-750 bg-gray-50">
+    <div class="px-6 py-4 border-b dark:border-gray-700 border-gray-200 dark:bg-gray-700/50 bg-gray-50">
         <p class="text-xs font-bold dark:text-gray-300 text-gray-700 uppercase tracking-wider">I. Data Pemilih & Pengguna Hak Pilih</p>
     </div>
     <div class="p-6">
@@ -80,7 +80,7 @@
 
 {{-- ══ SECTION II: SURAT SUARA ══ --}}
 <div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm mb-4 overflow-hidden">
-    <div class="px-6 py-4 border-b dark:border-gray-700 border-gray-200 dark:bg-gray-750 bg-gray-50">
+    <div class="px-6 py-4 border-b dark:border-gray-700 border-gray-200 dark:bg-gray-700/50 bg-gray-50">
         <p class="text-xs font-bold dark:text-gray-300 text-gray-700 uppercase tracking-wider">II. Data Penggunaan Surat Suara</p>
     </div>
     <div class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -116,7 +116,7 @@
 
 {{-- ══ SECTION III: DISABILITAS ══ --}}
 <div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm mb-4 overflow-hidden">
-    <div class="px-6 py-4 border-b dark:border-gray-700 border-gray-200 dark:bg-gray-750 bg-gray-50">
+    <div class="px-6 py-4 border-b dark:border-gray-700 border-gray-200 dark:bg-gray-700/50 bg-gray-50">
         <p class="text-xs font-bold dark:text-gray-300 text-gray-700 uppercase tracking-wider">III. Data Pemilih Disabilitas</p>
     </div>
     <div class="p-6 grid grid-cols-12 items-center gap-3">
@@ -147,7 +147,7 @@
 
 {{-- ══ SECTION IV: PEROLEHAN SUARA ══ --}}
 <div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm mb-4 overflow-hidden">
-    <div class="px-6 py-4 border-b dark:border-gray-700 border-gray-200 dark:bg-gray-750 bg-gray-50">
+    <div class="px-6 py-4 border-b dark:border-gray-700 border-gray-200 dark:bg-gray-700/50 bg-gray-50">
         <p class="text-xs font-bold dark:text-gray-300 text-gray-700 uppercase tracking-wider">IV. Perolehan Suara</p>
     </div>
     <div class="p-6">
@@ -239,7 +239,7 @@
 
 {{-- ══ SECTION V: SUARA SAH & TIDAK SAH ══ --}}
 <div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm mb-6 overflow-hidden">
-    <div class="px-6 py-4 border-b dark:border-gray-700 border-gray-200 dark:bg-gray-750 bg-gray-50">
+    <div class="px-6 py-4 border-b dark:border-gray-700 border-gray-200 dark:bg-gray-700/50 bg-gray-50">
         <p class="text-xs font-bold dark:text-gray-300 text-gray-700 uppercase tracking-wider">V. Suara Sah & Tidak Sah</p>
     </div>
     <div class="p-6 space-y-4">
@@ -287,12 +287,10 @@
             class="flex-1 bg-sky-500 hover:bg-sky-600 text-white font-semibold py-3 rounded-xl text-sm transition">
         💾 Simpan Draft
     </button>
-    @if($rekap)
     <button type="button" onclick="confirmFinalisasi()"
             class="flex-1 bg-teal-500 hover:bg-teal-600 text-white font-semibold py-3 rounded-xl text-sm transition">
         ✓ Simpan & Finalisasi
     </button>
-    @endif
 </div>
 @else
 <div class="dark:bg-gray-800 bg-gray-50 rounded-xl border dark:border-gray-700 border-gray-200 p-4 text-center">
@@ -394,7 +392,13 @@ updateAll();
 // ── FINALISASI ───────────────────────────────────────────
 function confirmFinalisasi() {
     if (confirm('Finalisasi rekap ini? Data tidak bisa diubah setelah difinalisasi.')) {
-        document.getElementById('form-finalisasi').submit();
+        // set hidden input lalu submit form rekap dengan flag finalisasi
+        const input = document.createElement('input');
+        input.type  = 'hidden';
+        input.name  = 'finalisasi';
+        input.value = '1';
+        document.getElementById('rekap-form').appendChild(input);
+        document.getElementById('rekap-form').submit();
     }
 }
 </script>

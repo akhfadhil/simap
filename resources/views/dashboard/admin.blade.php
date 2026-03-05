@@ -10,18 +10,62 @@
 
 {{-- Stats --}}
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-    @foreach([
-        ['label'=>'Total Pengguna','value'=>'128','sub'=>'aktif di sistem'],
-        ['label'=>'Wilayah TPS','value'=>'342','sub'=>'terdaftar'],
-        ['label'=>'Dokumen Masuk','value'=>'89%','sub'=>'sudah diverifikasi'],
-        ['label'=>'Log Aktivitas','value'=>'2.4K','sub'=>'hari ini'],
-    ] as $stat)
-    <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border dark:border-gray-700 border-gray-200 shadow-sm">
-        <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">{{ $stat['label'] }}</p>
-        <p class="font-display text-4xl text-red-600 tracking-wide">{{ $stat['value'] }}</p>
-        <p class="text-xs dark:text-gray-500 text-gray-400 mt-1">{{ $stat['sub'] }}</p>
+    @php
+        $totalPengguna   = \App\Models\User::count();
+        $totalTps        = \App\Models\Tps::count();
+        $totalKecamatan  = \App\Models\Kecamatan::count();
+        $totalSeharusnya = ($totalTps + $totalKecamatan) * 5;
+        $totalVerif      = \App\Models\Dokumen::where('status','terverifikasi')->count();
+        $persenVerif     = $totalSeharusnya > 0 ? round(($totalVerif / $totalSeharusnya) * 100) : 0;
+        $tpsSelesai      = \App\Models\RekapHeader::select('tps_id')
+                            ->where('status','final')
+                            ->groupBy('tps_id')
+                            ->havingRaw('COUNT(DISTINCT jenis) = 5')
+                            ->count();
+    @endphp
+
+    <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border dark:border-gray-700 border-gray-200 shadow-sm flex flex-col">
+        <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">Total Pengguna</p>
+        <p class="font-display text-4xl text-red-600 tracking-wide">{{ $totalPengguna }}</p>
+        <p class="text-xs dark:text-gray-500 text-gray-400 mt-auto pt-3">terdaftar di sistem</p>
     </div>
-    @endforeach
+
+    <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border dark:border-gray-700 border-gray-200 shadow-sm flex flex-col">
+        <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">Wilayah TPS</p>
+        <p class="font-display text-4xl text-red-600 tracking-wide">{{ $totalTps }}</p>
+        <p class="text-xs dark:text-gray-500 text-gray-400 mt-auto pt-3">titik pemungutan suara</p>
+    </div>
+
+    <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border dark:border-gray-700 border-gray-200 shadow-sm flex flex-col">
+        <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">Dokumen Masuk</p>
+        <p class="font-display text-4xl text-red-600 tracking-wide">{{ $totalVerif }}/{{ $totalSeharusnya }}</p>
+        <div class="mt-auto pt-3">
+            <div class="flex items-center gap-2 mb-1">
+                <div class="flex-1 h-1.5 dark:bg-gray-700 bg-gray-200 rounded-full">
+                    <div class="h-1.5 rounded-full bg-red-500 transition-all" style="width:{{ $persenVerif }}%"></div>
+                </div>
+                <span class="text-xs dark:text-gray-500 text-gray-400">{{ $persenVerif }}%</span>
+            </div>
+            <p class="text-xs dark:text-gray-500 text-gray-400">dokumen terunggah</p>
+        </div>
+    </div>
+
+    <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border dark:border-gray-700 border-gray-200 shadow-sm flex flex-col">
+        <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">Rekap Finalisasi</p>
+        <p class="font-display text-4xl text-red-600 tracking-wide">{{ $tpsSelesai }}/{{ $totalTps }}</p>
+        <div class="mt-auto pt-3">
+            <div class="flex items-center gap-2 mb-1">
+                <div class="flex-1 h-1.5 dark:bg-gray-700 bg-gray-200 rounded-full">
+                    <div class="h-1.5 rounded-full bg-red-500 transition-all"
+                         style="width:{{ $totalTps > 0 ? round(($tpsSelesai/$totalTps)*100) : 0 }}%"></div>
+                </div>
+                <span class="text-xs dark:text-gray-500 text-gray-400">
+                    {{ $totalTps > 0 ? round(($tpsSelesai/$totalTps)*100) : 0 }}%
+                </span>
+            </div>
+            <p class="text-xs dark:text-gray-500 text-gray-400">TPS selesai semua rekap</p>
+        </div>
+    </div>
 </div>
 
 {{-- Menu --}}

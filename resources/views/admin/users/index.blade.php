@@ -35,7 +35,8 @@
 
 {{-- Filter --}}
 <div class="flex gap-3 mb-6 flex-wrap">
-    <form method="GET" class="flex gap-3 flex-wrap items-center">
+    <form method="GET" id="filter-form" class="flex gap-3 flex-wrap items-center">
+        {{-- Role --}}
         <select name="role" onchange="this.form.submit()"
                 class="dark:bg-gray-800 bg-white border dark:border-gray-700 border-gray-300 dark:text-gray-300 text-gray-600 px-4 py-2.5 text-xs rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
             <option value="">Semua Role</option>
@@ -43,7 +44,38 @@
             <option value="pps"  {{ request('role') == 'pps'  ? 'selected' : '' }}>PPS</option>
             <option value="kpps" {{ request('role') == 'kpps' ? 'selected' : '' }}>KPPS</option>
         </select>
-        <span class="text-[10px] dark:text-gray-500 text-gray-400 font-semibold uppercase tracking-wider">{{ $users->count() }} User</span>
+
+        {{-- Kecamatan --}}
+        <select name="kecamatan_id" onchange="filterKecChange(this.value)"
+                class="dark:bg-gray-800 bg-white border dark:border-gray-700 border-gray-300 dark:text-gray-300 text-gray-600 px-4 py-2.5 text-xs rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
+            <option value="">Semua Kecamatan</option>
+            @foreach($kecamatans as $kec)
+            <option value="{{ $kec->id }}" {{ request('kecamatan_id') == $kec->id ? 'selected' : '' }}>
+                {{ $kec->nama }}
+            </option>
+            @endforeach
+        </select>
+
+        {{-- Desa (muncul jika kecamatan dipilih) --}}
+        <select name="desa_id" id="filter-desa" onchange="this.form.submit()"
+                class="dark:bg-gray-800 bg-white border dark:border-gray-700 border-gray-300 dark:text-gray-300 text-gray-600 px-4 py-2.5 text-xs rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none {{ !request('kecamatan_id') ? 'hidden' : '' }}">
+            <option value="">Semua Desa</option>
+            @foreach($desas->where('kecamatan_id', request('kecamatan_id')) as $desa)
+            <option value="{{ $desa->id }}" {{ request('desa_id') == $desa->id ? 'selected' : '' }}>
+                {{ $desa->nama }}
+            </option>
+            @endforeach
+        </select>
+
+        {{-- Reset --}}
+        @if(request('role') || request('kecamatan_id') || request('desa_id'))
+        <a href="{{ route('admin.users.index') }}"
+           class="text-xs dark:text-gray-500 text-gray-400 hover:text-red-500 transition">× Reset</a>
+        @endif
+
+        <span class="text-[10px] dark:text-gray-500 text-gray-400 font-semibold uppercase tracking-wider">
+            {{ $users->total() }} User
+        </span>
     </form>
 </div>
 

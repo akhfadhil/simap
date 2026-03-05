@@ -59,8 +59,8 @@
             <span class="font-semibold dark:text-gray-300 text-gray-600">{{ number_format($rekap->dpt_lk + $rekap->dpt_pr) }}</span>
         </div>
         <div class="flex justify-between text-[11px] dark:text-gray-500 text-gray-400 mb-1">
-            <span>Pengguna hak pilih</span>
-            <span class="font-semibold dark:text-gray-300 text-gray-600">{{ number_format($rekap->total_pengguna_lk + $rekap->total_pengguna_pr) }}</span>
+            <span>Suara sah</span>
+            <span class="font-semibold dark:text-gray-300 text-gray-600">{{ number_format($rekap->suara_sah) }}</span>
         </div>
         <div class="flex justify-between text-[11px] dark:text-gray-500 text-gray-400">
             <span>Suara tidak sah</span>

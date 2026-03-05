@@ -14,26 +14,40 @@
         $tps      = Auth::user()->tps;
         $uploaded = $tps ? \App\Models\Dokumen::where('tps_id', $tps->id)->count() : 0;
         $terverif = $tps ? \App\Models\Dokumen::where('tps_id', $tps->id)->where('status','terverifikasi')->count() : 0;
+        $totalRekap = $tps ? \App\Models\RekapHeader::where('tps_id', $tps->id)->count() : 0;
+        $finalRekap = $tps ? \App\Models\RekapHeader::where('tps_id', $tps->id)->where('status','final')->count() : 0;
     @endphp
+
     <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border dark:border-gray-700 border-gray-200 shadow-sm">
         <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">TPS</p>
         <p class="font-display text-3xl tracking-wide text-sky-300">{{ $tps->nama ?? '-' }}</p>
         <p class="text-xs dark:text-gray-500 text-gray-400 mt-1">{{ $tps->desa->nama ?? '-' }}</p>
     </div>
-    <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border dark:border-gray-700 border-gray-200 shadow-sm">
-        <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">Kecamatan</p>
-        <p class="font-display text-3xl tracking-wide text-sky-300">{{ $tps->desa->kecamatan->nama ?? '-' }}</p>
-        <p class="text-xs dark:text-gray-500 text-gray-400 mt-1">wilayah tugas</p>
-    </div>
+
     <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border dark:border-gray-700 border-gray-200 shadow-sm">
         <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">Dokumen Upload</p>
         <p class="font-display text-3xl tracking-wide text-sky-300">{{ $uploaded }}/5</p>
         <p class="text-xs dark:text-gray-500 text-gray-400 mt-1">sudah diupload</p>
     </div>
+
     <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border dark:border-gray-700 border-gray-200 shadow-sm">
         <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">Terverifikasi</p>
         <p class="font-display text-3xl tracking-wide text-sky-300">{{ $terverif }}/5</p>
         <p class="text-xs dark:text-gray-500 text-gray-400 mt-1">oleh PPS</p>
+    </div>
+
+    <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border dark:border-gray-700 border-gray-200 shadow-sm">
+        <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">Rekap Data</p>
+        <p class="font-display text-3xl tracking-wide text-sky-300">{{ $finalRekap }}/5</p>
+        <p class="text-xs dark:text-gray-500 text-gray-400 mt-1">
+            @if($finalRekap === 5)
+                semua difinalisasi ✓
+            @elseif($totalRekap > 0)
+                {{ $totalRekap - $finalRekap }} draft · {{ 5 - $totalRekap }} belum diisi
+            @else
+                belum ada rekap
+            @endif
+        </p>
     </div>
 </div>
 

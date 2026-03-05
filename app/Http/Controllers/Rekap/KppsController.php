@@ -36,14 +36,12 @@ class KppsController extends Controller
         abort_unless(in_array($jenis, self::JENIS), 404);
         $tps = Auth::user()->tps;
 
-        // Cegah edit kalau sudah final
         $existing = RekapHeader::where('tps_id', $tps->id)->where('jenis', $jenis)->first();
         if ($existing && $existing->status === 'final') {
             return back()->with('error', 'Rekap sudah difinalisasi, tidak bisa diubah.');
         }
 
-        DB::transaction(function () use ($request, $jenis, $tps, $existing) {
-            // Upsert header
+        DB::transaction(function () use ($request, $jenis, $tps) {
             $rekap = RekapHeader::updateOrCreate(
                 ['tps_id' => $tps->id, 'jenis' => $jenis],
                 array_merge($request->only([
@@ -57,7 +55,6 @@ class KppsController extends Controller
                 ]), ['diinput_oleh' => Auth::id(), 'status' => 'draft'])
             );
 
-            // Upsert suara
             if ($jenis === 'ppwp') {
                 foreach ($request->input('suara', []) as $calon_id => $suara) {
                     $rekap->ppwpSuaras()->updateOrCreate(['calon_id' => $calon_id], ['suara' => (int)$suara]);
@@ -74,9 +71,19 @@ class KppsController extends Controller
                     $rekap->calegSuaras()->updateOrCreate(['caleg_id' => $caleg_id], ['suara' => (int)$suara]);
                 }
             }
+
+            // Finalisasi langsung jika ada flag
+            if (request('finalisasi') == '1') {
+                $rekap->update(['status' => 'final', 'difinalisasi_at' => now()]);
+            }
         });
 
-        return redirect()->route('rekap.index')->with('success', 'Rekap '.RekapHeader::JENIS_LABELS[$jenis].' berhasil disimpan.');
+        $label = RekapHeader::JENIS_LABELS[$jenis];
+        if (request('finalisasi') == '1') {
+            return redirect()->route('rekap.index')->with('success', "Rekap {$label} berhasil difinalisasi.");
+        }
+
+        return redirect()->route('rekap.index')->with('success', "Rekap {$label} berhasil disimpan.");
     }
 
     public function finalisasi(string $jenis)

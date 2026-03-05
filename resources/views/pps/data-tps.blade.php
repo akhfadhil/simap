@@ -17,20 +17,41 @@
 
 {{-- Stats --}}
 <div class="grid grid-cols-3 gap-4 mb-8">
+    @php
+        $totalTps      = $tpsList->count();
+        $totalMaxDok   = $totalTps * 5;
+        $totalUploaded = $tpsList->sum(fn($t) => $t->dokumens->count());
+        $totalVerif    = $tpsList->sum(fn($t) => $t->dokumens->where('status','terverifikasi')->count());
+        $persenUpload  = $totalMaxDok > 0 ? round(($totalUploaded / $totalMaxDok) * 100) : 0;
+        $persenVerif   = $totalMaxDok > 0 ? round(($totalVerif / $totalMaxDok) * 100) : 0;
+    @endphp
+
     <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border dark:border-gray-700 border-gray-200 shadow-sm">
         <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">Total TPS</p>
-        <p class="font-display text-4xl text-teal-400">{{ $tpsList->count() }}</p>
+        <p class="font-display text-4xl text-teal-400">{{ $totalTps }}</p>
+        <p class="text-xs dark:text-gray-500 text-gray-400 mt-1">{{ $totalTps * 5 }} dokumen maksimal</p>
     </div>
+
     <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border dark:border-gray-700 border-gray-200 shadow-sm">
         <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">Sudah Upload</p>
-        @php $sudahUpload = $tpsList->filter(fn($t) => $t->dokumens->count() > 0)->count(); @endphp
-        <p class="font-display text-4xl text-teal-400">{{ $sudahUpload }}/{{ $tpsList->count() }}</p>
+        <p class="font-display text-4xl text-teal-400">{{ $totalUploaded }}/{{ $totalMaxDok }}</p>
+        <div class="mt-2 flex items-center gap-2">
+            <div class="flex-1 h-1.5 dark:bg-gray-700 bg-gray-200 rounded-full">
+                <div class="h-1.5 rounded-full bg-teal-400 transition-all" style="width:{{ $persenUpload }}%"></div>
+            </div>
+            <span class="text-xs dark:text-gray-500 text-gray-400">{{ $persenUpload }}%</span>
+        </div>
     </div>
+
     <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border dark:border-gray-700 border-gray-200 shadow-sm">
         <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">Terverifikasi</p>
-        @php $terverif = $tpsList->sum(fn($t) => $t->dokumens->where('status','terverifikasi')->count()); @endphp
-        <p class="font-display text-4xl text-teal-400">{{ $terverif }}</p>
-        <p class="text-xs dark:text-gray-500 text-gray-400 mt-1">dokumen</p>
+        <p class="font-display text-4xl text-teal-400">{{ $totalVerif }}/{{ $totalMaxDok }}</p>
+        <div class="mt-2 flex items-center gap-2">
+            <div class="flex-1 h-1.5 dark:bg-gray-700 bg-gray-200 rounded-full">
+                <div class="h-1.5 rounded-full bg-teal-400 transition-all" style="width:{{ $persenVerif }}%"></div>
+            </div>
+            <span class="text-xs dark:text-gray-500 text-gray-400">{{ $persenVerif }}%</span>
+        </div>
     </div>
 </div>
 

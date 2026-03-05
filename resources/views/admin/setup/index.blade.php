@@ -124,7 +124,7 @@
 </div>
 
 {{-- ══ TAB DPR RI & DPRD PROV ══ --}}
-@foreach(['dpr_ri'=>['partaiDprRi','DPR RI','orange'],'dprd_prov'=>['partaiProv','DPRD Provinsi','sky']] as $jenis => [$var, $label, $color])
+@foreach(['dpr_ri'=>['partaiDprRi','DPR RI','bg-orange-500'],'dprd_prov'=>['partaiProv','DPRD Provinsi','bg-sky-500']] as $jenis => [$var, $label, $color])
 <div id="panel-{{ $jenis }}" class="tab-panel hidden">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         <div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 p-6 shadow-sm">
@@ -154,10 +154,10 @@
             </div>
             @forelse($$var as $partai)
             <div class="border-b dark:border-gray-700 border-gray-100 last:border-0">
-                <div class="flex items-center justify-between px-6 py-3 dark:bg-gray-750 bg-gray-50 cursor-pointer group"
+                <div class="flex items-center justify-between px-6 py-3 dark:bg-gray-700 bg-gray-50 cursor-pointer group"
                      onclick="togglePartai({{ $partai->id }})">
                     <div class="flex items-center gap-3">
-                        <span class="w-7 h-7 rounded-lg bg-{{ $color }}-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
+                        <span class="w-7 h-7 rounded-lg {{ $color }} text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
                             {{ $partai->nomor_urut }}
                         </span>
                         <p class="text-sm font-semibold dark:text-gray-100 text-gray-800">{{ $partai->nama_partai }}</p>
@@ -328,7 +328,7 @@
                 @forelse($dapilPartais as $partai)
                 <div class="border-b dark:border-gray-700 border-gray-100 last:border-0">
                     {{-- Header partai --}}
-                    <div class="flex items-center justify-between px-6 py-3 dark:bg-gray-750 bg-gray-50 cursor-pointer group"
+                    <div class="flex items-center justify-between px-6 py-3 dark:bg-gray-700 bg-gray-50 cursor-pointer group"                    
                         onclick="togglePartai({{ $partai->id }})">
                         <div class="flex items-center gap-3">
                             <span class="w-7 h-7 rounded-lg bg-violet-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">

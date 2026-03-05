@@ -13,16 +13,29 @@ class UserManagementController extends Controller
 {
     public function index()
     {
-        $users = User::with('kecamatan', 'desa', 'tps')
+        $users = User::with('kecamatan', 'desa.kecamatan', 'tps.desa.kecamatan')
                     ->where('role', '!=', 'admin')
                     ->when(request('role'), fn($q) => $q->where('role', request('role')))
-                    ->latest()
+                    ->when(request('kecamatan_id'), function($q) {
+                        $q->where(function($q2) {
+                            $q2->where('kecamatan_id', request('kecamatan_id'))
+                            ->orWhereHas('desa', fn($q3) => $q3->where('kecamatan_id', request('kecamatan_id')))
+                            ->orWhereHas('tps.desa', fn($q3) => $q3->where('kecamatan_id', request('kecamatan_id')));
+                        });
+                    })
+                    ->when(request('desa_id'), function($q) {
+                        $q->where(function($q2) {
+                            $q2->where('desa_id', request('desa_id'))
+                            ->orWhereHas('tps', fn($q3) => $q3->where('desa_id', request('desa_id')));
+                        });
+                    })
+                    ->orderBy('name')
                     ->paginate(15)
                     ->withQueryString();
 
-        $kecamatans = Kecamatan::all();
-        $desas      = Desa::with('kecamatan')->get();
-        $tpsList    = Tps::with('desa')->get();
+        $kecamatans = Kecamatan::orderBy('nama')->get();
+        $desas      = Desa::with('kecamatan')->orderBy('nama')->get();
+        $tpsList    = Tps::with('desa')->orderBy('nama')->get();
 
         return view('admin.users.index', compact('users', 'kecamatans', 'desas', 'tpsList'));
     }

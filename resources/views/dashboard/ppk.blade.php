@@ -10,18 +10,57 @@
 
 {{-- Stats --}}
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-    @foreach([
-        ['label'=>'Kecamatan','value'=> Auth::user()->kecamatan->nama ?? '-','sub'=>'wilayah tugas'],
-        ['label'=>'Jumlah Desa','value'=> Auth::user()->kecamatan ? Auth::user()->kecamatan->desas->count() : '-','sub'=>'di kecamatan'],
-        ['label'=>'Total TPS','value'=> Auth::user()->kecamatan ? Auth::user()->kecamatan->desas->sum(fn($d) => $d->tps->count()) : '-','sub'=>'titik pemungutan'],
-        ['label'=>'Jumlah PPS','value'=> Auth::user()->kecamatan ? Auth::user()->kecamatan->desas->count() : '-','sub'=>'panitia aktif'],
-    ] as $stat)
+    @php
+        $kecamatan    = Auth::user()->kecamatan;
+        $desas        = $kecamatan ? $kecamatan->desas : collect();
+        $tpsAll       = $desas->flatMap(fn($d) => $d->tps);
+        $totalTps     = $tpsAll->count();
+
+        // Dokumen D hasil PPK (bukan dari TPS)
+        $dokPpk       = $kecamatan
+                        ? \App\Models\Dokumen::where('kecamatan_id', $kecamatan->id)
+                            ->where('level', 'ppk')
+                            ->get()
+                        : collect();
+        $totalUpload  = $dokPpk->count();
+        $totalVerif   = $dokPpk->where('status', 'terverifikasi')->count();
+        $persenUp     = round(($totalUpload / 5) * 100);
+        $persenVer    = round(($totalVerif / 5) * 100);
+    @endphp
+
     <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border dark:border-gray-700 border-gray-200 shadow-sm">
-        <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">{{ $stat['label'] }}</p>
-        <p class="font-display text-3xl tracking-wide text-orange-400">{{ $stat['value'] }}</p>
-        <p class="text-xs dark:text-gray-500 text-gray-400 mt-1">{{ $stat['sub'] }}</p>
+        <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">Kecamatan</p>
+        <p class="font-display text-3xl tracking-wide text-orange-400">{{ $kecamatan->nama ?? '-' }}</p>
+        <p class="text-xs dark:text-gray-500 text-gray-400 mt-1">wilayah tugas</p>
     </div>
-    @endforeach
+
+    <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border dark:border-gray-700 border-gray-200 shadow-sm">
+        <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">Jumlah Desa | TPS</p>
+        <p class="font-display text-3xl tracking-wide text-orange-400">{{ $desas->count() }} | {{ $totalTps }}</p>
+        <p class="text-xs dark:text-gray-500 text-gray-400 mt-1">desa | titik pemungutan</p>
+    </div>
+
+    <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border dark:border-gray-700 border-gray-200 shadow-sm">
+        <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">Dokumen D Upload</p>
+        <p class="font-display text-3xl tracking-wide text-orange-400">{{ $totalUpload }}/5</p>
+        <div class="mt-2 flex items-center gap-2">
+            <div class="flex-1 h-1.5 dark:bg-gray-700 bg-gray-200 rounded-full">
+                <div class="h-1.5 rounded-full bg-orange-400 transition-all" style="width:{{ $persenUp }}%"></div>
+            </div>
+            <span class="text-xs dark:text-gray-500 text-gray-400">{{ $persenUp }}%</span>
+        </div>
+    </div>
+
+    <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border dark:border-gray-700 border-gray-200 shadow-sm">
+        <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">Dokumen D Terverifikasi</p>
+        <p class="font-display text-3xl tracking-wide text-orange-400">{{ $totalVerif }}/5</p>
+        <div class="mt-2 flex items-center gap-2">
+            <div class="flex-1 h-1.5 dark:bg-gray-700 bg-gray-200 rounded-full">
+                <div class="h-1.5 rounded-full bg-orange-400 transition-all" style="width:{{ $persenVer }}%"></div>
+            </div>
+            <span class="text-xs dark:text-gray-500 text-gray-400">{{ $persenVer }}%</span>
+        </div>
+    </div>
 </div>
 
 {{-- Menu --}}
@@ -31,7 +70,7 @@
     <a href="{{ route('dokumen.ppk') }}"
        class="dark:bg-gray-800 bg-white rounded-xl p-6 border-l-4 border border-l-orange-400 dark:border-gray-700 border-gray-200 hover:shadow-md transition group block">
         <span class="float-right dark:text-gray-600 text-gray-300 group-hover:text-orange-400 transition text-lg">→</span>
-        <div class="text-3xl mb-4">📊</div>
+        <div class="text-3xl mb-4">🗂️</div>
         <p class="font-semibold text-sm mb-1 dark:text-gray-100 text-gray-800">Rekap Dokumen</p>
         <p class="text-xs dark:text-gray-500 text-gray-500 leading-relaxed">Lihat dan download dokumen dari seluruh TPS di kecamatan.</p>
     </a>
@@ -55,7 +94,7 @@
     <a href="{{ route('ppk.rekap.index') }}"
    class="dark:bg-gray-800 bg-white rounded-xl p-6 border-l-4 border border-l-orange-400 dark:border-gray-700 border-gray-200 hover:shadow-md transition group block">
         <span class="float-right dark:text-gray-600 text-gray-300 group-hover:text-orange-400 transition text-lg">→</span>
-        <div class="text-3xl mb-4">📈</div>
+        <div class="text-3xl mb-4">📊</div>
         <p class="font-semibold text-sm mb-1 dark:text-gray-100 text-gray-800">Rekapitulasi Data</p>
         <p class="text-xs dark:text-gray-500 text-gray-500 leading-relaxed">Lihat rekap suara dari seluruh TPS di kecamatan.</p>
     </a>
