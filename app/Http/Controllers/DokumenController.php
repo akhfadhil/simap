@@ -53,7 +53,6 @@ class DokumenController extends Controller
 
         $tps = Tps::with('desa.kecamatan')->findOrFail($tpsId);
 
-        // Hapus file lama kalau ada
         $existing = Dokumen::where('tps_id', $tps->id)
             ->where('jenis', $request->jenis)
             ->first();
@@ -63,7 +62,6 @@ class DokumenController extends Controller
             $existing->delete();
         }
 
-        // Buat path terstruktur
         $kecFolder  = preg_replace('/[^A-Za-z0-9_\-]/', '_', $tps->desa->kecamatan->nama);
         $desaFolder = preg_replace('/[^A-Za-z0-9_\-]/', '_', $tps->desa->nama);
         $tpsFolder  = preg_replace('/[^A-Za-z0-9_\-]/', '_', $tps->nama);
@@ -81,6 +79,7 @@ class DokumenController extends Controller
             'jenis'       => $request->jenis,
             'level'       => 'tps',
             'status'      => 'menunggu_verifikasi',
+            'komentar'    => null, // reset komentar saat upload ulang
             'file_path'   => $path,
             'file_name'   => $file->getClientOriginalName(),
             'file_size'   => $file->getSize(),
@@ -88,6 +87,7 @@ class DokumenController extends Controller
 
         return back()->with('success', Dokumen::JENIS[$request->jenis] . ' berhasil diupload.');
     }
+
     // ── PPS: Index ─────────────────────────────────────────────
     public function indexPps(Request $request)
     {
@@ -118,17 +118,31 @@ class DokumenController extends Controller
     {
         $user = Auth::user();
 
-        // Pastikan dokumen ini milik desa si PPS
         $tps = Tps::findOrFail($dokumen->tps_id);
         abort_if($tps->desa_id !== $user->desa_id, 403);
 
-        $dokumen->update([
-            'status'      => 'terverifikasi',
-            'verified_by' => $user->id,
-            'verified_at' => now(),
+        $request->validate([
+            'aksi'     => 'required|in:terverifikasi,ditolak',
+            'komentar' => 'required_if:aksi,ditolak|nullable|string|max:500',
         ]);
 
-        return back()->with('success', 'Dokumen berhasil diverifikasi.');
+        if ($request->aksi === 'terverifikasi') {
+            $dokumen->update([
+                'status'      => 'terverifikasi',
+                'verified_by' => $user->id,
+                'verified_at' => now(),
+                'komentar'    => null,
+            ]);
+            return back()->with('success', 'Dokumen berhasil diverifikasi.');
+        } else {
+            $dokumen->update([
+                'status'      => 'ditolak',
+                'verified_by' => $user->id,
+                'verified_at' => now(),
+                'komentar'    => $request->komentar,
+            ]);
+            return back()->with('success', 'Dokumen telah ditolak.');
+        }
     }
 
     // ── PPK: Index ─────────────────────────────────────────────
@@ -188,7 +202,6 @@ class DokumenController extends Controller
 
         $kecamatan = \App\Models\Kecamatan::findOrFail($user->kecamatan_id);
 
-        // Hapus file lama kalau ada
         $existing = Dokumen::where('kecamatan_id', $kecamatan->id)
             ->where('level', 'kecamatan')
             ->where('jenis', $request->jenis)
@@ -199,7 +212,6 @@ class DokumenController extends Controller
             $existing->delete();
         }
 
-        // Buat path terstruktur
         $kecFolder = preg_replace('/[^A-Za-z0-9_\-]/', '_', $kecamatan->nama);
 
         $file = $request->file('file');
@@ -215,6 +227,7 @@ class DokumenController extends Controller
             'jenis'        => $request->jenis,
             'level'        => 'kecamatan',
             'status'       => 'menunggu_verifikasi',
+            'komentar'     => null, // reset komentar saat upload ulang
             'file_path'    => $path,
             'file_name'    => $file->getClientOriginalName(),
             'file_size'    => $file->getSize(),
@@ -255,18 +268,31 @@ class DokumenController extends Controller
     // ── Admin: Verifikasi dokumen TPS atau Kecamatan ───────────────
     public function verifikasiAdmin(Request $request, Dokumen $dokumen)
     {
-        // Pastikan hanya admin
         abort_if(Auth::user()->role !== 'admin', 403);
 
-        $dokumen->update([
-            'status'      => 'terverifikasi',
-            'verified_by' => Auth::id(),
-            'verified_at' => now(),
+        $request->validate([
+            'aksi'     => 'required|in:terverifikasi,ditolak',
+            'komentar' => 'required_if:aksi,ditolak|nullable|string|max:500',
         ]);
 
-        return back()->with('success', 'Dokumen berhasil diverifikasi.');
+        if ($request->aksi === 'terverifikasi') {
+            $dokumen->update([
+                'status'      => 'terverifikasi',
+                'verified_by' => Auth::id(),
+                'verified_at' => now(),
+                'komentar'    => null,
+            ]);
+            return back()->with('success', 'Dokumen berhasil diverifikasi.');
+        } else {
+            $dokumen->update([
+                'status'      => 'ditolak',
+                'verified_by' => Auth::id(),
+                'verified_at' => now(),
+                'komentar'    => $request->komentar,
+            ]);
+            return back()->with('success', 'Dokumen telah ditolak.');
+        }
     }
-
     // ── Preview PDF (semua role, dengan guard) ─────────────────
     public function preview(Dokumen $dokumen)
     {

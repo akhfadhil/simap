@@ -49,48 +49,60 @@
 <div class="space-y-3 mb-8">
 @foreach(App\Models\Dokumen::JENIS as $key => $label)
 @php $dok = $uploaded[$key] ?? null; @endphp
-<div class="dark:bg-gray-800 bg-white rounded-xl p-5 border dark:border-gray-700 border-gray-200 flex items-center justify-between flex-wrap gap-4 shadow-sm">
-    <div class="flex items-center gap-4">
-        <div class="w-1 h-12 rounded-full flex-shrink-0"
-             style="background: {{ $dok ? ($dok->status === 'terverifikasi' ? '#2EC4B6' : '#F4A261') : '#9CA3AF' }}"></div>
-        <div>
-            <p class="font-semibold text-sm dark:text-gray-100 text-gray-800">{{ $label }}</p>
+<div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm overflow-hidden">
+    <div class="p-5 flex items-center justify-between flex-wrap gap-4">
+        <div class="flex items-center gap-4">
+            <div class="w-1 h-12 rounded-full flex-shrink-0"
+                 style="background: {{ $dok ? App\Models\Dokumen::STATUS_COLORS[$dok->status] : '#9CA3AF' }}"></div>
+            <div>
+                <p class="font-semibold text-sm dark:text-gray-100 text-gray-800">{{ $label }}</p>
+                @if($dok)
+                    <p class="text-[11px] dark:text-gray-500 text-gray-400 mt-0.5">
+                        {{ $dok->file_name }} · {{ number_format($dok->file_size / 1024, 0) }} KB
+                        · {{ $dok->updated_at->diffForHumans() }}
+                    </p>
+                    <span class="inline-block text-[9px] tracking-widest uppercase px-2 py-0.5 mt-1 rounded font-semibold"
+                          style="color: {{ App\Models\Dokumen::STATUS_COLORS[$dok->status] }};
+                                 background: {{ App\Models\Dokumen::STATUS_COLORS[$dok->status] }}20;
+                                 border: 1px solid {{ App\Models\Dokumen::STATUS_COLORS[$dok->status] }}40">
+                        {{ App\Models\Dokumen::STATUS_LABELS[$dok->status] }}
+                    </span>
+                @else
+                    <p class="text-[11px] dark:text-gray-600 text-gray-400 mt-0.5">Belum diupload</p>
+                @endif
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2">
             @if($dok)
-                <p class="text-[11px] dark:text-gray-500 text-gray-400 mt-0.5">
-                    {{ $dok->file_name }} · {{ number_format($dok->file_size / 1024, 0) }} KB
-                    · {{ $dok->updated_at->diffForHumans() }}
-                </p>
-                <span class="inline-block text-[9px] tracking-widest uppercase px-2 py-0.5 mt-1 rounded font-semibold"
-                      style="color: {{ App\Models\Dokumen::STATUS_COLORS[$dok->status] }};
-                             background: {{ App\Models\Dokumen::STATUS_COLORS[$dok->status] }}20;
-                             border: 1px solid {{ App\Models\Dokumen::STATUS_COLORS[$dok->status] }}40">
-                    {{ App\Models\Dokumen::STATUS_LABELS[$dok->status] }}
-                </span>
-            @else
-                <p class="text-[11px] dark:text-gray-600 text-gray-400 mt-0.5">Belum diupload</p>
+            <button onclick="openPreview('{{ route('dokumen.preview', $dok) }}')"
+                    class="px-3 py-1.5 rounded-lg text-xs font-medium dark:border-gray-600 border-gray-300 border dark:text-gray-400 text-gray-500 dark:hover:bg-gray-700 hover:bg-gray-100 transition">
+                Preview
+            </button>
+            <a href="{{ route('dokumen.download', $dok) }}"
+               class="px-3 py-1.5 rounded-lg text-xs font-medium dark:border-gray-600 border-gray-300 border dark:text-gray-400 text-gray-500 dark:hover:bg-gray-700 hover:bg-gray-100 transition">
+                Download
+            </a>
+            @endif
+            @if(!isset($isAdminView) || !$isAdminView)
+            <button onclick="openUpload('{{ $key }}', '{{ $label }}')"
+                    class="px-4 py-1.5 rounded-lg text-xs font-semibold text-white bg-sky-500 hover:bg-sky-600 transition">
+                {{ $dok ? 'Ganti' : 'Upload' }}
+            </button>
             @endif
         </div>
     </div>
 
-    <div class="flex items-center gap-2">
-        @if($dok)
-        <button onclick="openPreview('{{ route('dokumen.preview', $dok) }}')"
-                class="px-3 py-1.5 rounded-lg text-xs font-medium dark:border-gray-600 border-gray-300 border dark:text-gray-400 text-gray-500 dark:hover:bg-gray-700 hover:bg-gray-100 transition">
-            Preview
-        </button>
-        <a href="{{ route('dokumen.download', $dok) }}"
-           class="px-3 py-1.5 rounded-lg text-xs font-medium dark:border-gray-600 border-gray-300 border dark:text-gray-400 text-gray-500 dark:hover:bg-gray-700 hover:bg-gray-100 transition">
-            Download
-        </a>
-        @endif
-
-        @if(!isset($isAdminView) || !$isAdminView)
-        <button onclick="openUpload('{{ $key }}', '{{ $label }}')"
-                class="px-4 py-1.5 rounded-lg text-xs font-semibold text-white bg-sky-500 hover:bg-sky-600 transition">
-            {{ $dok ? 'Ganti' : 'Upload' }}
-        </button>
-        @endif
+    {{-- Komentar penolakan --}}
+    @if($dok && $dok->status === 'ditolak' && $dok->komentar)
+    <div class="mx-5 mb-4 flex items-start gap-2 bg-red-500/10 border border-red-400/30 rounded-lg px-4 py-2.5">
+        <span class="text-red-400 text-xs mt-0.5">✗</span>
+        <div>
+            <p class="text-[10px] text-red-400 font-semibold uppercase tracking-wider mb-0.5">Alasan Penolakan</p>
+            <p class="text-xs dark:text-gray-300 text-gray-600">{{ $dok->komentar }}</p>
+        </div>
     </div>
+    @endif
 </div>
 @endforeach
 </div>
