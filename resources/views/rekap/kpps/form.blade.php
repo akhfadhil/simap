@@ -10,16 +10,26 @@
     <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-2 font-semibold">
         // KPPS — {{ $tps->nama }} · {{ $tps->desa->nama }}
     </p>
+
     <div class="flex items-center justify-between flex-wrap gap-3">
         <h1 class="font-display text-4xl tracking-[2px] text-sky-300">
             {{ strtoupper(\App\Models\RekapHeader::JENIS_LABELS[$jenis]) }}
         </h1>
-        @if($rekap && $rekap->status === 'final')
-        <span class="px-4 py-1.5 rounded-lg text-xs font-semibold bg-teal-500/20 text-teal-400 border border-teal-500/40">
-            ✓ Sudah Difinalisasi
-        </span>
-        @endif
+        <div class="flex items-center gap-2">
+            @if($rekap && $rekap->status === 'final')
+            <span class="px-4 py-1.5 rounded-lg text-xs font-semibold bg-teal-500/20 text-teal-400 border border-teal-500/40">
+                ✓ Sudah Difinalisasi
+            </span>
+            @endif
+            @if($rekap)
+            <a href="{{ route('rekap.export', $jenis) }}"
+            class="inline-flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-semibold bg-sky-500 hover:bg-sky-600 text-white transition">
+                ↓ Export Excel
+            </a>
+            @endif
+        </div>
     </div>
+
 </div>
 
 @if(session('error'))

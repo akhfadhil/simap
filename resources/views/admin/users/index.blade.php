@@ -431,10 +431,15 @@ $labelClass = "block text-xs font-semibold dark:text-gray-400 text-gray-600 uppe
     }
 
     function loadDesa(prefix, kecId) {
-        const desas   = allDesas.filter(d => d.kecamatan_id == kecId);
+        const desas = allDesas.filter(d => d.kecamatan_id == kecId);
         let selId, fieldId;
-        if (prefix === 'tambah') { selId = 'tambah-desa-select'; fieldId = 'tambah-field-desa'; }
-        else                     { selId = 'tambah-desa-kpps';   fieldId = 'tambah-field-desa-kpps'; }
+        if (prefix === 'tambah') {
+            selId   = 'tambah-desa-select';
+            fieldId = 'tambah-field-desa';
+        } else if (prefix === 'tambah-kpps') {
+            selId   = 'tambah-desa-kpps';
+            fieldId = 'tambah-field-desa-kpps';
+        }
         const sel = document.getElementById(selId);
         sel.innerHTML = '<option value="">— Pilih Desa —</option>';
         desas.forEach(d => sel.innerHTML += `<option value="${d.id}">${d.nama}</option>`);

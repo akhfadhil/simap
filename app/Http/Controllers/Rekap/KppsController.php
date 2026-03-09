@@ -9,6 +9,8 @@ use App\Models\RekapPartai;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Exports\RekapSheetExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class KppsController extends Controller
 {
@@ -94,6 +96,35 @@ class KppsController extends Controller
         return back()->with('success', 'Rekap berhasil difinalisasi.');
     }
 
+    public function export(string $jenis)
+    {
+        abort_unless(in_array($jenis, self::JENIS), 404);
+
+        $tps    = Auth::user()->tps;
+        $rekap  = RekapHeader::with(['ppwpSuaras','dpdSuaras','partaiSuaras','calegSuaras'])
+                            ->where('tps_id', $tps->id)
+                            ->where('jenis', $jenis)
+                            ->get();
+
+        $tpsList = collect([$tps]);
+        $master  = $this->getAllMaster();
+        $wilayah = $tps->nama . ' — ' . $tps->desa->nama;
+        $label   = RekapHeader::JENIS_LABELS[$jenis];
+        $filename = 'Rekap_' . strtoupper($jenis) . '_' . str_replace(' ', '_', $tps->nama) . '.xlsx';
+
+        $sheet = new RekapSheetExport(
+            $jenis,
+            $label,
+            $rekap,
+            $master,
+            $tpsList,
+            'kpps',
+            $wilayah
+        );
+
+        return Excel::download($sheet, $filename);
+    }
+
     private function getMasterData(string $jenis, ?RekapHeader $rekap): array
     {
         $existingSuara  = [];
@@ -160,5 +191,17 @@ class KppsController extends Controller
         }
 
         return [];
+    }
+
+    private function getAllMaster(): array
+    {
+        $kecamatan = Auth::user()->tps->desa->kecamatan;
+        return [
+            'ppwp'      => ['calons'  => RekapPpwpCalon::orderBy('nomor_urut')->get()],
+            'dpd'       => ['calons'  => RekapDpdCalon::orderBy('nomor_urut')->get()],
+            'dpr_ri'    => ['partais' => RekapPartai::with('calegs')->where('jenis','dpr_ri')->orderBy('nomor_urut')->get()],
+            'dprd_prov' => ['partais' => RekapPartai::with('calegs')->where('jenis','dprd_prov')->orderBy('nomor_urut')->get()],
+            'dprd_kab'  => ['partais' => RekapPartai::with('calegs')->where('jenis','dprd_kab')->where('dapil_id', $kecamatan->dapil_id)->orderBy('nomor_urut')->get()],
+        ];
     }
 }

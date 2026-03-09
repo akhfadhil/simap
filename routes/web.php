@@ -112,27 +112,32 @@ Route::middleware('auth')->group(function () {
 
     // ── REKAP INPUT (KPPS) ───────────────────────────────────
     Route::prefix('rekap')->name('rekap.')->middleware('role:kpps')->group(function () {
-        Route::get('/',                          [App\Http\Controllers\Rekap\KppsController::class, 'index'])->name('index');
-        Route::get('{jenis}',                    [App\Http\Controllers\Rekap\KppsController::class, 'form'])->name('form');
-        Route::post('{jenis}',                   [App\Http\Controllers\Rekap\KppsController::class, 'store'])->name('store');
-        Route::post('{jenis}/finalisasi',        [App\Http\Controllers\Rekap\KppsController::class, 'finalisasi'])->name('finalisasi');
+        Route::get('/',                    [App\Http\Controllers\Rekap\KppsController::class, 'index'])->name('index');
+        Route::get('{jenis}/export',       [App\Http\Controllers\Rekap\KppsController::class, 'export'])->name('export'); // ← sebelum {jenis}
+        Route::get('{jenis}',              [App\Http\Controllers\Rekap\KppsController::class, 'form'])->name('form');
+        Route::post('{jenis}',             [App\Http\Controllers\Rekap\KppsController::class, 'store'])->name('store');
+        Route::post('{jenis}/finalisasi',  [App\Http\Controllers\Rekap\KppsController::class, 'finalisasi'])->name('finalisasi');
     });
 
     // ── REKAP VIEW (PPS) ─────────────────────────────────────
     Route::prefix('pps/rekap')->name('pps.rekap.')->middleware('role:pps')->group(function () {
         Route::get('/',                          [App\Http\Controllers\Rekap\PpsController::class, 'index'])->name('index');
         Route::get('{jenis}',                    [App\Http\Controllers\Rekap\PpsController::class, 'show'])->name('show');
+        Route::get('{jenis}/export', [App\Http\Controllers\Rekap\PpsController::class, 'export'])->name('export');
     });
 
     // ── REKAP VIEW (PPK) ─────────────────────────────────────
     Route::prefix('ppk/rekap')->name('ppk.rekap.')->middleware('role:ppk')->group(function () {
         Route::get('/',                          [App\Http\Controllers\Rekap\PpkController::class, 'index'])->name('index');
         Route::get('{jenis}',                    [App\Http\Controllers\Rekap\PpkController::class, 'show'])->name('show');
+        Route::get('{jenis}/export', [App\Http\Controllers\Rekap\PpkController::class, 'export'])->name('export');
     });
 
     // ── REKAP VIEW (Admin) ───────────────────────────────────
     Route::prefix('admin/rekap')->name('admin.rekap.')->middleware('role:admin')->group(function () {
-        Route::get('/',                          [App\Http\Controllers\Rekap\AdminController::class, 'index'])->name('index');
-        Route::get('{jenis}',                    [App\Http\Controllers\Rekap\AdminController::class, 'show'])->name('show');
+        Route::get('/',                   [App\Http\Controllers\Rekap\AdminController::class, 'index'])->name('index');
+        Route::get('export/download',     [App\Http\Controllers\Rekap\AdminController::class, 'exportDownload'])->name('export.download'); // ← tambah, SEBELUM {jenis}
+        Route::get('{jenis}/export',      [App\Http\Controllers\Rekap\AdminController::class, 'export'])->name('export');
+        Route::get('{jenis}',             [App\Http\Controllers\Rekap\AdminController::class, 'show'])->name('show');
     });
 });
