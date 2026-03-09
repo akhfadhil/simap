@@ -48,7 +48,7 @@ class DokumenController extends Controller
 
         $request->validate([
             'jenis' => 'required|in:' . implode(',', array_keys(Dokumen::JENIS)),
-            'file'  => 'required|file|mimes:pdf|max:10240',
+            'file'  => 'required|file|mimes:pdf|max:5120',
         ]);
 
         $tps = Tps::with('desa.kecamatan')->findOrFail($tpsId);
@@ -197,7 +197,7 @@ class DokumenController extends Controller
 
         $request->validate([
             'jenis' => 'required|in:' . implode(',', array_keys(Dokumen::JENIS)),
-            'file'  => 'required|file|mimes:pdf|max:10240',
+            'file'  => 'required|file|mimes:pdf|max:5120',
         ]);
 
         $kecamatan = \App\Models\Kecamatan::findOrFail($user->kecamatan_id);
