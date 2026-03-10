@@ -64,6 +64,17 @@
             {{ $dok ? 'Ganti' : 'Upload' }}
         </button>
     </div>
+
+    {{-- Komentar penolakan --}}
+    @if($dok && $dok->status === 'ditolak' && $dok->komentar)
+    <div class="mx-5 mb-4 flex items-start gap-2 bg-red-500/10 border border-red-400/30 rounded-lg px-4 py-2.5">
+        <span class="text-red-400 text-xs mt-0.5">✗</span>
+        <div>
+            <p class="text-[10px] text-red-400 font-semibold uppercase tracking-wider mb-0.5">Alasan Penolakan</p>
+            <p class="text-xs dark:text-gray-300 text-gray-600">{{ $dok->komentar }}</p>
+        </div>
+    </div>
+    @endif
 </div>
 @endforeach
 </div>

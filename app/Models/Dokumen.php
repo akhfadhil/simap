@@ -28,12 +28,15 @@ class Dokumen extends Model
     const STATUS_COLORS = [
         'menunggu_verifikasi' => '#F4A261',
         'terverifikasi'       => '#2EC4B6',
+        'ditolak'             => '#EF4444',
     ];
 
     const STATUS_LABELS = [
-        'menunggu_verifikasi' => 'Menunggu Verifikasi',
+    'menunggu_verifikasi' => 'Menunggu Verifikasi',
         'terverifikasi'       => 'Terverifikasi',
+        'ditolak'             => 'Ditolak',
     ];
+
 
     public function tps()       { return $this->belongsTo(Tps::class); }
     public function kecamatan() { return $this->belongsTo(Kecamatan::class); }

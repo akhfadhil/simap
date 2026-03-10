@@ -118,12 +118,25 @@ class DokumenController extends Controller
     {
         $user = Auth::user();
 
-        // Pastikan dokumen ini milik desa si PPS
         $tps = Tps::findOrFail($dokumen->tps_id);
         abort_if($tps->desa_id !== $user->desa_id, 403);
 
+        $aksi = $request->input('aksi', 'terverifikasi');
+
+        if ($aksi === 'ditolak') {
+            $request->validate(['komentar' => 'required|string|max:500']);
+            $dokumen->update([
+                'status'      => 'ditolak',
+                'komentar'    => $request->komentar,
+                'verified_by' => $user->id,
+                'verified_at' => now(),
+            ]);
+            return back()->with('success', 'Dokumen berhasil ditolak.');
+        }
+
         $dokumen->update([
             'status'      => 'terverifikasi',
+            'komentar'    => null,
             'verified_by' => $user->id,
             'verified_at' => now(),
         ]);
@@ -255,11 +268,24 @@ class DokumenController extends Controller
     // ── Admin: Verifikasi dokumen TPS atau Kecamatan ───────────────
     public function verifikasiAdmin(Request $request, Dokumen $dokumen)
     {
-        // Pastikan hanya admin
         abort_if(Auth::user()->role !== 'admin', 403);
+
+        $aksi = $request->input('aksi', 'terverifikasi');
+
+        if ($aksi === 'ditolak') {
+            $request->validate(['komentar' => 'required|string|max:500']);
+            $dokumen->update([
+                'status'      => 'ditolak',
+                'komentar'    => $request->komentar,
+                'verified_by' => Auth::id(),
+                'verified_at' => now(),
+            ]);
+            return back()->with('success', 'Dokumen berhasil ditolak.');
+        }
 
         $dokumen->update([
             'status'      => 'terverifikasi',
+            'komentar'    => null,
             'verified_by' => Auth::id(),
             'verified_at' => now(),
         ]);
