@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -9,46 +10,59 @@ use Illuminate\Http\Request;
 
 class TpsController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $kecamatans = Kecamatan::all();
-        $desas = $request->kecamatan_id
-            ? Desa::where('kecamatan_id', $request->kecamatan_id)->get()
-            : collect();
-
-        $tps = Tps::with('desa.kecamatan')
-            ->when($request->desa_id, fn($q) => $q->where('desa_id', $request->desa_id))
-            ->when($request->kecamatan_id && !$request->desa_id, fn($q) =>
-                $q->whereHas('desa', fn($q2) => $q2->where('kecamatan_id', $request->kecamatan_id))
-            )
-            ->latest()->get();
-
-        return view('admin.wilayah.tps', compact('tps', 'desas', 'kecamatans'));
+        $kecamatans = Kecamatan::with(['desas.tps'])->orderBy('nama')->get();
+        return view('admin.tps.index', compact('kecamatans'));
     }
 
+    /**
+     * Bulk store: buat TPS 001 s/d {jumlah} untuk desa tertentu.
+     * Jika TPS sudah ada di rentang itu, skip (insertOrIgnore by nama+desa_id).
+     */
     public function store(Request $request)
     {
         $request->validate([
-            'nama'    => 'required|string|max:100',
             'desa_id' => 'required|exists:desas,id',
+            'jumlah'  => 'required|integer|min:1|max:999',
         ]);
-        Tps::create($request->only('nama', 'desa_id'));
-        return back()->with('success', 'TPS berhasil ditambahkan.');
+
+        $desaId  = $request->desa_id;
+        $jumlah  = (int) $request->jumlah;
+        $created = 0;
+
+        for ($i = 1; $i <= $jumlah; $i++) {
+            $nama = 'TPS ' . str_pad($i, 3, '0', STR_PAD_LEFT);
+
+            $exists = Tps::where('desa_id', $desaId)->where('nama', $nama)->exists();
+            if (!$exists) {
+                Tps::create(['nama' => $nama, 'desa_id' => $desaId]);
+                $created++;
+            }
+        }
+
+        $desa = Desa::find($desaId);
+        return back()->with('success', "Berhasil membuat {$created} TPS baru di {$desa->nama}. (TPS yang sudah ada dilewati)");
     }
 
+    /**
+     * Update nama TPS.
+     */
     public function update(Request $request, Tps $tps)
     {
         $request->validate([
-            'nama'    => 'required|string|max:100',
-            'desa_id' => 'required|exists:desas,id',
+            'nama' => 'required|string|max:100',
         ]);
-        $tps->update($request->only('nama', 'desa_id'));
-        return back()->with('success', 'TPS berhasil diupdate.');
+
+        $tps->update(['nama' => $request->nama]);
+
+        return back()->with('success', "Nama TPS berhasil diubah menjadi \"{$tps->nama}\".");
     }
 
     public function destroy(Tps $tps)
     {
+        $nama = $tps->nama;
         $tps->delete();
-        return back()->with('success', 'TPS berhasil dihapus.');
+        return back()->with('success', "{$nama} berhasil dihapus.");
     }
 }
