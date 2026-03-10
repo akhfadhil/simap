@@ -95,7 +95,7 @@
                        class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-300 text-gray-600 px-4 py-3 text-sm rounded-lg
                               file:bg-orange-400 file:text-white file:border-0 file:px-4 file:py-1.5 file:mr-4
                               file:text-xs file:font-semibold file:rounded file:cursor-pointer">
-                <p class="text-[11px] dark:text-gray-600 text-gray-400 mt-2">Format PDF · Maks. 10MB</p>
+                <p class="text-[11px] dark:text-gray-600 text-gray-400 mt-2">Format PDF · Maks. 5MB</p>
             </div>
 
             <div class="flex gap-3">
