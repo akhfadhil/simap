@@ -161,4 +161,124 @@ class AdminController extends Controller
                 );
         }
     }
+
+    public function chartPage()
+    {
+        $kecamatans = Kecamatan::with(['desas.tps'])->orderBy('nama')->get();
+        return view('rekap.admin.chart', compact('kecamatans'));
+    }
+
+    public function chartData(\Illuminate\Http\Request $request)
+    {
+        $jenis  = $request->jenis;
+        $level  = $request->level ?? 'kabupaten';
+        $kecId  = $request->kecamatan_id;
+        $desaId = $request->desa_id;
+        $tpsId  = $request->tps_id;
+
+        // Tentukan scope TPS
+        $tpsQuery = Tps::query();
+        if ($tpsId)       $tpsQuery->where('id', $tpsId);
+        elseif ($desaId)  $tpsQuery->where('desa_id', $desaId);
+        elseif ($kecId)   $tpsQuery->whereHas('desa', fn($q) => $q->where('kecamatan_id', $kecId));
+        $tpsIds = $tpsQuery->pluck('id');
+
+        $rekaps = \App\Models\RekapHeader::with(['ppwpSuaras.calon','dpdSuaras.calon','partaiSuaras','calegSuaras'])
+                    ->whereIn('tps_id', $tpsIds)
+                    ->where('jenis', $jenis)
+                    ->get();
+
+        // Tentukan label & grouping
+        $data = [];
+
+        if ($level === 'kabupaten') {
+            // Per kecamatan
+            $kecamatans = Kecamatan::with(['desas.tps'])->orderBy('nama')->get();
+            foreach ($kecamatans as $kec) {
+                $kecTpsIds = $kec->desas->flatMap(fn($d) => $d->tps->pluck('id'))->toArray();
+                $data[] = [
+                    'label'       => $kec->nama,
+                    'suara'       => $this->buildSuaraData($rekaps->whereIn('tps_id', $kecTpsIds), $jenis),
+                    'partisipasi' => $this->buildPartisipasiData($rekaps->whereIn('tps_id', $kecTpsIds)),
+                ];
+            }
+        } elseif ($level === 'kecamatan' && $kecId) {
+            // Per desa
+            $desas = \App\Models\Desa::where('kecamatan_id', $kecId)->with('tps')->orderBy('nama')->get();
+            foreach ($desas as $desa) {
+                $desaTpsIds = $desa->tps->pluck('id')->toArray();
+                $data[] = [
+                    'label'       => $desa->nama,
+                    'suara'       => $this->buildSuaraData($rekaps->whereIn('tps_id', $desaTpsIds), $jenis),
+                    'partisipasi' => $this->buildPartisipasiData($rekaps->whereIn('tps_id', $desaTpsIds)),
+                ];
+            }
+        } elseif ($level === 'desa' && $desaId) {
+            // Per TPS
+            $tpsList = \App\Models\Tps::where('desa_id', $desaId)->orderBy('nama')->get();
+            foreach ($tpsList as $tps) {
+                $r = $rekaps->where('tps_id', $tps->id)->first();
+                $data[] = [
+                    'label'       => $tps->nama,
+                    'suara'       => $this->buildSuaraData($r ? collect([$r]) : collect(), $jenis),
+                    'partisipasi' => $this->buildPartisipasiData($r ? collect([$r]) : collect()),
+                ];
+            }
+        } elseif ($level === 'tps' && $tpsId) {
+            // Single TPS
+            $tps = Tps::find($tpsId);
+            $r   = $rekaps->where('tps_id', $tpsId)->first();
+            $data[] = [
+                'label'       => $tps->nama,
+                'suara'       => $this->buildSuaraData($r ? collect([$r]) : collect(), $jenis),
+                'partisipasi' => $this->buildPartisipasiData($r ? collect([$r]) : collect()),
+            ];
+        }
+
+        // Master labels
+        $master = $this->getMaster($jenis);
+        $labels = [];
+        if (in_array($jenis, ['ppwp','dpd'])) {
+            $labels = $master['calons']->map(fn($c) => $jenis === 'ppwp' ? $c->nama_paslon : $c->nama_calon)->toArray();
+        } else {
+            $labels = $master['partais']->map(fn($p) => $p->nama_partai)->toArray();
+        }
+
+        return response()->json([
+            'type'   => in_array($jenis, ['ppwp','dpd']) ? 'pie' : 'bar',
+            'jenis'  => $jenis,
+            'labels' => $labels,
+            'data'   => $data,
+        ]);
+    }
+
+    private function buildSuaraData($rekaps, string $jenis): array
+    {
+        if (in_array($jenis, ['ppwp','dpd'])) {
+            $master = $this->getMaster($jenis);
+            return $master['calons']->map(function($calon) use ($rekaps, $jenis) {
+                return $rekaps->sum(fn($r) => $jenis === 'ppwp'
+                    ? ($r->ppwpSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0)
+                    : ($r->dpdSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0));
+            })->toArray();
+        } else {
+            $master = $this->getMaster($jenis);
+            return $master['partais']->map(function($partai) use ($rekaps) {
+                return $rekaps->sum(fn($r) =>
+                    ($r->partaiSuaras->firstWhere('partai_id', $partai->id)?->suara ?? 0) +
+                    $r->calegSuaras->whereIn('caleg_id', $partai->calegs->pluck('id'))->sum('suara')
+                );
+            })->toArray();
+        }
+    }
+
+    private function buildPartisipasiData($rekaps): array
+    {
+        return [
+            'dpt'   => $rekaps->sum(fn($r) => ($r->dpt_lk ?? 0) + ($r->dpt_pr ?? 0)),
+            'hadir' => $rekaps->sum(fn($r) => ($r->pengguna_dpt_lk ?? 0) + ($r->pengguna_dpt_pr ?? 0) +
+                                            ($r->pengguna_dptb_lk ?? 0) + ($r->pengguna_dptb_pr ?? 0) +
+                                            ($r->pengguna_dpk_lk ?? 0) + ($r->pengguna_dpk_pr ?? 0)),
+        ];
+    }
 }

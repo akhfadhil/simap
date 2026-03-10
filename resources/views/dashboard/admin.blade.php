@@ -80,6 +80,14 @@
         <p class="text-xs dark:text-gray-500 text-gray-500 leading-relaxed">Tambah akun PPK, PPS, KPPS dan assign wilayah.</p>
     </a>
 
+    <a href="{{ route('admin.rekap.chart') }}"
+       class="dark:bg-gray-800 bg-white rounded-xl p-6 border-l-4 border border-l-red-600 dark:border-gray-700 border-gray-200 hover:shadow-md transition group block">
+        <span class="float-right dark:text-gray-600 text-gray-300 group-hover:text-red-500 transition text-lg">→</span>
+        <div class="text-3xl mb-4">📊</div>
+        <p class="font-semibold text-sm mb-1 dark:text-gray-100 text-gray-800">Grafik & Statistik</p>
+        <p class="text-xs dark:text-gray-500 text-gray-500 leading-relaxed">Visualisasi data rekap suara per kecamatan, desa, hingga TPS.</p>
+    </a>
+
     <a href="{{ route('admin.kecamatan.index') }}"
        class="dark:bg-gray-800 bg-white rounded-xl p-6 border-l-4 border border-l-red-600 dark:border-gray-700 border-gray-200 hover:shadow-md transition group block">
         <span class="float-right dark:text-gray-600 text-gray-300 group-hover:text-red-500 transition text-lg">→</span>

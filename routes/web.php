@@ -136,6 +136,8 @@ Route::middleware('auth')->group(function () {
     // ── REKAP VIEW (Admin) ───────────────────────────────────
     Route::prefix('admin/rekap')->name('admin.rekap.')->middleware('role:admin')->group(function () {
         Route::get('/',                   [App\Http\Controllers\Rekap\AdminController::class, 'index'])->name('index');
+        Route::get('chart',               [App\Http\Controllers\Rekap\AdminController::class, 'chartPage'])->name('chart');      
+        Route::get('chart/data',          [App\Http\Controllers\Rekap\AdminController::class, 'chartData'])->name('chart.data');
         Route::get('export/download',     [App\Http\Controllers\Rekap\AdminController::class, 'exportDownload'])->name('export.download'); // ← tambah, SEBELUM {jenis}
         Route::get('{jenis}/export',      [App\Http\Controllers\Rekap\AdminController::class, 'export'])->name('export');
         Route::get('{jenis}',             [App\Http\Controllers\Rekap\AdminController::class, 'show'])->name('show');
