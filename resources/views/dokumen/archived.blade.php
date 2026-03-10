@@ -85,10 +85,10 @@
             {{-- Tombol restore (admin only) --}}
             @if($isAdmin)
             <div class="mb-4">
-                <form method="POST" action="{{ route('dokumen.restore', $dokumen) }}"
-                      onsubmit="return confirm('Restore file ini dari backup ke storage aktif?')">
+                <form method="POST" action="{{ route('dokumen.restore', $dokumen) }}" id="restore-form">
                     @csrf
-                    <button class="w-full px-5 py-2.5 rounded-xl text-sm font-semibold bg-amber-500 hover:bg-amber-600 text-white transition">
+                    <button type="button" onclick="confirmRestore()"
+                            class="w-full px-5 py-2.5 rounded-xl text-sm font-semibold bg-amber-500 hover:bg-amber-600 text-white transition">
                         ↩ Restore File dari Backup
                     </button>
                 </form>
@@ -107,6 +107,66 @@
 
         </div>
     </main>
+
+{{-- Toast Confirm Restore --}}
+<div id="toast-confirm" class="hidden fixed inset-0 z-[999] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="toast-backdrop"></div>
+    <div class="relative dark:bg-gray-800 bg-white rounded-2xl shadow-2xl border dark:border-gray-700 border-gray-200 w-full max-w-sm p-6">
+        <div class="flex items-start gap-4 mb-5">
+            <div class="w-10 h-10 rounded-full bg-amber-500/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                </svg>
+            </div>
+            <div>
+                <p class="font-semibold dark:text-gray-100 text-gray-800 text-sm mb-1">Konfirmasi Restore</p>
+                <p class="text-xs dark:text-gray-400 text-gray-500 leading-relaxed">
+                    File akan dipindahkan kembali dari backup ke storage aktif dan dapat diakses kembali.
+                </p>
+            </div>
+        </div>
+        <div class="flex gap-2">
+            <button id="btn-cancel"
+                    class="flex-1 px-4 py-2.5 rounded-xl text-xs font-semibold border dark:border-gray-600 border-gray-300
+                           dark:text-gray-400 text-gray-500 dark:hover:bg-gray-700 hover:bg-gray-100 transition">
+                Batal
+            </button>
+            <button id="btn-ok"
+                    class="flex-1 px-4 py-2.5 rounded-xl text-xs font-semibold bg-amber-500 hover:bg-amber-600 text-white transition">
+                ↩ Ya, Restore
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmRestore() {
+    const modal    = document.getElementById('toast-confirm');
+    const btnOk    = document.getElementById('btn-ok');
+    const btnCancel= document.getElementById('btn-cancel');
+    const backdrop = document.getElementById('toast-backdrop');
+
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+
+    function close(ok) {
+        modal.classList.add('hidden');
+        document.body.style.overflow = '';
+        btnOk.removeEventListener('click', onOk);
+        btnCancel.removeEventListener('click', onCancel);
+        backdrop.removeEventListener('click', onCancel);
+        if (ok) document.getElementById('restore-form').submit();
+    }
+
+    const onOk     = () => close(true);
+    const onCancel = () => close(false);
+
+    btnOk.addEventListener('click', onOk);
+    btnCancel.addEventListener('click', onCancel);
+    backdrop.addEventListener('click', onCancel);
+}
+</script>
 
 </body>
 </html>
