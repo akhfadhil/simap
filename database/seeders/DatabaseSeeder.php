@@ -18,6 +18,10 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UserSeeder::class,
             WilayahSeeder::class,
+            PartaiSeeder::class,
         ]);
     }
 }
+
+// php artisan migrate:fresh
+// php artisan db:seed
