@@ -110,7 +110,7 @@
         @forelse($filteredTps->sortBy('nama') as $tps)
         <div class="flex items-center justify-between px-6 py-4 border-b dark:border-gray-700 border-gray-100 last:border-0 dark:hover:bg-gray-750 hover:bg-gray-50 transition group">
             <div>
-                <p class="text-sm font-medium dark:text-gray-100 text-gray-800 font-mono">{{ $tps->nama }}</p>
+                <p class="text-sm font-medium dark:text-gray-100 text-gray-800">{{ $tps->nama }}</p>
                 <p class="text-xs dark:text-gray-500 text-gray-400 mt-0.5">
                     {{ $tps->desa->nama }} · {{ $tps->desa->kecamatan->nama }}
                 </p>
