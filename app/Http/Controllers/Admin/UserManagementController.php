@@ -55,7 +55,6 @@ class UserManagementController extends Controller
         User::create([
             'name'         => $request->name,
             'username'     => $request->username,
-            'email'        => $request->username . '@pemilu.id',
             'password'     => Hash::make($request->password),
             'role'         => $request->role,
             'kecamatan_id' => $request->role === 'ppk'  ? $request->kecamatan_id : null,

@@ -15,6 +15,8 @@ return [
 
     'default' => env('FILESYSTEM_DISK', 'local'),
 
+    'backup_path' => env('BACKUP_DOKUMEN_PATH', storage_path('app/backup')),
+    
     /*
     |--------------------------------------------------------------------------
     | Filesystem Disks

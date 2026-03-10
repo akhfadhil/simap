@@ -8,11 +8,13 @@ class Dokumen extends Model
     protected $fillable = [
         'tps_id', 'kecamatan_id', 'uploaded_by', 'jenis', 'level', 'status',
         'verified_by', 'verified_at', 'file_path', 'file_name', 'file_size',
-        'komentar',
+        'komentar', 'is_archived', 'archived_at',
     ];
 
     protected $casts = [
-        'verified_at' => 'datetime',
+        'verified_at'  => 'datetime',
+        'archived_at'  => 'datetime',
+        'is_archived'  => 'boolean',
     ];
 
     const JENIS = [
@@ -26,13 +28,11 @@ class Dokumen extends Model
     const STATUS_COLORS = [
         'menunggu_verifikasi' => '#F4A261',
         'terverifikasi'       => '#2EC4B6',
-        'ditolak'             => '#E63946',
     ];
 
     const STATUS_LABELS = [
         'menunggu_verifikasi' => 'Menunggu Verifikasi',
         'terverifikasi'       => 'Terverifikasi',
-        'ditolak'             => 'Ditolak',
     ];
 
     public function tps()       { return $this->belongsTo(Tps::class); }

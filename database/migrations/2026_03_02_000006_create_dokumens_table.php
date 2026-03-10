@@ -16,6 +16,8 @@ return new class extends Migration
             $table->enum('level', ['tps', 'kecamatan'])->default('tps');
             $table->enum('status', ['menunggu_verifikasi', 'terverifikasi', 'ditolak'])->default('menunggu_verifikasi');
             $table->text('komentar')->nullable();
+            $table->boolean('is_archived')->default(false);
+            $table->timestamp('archived_at')->nullable();
             $table->foreignId('verified_by')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamp('verified_at')->nullable();
             $table->string('file_path');

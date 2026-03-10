@@ -48,11 +48,12 @@ class DokumenController extends Controller
 
         $request->validate([
             'jenis' => 'required|in:' . implode(',', array_keys(Dokumen::JENIS)),
-            'file'  => 'required|file|mimes:pdf|max:5120',
+            'file'  => 'required|file|mimes:pdf|max:10240',
         ]);
 
         $tps = Tps::with('desa.kecamatan')->findOrFail($tpsId);
 
+        // Hapus file lama kalau ada
         $existing = Dokumen::where('tps_id', $tps->id)
             ->where('jenis', $request->jenis)
             ->first();
@@ -62,6 +63,7 @@ class DokumenController extends Controller
             $existing->delete();
         }
 
+        // Buat path terstruktur
         $kecFolder  = preg_replace('/[^A-Za-z0-9_\-]/', '_', $tps->desa->kecamatan->nama);
         $desaFolder = preg_replace('/[^A-Za-z0-9_\-]/', '_', $tps->desa->nama);
         $tpsFolder  = preg_replace('/[^A-Za-z0-9_\-]/', '_', $tps->nama);
@@ -79,7 +81,6 @@ class DokumenController extends Controller
             'jenis'       => $request->jenis,
             'level'       => 'tps',
             'status'      => 'menunggu_verifikasi',
-            'komentar'    => null, // reset komentar saat upload ulang
             'file_path'   => $path,
             'file_name'   => $file->getClientOriginalName(),
             'file_size'   => $file->getSize(),
@@ -87,7 +88,6 @@ class DokumenController extends Controller
 
         return back()->with('success', Dokumen::JENIS[$request->jenis] . ' berhasil diupload.');
     }
-
     // ── PPS: Index ─────────────────────────────────────────────
     public function indexPps(Request $request)
     {
@@ -118,31 +118,17 @@ class DokumenController extends Controller
     {
         $user = Auth::user();
 
+        // Pastikan dokumen ini milik desa si PPS
         $tps = Tps::findOrFail($dokumen->tps_id);
         abort_if($tps->desa_id !== $user->desa_id, 403);
 
-        $request->validate([
-            'aksi'     => 'required|in:terverifikasi,ditolak',
-            'komentar' => 'required_if:aksi,ditolak|nullable|string|max:500',
+        $dokumen->update([
+            'status'      => 'terverifikasi',
+            'verified_by' => $user->id,
+            'verified_at' => now(),
         ]);
 
-        if ($request->aksi === 'terverifikasi') {
-            $dokumen->update([
-                'status'      => 'terverifikasi',
-                'verified_by' => $user->id,
-                'verified_at' => now(),
-                'komentar'    => null,
-            ]);
-            return back()->with('success', 'Dokumen berhasil diverifikasi.');
-        } else {
-            $dokumen->update([
-                'status'      => 'ditolak',
-                'verified_by' => $user->id,
-                'verified_at' => now(),
-                'komentar'    => $request->komentar,
-            ]);
-            return back()->with('success', 'Dokumen telah ditolak.');
-        }
+        return back()->with('success', 'Dokumen berhasil diverifikasi.');
     }
 
     // ── PPK: Index ─────────────────────────────────────────────
@@ -197,11 +183,12 @@ class DokumenController extends Controller
 
         $request->validate([
             'jenis' => 'required|in:' . implode(',', array_keys(Dokumen::JENIS)),
-            'file'  => 'required|file|mimes:pdf|max:5120',
+            'file'  => 'required|file|mimes:pdf|max:10240',
         ]);
 
         $kecamatan = \App\Models\Kecamatan::findOrFail($user->kecamatan_id);
 
+        // Hapus file lama kalau ada
         $existing = Dokumen::where('kecamatan_id', $kecamatan->id)
             ->where('level', 'kecamatan')
             ->where('jenis', $request->jenis)
@@ -212,6 +199,7 @@ class DokumenController extends Controller
             $existing->delete();
         }
 
+        // Buat path terstruktur
         $kecFolder = preg_replace('/[^A-Za-z0-9_\-]/', '_', $kecamatan->nama);
 
         $file = $request->file('file');
@@ -227,7 +215,6 @@ class DokumenController extends Controller
             'jenis'        => $request->jenis,
             'level'        => 'kecamatan',
             'status'       => 'menunggu_verifikasi',
-            'komentar'     => null, // reset komentar saat upload ulang
             'file_path'    => $path,
             'file_name'    => $file->getClientOriginalName(),
             'file_size'    => $file->getSize(),
@@ -268,54 +255,83 @@ class DokumenController extends Controller
     // ── Admin: Verifikasi dokumen TPS atau Kecamatan ───────────────
     public function verifikasiAdmin(Request $request, Dokumen $dokumen)
     {
+        // Pastikan hanya admin
         abort_if(Auth::user()->role !== 'admin', 403);
 
-        $request->validate([
-            'aksi'     => 'required|in:terverifikasi,ditolak',
-            'komentar' => 'required_if:aksi,ditolak|nullable|string|max:500',
+        $dokumen->update([
+            'status'      => 'terverifikasi',
+            'verified_by' => Auth::id(),
+            'verified_at' => now(),
         ]);
 
-        if ($request->aksi === 'terverifikasi') {
-            $dokumen->update([
-                'status'      => 'terverifikasi',
-                'verified_by' => Auth::id(),
-                'verified_at' => now(),
-                'komentar'    => null,
-            ]);
-            return back()->with('success', 'Dokumen berhasil diverifikasi.');
-        } else {
-            $dokumen->update([
-                'status'      => 'ditolak',
-                'verified_by' => Auth::id(),
-                'verified_at' => now(),
-                'komentar'    => $request->komentar,
-            ]);
-            return back()->with('success', 'Dokumen telah ditolak.');
-        }
+        return back()->with('success', 'Dokumen berhasil diverifikasi.');
     }
+
     // ── Preview PDF (semua role, dengan guard) ─────────────────
     public function preview(Dokumen $dokumen)
     {
         $this->authorizeAccess($dokumen);
 
-        $path = Storage::path($dokumen->file_path);
+        // File sudah diarsipkan
+        if ($dokumen->is_archived) {
+            return response()->view('dokumen.archived', [
+                'dokumen'   => $dokumen,
+                'isAdmin'   => Auth::user()->role === 'admin',
+            ], 200);
+        }
 
         abort_if(!Storage::exists($dokumen->file_path), 404, 'File tidak ditemukan.');
 
+        $path = Storage::path($dokumen->file_path);
         return response()->file($path, [
             'Content-Type'        => 'application/pdf',
             'Content-Disposition' => 'inline; filename="' . $dokumen->file_name . '"',
         ]);
     }
-    
+
     // ── Download PDF ───────────────────────────────────────────
     public function download(Dokumen $dokumen)
     {
         $this->authorizeAccess($dokumen);
 
+        if ($dokumen->is_archived) {
+            return back()->with('error', 'File ini telah diarsipkan dan tidak dapat diunduh. Hubungi admin untuk restore.');
+        }
+
         abort_if(!Storage::exists($dokumen->file_path), 404, 'File tidak ditemukan.');
 
         return Storage::download($dokumen->file_path, $dokumen->file_name);
+    }
+
+    // ── Admin: Restore file dari backup ───────────────────────
+    public function restore(Dokumen $dokumen)
+    {
+        abort_if(Auth::user()->role !== 'admin', 403);
+        abort_if(!$dokumen->is_archived, 400, 'Dokumen ini tidak dalam status diarsipkan.');
+
+        $backupDir  = config('filesystems.backup_path', storage_path('app/backup'));
+        // $archivedAt = $dokumen->archived_at ?? $dokumen->created_at;
+        // $subDir     = $archivedAt->format('Y') . DIRECTORY_SEPARATOR . $archivedAt->format('m');
+        // $backupPath = $backupDir . DIRECTORY_SEPARATOR . $subDir . DIRECTORY_SEPARATOR . basename($dokumen->file_path);
+        $backupPath = $backupDir . DIRECTORY_SEPARATOR . $dokumen->file_path;
+
+        if (!file_exists($backupPath)) {
+            return back()->with('error', 'File backup tidak ditemukan di server. Hubungi administrator.');
+        }
+
+        // Pastikan folder storage tujuan ada
+        $storageDir = dirname(Storage::path($dokumen->file_path));
+        if (!is_dir($storageDir)) {
+            mkdir($storageDir, 0755, true);
+        }
+
+        if (copy($backupPath, Storage::path($dokumen->file_path))) {
+            unlink($backupPath);
+            $dokumen->update(['is_archived' => false, 'archived_at' => null]);
+            return back()->with('success', 'Dokumen berhasil di-restore dan siap diakses kembali.');
+        }
+
+        return back()->with('error', 'Gagal melakukan restore. Silakan coba lagi.');
     }
 
     // ── Guard: pastikan user boleh akses dokumen ini ───────────

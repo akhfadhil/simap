@@ -72,6 +72,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:admin')->group(function () {
         Route::get('/dokumen/semua',                               [DokumenController::class, 'indexAdmin'])->name('dokumen.admin');
         Route::post('/dokumen/{dokumen}/verifikasi-admin',         [DokumenController::class, 'verifikasiAdmin'])->name('dokumen.verifikasi.admin');
+        Route::post('/dokumen/{dokumen}/restore',                  [DokumenController::class, 'restore'])->name('dokumen.restore')->middleware('role:admin');
     });
 
     // Admin CRUD
