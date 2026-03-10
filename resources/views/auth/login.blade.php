@@ -5,14 +5,14 @@
 
     {{-- Brand --}}
     <div class="text-center mb-10">
-        <span class="inline-block bg-red-600 text-white text-[10px] tracking-[3px] px-3 py-1 mb-4 rounded font-semibold">KPU RI — 2024</span>
-        <h1 class="font-display text-6xl tracking-[4px] dark:text-white text-gray-900">SIM<span class="text-red-600">PEMILU</span></h1>
-        <p class="text-[11px] dark:text-gray-500 text-gray-400 tracking-[2px] uppercase mt-2">Sistem Informasi Manajemen Pemilu</p>
+        <span class="inline-block bg-red-600 text-white text-[10px] tracking-[3px] px-3 py-1 mb-4 rounded font-semibold">KPU Kabupaten Banyuwangi — 2026</span>
+        <h1 class="font-display text-6xl tracking-[4px] dark:text-white text-gray-900">SIM<span class="text-red-600">AP</span></h1>
+        <p class="text-[11px] dark:text-gray-500 text-gray-400 tracking-[2px] uppercase mt-2">Sistem Informasi Manajemen Arsip Pemilu</p>
     </div>
 
     {{-- Card --}}
     <div class="dark:bg-gray-800 bg-white rounded-2xl border dark:border-gray-700 border-gray-200 p-9 shadow-xl">
-        <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-7 font-semibold">// Masuk ke Sistem</p>
+        <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-7 font-semibold">// Login</p>
 
         <form method="POST" action="{{ route('login.post') }}">
             @csrf
@@ -43,7 +43,7 @@
     </div>
 
     {{-- Akun Demo --}}
-    <div class="dark:bg-gray-800 bg-white border dark:border-gray-700 border-gray-200 rounded-xl p-4 mt-4 shadow-sm">
+    <!-- <div class="dark:bg-gray-800 bg-white border dark:border-gray-700 border-gray-200 rounded-xl p-4 mt-4 shadow-sm">
         <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">// Akun Demo</p>
         @foreach(['admin'=>'admin123','ppk'=>'ppk123','pps'=>'pps123','kpps'=>'kpps123'] as $u => $p)
         <div class="flex justify-between text-xs dark:text-gray-500 text-gray-400 py-1">
@@ -51,7 +51,7 @@
             <span class="dark:text-gray-400 text-gray-500">{{ $u }} / {{ $p }}</span>
         </div>
         @endforeach
-    </div>
+    </div> -->
 
 </div>
 @endsection

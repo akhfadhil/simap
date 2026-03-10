@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIMPEG PEMILU — @yield('title', 'Dashboard')</title>
+    <title>SIMAP — @yield('title', 'Dashboard')</title>
     <script>
         (function() {
             const saved  = localStorage.getItem('theme') || 'dark';
@@ -39,12 +39,15 @@
 
         {{-- Brand --}}
         <a href="{{ route('dashboard.' . Auth::user()->role) }}" class="flex items-center gap-3 flex-shrink-0">
-            <div class="w-8 h-8 bg-red-600 flex items-center justify-center rounded">
+            <!-- <div class="w-8 h-8 bg-red-600 flex items-center justify-center rounded">
                 <span class="font-display text-white text-base leading-none">KPU</span>
+            </div> -->
+            <div class="w-8 h-8 flex items-center justify-center rounded overflow-hidden">
+                <img src="{{ asset('images/logo-kpu.png') }}" alt="KPU" class="w-full h-full object-contain">
             </div>
             <div class="hidden sm:block">
-                <p class="font-display text-lg leading-none dark:text-white text-gray-900 tracking-wide">SIMPEG PEMILU</p>
-                <p class="text-[9px] dark:text-gray-500 text-gray-400 tracking-widest uppercase">Sistem Informasi Manajemen</p>
+                <p class="font-display text-lg leading-none dark:text-white text-gray-900 tracking-wide">SIMAP</p>
+                <p class="text-[9px] dark:text-gray-500 text-gray-400 tracking-widest uppercase">Sistem Informasi Manajemen Arsip Pemilu</p>
             </div>
         </a>
 

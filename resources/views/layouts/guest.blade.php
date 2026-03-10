@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIMPEMILU — Login</title>
+    <title>SIMAP — Login</title>
     <script>
         (function() {
             const saved  = localStorage.getItem('theme') || 'dark';
