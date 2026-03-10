@@ -12,6 +12,7 @@
         })();
     </script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link rel="icon" type="image/png" href="{{ asset('images\logo-kpu.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Bebas+Neue&display=swap" rel="stylesheet">
     <style>
@@ -161,7 +162,86 @@
     document.getElementById('pdf-modal').addEventListener('click', function(e) {
         if (e.target === this) closePreview();
     });
+
+    // ── Override window.confirm dengan toast modal ──
+    window.confirm = function(message) {
+        return new Promise((resolve) => {
+            const modal     = document.getElementById('toast-confirm');
+            const msg       = document.getElementById('toast-confirm-msg');
+            const btnOk     = document.getElementById('toast-confirm-ok');
+            const btnCancel = document.getElementById('toast-confirm-cancel');
+            const backdrop  = document.getElementById('toast-confirm-backdrop');
+
+            msg.textContent = message;
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+
+            function close(result) {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+                btnOk.removeEventListener('click', onOk);
+                btnCancel.removeEventListener('click', onCancel);
+                backdrop.removeEventListener('click', onCancel);
+                resolve(result);
+            }
+
+            const onOk     = () => close(true);
+            const onCancel = () => close(false);
+
+            btnOk.addEventListener('click', onOk);
+            btnCancel.addEventListener('click', onCancel);
+            backdrop.addEventListener('click', onCancel);
+        });
+    };
+
+    // ── Intercept semua form onsubmit yang pakai confirm (async-safe) ──
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('form[onsubmit]').forEach(form => {
+            const attr = form.getAttribute('onsubmit');
+            if (!attr || !attr.includes('confirm')) return;
+
+            const match   = attr.match(/confirm\(['"](.*?)['"']\)/s);
+            const message = match ? match[1] : 'Yakin ingin menghapus data ini?';
+
+            form.removeAttribute('onsubmit');
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const ok = await window.confirm(message);
+                if (ok) this.submit();
+            });
+        });
+    });
 </script>
+
+{{-- ── Toast Confirm Modal ── --}}
+<div id="toast-confirm" class="hidden fixed inset-0 z-[999] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="toast-confirm-backdrop"></div>
+    <div class="relative dark:bg-gray-800 bg-white rounded-2xl shadow-2xl border dark:border-gray-700 border-gray-200 w-full max-w-sm p-6">
+        <div class="flex items-start gap-4 mb-5">
+            <div class="w-10 h-10 rounded-full bg-red-500/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+            </div>
+            <div>
+                <p class="font-semibold dark:text-gray-100 text-gray-800 text-sm mb-1">Konfirmasi Hapus</p>
+                <p id="toast-confirm-msg" class="text-xs dark:text-gray-400 text-gray-500 leading-relaxed"></p>
+            </div>
+        </div>
+        <div class="flex gap-2">
+            <button id="toast-confirm-cancel"
+                    class="flex-1 px-4 py-2.5 rounded-xl text-xs font-semibold border dark:border-gray-600 border-gray-300
+                           dark:text-gray-400 text-gray-500 dark:hover:bg-gray-700 hover:bg-gray-100 transition">
+                Batal
+            </button>
+            <button id="toast-confirm-ok"
+                    class="flex-1 px-4 py-2.5 rounded-xl text-xs font-semibold bg-red-500 hover:bg-red-600 text-white transition">
+                Ya, Hapus
+            </button>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>
