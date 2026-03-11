@@ -281,4 +281,21 @@ class AdminController extends Controller
                                             ($r->pengguna_dpk_lk ?? 0) + ($r->pengguna_dpk_pr ?? 0)),
         ];
     }
+
+    public function unlock(Request $request, string $jenis)
+    {
+        $tpsId = $request->tps_id;
+        
+        $rekap = RekapHeader::where('tps_id', $tpsId)
+                            ->where('jenis', $jenis)
+                            ->firstOrFail();
+
+        $rekap->update([
+            'status'          => 'draft',
+            'difinalisasi_at' => null,
+        ]);
+
+        return back()->with('success', 'Rekap berhasil dibuka kembali untuk diedit.');
+    }
 }
+

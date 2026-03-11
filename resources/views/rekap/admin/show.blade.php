@@ -543,7 +543,14 @@
                     @php $r = $rekaps[$tps->id] ?? null; @endphp
                     <td class="px-3 py-1.5 text-center">
                         @if(!$r) <span class="text-[9px] px-2 py-1 rounded font-semibold bg-gray-500/20 dark:text-gray-400 text-gray-500 border border-gray-400/30">Kosong</span>
-                        @elseif($r->status === 'final') <span class="text-[9px] px-2 py-1 rounded font-semibold bg-teal-500/20 text-teal-400 border border-teal-500/40">Final</span>
+                        @elseif($r->status === 'final')
+                            <div class="flex flex-col items-center gap-1">
+                                <span class="text-[9px] px-2 py-1 rounded font-semibold bg-teal-500/20 text-teal-400 border border-teal-500/40">Final</span>
+                                <button onclick="openUnlockModal({{ $r->tps_id }}, '{{ addslashes($tps->nama) }}')"
+                                        class="text-[9px] px-2 py-0.5 rounded font-semibold border border-orange-400/40 text-orange-400 hover:bg-orange-400/10 transition whitespace-nowrap">
+                                    ↩ Buka
+                                </button>
+                            </div>
                         @else <span class="text-[9px] px-2 py-1 rounded font-semibold bg-orange-400/20 text-orange-400 border border-orange-400/40">Draft</span>
                         @endif
                     </td>
@@ -617,6 +624,39 @@
                 ↓ Download
             </a>
         </div>
+    </div>
+</div>
+
+{{-- Modal Unlock Rekap --}}
+<div id="modal-unlock" class="hidden fixed inset-0 z-[999] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeUnlockModal()"></div>
+    <div class="relative dark:bg-gray-800 bg-white rounded-2xl shadow-2xl border dark:border-gray-700 border-gray-200 w-full max-w-sm p-6">
+        <div class="flex items-start gap-4 mb-5">
+            <div class="w-10 h-10 rounded-full bg-orange-400/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/>
+                </svg>
+            </div>
+            <div>
+                <p class="font-semibold dark:text-gray-100 text-gray-800 text-sm mb-1">Buka Rekap untuk Diedit</p>
+                <p id="unlock-label" class="text-xs dark:text-gray-400 text-gray-500 leading-relaxed"></p>
+            </div>
+        </div>
+        <form id="unlock-form" method="POST">
+            @csrf
+            <div class="flex gap-2">
+                <button type="button" onclick="closeUnlockModal()"
+                        class="flex-1 px-4 py-2.5 rounded-xl text-xs font-semibold border dark:border-gray-600 border-gray-300
+                               dark:text-gray-400 text-gray-500 dark:hover:bg-gray-700 hover:bg-gray-100 transition">
+                    Batal
+                </button>
+                <button type="submit"
+                        class="flex-1 px-4 py-2.5 rounded-xl text-xs font-semibold bg-orange-500 hover:bg-orange-600 text-white transition">
+                    ↩ Ya, Buka
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -720,6 +760,18 @@
         btn.classList.add('opacity-50','pointer-events-none');
     }
 </script>
-@endpush
 
-@endsection
+function openUnlockModal(tpsId, tpsNama) {
+    document.getElementById('unlock-label').textContent =
+        'Status rekap ' + tpsNama + ' akan dikembalikan ke Draft dan KPPS dapat mengedit kembali.';
+    document.getElementById('unlock-form').action =
+        '{{ route("admin.rekap.unlock", $jenis) }}?tps_id=' + tpsId;
+    document.getElementById('modal-unlock').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+function closeUnlockModal() {
+    document.getElementById('modal-unlock').classList.add('hidden');
+    document.body.style.overflow = '';
+}
+
+@endpush
