@@ -165,22 +165,25 @@ class AdminController extends Controller
     public function chartPage()
     {
         $kecamatans = Kecamatan::with(['desas.tps'])->orderBy('nama')->get();
-        return view('rekap.admin.chart', compact('kecamatans'));
+        $dapils     = \App\Models\Dapil::with('kecamatans')->orderBy('nama')->get();
+        return view('rekap.admin.chart', compact('kecamatans', 'dapils'));
     }
 
     public function chartData(\Illuminate\Http\Request $request)
     {
-        $jenis  = $request->jenis;
-        $level  = $request->level ?? 'kabupaten';
-        $kecId  = $request->kecamatan_id;
-        $desaId = $request->desa_id;
-        $tpsId  = $request->tps_id;
+        $jenis   = $request->jenis;
+        $level   = $request->level ?? 'kabupaten';
+        $kecId   = $request->kecamatan_id;
+        $desaId  = $request->desa_id;
+        $tpsId   = $request->tps_id;
+        $dapilId = $request->dapil_id;
 
         // Tentukan scope TPS
         $tpsQuery = Tps::query();
         if ($tpsId)       $tpsQuery->where('id', $tpsId);
         elseif ($desaId)  $tpsQuery->where('desa_id', $desaId);
         elseif ($kecId)   $tpsQuery->whereHas('desa', fn($q) => $q->where('kecamatan_id', $kecId));
+        elseif ($dapilId) $tpsQuery->whereHas('desa.kecamatan', fn($q) => $q->where('dapil_id', $dapilId));
         $tpsIds = $tpsQuery->pluck('id');
 
         $rekaps = \App\Models\RekapHeader::with(['ppwpSuaras.calon','dpdSuaras.calon','partaiSuaras','calegSuaras'])
@@ -194,6 +197,17 @@ class AdminController extends Controller
         if ($level === 'kabupaten') {
             // Per kecamatan
             $kecamatans = Kecamatan::with(['desas.tps'])->orderBy('nama')->get();
+            foreach ($kecamatans as $kec) {
+                $kecTpsIds = $kec->desas->flatMap(fn($d) => $d->tps->pluck('id'))->toArray();
+                $data[] = [
+                    'label'       => $kec->nama,
+                    'suara'       => $this->buildSuaraData($rekaps->whereIn('tps_id', $kecTpsIds), $jenis),
+                    'partisipasi' => $this->buildPartisipasiData($rekaps->whereIn('tps_id', $kecTpsIds)),
+                ];
+            }
+        } elseif ($level === 'dapil' && $dapilId) {
+            // Per kecamatan dalam dapil tsb
+            $kecamatans = Kecamatan::with(['desas.tps'])->where('dapil_id', $dapilId)->orderBy('nama')->get();
             foreach ($kecamatans as $kec) {
                 $kecTpsIds = $kec->desas->flatMap(fn($d) => $d->tps->pluck('id'))->toArray();
                 $data[] = [
@@ -281,21 +295,4 @@ class AdminController extends Controller
                                             ($r->pengguna_dpk_lk ?? 0) + ($r->pengguna_dpk_pr ?? 0)),
         ];
     }
-
-    public function unlock(Request $request, string $jenis)
-    {
-        $tpsId = $request->tps_id;
-        
-        $rekap = RekapHeader::where('tps_id', $tpsId)
-                            ->where('jenis', $jenis)
-                            ->firstOrFail();
-
-        $rekap->update([
-            'status'          => 'draft',
-            'difinalisasi_at' => null,
-        ]);
-
-        return back()->with('success', 'Rekap berhasil dibuka kembali untuk diedit.');
-    }
 }
-

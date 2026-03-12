@@ -41,6 +41,18 @@
             </select>
         </div>
 
+        {{-- Dapil (hanya muncul untuk dprd_kab) --}}
+        <div id="wrap-dapil" class="hidden">
+            <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">Dapil</label>
+            <select id="f-dapil" onchange="onDapilChange()"
+                    class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-300 text-gray-600 px-3 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
+                <option value="">— Pilih Dapil —</option>
+                @foreach($dapils as $dapil)
+                <option value="{{ $dapil->id }}">{{ $dapil->nama }}</option>
+                @endforeach
+            </select>
+        </div>
+
         {{-- Kecamatan --}}
         <div id="wrap-kec" class="hidden">
             <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">Kecamatan</label>
@@ -119,7 +131,9 @@
 @push('scripts')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
-    const allDesas = @json($kecamatans->flatMap(fn($k) => $k->desas->map(fn($d) => ['id'=>$d->id,'nama'=>$d->nama,'kecamatan_id'=>$k->id]))->values());
+    const allDesas       = @json($kecamatans->flatMap(fn($k) => $k->desas->map(fn($d) => ['id'=>$d->id,'nama'=>$d->nama,'kecamatan_id'=>$k->id]))->values());
+    const allDapils      = @json($dapils->map(fn($d) => ['id'=>$d->id,'nama'=>$d->nama])->values());
+    const dapilKecamatans = @json($dapils->map(fn($d) => ['dapil_id'=>$d->id,'kecamatans'=>$d->kecamatans->map(fn($k)=>['id'=>$k->id,'nama'=>$k->nama])->values()])->values());
     const allTps   = @json($kecamatans->flatMap(fn($k) => $k->desas->flatMap(fn($d) => $d->tps->map(fn($t) => ['id'=>$t->id,'nama'=>$t->nama,'desa_id'=>$d->id])))->values());
     const isDark   = () => document.documentElement.classList.contains('dark');
 
@@ -133,27 +147,55 @@
     function textColor()  { return isDark() ? '#9CA3AF' : '#6B7280'; }
 
     function onJenisChange() {
-        const level = document.getElementById('f-level').value;
-        if (level === 'kabupaten') { loadChart(); return; }
-        // reset wilayah
+        const jenis = document.getElementById('f-jenis').value;
+        const fLevel = document.getElementById('f-level');
+
+        // Kalau dprd_kab, ganti opsi level kabupaten → dapil
+        const kabOpt = fLevel.querySelector('option[value="kabupaten"]');
+        if (jenis === 'dprd_kab') {
+            kabOpt.value = 'dapil';
+            kabOpt.textContent = 'Dapil';
+        } else {
+            kabOpt.value = 'kabupaten';
+            kabOpt.textContent = 'Kabupaten';
+        }
+
+        // Reset semua filter wilayah
+        fLevel.value = (jenis === 'dprd_kab') ? 'dapil' : 'kabupaten';
         document.getElementById('f-kec').value = '';
+        document.getElementById('f-dapil').value = '';
         document.getElementById('f-desa').innerHTML = '<option value="">— Pilih —</option>';
         document.getElementById('f-tps').innerHTML  = '<option value="">— Pilih —</option>';
+        document.getElementById('wrap-dapil').classList.toggle('hidden', jenis !== 'dprd_kab');
+        document.getElementById('wrap-kec').classList.add('hidden');
+        document.getElementById('wrap-desa').classList.add('hidden');
+        document.getElementById('wrap-tps').classList.add('hidden');
         hideCharts();
     }
 
     function onLevelChange() {
         const level = document.getElementById('f-level').value;
-        document.getElementById('wrap-kec').classList.toggle('hidden',  level === 'kabupaten');
+        const jenis = document.getElementById('f-jenis').value;
+
+        document.getElementById('wrap-dapil').classList.toggle('hidden', !(level === 'dapil' || jenis === 'dprd_kab'));
+        document.getElementById('wrap-kec').classList.toggle('hidden',  level === 'kabupaten' || level === 'dapil');
         document.getElementById('wrap-desa').classList.toggle('hidden', !['desa','tps'].includes(level));
         document.getElementById('wrap-tps').classList.toggle('hidden',  level !== 'tps');
 
         document.getElementById('f-kec').value = '';
+        document.getElementById('f-dapil').value = '';
         document.getElementById('f-desa').innerHTML = '<option value="">— Pilih —</option>';
         document.getElementById('f-tps').innerHTML  = '<option value="">— Pilih —</option>';
         hideCharts();
 
         if (level === 'kabupaten') loadChart();
+    }
+
+    function onDapilChange() {
+        const dapilId = document.getElementById('f-dapil').value;
+        hideCharts();
+        if (!dapilId) return;
+        loadChart();
     }
 
     function onKecChange() {
@@ -205,19 +247,22 @@
         const tpsId  = document.getElementById('f-tps').value;
 
         // Validasi wilayah sesuai level
-        if (level === 'kecamatan' && !kecId)  return;
-        if (level === 'desa'      && !desaId) return;
-        if (level === 'tps'       && !tpsId)  return;
+        if (level === 'dapil'     && !dapilId) return;
+        if (level === 'kecamatan' && !kecId)   return;
+        if (level === 'desa'      && !desaId)  return;
+        if (level === 'tps'       && !tpsId)   return;
 
         // Show loading
         document.getElementById('chart-placeholder').classList.add('hidden');
         document.getElementById('chart-area').classList.add('hidden');
         document.getElementById('chart-loading').classList.remove('hidden');
 
-        const params = new URLSearchParams({ jenis, level });
-        if (kecId)  params.set('kecamatan_id', kecId);
-        if (desaId) params.set('desa_id', desaId);
-        if (tpsId)  params.set('tps_id', tpsId);
+        const dapilId = document.getElementById('f-dapil').value;
+        const params  = new URLSearchParams({ jenis, level });
+        if (dapilId) params.set('dapil_id', dapilId);
+        if (kecId)   params.set('kecamatan_id', kecId);
+        if (desaId)  params.set('desa_id', desaId);
+        if (tpsId)   params.set('tps_id', tpsId);
 
         try {
             const res  = await fetch('{{ route('admin.rekap.chart.data') }}?' + params);
