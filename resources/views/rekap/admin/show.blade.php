@@ -101,10 +101,15 @@
         <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold">// {{ $sec['title'] }}</p>
     </div>
     <div class="overflow-x-auto">
-        <table class="w-full text-sm">
+        <table class="w-full text-sm table-fixed">
+            <colgroup>
+                <col style="width:220px">
+                @foreach($kecamatans as $__kec) <col style="width:110px"> @endforeach
+                <col style="width:110px">
+            </colgroup>
             <thead>
                 <tr class="border-b dark:border-gray-700 border-gray-200">
-                    <th class="text-left px-5 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold min-w-56">Keterangan</th>
+                    <th class="text-left px-5 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold truncate">Keterangan</th>
                     @foreach($kecamatans as $kec)
                     <th class="text-center px-3 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold whitespace-nowrap">{{ $kec->nama }}</th>
                     @endforeach
@@ -136,10 +141,15 @@
     </div>
     @if(in_array($jenis, ['ppwp','dpd']))
     <div class="overflow-x-auto">
-        <table class="w-full text-sm">
+        <table class="w-full text-sm table-fixed">
+            <colgroup>
+                <col style="width:220px">
+                @foreach($kecamatans as $__kec) <col style="width:110px"> @endforeach
+                <col style="width:110px">
+            </colgroup>
             <thead>
                 <tr class="border-b dark:border-gray-700 border-gray-200">
-                    <th class="text-left px-5 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold min-w-48">Calon</th>
+                    <th class="text-left px-5 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold truncate">Calon</th>
                     @foreach($kecamatans as $kec)
                     <th class="text-center px-3 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold whitespace-nowrap">{{ $kec->nama }}</th>
                     @endforeach
@@ -179,7 +189,7 @@
             <table class="w-full text-sm">
                 <thead>
                     <tr class="border-b dark:border-gray-700 border-gray-100">
-                        <th class="text-left px-5 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold min-w-48">Caleg</th>
+                        <th class="text-left px-5 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold truncate">Caleg</th>
                         @foreach($kecamatans as $kec)
                         <th class="text-center px-3 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold whitespace-nowrap">{{ $kec->nama }}</th>
                         @endforeach
@@ -230,10 +240,15 @@
         <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold">// Section V — Suara Sah, Tidak Sah & Total</p>
     </div>
     <div class="overflow-x-auto">
-        <table class="w-full text-sm">
+        <table class="w-full text-sm table-fixed">
+            <colgroup>
+                <col style="width:220px">
+                @foreach($kecamatans as $__kec) <col style="width:110px"> @endforeach
+                <col style="width:110px">
+            </colgroup>
             <thead>
                 <tr class="border-b dark:border-gray-700 border-gray-200">
-                    <th class="text-left px-5 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold min-w-56">Keterangan</th>
+                    <th class="text-left px-5 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold truncate">Keterangan</th>
                     @foreach($kecamatans as $kec)
                     <th class="text-center px-3 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold whitespace-nowrap">{{ $kec->nama }}</th>
                     @endforeach
@@ -321,10 +336,15 @@
             <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold">// Section I — DPT & Pengguna Hak Pilih</p>
         </div>
         <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+            <table class="w-full text-sm table-fixed">
+                <colgroup>
+                    <col style="width:220px">
+                    @foreach($kecamatans as $__kec) <col style="width:110px"> @endforeach
+                    <col style="width:110px">
+                </colgroup>
                 <thead>
                     <tr class="border-b dark:border-gray-700 border-gray-200">
-                        <th class="text-left px-5 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold min-w-56">Keterangan</th>
+                        <th class="text-left px-5 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Keterangan</th>
                         @foreach($desa->tps as $tps)
                         <th class="text-center px-3 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold whitespace-nowrap">{{ $tps->nama }}</th>
                         @endforeach
@@ -352,10 +372,15 @@
             <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold">// Section II — Surat Suara</p>
         </div>
         <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+            <table class="w-full text-sm table-fixed">
+                <colgroup>
+                    <col style="width:220px">
+                    @foreach($kecamatans as $__kec) <col style="width:110px"> @endforeach
+                    <col style="width:110px">
+                </colgroup>
                 <thead>
                     <tr class="border-b dark:border-gray-700 border-gray-200">
-                        <th class="text-left px-5 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold min-w-56">Keterangan</th>
+                        <th class="text-left px-5 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Keterangan</th>
                         @foreach($desa->tps as $tps)
                         <th class="text-center px-3 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold whitespace-nowrap">{{ $tps->nama }}</th>
                         @endforeach
@@ -383,10 +408,15 @@
             <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold">// Section III — Pemilih Disabilitas</p>
         </div>
         <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+            <table class="w-full text-sm table-fixed">
+                <colgroup>
+                    <col style="width:220px">
+                    @foreach($kecamatans as $__kec) <col style="width:110px"> @endforeach
+                    <col style="width:110px">
+                </colgroup>
                 <thead>
                     <tr class="border-b dark:border-gray-700 border-gray-200">
-                        <th class="text-left px-5 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold min-w-56">Keterangan</th>
+                        <th class="text-left px-5 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Keterangan</th>
                         @foreach($desa->tps as $tps)
                         <th class="text-center px-3 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold whitespace-nowrap">{{ $tps->nama }}</th>
                         @endforeach
@@ -415,10 +445,15 @@
         </div>
         @if(in_array($jenis, ['ppwp','dpd']))
         <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+            <table class="w-full text-sm table-fixed">
+                <colgroup>
+                    <col style="width:220px">
+                    @foreach($kecamatans as $__kec) <col style="width:110px"> @endforeach
+                    <col style="width:110px">
+                </colgroup>
                 <thead>
                     <tr class="border-b dark:border-gray-700 border-gray-200">
-                        <th class="text-left px-5 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold min-w-48">Calon</th>
+                        <th class="text-left px-5 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Calon</th>
                         @foreach($desa->tps as $tps)
                         <th class="text-center px-3 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold whitespace-nowrap">{{ $tps->nama }}</th>
                         @endforeach
@@ -450,7 +485,7 @@
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="border-b dark:border-gray-700 border-gray-100">
-                            <th class="text-left px-5 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold min-w-48">Caleg</th>
+                            <th class="text-left px-5 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold truncate">Caleg</th>
                             @foreach($desa->tps as $tps)
                             <th class="text-center px-3 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold whitespace-nowrap">{{ $tps->nama }}</th>
                             @endforeach
@@ -499,10 +534,15 @@
             <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold">// Section V — Suara Sah, Tidak Sah & Total</p>
         </div>
         <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+            <table class="w-full text-sm table-fixed">
+                <colgroup>
+                    <col style="width:220px">
+                    @foreach($kecamatans as $__kec) <col style="width:110px"> @endforeach
+                    <col style="width:110px">
+                </colgroup>
                 <thead>
                     <tr class="border-b dark:border-gray-700 border-gray-200">
-                        <th class="text-left px-5 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold min-w-56">Keterangan</th>
+                        <th class="text-left px-5 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Keterangan</th>
                         @foreach($desa->tps as $tps)
                         <th class="text-center px-3 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold whitespace-nowrap">{{ $tps->nama }}</th>
                         @endforeach
@@ -759,19 +799,20 @@
         btn.href  = '#';
         btn.classList.add('opacity-50','pointer-events-none');
     }
+
+    function openUnlockModal(tpsId, tpsNama) {
+        document.getElementById('unlock-label').textContent =
+            'Status rekap ' + tpsNama + ' akan dikembalikan ke Draft dan KPPS dapat mengedit kembali.';
+        document.getElementById('unlock-form').action =
+            '{{ route("admin.rekap.unlock", $jenis) }}?tps_id=' + tpsId;
+        document.getElementById('modal-unlock').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeUnlockModal() {
+        document.getElementById('modal-unlock').classList.add('hidden');
+        document.body.style.overflow = '';
+    }
 </script>
 
-function openUnlockModal(tpsId, tpsNama) {
-    document.getElementById('unlock-label').textContent =
-        'Status rekap ' + tpsNama + ' akan dikembalikan ke Draft dan KPPS dapat mengedit kembali.';
-    document.getElementById('unlock-form').action =
-        '{{ route("admin.rekap.unlock", $jenis) }}?tps_id=' + tpsId;
-    document.getElementById('modal-unlock').classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-}
-function closeUnlockModal() {
-    document.getElementById('modal-unlock').classList.add('hidden');
-    document.body.style.overflow = '';
-}
-
 @endpush
+@endsection

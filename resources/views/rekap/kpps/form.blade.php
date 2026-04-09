@@ -400,9 +400,9 @@ document.querySelectorAll('input[type="number"]').forEach(inp => {
 updateAll();
 
 // ── FINALISASI ───────────────────────────────────────────
-function confirmFinalisasi() {
-    if (confirm('Finalisasi rekap ini? Data tidak bisa diubah setelah difinalisasi.')) {
-        // set hidden input lalu submit form rekap dengan flag finalisasi
+async function confirmFinalisasi() {
+    const ok = await confirmFinal();
+    if (ok) {
         const input = document.createElement('input');
         input.type  = 'hidden';
         input.name  = 'finalisasi';
@@ -411,6 +411,68 @@ function confirmFinalisasi() {
         document.getElementById('rekap-form').submit();
     }
 }
+
+function confirmFinal() {
+    return new Promise((resolve) => {
+        const modal     = document.getElementById('toast-final');
+        const btnOk     = document.getElementById('toast-final-ok');
+        const btnCancel = document.getElementById('toast-final-cancel');
+        const backdrop  = document.getElementById('toast-final-backdrop');
+
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+
+        function close(result) {
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+            btnOk.removeEventListener('click', onOk);
+            btnCancel.removeEventListener('click', onCancel);
+            backdrop.removeEventListener('click', onCancel);
+            resolve(result);
+        }
+
+        const onOk     = () => close(true);
+        const onCancel = () => close(false);
+
+        btnOk.addEventListener('click', onOk);
+        btnCancel.addEventListener('click', onCancel);
+        backdrop.addEventListener('click', onCancel);
+    });
+}
 </script>
+
+{{-- Toast Confirm Finalisasi --}}
+<div id="toast-final" class="hidden fixed inset-0 z-[999] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="toast-final-backdrop"></div>
+    <div class="relative dark:bg-gray-800 bg-white rounded-2xl shadow-2xl border dark:border-gray-700 border-gray-200 w-full max-w-sm p-6">
+        <div class="flex items-start gap-4 mb-5">
+            <div class="w-10 h-10 rounded-full bg-teal-500/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg class="w-5 h-5 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <div>
+                <p class="font-semibold dark:text-gray-100 text-gray-800 text-sm mb-1">Konfirmasi Finalisasi</p>
+                <p class="text-xs dark:text-gray-400 text-gray-500 leading-relaxed">
+                    Data rekap akan difinalisasi dan <span class="font-semibold text-teal-500">tidak bisa diubah</span> setelah ini.
+                    Pastikan semua data sudah benar sebelum melanjutkan.
+                </p>
+            </div>
+        </div>
+        <div class="flex gap-2">
+            <button id="toast-final-cancel"
+                    class="flex-1 px-4 py-2.5 rounded-xl text-xs font-semibold border dark:border-gray-600 border-gray-300
+                           dark:text-gray-400 text-gray-500 dark:hover:bg-gray-700 hover:bg-gray-100 transition">
+                Batal
+            </button>
+            <button id="toast-final-ok"
+                    class="flex-1 px-4 py-2.5 rounded-xl text-xs font-semibold bg-teal-500 hover:bg-teal-600 text-white transition">
+                ✓ Ya, Finalisasi
+            </button>
+        </div>
+    </div>
+</div>
+
 @endpush
 @endsection

@@ -37,6 +37,10 @@ return new class extends Migration
             $table->unsignedInteger('suara_sah')->default(0);
             $table->unsignedInteger('suara_tidak_sah')->default(0);
 
+            // Meta
+            $table->foreignId('diinput_oleh')->nullable()->constrained('users')->onDelete('set null');
+            $table->timestamp('difinalisasi_at')->nullable();
+
             $table->timestamps();
             $table->unique(['tps_id', 'jenis']);
         });
