@@ -428,7 +428,10 @@
                         <tr class="border-b dark:border-gray-700 border-gray-100">
                             <th class="text-left px-5 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold min-w-48">Caleg</th>
                             @foreach($desa->tps as $tps)
-                            <th class="text-center px-3 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold whitespace-nowrap">{{ $tps->nama }}</th>
+                            <th class="text-center px-3 py-2 text-[10px] uppercase font-semibold whitespace-nowrap
+    {{ ($rekaps[$tps->id] ?? null)?->status === 'final'
+        ? 'dark:text-gray-500 text-gray-400'
+        : 'text-red-400' }}">{{ $tps->nama }}</th>
                             @endforeach
                             <th class="text-center px-3 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Total</th>
                         </tr>
