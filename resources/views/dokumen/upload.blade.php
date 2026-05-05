@@ -125,6 +125,7 @@
                               file:bg-sky-500 file:text-white file:border-0 file:px-4 file:py-1.5 file:mr-4
                               file:text-xs file:font-semibold file:rounded file:cursor-pointer">
                 <p class="text-[11px] dark:text-gray-600 text-gray-400 mt-2">Format PDF · Maks. 5MB</p>
+                <p id="file-error" class="hidden text-[11px] text-red-400 mt-1 font-semibold">⚠ File terlalu besar. Maksimal 5 MB.</p>
             </div>
 
             <div class="flex gap-3">
@@ -151,8 +152,32 @@ function openUpload(jenis, label) {
 }
 function closeUpload() {
     document.getElementById('upload-modal').classList.add('hidden');
+    document.getElementById('file-error').classList.add('hidden');
     document.body.style.overflow = '';
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    const fileInput = document.querySelector('input[name="file"]');
+    const form      = fileInput.closest('form');
+    const maxMB     = 5;
+
+    fileInput.addEventListener('change', () => {
+        const err = document.getElementById('file-error');
+        if (fileInput.files[0] && fileInput.files[0].size > maxMB * 1024 * 1024) {
+            err.classList.remove('hidden');
+            fileInput.value = '';
+        } else {
+            err.classList.add('hidden');
+        }
+    });
+
+    form.addEventListener('submit', (e) => {
+        if (fileInput.files[0] && fileInput.files[0].size > maxMB * 1024 * 1024) {
+            e.preventDefault();
+            document.getElementById('file-error').classList.remove('hidden');
+        }
+    });
+});
 </script>
 @endpush
 @endif
