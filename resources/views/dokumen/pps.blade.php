@@ -55,11 +55,11 @@
                 <div class="h-1.5 rounded-full transition-all bg-teal-400" style="width:{{ ($totalDok/5)*100 }}%"></div>
             </div>
             <span class="text-[11px] dark:text-gray-500 text-gray-400">{{ $totalDok }}/5</span>
-            <span class="dark:text-gray-500 text-gray-400 text-xs" id="arrow-{{ $tps->id }}">▾</span>
+            <span class="dark:text-gray-500 text-gray-400 text-xs" id="arrow-{{ $tps->id }}">▸</span>
         </div>
     </div>
 
-    <div id="tps-{{ $tps->id }}">
+    <div id="tps-{{ $tps->id }}" class="hidden">
     @foreach(App\Models\Dokumen::JENIS as $key => $label)
     @php $dok = $dokByJenis[$key] ?? null; @endphp
     <div class="px-6 py-4 border-b dark:border-gray-700 border-gray-100 last:border-0">
