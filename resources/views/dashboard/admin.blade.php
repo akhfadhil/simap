@@ -137,4 +137,40 @@
     </a>
 
 </div>
+
+{{-- Tools Admin --}}
+<p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-4 pb-3 border-b dark:border-gray-800 border-gray-200 font-semibold mt-8">// Tools</p>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+    <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border-l-4 border border-l-amber-500 dark:border-gray-700 border-gray-200 shadow-sm">
+        <div class="text-3xl mb-3">💾</div>
+        <p class="font-semibold text-sm mb-1 dark:text-gray-100 text-gray-800">Backup Dokumen</p>
+        <p class="text-xs dark:text-gray-500 text-gray-500 leading-relaxed mb-4">Pindahkan file PDF dokumen yang sudah terverifikasi ke folder backup eksternal.</p>
+        <form method="POST" action="{{ route('admin.tools.backup') }}">
+            @csrf
+            <button class="px-4 py-2 text-xs font-semibold bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition">
+                ▶ Jalankan Backup
+            </button>
+        </form>
+        @if(session('backup_result'))
+        <p class="text-xs mt-3 dark:text-gray-400 text-gray-500">{{ session('backup_result') }}</p>
+        @endif
+    </div>
+
+    <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border-l-4 border border-l-blue-500 dark:border-gray-700 border-gray-200 shadow-sm">
+        <div class="text-3xl mb-3">🌱</div>
+        <p class="font-semibold text-sm mb-1 dark:text-gray-100 text-gray-800">Seed Partai</p>
+        <p class="text-xs dark:text-gray-500 text-gray-500 leading-relaxed mb-4">Isi otomatis 18 partai untuk DPR RI, DPRD Prov, dan semua dapil DPRD Kab. Aman dijalankan berulang.</p>
+        <form method="POST" action="{{ route('admin.tools.seed-partai') }}">
+            @csrf
+            <button class="px-4 py-2 text-xs font-semibold bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition">
+                ▶ Jalankan Seeder
+            </button>
+        </form>
+        @if(session('seed_result'))
+        <p class="text-xs mt-3 dark:text-gray-400 text-gray-500">{{ session('seed_result') }}</p>
+        @endif
+    </div>
+
+</div>
 @endsection
