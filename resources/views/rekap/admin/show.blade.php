@@ -91,15 +91,8 @@
     <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold mb-3">// Rekap Total Kabupaten</p>
 </div>
 
-@foreach([
-    ['title'=>'Section I — DPT & Pengguna Hak Pilih', 'rows'=>$rows1],
-    ['title'=>'Section II — Surat Suara',              'rows'=>$rows2],
-    ['title'=>'Section III — Pemilih Disabilitas',     'rows'=>$rows3],
-] as $sec)
+{{-- ══ SATU TABEL BESAR REKAP TOTAL KABUPATEN ══ --}}
 <div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm overflow-hidden mb-4">
-    <div class="px-5 py-2.5 border-b dark:border-gray-700 border-gray-200 dark:bg-gray-700/50 bg-gray-50">
-        <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold">// {{ $sec['title'] }}</p>
-    </div>
     <div class="overflow-x-auto">
         <table class="w-full text-sm table-fixed">
             <colgroup>
@@ -108,18 +101,29 @@
                 <col style="width:110px">
             </colgroup>
             <thead>
-                <tr class="border-b dark:border-gray-700 border-gray-200">
-                    <th class="text-left px-5 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold truncate">Keterangan</th>
+                <tr class="border-b dark:border-gray-700 border-gray-200 sticky top-0 dark:bg-gray-800 bg-white z-10">
+                    <th class="text-left px-5 py-3 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold truncate">Keterangan</th>
                     @foreach($kecamatans as $kec)
-                    <th class="text-center px-3 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold whitespace-nowrap">{{ $kec->nama }}</th>
+                    <th class="text-center px-3 py-3 text-[10px] uppercase font-semibold whitespace-nowrap
+                        {{ ($rekaps->first(fn($r) => in_array($r->tps_id, $kec->desas->flatMap(fn($d)=>$d->tps->pluck('id'))->toArray()) && $r->status === 'final'))
+                           ? 'dark:text-gray-500 text-gray-400' : 'text-red-400' }}">
+                        {{ $kec->nama }}
+                    </th>
                     @endforeach
-                    <th class="text-center px-3 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Total</th>
+                    <th class="text-center px-3 py-3 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Total</th>
                 </tr>
             </thead>
             <tbody>
-            @foreach($sec['rows'] as $row)
+
+            {{-- ── Section I ── --}}
+            <tr class="dark:bg-gray-900/60 bg-gray-100 border-b dark:border-gray-700 border-gray-200">
+                <td colspan="{{ $kecamatans->count() + 2 }}" class="px-5 py-1.5 text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase font-semibold">
+                    Section I — DPT &amp; Pengguna Hak Pilih
+                </td>
+            </tr>
+            @foreach($rows1 as $row)
             @php $rowTotal = 0; $isBold = $row['bold'] ?? false; @endphp
-            <tr class="border-b dark:border-gray-700 border-gray-100 last:border-0 {{ $isBold ? 'dark:bg-gray-700/20 bg-gray-50' : 'dark:hover:bg-gray-750 hover:bg-gray-50' }}">
+            <tr class="border-b dark:border-gray-700 border-gray-100 {{ $isBold ? 'dark:bg-gray-700/20 bg-gray-50' : 'dark:hover:bg-gray-750 hover:bg-gray-50' }}">
                 <td class="px-5 py-2 text-sm {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-800' : 'dark:text-gray-300 text-gray-600' }}">{{ $row['label'] }}</td>
                 @foreach($kecamatans as $kec)
                 @php $val = $getKecVal($kec, $row); $rowTotal += $val; @endphp
@@ -128,35 +132,50 @@
                 <td class="px-3 py-2 text-center font-bold text-red-500">{{ number_format($rowTotal) }}</td>
             </tr>
             @endforeach
-            </tbody>
-        </table>
-    </div>
-</div>
-@endforeach
 
-{{-- Section IV Total --}}
-<div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm overflow-hidden mb-4">
-    <div class="px-5 py-2.5 border-b dark:border-gray-700 border-gray-200 dark:bg-gray-700/50 bg-gray-50">
-        <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold">// Section IV — Perolehan Suara</p>
-    </div>
-    @if(in_array($jenis, ['ppwp','dpd']))
-    <div class="overflow-x-auto">
-        <table class="w-full text-sm table-fixed">
-            <colgroup>
-                <col style="width:220px">
-                @foreach($kecamatans as $__kec) <col style="width:110px"> @endforeach
-                <col style="width:110px">
-            </colgroup>
-            <thead>
-                <tr class="border-b dark:border-gray-700 border-gray-200">
-                    <th class="text-left px-5 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold truncate">Calon</th>
-                    @foreach($kecamatans as $kec)
-                    <th class="text-center px-3 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold whitespace-nowrap">{{ $kec->nama }}</th>
-                    @endforeach
-                    <th class="text-center px-3 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Total</th>
-                </tr>
-            </thead>
-            <tbody>
+            {{-- ── Section II ── --}}
+            <tr class="dark:bg-gray-900/60 bg-gray-100 border-b dark:border-gray-700 border-gray-200">
+                <td colspan="{{ $kecamatans->count() + 2 }}" class="px-5 py-1.5 text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase font-semibold">
+                    Section II — Surat Suara
+                </td>
+            </tr>
+            @foreach($rows2 as $row)
+            @php $rowTotal = 0; $isBold = $row['bold'] ?? false; @endphp
+            <tr class="border-b dark:border-gray-700 border-gray-100 {{ $isBold ? 'dark:bg-gray-700/20 bg-gray-50' : 'dark:hover:bg-gray-750 hover:bg-gray-50' }}">
+                <td class="px-5 py-2 text-sm {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-800' : 'dark:text-gray-300 text-gray-600' }}">{{ $row['label'] }}</td>
+                @foreach($kecamatans as $kec)
+                @php $val = $getKecVal($kec, $row); $rowTotal += $val; @endphp
+                <td class="px-3 py-2 text-center {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500' }}">{{ number_format($val) }}</td>
+                @endforeach
+                <td class="px-3 py-2 text-center font-bold text-red-500">{{ number_format($rowTotal) }}</td>
+            </tr>
+            @endforeach
+
+            {{-- ── Section III ── --}}
+            <tr class="dark:bg-gray-900/60 bg-gray-100 border-b dark:border-gray-700 border-gray-200">
+                <td colspan="{{ $kecamatans->count() + 2 }}" class="px-5 py-1.5 text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase font-semibold">
+                    Section III — Pemilih Disabilitas
+                </td>
+            </tr>
+            @foreach($rows3 as $row)
+            @php $rowTotal = 0; $isBold = $row['bold'] ?? false; @endphp
+            <tr class="border-b dark:border-gray-700 border-gray-100 {{ $isBold ? 'dark:bg-gray-700/20 bg-gray-50' : 'dark:hover:bg-gray-750 hover:bg-gray-50' }}">
+                <td class="px-5 py-2 text-sm {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-800' : 'dark:text-gray-300 text-gray-600' }}">{{ $row['label'] }}</td>
+                @foreach($kecamatans as $kec)
+                @php $val = $getKecVal($kec, $row); $rowTotal += $val; @endphp
+                <td class="px-3 py-2 text-center {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500' }}">{{ number_format($val) }}</td>
+                @endforeach
+                <td class="px-3 py-2 text-center font-bold text-red-500">{{ number_format($rowTotal) }}</td>
+            </tr>
+            @endforeach
+
+            {{-- ── Section IV ── --}}
+            <tr class="dark:bg-gray-900/60 bg-gray-100 border-b dark:border-gray-700 border-gray-200">
+                <td colspan="{{ $kecamatans->count() + 2 }}" class="px-5 py-1.5 text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase font-semibold">
+                    Section IV — Perolehan Suara
+                </td>
+            </tr>
+            @if(in_array($jenis, ['ppwp','dpd']))
             @foreach($master['calons'] as $calon)
             @php $rowTotal = 0; $name = $jenis === 'ppwp' ? $calon->nama_paslon : $calon->nama_calon; @endphp
             <tr class="border-b dark:border-gray-700 border-gray-100 last:border-0 dark:hover:bg-gray-750 hover:bg-gray-50">
@@ -176,27 +195,13 @@
                 <td class="px-3 py-2.5 text-center font-bold text-red-500">{{ number_format($rowTotal) }}</td>
             </tr>
             @endforeach
-            </tbody>
-        </table>
-    </div>
-    @else
-    @foreach($master['partais'] as $partai)
-    <div class="border-b dark:border-gray-700 border-gray-200 last:border-0">
-        <div class="px-5 py-2 dark:bg-gray-700/30 bg-gray-50">
-            <p class="text-xs font-bold dark:text-gray-300 text-gray-700">{{ $partai->nomor_urut }}. {{ $partai->nama_partai }}</p>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead>
-                    <tr class="border-b dark:border-gray-700 border-gray-100">
-                        <th class="text-left px-5 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold truncate">Caleg</th>
-                        @foreach($kecamatans as $kec)
-                        <th class="text-center px-3 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold whitespace-nowrap">{{ $kec->nama }}</th>
-                        @endforeach
-                        <th class="text-center px-3 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Total</th>
-                    </tr>
-                </thead>
-                <tbody>
+            @else
+            @foreach($master['partais'] as $partai)
+            <tr class="dark:bg-gray-700/30 bg-gray-50 border-b dark:border-gray-700 border-gray-200">
+                <td colspan="{{ $kecamatans->count() + 2 }}" class="px-5 py-1.5 text-xs font-bold dark:text-gray-300 text-gray-700">
+                    {{ $partai->nomor_urut }}. {{ $partai->nama_partai }}
+                </td>
+            </tr>
                 @php $partaiRowTotal = 0; @endphp
                 <tr class="border-b dark:border-gray-700 border-gray-100 dark:bg-gray-700/20 bg-gray-50">
                     <td class="px-5 py-2 text-xs font-bold dark:text-gray-300 text-gray-700 uppercase">Suara Partai</td>
@@ -226,36 +231,15 @@
                     @endforeach
                     <td class="px-3 py-2 text-center font-bold text-teal-400">{{ number_format($grandTotal) }}</td>
                 </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-    @endforeach
-    @endif
-</div>
+            @endforeach
+            @endif
 
-{{-- Section V Total --}}
-<div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm overflow-hidden mb-8">
-    <div class="px-5 py-2.5 border-b dark:border-gray-700 border-gray-200 dark:bg-gray-700/50 bg-gray-50">
-        <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold">// Section V — Suara Sah, Tidak Sah & Total</p>
-    </div>
-    <div class="overflow-x-auto">
-        <table class="w-full text-sm table-fixed">
-            <colgroup>
-                <col style="width:220px">
-                @foreach($kecamatans as $__kec) <col style="width:110px"> @endforeach
-                <col style="width:110px">
-            </colgroup>
-            <thead>
-                <tr class="border-b dark:border-gray-700 border-gray-200">
-                    <th class="text-left px-5 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold truncate">Keterangan</th>
-                    @foreach($kecamatans as $kec)
-                    <th class="text-center px-3 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold whitespace-nowrap">{{ $kec->nama }}</th>
-                    @endforeach
-                    <th class="text-center px-3 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Total</th>
-                </tr>
-            </thead>
-            <tbody>
+            {{-- ── Section V ── --}}
+            <tr class="dark:bg-gray-900/60 bg-gray-100 border-b dark:border-gray-700 border-gray-200">
+                <td colspan="{{ $kecamatans->count() + 2 }}" class="px-5 py-1.5 text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase font-semibold">
+                    Section V — Suara Sah, Tidak Sah &amp; Total
+                </td>
+            </tr>
             @foreach([['label'=>'Jumlah Suara Sah','field'=>'suara_sah'],['label'=>'Jumlah Suara Tidak Sah','field'=>'suara_tidak_sah']] as $row)
             @php $rowTotal = 0; @endphp
             <tr class="border-b dark:border-gray-700 border-gray-100 dark:hover:bg-gray-750 hover:bg-gray-50">
@@ -331,19 +315,16 @@
 
     <div id="desa-{{ $desa->id }}" class="hidden">
 
-        {{-- Section I --}}
-        <div class="px-5 py-2 border-b dark:border-gray-700 border-gray-200 dark:bg-gray-700/20 bg-gray-50">
-            <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold">// Section I — DPT & Pengguna Hak Pilih</p>
-        </div>
+        {{-- ══ SATU TABEL BESAR PER DESA ══ --}}
         <div class="overflow-x-auto">
             <table class="w-full text-sm table-fixed">
                 <colgroup>
                     <col style="width:220px">
-                    @foreach($kecamatans as $__kec) <col style="width:110px"> @endforeach
+                    @foreach($desa->tps as $__tps) <col style="width:110px"> @endforeach
                     <col style="width:110px">
                 </colgroup>
                 <thead>
-                    <tr class="border-b dark:border-gray-700 border-gray-200">
+                    <tr class="border-b dark:border-gray-700 border-gray-200 sticky top-0 dark:bg-gray-800 bg-white z-10">
                         <th class="text-left px-5 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Keterangan</th>
                         @foreach($desa->tps as $tps)
                         <th class="text-center px-3 py-2 text-[10px] uppercase font-semibold whitespace-nowrap
@@ -355,9 +336,16 @@
                     </tr>
                 </thead>
                 <tbody>
+
+                {{-- ── Section I ── --}}
+                <tr class="dark:bg-gray-900/60 bg-gray-100 border-b dark:border-gray-700 border-gray-200">
+                    <td colspan="{{ $desa->tps->count() + 2 }}" class="px-5 py-1.5 text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase font-semibold">
+                        Section I — DPT &amp; Pengguna Hak Pilih
+                    </td>
+                </tr>
                 @foreach($rows1 as $row)
                 @php $rowTotal = 0; $isBold = $row['bold'] ?? false; @endphp
-                <tr class="border-b dark:border-gray-700 border-gray-100 last:border-0 {{ $isBold ? 'dark:bg-gray-700/20 bg-gray-50' : 'dark:hover:bg-gray-750 hover:bg-gray-50' }}">
+                <tr class="border-b dark:border-gray-700 border-gray-100 {{ $isBold ? 'dark:bg-gray-700/20 bg-gray-50' : 'dark:hover:bg-gray-750 hover:bg-gray-50' }}">
                     <td class="px-5 py-1.5 text-sm {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-800' : 'dark:text-gray-300 text-gray-600' }}">{{ $row['label'] }}</td>
                     @foreach($desa->tps as $tps)
                     @php $r = $rekaps[$tps->id] ?? null; $val = $r ? (isset($row['field']) ? ($r->{$row['field']} ?? 0) : collect($row['sum'])->sum(fn($f) => $r->$f ?? 0)) : null; $rowTotal += $val ?? 0; @endphp
@@ -366,37 +354,16 @@
                     <td class="px-3 py-1.5 text-center font-bold text-red-500">{{ number_format($rowTotal) }}</td>
                 </tr>
                 @endforeach
-                </tbody>
-            </table>
-        </div>
 
-        {{-- Section II --}}
-        <div class="px-5 py-2 border-t border-b dark:border-gray-700 border-gray-200 dark:bg-gray-700/20 bg-gray-50">
-            <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold">// Section II — Surat Suara</p>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm table-fixed">
-                <colgroup>
-                    <col style="width:220px">
-                    @foreach($kecamatans as $__kec) <col style="width:110px"> @endforeach
-                    <col style="width:110px">
-                </colgroup>
-                <thead>
-                    <tr class="border-b dark:border-gray-700 border-gray-200">
-                        <th class="text-left px-5 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Keterangan</th>
-                        @foreach($desa->tps as $tps)
-                        <th class="text-center px-3 py-2 text-[10px] uppercase font-semibold whitespace-nowrap
-    {{ ($rekaps[$tps->id] ?? null)?->status === 'final'
-        ? 'dark:text-gray-500 text-gray-400'
-        : 'text-red-400' }}">{{ $tps->nama }}</th>
-                        @endforeach
-                        <th class="text-center px-3 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Total</th>
-                    </tr>
-                </thead>
-                <tbody>
+                {{-- ── Section II ── --}}
+                <tr class="dark:bg-gray-900/60 bg-gray-100 border-b dark:border-gray-700 border-gray-200">
+                    <td colspan="{{ $desa->tps->count() + 2 }}" class="px-5 py-1.5 text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase font-semibold">
+                        Section II — Surat Suara
+                    </td>
+                </tr>
                 @foreach($rows2 as $row)
                 @php $rowTotal = 0; $isBold = $row['bold'] ?? false; @endphp
-                <tr class="border-b dark:border-gray-700 border-gray-100 last:border-0 {{ $isBold ? 'dark:bg-gray-700/20 bg-gray-50' : 'dark:hover:bg-gray-750 hover:bg-gray-50' }}">
+                <tr class="border-b dark:border-gray-700 border-gray-100 {{ $isBold ? 'dark:bg-gray-700/20 bg-gray-50' : 'dark:hover:bg-gray-750 hover:bg-gray-50' }}">
                     <td class="px-5 py-1.5 text-sm {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-800' : 'dark:text-gray-300 text-gray-600' }}">{{ $row['label'] }}</td>
                     @foreach($desa->tps as $tps)
                     @php $r = $rekaps[$tps->id] ?? null; $val = $r ? ($r->{$row['field']} ?? 0) : null; $rowTotal += $val ?? 0; @endphp
@@ -405,37 +372,16 @@
                     <td class="px-3 py-1.5 text-center font-bold text-red-500">{{ number_format($rowTotal) }}</td>
                 </tr>
                 @endforeach
-                </tbody>
-            </table>
-        </div>
 
-        {{-- Section III --}}
-        <div class="px-5 py-2 border-t border-b dark:border-gray-700 border-gray-200 dark:bg-gray-700/20 bg-gray-50">
-            <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold">// Section III — Pemilih Disabilitas</p>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm table-fixed">
-                <colgroup>
-                    <col style="width:220px">
-                    @foreach($kecamatans as $__kec) <col style="width:110px"> @endforeach
-                    <col style="width:110px">
-                </colgroup>
-                <thead>
-                    <tr class="border-b dark:border-gray-700 border-gray-200">
-                        <th class="text-left px-5 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Keterangan</th>
-                        @foreach($desa->tps as $tps)
-                        <th class="text-center px-3 py-2 text-[10px] uppercase font-semibold whitespace-nowrap
-    {{ ($rekaps[$tps->id] ?? null)?->status === 'final'
-        ? 'dark:text-gray-500 text-gray-400'
-        : 'text-red-400' }}">{{ $tps->nama }}</th>
-                        @endforeach
-                        <th class="text-center px-3 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Total</th>
-                    </tr>
-                </thead>
-                <tbody>
+                {{-- ── Section III ── --}}
+                <tr class="dark:bg-gray-900/60 bg-gray-100 border-b dark:border-gray-700 border-gray-200">
+                    <td colspan="{{ $desa->tps->count() + 2 }}" class="px-5 py-1.5 text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase font-semibold">
+                        Section III — Pemilih Disabilitas
+                    </td>
+                </tr>
                 @foreach($rows3 as $row)
                 @php $rowTotal = 0; $isBold = $row['bold'] ?? false; @endphp
-                <tr class="border-b dark:border-gray-700 border-gray-100 last:border-0 {{ $isBold ? 'dark:bg-gray-700/20 bg-gray-50' : 'dark:hover:bg-gray-750 hover:bg-gray-50' }}">
+                <tr class="border-b dark:border-gray-700 border-gray-100 {{ $isBold ? 'dark:bg-gray-700/20 bg-gray-50' : 'dark:hover:bg-gray-750 hover:bg-gray-50' }}">
                     <td class="px-5 py-1.5 text-sm {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-800' : 'dark:text-gray-300 text-gray-600' }}">{{ $row['label'] }}</td>
                     @foreach($desa->tps as $tps)
                     @php $r = $rekaps[$tps->id] ?? null; $val = $r ? (isset($row['field']) ? ($r->{$row['field']} ?? 0) : collect($row['sum'])->sum(fn($f) => $r->$f ?? 0)) : null; $rowTotal += $val ?? 0; @endphp
@@ -444,35 +390,14 @@
                     <td class="px-3 py-1.5 text-center font-bold text-red-500">{{ number_format($rowTotal) }}</td>
                 </tr>
                 @endforeach
-                </tbody>
-            </table>
-        </div>
 
-        {{-- Section IV --}}
-        <div class="px-5 py-2 border-t border-b dark:border-gray-700 border-gray-200 dark:bg-gray-700/20 bg-gray-50">
-            <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold">// Section IV — Perolehan Suara</p>
-        </div>
-        @if(in_array($jenis, ['ppwp','dpd']))
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm table-fixed">
-                <colgroup>
-                    <col style="width:220px">
-                    @foreach($kecamatans as $__kec) <col style="width:110px"> @endforeach
-                    <col style="width:110px">
-                </colgroup>
-                <thead>
-                    <tr class="border-b dark:border-gray-700 border-gray-200">
-                        <th class="text-left px-5 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Calon</th>
-                        @foreach($desa->tps as $tps)
-                        <th class="text-center px-3 py-2 text-[10px] uppercase font-semibold whitespace-nowrap
-    {{ ($rekaps[$tps->id] ?? null)?->status === 'final'
-        ? 'dark:text-gray-500 text-gray-400'
-        : 'text-red-400' }}">{{ $tps->nama }}</th>
-                        @endforeach
-                        <th class="text-center px-3 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Total</th>
-                    </tr>
-                </thead>
-                <tbody>
+                {{-- ── Section IV ── --}}
+                <tr class="dark:bg-gray-900/60 bg-gray-100 border-b dark:border-gray-700 border-gray-200">
+                    <td colspan="{{ $desa->tps->count() + 2 }}" class="px-5 py-1.5 text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase font-semibold">
+                        Section IV — Perolehan Suara
+                    </td>
+                </tr>
+                @if(in_array($jenis, ['ppwp','dpd']))
                 @foreach($master['calons'] as $calon)
                 @php $rowTotal = 0; $name = $jenis === 'ppwp' ? $calon->nama_paslon : $calon->nama_calon; @endphp
                 <tr class="border-b dark:border-gray-700 border-gray-100 last:border-0 dark:hover:bg-gray-750 hover:bg-gray-50">
@@ -484,90 +409,51 @@
                     <td class="px-3 py-1.5 text-center font-bold text-red-500">{{ number_format($rowTotal) }}</td>
                 </tr>
                 @endforeach
-                </tbody>
-            </table>
-        </div>
-        @else
-        @foreach($master['partais'] as $partai)
-        <div class="border-b dark:border-gray-700 border-gray-200 last:border-0">
-            <div class="px-5 py-2 dark:bg-gray-700/30 bg-gray-50">
-                <p class="text-xs font-bold dark:text-gray-300 text-gray-700">{{ $partai->nomor_urut }}. {{ $partai->nama_partai }}</p>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                    <thead>
-                        <tr class="border-b dark:border-gray-700 border-gray-100">
-                            <th class="text-left px-5 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold truncate">Caleg</th>
-                            @foreach($desa->tps as $tps)
-                            <th class="text-center px-3 py-2 text-[10px] uppercase font-semibold whitespace-nowrap
-    {{ ($rekaps[$tps->id] ?? null)?->status === 'final'
-        ? 'dark:text-gray-500 text-gray-400'
-        : 'text-red-400' }}">{{ $tps->nama }}</th>
-                            @endforeach
-                            <th class="text-center px-3 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    @php $partaiRowTotal = 0; @endphp
-                    <tr class="border-b dark:border-gray-700 border-gray-100 dark:bg-gray-700/20 bg-gray-50">
-                        <td class="px-5 py-1.5 text-xs font-bold dark:text-gray-300 text-gray-700 uppercase">Suara Partai</td>
-                        @foreach($desa->tps as $tps)
-                        @php $r = $rekaps[$tps->id] ?? null; $sp = $r ? ($r->partaiSuaras->firstWhere('partai_id', $partai->id)?->suara ?? 0) : null; $partaiRowTotal += $sp ?? 0; @endphp
-                        <td class="px-3 py-1.5 text-center dark:text-gray-400 text-gray-500">{{ $r ? number_format($sp) : '—' }}</td>
-                        @endforeach
-                        <td class="px-3 py-1.5 text-center font-bold text-red-500">{{ number_format($partaiRowTotal) }}</td>
-                    </tr>
-                    @foreach($partai->calegs as $caleg)
-                    @php $calegRowTotal = 0; @endphp
-                    <tr class="border-b dark:border-gray-700 border-gray-100 last:border-0 dark:hover:bg-gray-750 hover:bg-gray-50">
-                        <td class="px-5 py-1.5"><div class="flex items-center gap-2"><span class="text-xs dark:text-gray-500 text-gray-400 w-4">{{ $caleg->nomor_urut }}.</span><span class="text-sm dark:text-gray-200 text-gray-700">{{ $caleg->nama_caleg }}</span></div></td>
-                        @foreach($desa->tps as $tps)
-                        @php $r = $rekaps[$tps->id] ?? null; $sc = $r ? ($r->calegSuaras->firstWhere('caleg_id', $caleg->id)?->suara ?? 0) : null; $calegRowTotal += $sc ?? 0; @endphp
-                        <td class="px-3 py-1.5 text-center dark:text-gray-400 text-gray-500">{{ $r ? number_format($sc) : '—' }}</td>
-                        @endforeach
-                        <td class="px-3 py-1.5 text-center font-bold text-teal-400">{{ number_format($calegRowTotal) }}</td>
-                    </tr>
+                @else
+                @foreach($master['partais'] as $partai)
+                <tr class="dark:bg-gray-700/30 bg-gray-50 border-b dark:border-gray-700 border-gray-200">
+                    <td colspan="{{ $desa->tps->count() + 2 }}" class="px-5 py-1.5 text-xs font-bold dark:text-gray-300 text-gray-700">
+                        {{ $partai->nomor_urut }}. {{ $partai->nama_partai }}
+                    </td>
+                </tr>
+                @php $partaiRowTotal = 0; @endphp
+                <tr class="border-b dark:border-gray-700 border-gray-100 dark:bg-gray-700/20 bg-gray-50">
+                    <td class="px-5 py-1.5 text-xs font-bold dark:text-gray-300 text-gray-700 uppercase">Suara Partai</td>
+                    @foreach($desa->tps as $tps)
+                    @php $r = $rekaps[$tps->id] ?? null; $sp = $r ? ($r->partaiSuaras->firstWhere('partai_id', $partai->id)?->suara ?? 0) : null; $partaiRowTotal += $sp ?? 0; @endphp
+                    <td class="px-3 py-1.5 text-center dark:text-gray-400 text-gray-500">{{ $r ? number_format($sp) : '—' }}</td>
                     @endforeach
-                    @php $grandTotal = 0; @endphp
-                    <tr class="border-t-2 dark:border-gray-600 border-gray-300 dark:bg-gray-700/30 bg-gray-50">
-                        <td class="px-5 py-1.5 text-xs font-bold dark:text-gray-300 text-gray-700 uppercase">Total Suara Sah</td>
-                        @foreach($desa->tps as $tps)
-                        @php $r = $rekaps[$tps->id] ?? null; $sp = $r ? ($r->partaiSuaras->firstWhere('partai_id', $partai->id)?->suara ?? 0) : 0; $sc_sum = $r ? $r->calegSuaras->whereIn('caleg_id', $partai->calegs->pluck('id'))->sum('suara') : 0; $colTotal = $r ? ($sp + $sc_sum) : null; $grandTotal += $colTotal ?? 0; @endphp
-                        <td class="px-3 py-1.5 text-center font-bold text-teal-400">{{ $r ? number_format($colTotal) : '—' }}</td>
-                        @endforeach
-                        <td class="px-3 py-1.5 text-center font-bold text-teal-400">{{ number_format($grandTotal) }}</td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        @endforeach
-        @endif
+                    <td class="px-3 py-1.5 text-center font-bold text-red-500">{{ number_format($partaiRowTotal) }}</td>
+                </tr>
+                @foreach($partai->calegs as $caleg)
+                @php $calegRowTotal = 0; @endphp
+                <tr class="border-b dark:border-gray-700 border-gray-100 last:border-0 dark:hover:bg-gray-750 hover:bg-gray-50">
+                    <td class="px-5 py-1.5"><div class="flex items-center gap-2"><span class="text-xs dark:text-gray-500 text-gray-400 w-4">{{ $caleg->nomor_urut }}.</span><span class="text-sm dark:text-gray-200 text-gray-700">{{ $caleg->nama_caleg }}</span></div></td>
+                    @foreach($desa->tps as $tps)
+                    @php $r = $rekaps[$tps->id] ?? null; $sc = $r ? ($r->calegSuaras->firstWhere('caleg_id', $caleg->id)?->suara ?? 0) : null; $calegRowTotal += $sc ?? 0; @endphp
+                    <td class="px-3 py-1.5 text-center dark:text-gray-400 text-gray-500">{{ $r ? number_format($sc) : '—' }}</td>
+                    @endforeach
+                    <td class="px-3 py-1.5 text-center font-bold text-teal-400">{{ number_format($calegRowTotal) }}</td>
+                </tr>
+                @endforeach
+                @php $grandTotal = 0; @endphp
+                <tr class="border-t-2 dark:border-gray-600 border-gray-300 dark:bg-gray-700/30 bg-gray-50">
+                    <td class="px-5 py-1.5 text-xs font-bold dark:text-gray-300 text-gray-700 uppercase">Total Suara Sah</td>
+                    @foreach($desa->tps as $tps)
+                    @php $r = $rekaps[$tps->id] ?? null; $sp = $r ? ($r->partaiSuaras->firstWhere('partai_id', $partai->id)?->suara ?? 0) : 0; $sc_sum = $r ? $r->calegSuaras->whereIn('caleg_id', $partai->calegs->pluck('id'))->sum('suara') : 0; $colTotal = $r ? ($sp + $sc_sum) : null; $grandTotal += $colTotal ?? 0; @endphp
+                    <td class="px-3 py-1.5 text-center font-bold text-teal-400">{{ $r ? number_format($colTotal) : '—' }}</td>
+                    @endforeach
+                    <td class="px-3 py-1.5 text-center font-bold text-teal-400">{{ number_format($grandTotal) }}</td>
+                </tr>
+                @endforeach
+                @endif
 
-        {{-- Section V --}}
-        <div class="px-5 py-2 border-t border-b dark:border-gray-700 border-gray-200 dark:bg-gray-700/20 bg-gray-50">
-            <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold">// Section V — Suara Sah, Tidak Sah & Total</p>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm table-fixed">
-                <colgroup>
-                    <col style="width:220px">
-                    @foreach($kecamatans as $__kec) <col style="width:110px"> @endforeach
-                    <col style="width:110px">
-                </colgroup>
-                <thead>
-                    <tr class="border-b dark:border-gray-700 border-gray-200">
-                        <th class="text-left px-5 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Keterangan</th>
-                        @foreach($desa->tps as $tps)
-                        <th class="text-center px-3 py-2 text-[10px] uppercase font-semibold whitespace-nowrap
-    {{ ($rekaps[$tps->id] ?? null)?->status === 'final'
-        ? 'dark:text-gray-500 text-gray-400'
-        : 'text-red-400' }}">{{ $tps->nama }}</th>
-                        @endforeach
-                        <th class="text-center px-3 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Total</th>
-                    </tr>
-                </thead>
-                <tbody>
+                {{-- ── Section V ── --}}
+                <tr class="dark:bg-gray-900/60 bg-gray-100 border-b dark:border-gray-700 border-gray-200">
+                    <td colspan="{{ $desa->tps->count() + 2 }}" class="px-5 py-1.5 text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase font-semibold">
+                        Section V — Suara Sah, Tidak Sah &amp; Total
+                    </td>
+                </tr>
                 @php $rowTotalSah = 0; @endphp
                 <tr class="border-b dark:border-gray-700 border-gray-100 dark:hover:bg-gray-750 hover:bg-gray-50">
                     <td class="px-5 py-1.5 text-sm dark:text-gray-300 text-gray-600">Jumlah Suara Sah</td>
@@ -615,9 +501,11 @@
                     @endforeach
                     <td></td>
                 </tr>
+
                 </tbody>
             </table>
         </div>
+        {{-- ══ END TABEL BESAR PER DESA ══ --}}
 
     </div>{{-- end desa --}}
     @endforeach
