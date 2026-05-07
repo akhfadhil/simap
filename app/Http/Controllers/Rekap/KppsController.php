@@ -15,7 +15,7 @@ use Maatwebsite\Excel\Facades\Excel;
 class KppsController extends Controller
 {
     const JENIS = ['ppwp', 'dpd', 'dpr_ri', 'dprd_prov', 'dprd_kab'];
-
+    
     public function index()
     {
         $tps    = Auth::user()->tps;
@@ -88,12 +88,49 @@ class KppsController extends Controller
         return redirect()->route('rekap.index')->with('success', "Rekap {$label} berhasil disimpan.");
     }
 
+    // public function finalisasi(string $jenis)
+    // {
+    //     $tps   = Auth::user()->tps;
+    //     $rekap = RekapHeader::where('tps_id', $tps->id)
+    //                         ->where('jenis', $jenis)
+    //                         ->firstOrFail();
+
+    //     $rekap->update(['status' => 'final', 'difinalisasi_at' => now()]);
+
+    //     // Auto export ke storage
+    //     try {
+    //         $tps->load('desa.kecamatan');
+    //         app(\App\Services\RekapExportService::class)->handleFinalisasi($tps, $jenis);
+    //     } catch (\Exception $e) {
+    //         // Jangan gagalkan finalisasi jika export error
+    //         \Log::error('Auto export gagal: ' . $e->getMessage());
+    //     }
+
+    //     return back()->with('success', 'Rekap berhasil difinalisasi dan disimpan ke storage.');
+    // }
+
     public function finalisasi(string $jenis)
     {
         $tps   = Auth::user()->tps;
-        $rekap = RekapHeader::where('tps_id', $tps->id)->where('jenis', $jenis)->firstOrFail();
+        $rekap = RekapHeader::where('tps_id', $tps->id)
+                            ->where('jenis', $jenis)
+                            ->firstOrFail();
+
         $rekap->update(['status' => 'final', 'difinalisasi_at' => now()]);
-        return back()->with('success', 'Rekap berhasil difinalisasi.');
+        
+        // \Log::info('Finalisasi dipanggil', ['tps_id' => $tps->id, 'jenis' => $jenis]);
+
+        try {
+            // \Log::info('Masuk try block');
+            $tps->load('desa.kecamatan');
+            app(\App\Services\RekapExportService::class)->handleFinalisasi($tps, $jenis);
+            // \Log::info('handleFinalisasi selesai');
+        } catch (\Exception $e) {
+            \Log::error('Auto export gagal: ' . $e->getMessage());
+        }
+
+        // return back()->with('success', 'Rekap berhasil difinalisasi dan disimpan ke storage.');
+        return redirect()->route('rekap.index')->with('success', 'Rekap berhasil difinalisasi dan disimpan ke storage.');
     }
 
     public function export(string $jenis)

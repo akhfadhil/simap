@@ -403,12 +403,13 @@ updateAll();
 async function confirmFinalisasi() {
     const ok = await confirmFinal();
     if (ok) {
-        const input = document.createElement('input');
-        input.type  = 'hidden';
-        input.name  = 'finalisasi';
-        input.value = '1';
-        document.getElementById('rekap-form').appendChild(input);
-        document.getElementById('rekap-form').submit();
+        // const input = document.createElement('input');
+        // input.type  = 'hidden';
+        // input.name  = 'finalisasi';
+        // input.value = '1';
+        // document.getElementById('rekap-form').appendChild(input);
+        // document.getElementById('rekap-form').submit();
+        document.getElementById('form-finalisasi').submit();
     }
 }
 
