@@ -17,12 +17,22 @@ class Dokumen extends Model
         'is_archived'  => 'boolean',
     ];
 
+    // const JENIS = [
+    //     'PPWP'       => 'PPWP',
+    //     'DPR_RI'     => 'DPR RI',
+    //     'DPD'        => 'DPD',
+    //     'DPRD_PROV'  => 'DPRD Provinsi',
+    //     'DPRD_KAB'   => 'DPRD Kabupaten/Kota',
+    // ];
+
     const JENIS = [
-        'PPWP'       => 'PPWP',
-        'DPR_RI'     => 'DPR RI',
-        'DPD'        => 'DPD',
-        'DPRD_PROV'  => 'DPRD Provinsi',
-        'DPRD_KAB'   => 'DPRD Kabupaten/Kota',
+        'PPWP'      => 'Presiden & Wakil Presiden',
+        'GUBERNUR'  => 'Gubernur & Wakil Gubernur',
+        'BUPATI'    => 'Bupati & Wakil Bupati',
+        'DPD'       => 'DPD',
+        'DPR_RI'    => 'DPR RI',
+        'DPRD_PROV' => 'DPRD Provinsi',
+        'DPRD_KAB'  => 'DPRD Kabupaten',
     ];
 
     const STATUS_COLORS = [

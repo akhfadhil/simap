@@ -14,7 +14,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class KppsController extends Controller
 {
-    const JENIS = ['ppwp', 'dpd', 'dpr_ri', 'dprd_prov', 'dprd_kab'];
+    const JENIS = ['ppwp', 'gubernur', 'bupati', 'dpd', 'dpr_ri', 'dprd_prov', 'dprd_kab'];
     
     public function index()
     {

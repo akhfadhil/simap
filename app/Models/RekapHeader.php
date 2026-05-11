@@ -16,12 +16,22 @@ class RekapHeader extends Model {
 
     protected $casts = ['difinalisasi_at' => 'datetime'];
 
+    // const JENIS_LABELS = [
+    //     'ppwp'      => 'Presiden & Wakil Presiden',
+    //     'dpd'       => 'DPD',
+    //     'dpr_ri'    => 'DPR RI',
+    //     'dprd_prov' => 'DPRD Provinsi',
+    //     'dprd_kab'  => 'DPRD Kabupaten',
+    // ];
+
     const JENIS_LABELS = [
-        'ppwp'      => 'Presiden & Wakil Presiden',
-        'dpd'       => 'DPD',
-        'dpr_ri'    => 'DPR RI',
-        'dprd_prov' => 'DPRD Provinsi',
-        'dprd_kab'  => 'DPRD Kabupaten',
+    'ppwp'      => 'Presiden & Wakil Presiden',
+    'gubernur'  => 'Gubernur & Wakil Gubernur',
+    'bupati'    => 'Bupati & Wakil Bupati',
+    'dpd'       => 'DPD',
+    'dpr_ri'    => 'DPR RI',
+    'dprd_prov' => 'DPRD Provinsi',
+    'dprd_kab'  => 'DPRD Kabupaten',
     ];
 
     public function tps()         { return $this->belongsTo(Tps::class); }
@@ -32,11 +42,19 @@ class RekapHeader extends Model {
     public function calegSuaras() { return $this->hasMany(RekapCalegSuara::class, 'rekap_id'); }
 
     // Computed: total suara sah
+    // public function getSuaraSahAttribute(): int {
+    //     return match($this->jenis) {
+    //         'ppwp'      => $this->ppwpSuaras->sum('suara'),
+    //         'dpd'       => $this->dpdSuaras->sum('suara'),
+    //         default     => $this->partaiSuaras->sum('suara') + $this->calegSuaras->sum('suara'),
+    //     };
+    // }
+
     public function getSuaraSahAttribute(): int {
-        return match($this->jenis) {
-            'ppwp'      => $this->ppwpSuaras->sum('suara'),
-            'dpd'       => $this->dpdSuaras->sum('suara'),
-            default     => $this->partaiSuaras->sum('suara') + $this->calegSuaras->sum('suara'),
+    return match($this->jenis) {
+        'ppwp', 'gubernur', 'bupati' => $this->ppwpSuaras->sum('suara'),
+        'dpd'                         => $this->dpdSuaras->sum('suara'),
+        default                       => $this->partaiSuaras->sum('suara') + $this->calegSuaras->sum('suara'),
         };
     }
 

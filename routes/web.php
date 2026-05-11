@@ -92,6 +92,7 @@ Route::middleware('auth')->group(function () {
     // ── SETUP MASTER DATA (Admin only) ──────────────────────
     Route::prefix('admin/setup')->name('admin.setup.')->middleware('role:admin')->group(function () {
         Route::get('/',                          [App\Http\Controllers\Admin\SetupController::class, 'index'])->name('index');
+        Route::post('pemilu-settings',           [App\Http\Controllers\Admin\SetupController::class, 'updatePemiluSettings'])->name('pemilu.settings');
 
         // PPWP
         Route::post('ppwp',                      [App\Http\Controllers\Admin\SetupController::class, 'storePpwp'])->name('ppwp.store');

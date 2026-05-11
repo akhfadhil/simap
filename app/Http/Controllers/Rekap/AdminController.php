@@ -90,7 +90,9 @@ class AdminController extends Controller
     public function exportDownload(Request $request)
     {
         $request->validate([
-            'jenis' => 'required|in:ppwp,dpd,dpr_ri,dprd_prov,dprd_kab',
+            // 'jenis' => 'required|in:ppwp,dpd,dpr_ri,dprd_prov,dprd_kab',
+            // Di validasi jenis di KppsController
+            'jenis' => 'required|in:ppwp,gubernur,bupati,dpd,dpr_ri,dprd_prov,dprd_kab',
             'level' => 'required|in:tps,desa,kecamatan,kabupaten',
         ]);
 

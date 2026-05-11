@@ -27,9 +27,27 @@ class SetupController extends Controller
                         ->get()
                         ->groupBy(fn($p) => (string) $p->dapil_id); // ← cast ke string
 
+        // return view('admin.setup.index', compact(
+        //     'ppwpCalons','dpdCalons','partaiDprRi','partaiProv','partaiKab','dapils','kecamatans'
+        // ));
+        $pemiluSettings = \App\Models\PemiluSetting::orderByRaw("FIELD(jenis,'ppwp','gubernur','bupati','dpd','dpr_ri','dprd_prov','dprd_kab')")->get()->keyBy('jenis');
+
         return view('admin.setup.index', compact(
-            'ppwpCalons','dpdCalons','partaiDprRi','partaiProv','partaiKab','dapils','kecamatans'
+            'ppwpCalons','dpdCalons','partaiDprRi','partaiProv','partaiKab','dapils','kecamatans','pemiluSettings'
         ));
+    }
+
+    public function updatePemiluSettings(Request $request)
+    {
+        $jenisList = ['ppwp','gubernur','bupati','dpd','dpr_ri','dprd_prov','dprd_kab'];
+        
+        foreach ($jenisList as $jenis) {
+            \App\Models\PemiluSetting::where('jenis', $jenis)->update([
+                'is_active' => $request->has("jenis_{$jenis}")
+            ]);
+        }
+
+        return back()->with('success', 'Pengaturan jenis pemilu berhasil disimpan.');
     }
 
     public function storePpwp(Request $request)
