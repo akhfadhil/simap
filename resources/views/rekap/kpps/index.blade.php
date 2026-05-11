@@ -23,7 +23,12 @@
 </p>
 
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-@foreach(\App\Models\RekapHeader::JENIS_LABELS as $jenis => $label)
+@php $aktifJenis = \App\Models\PemiluSetting::aktif(); @endphp
+
+@foreach(\App\Models\RekapHeader::JENIS_LABELS as $key => $label)
+@if(in_array($key, $aktifJenis))
+    {{-- tampilkan card rekap --}}
+
 @php
     $rekap   = $rekaps[$jenis] ?? null;
     $isDraft = $rekap && $rekap->status === 'draft';
@@ -83,6 +88,7 @@
         @endif
     </div>
 </div>
+    @endif
 @endforeach
 </div>
 @endsection

@@ -18,8 +18,14 @@ class PpkController extends Controller
         return view('rekap.ppk.index', compact('kecamatan', 'rekaps'));
     }
 
+    private function cekAktif(string $jenis): void
+    {
+        abort_if(!in_array($jenis, \App\Models\PemiluSetting::aktif()), 403, 'Jenis pemilu ini tidak aktif.');
+    }
+
     public function show(string $jenis)
     {
+        $this->cekAktif($jenis);
         $kecamatan = Auth::user()->kecamatan;
         $tpsIds    = Tps::whereHas('desa', fn($q) => $q->where('kecamatan_id', $kecamatan->id))->pluck('id');
         $rekaps    = RekapHeader::with(['tps.desa','ppwpSuaras.calon','dpdSuaras.calon','partaiSuaras.partai','calegSuaras.caleg'])
@@ -33,6 +39,7 @@ class PpkController extends Controller
 
     public function export(string $jenis)
     {
+        $this->cekAktif($jenis);
         $kecamatan = Auth::user()->kecamatan;
         $desas     = $kecamatan->desas()->with('tps')->get();
         $tpsIds    = $desas->flatMap(fn($d) => $d->tps->pluck('id'));

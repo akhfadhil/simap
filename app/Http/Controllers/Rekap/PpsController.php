@@ -18,8 +18,14 @@ class PpsController extends Controller
         return view('rekap.pps.index', compact('desa', 'rekaps'));
     }
 
+    private function cekAktif(string $jenis): void
+    {
+        abort_if(!in_array($jenis, \App\Models\PemiluSetting::aktif()), 403, 'Jenis pemilu ini tidak aktif.');
+    }
+
     public function show(string $jenis)
     {
+        $this->cekAktif($jenis);
         $desa   = Auth::user()->desa;
         $tpsIds = $desa->tps->pluck('id');
         $rekaps = RekapHeader::with(['tps','ppwpSuaras.calon','dpdSuaras.calon','partaiSuaras.partai','calegSuaras.caleg'])
@@ -33,6 +39,7 @@ class PpsController extends Controller
 
     public function export(string $jenis)
     {
+        $this->cekAktif($jenis);
         $desa   = Auth::user()->desa;
         $tpsIds = $desa->tps->pluck('id');
 

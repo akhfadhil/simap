@@ -29,6 +29,38 @@
     @endforeach
 </div>
 
+{{-- Pengaturan Jenis Pemilu --}}
+<div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm overflow-hidden mb-8">
+    <div class="px-6 py-4 border-b dark:border-gray-700 border-gray-200">
+        <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold">// Aktifkan Jenis Pemilu</p>
+        <p class="text-xs dark:text-gray-500 text-gray-400 mt-1">Hanya jenis yang dicentang yang bisa diakses oleh KPPS, PPS, dan PPK.</p>
+    </div>
+    <form method="POST" action="{{ route('admin.setup.pemilu.settings') }}" class="p-6">
+        @csrf
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-5">
+            @foreach([
+                'ppwp'      => 'Presiden & Wakil Presiden',
+                'gubernur'  => 'Gubernur & Wakil Gubernur',
+                'bupati'    => 'Bupati & Wakil Bupati',
+                'dpd'       => 'DPD',
+                'dpr_ri'    => 'DPR RI',
+                'dprd_prov' => 'DPRD Provinsi',
+                'dprd_kab'  => 'DPRD Kabupaten',
+            ] as $key => $label)
+            @php $active = $pemiluSettings[$key]->is_active ?? true; @endphp
+            <label class="flex items-center gap-3 dark:bg-gray-700/50 bg-gray-50 border dark:border-gray-700 border-gray-200 rounded-lg px-4 py-3 cursor-pointer hover:border-red-400 transition {{ $active ? 'border-red-400/50' : '' }}">
+                <input type="checkbox" name="jenis_{{ $key }}" value="1" {{ $active ? 'checked' : '' }}
+                       class="w-4 h-4 accent-red-500">
+                <span class="text-sm dark:text-gray-300 text-gray-600 font-medium">{{ $label }}</span>
+            </label>
+            @endforeach
+        </div>
+        <button class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition">
+            Simpan Pengaturan
+        </button>
+    </form>
+</div>
+
 {{-- ══ TAB PPWP ══ --}}
 <div id="panel-ppwp" class="tab-panel">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">

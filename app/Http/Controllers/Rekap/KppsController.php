@@ -24,8 +24,15 @@ class KppsController extends Controller
         return view('rekap.kpps.index', compact('tps', 'rekaps'));
     }
 
+    private function cekAktif(string $jenis): void
+    {
+        $aktif = \App\Models\PemiluSetting::aktif();
+        abort_if(!in_array($jenis, $aktif), 403, 'Jenis pemilu ini tidak aktif.');
+    }
+
     public function form(string $jenis)
     {
+        $this->cekAktif($jenis);
         abort_unless(in_array($jenis, self::JENIS), 404);
         $tps   = Auth::user()->tps;
         $rekap = RekapHeader::where('tps_id', $tps->id)->where('jenis', $jenis)->first();
@@ -35,6 +42,7 @@ class KppsController extends Controller
 
     public function store(Request $request, string $jenis)
     {
+        $this->cekAktif($jenis);
         abort_unless(in_array($jenis, self::JENIS), 404);
         $tps = Auth::user()->tps;
 
@@ -111,6 +119,7 @@ class KppsController extends Controller
 
     public function finalisasi(string $jenis)
     {
+        $this->cekAktif($jenis);
         $tps   = Auth::user()->tps;
         $rekap = RekapHeader::where('tps_id', $tps->id)
                             ->where('jenis', $jenis)
@@ -135,6 +144,7 @@ class KppsController extends Controller
 
     public function export(string $jenis)
     {
+        $this->cekAktif($jenis);
         abort_unless(in_array($jenis, self::JENIS), 404);
 
         $tps    = Auth::user()->tps;

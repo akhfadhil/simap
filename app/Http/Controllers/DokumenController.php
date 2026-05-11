@@ -50,6 +50,7 @@ class DokumenController extends Controller
             'jenis' => 'required|in:' . implode(',', array_keys(Dokumen::JENIS)),
             'file'  => 'required|file|mimes:pdf|max:10240',
         ]);
+        abort_if(!in_array(strtolower($request->jenis), \App\Models\PemiluSetting::aktif()), 403, 'Jenis pemilu ini tidak aktif.');
 
         $tps = Tps::with('desa.kecamatan')->findOrFail($tpsId);
 
@@ -88,6 +89,7 @@ class DokumenController extends Controller
 
         return back()->with('success', Dokumen::JENIS[$request->jenis] . ' berhasil diupload.');
     }
+    
     // ── PPS: Index ─────────────────────────────────────────────
     public function indexPps(Request $request)
     {
@@ -198,7 +200,8 @@ class DokumenController extends Controller
             'jenis' => 'required|in:' . implode(',', array_keys(Dokumen::JENIS)),
             'file'  => 'required|file|mimes:pdf|max:10240',
         ]);
-
+        abort_if(!in_array(strtolower($request->jenis), \App\Models\PemiluSetting::aktif()), 403, 'Jenis pemilu ini tidak aktif.');
+        
         $kecamatan = \App\Models\Kecamatan::findOrFail($user->kecamatan_id);
 
         // Hapus file lama kalau ada
