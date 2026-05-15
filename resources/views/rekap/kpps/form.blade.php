@@ -163,20 +163,20 @@
     <div class="p-6">
 
     {{-- PPWP & DPD: list calon --}}
-    @if(in_array($jenis, ['ppwp','dpd']))
+    @if(in_array($jenis, ['ppwp','dpd', 'gubernur', 'bupati']))
         @if($data['calons']->isEmpty())
         <div class="text-center py-8 dark:text-gray-500 text-gray-400 text-sm">
-            ⚠ Belum ada data {{ $jenis === 'ppwp' ? 'paslon' : 'calon DPD' }}. Minta admin untuk menginput terlebih dahulu.
+            ⚠ Belum ada data {{ in_array($jenis, ['ppwp','gubernur','bupati']) ? 'paslon' : 'calon DPD' }}.
         </div>
         @else
         <div class="space-y-3">
         @foreach($data['calons'] as $calon)
         <div class="flex items-center gap-4">
-            <span class="w-8 h-8 rounded-full {{ $jenis === 'ppwp' ? 'bg-red-600' : 'bg-teal-500' }} text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
+            <span class="w-8 h-8 rounded-full {{ in_array($jenis, ['ppwp','gubernur','bupati']) ? 'bg-red-600' : 'bg-teal-500' }} text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
                 {{ $calon->nomor_urut }}
             </span>
             <p class="flex-1 text-sm dark:text-gray-200 text-gray-700">
-                {{ $jenis === 'ppwp' ? $calon->nama_paslon : $calon->nama_calon }}
+                {{ in_array($jenis, ['ppwp','gubernur','bupati']) ? $calon->nama_paslon : $calon->nama_calon }}
             </p>
             <input type="number" name="suara[{{ $calon->id }}]" min="0"
                    value="{{ old('suara.'.$calon->id, $data['suara'][$calon->id] ?? 0) }}"

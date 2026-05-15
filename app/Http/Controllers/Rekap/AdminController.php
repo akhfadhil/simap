@@ -66,6 +66,8 @@ class AdminController extends Controller
     private function getMaster(string $jenis): array
     {
         if ($jenis === 'ppwp') return ['calons' => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get()];
+        if ($jenis === 'gubernur') return ['calons' => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get()];
+        if ($jenis === 'bupati')   return ['calons' => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get()];
         if ($jenis === 'dpd')  return ['calons' => \App\Models\RekapDpdCalon::orderBy('nomor_urut')->get()];
         return ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis',$jenis)->orderBy('nomor_urut')->get()];
     }
@@ -74,6 +76,8 @@ class AdminController extends Controller
     {
         return [
             'ppwp'      => ['calons'  => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get()],
+            'gubernur'  => ['calons'  => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get()],
+            'bupati'    => ['calons'  => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get()],
             'dpd'       => ['calons'  => \App\Models\RekapDpdCalon::orderBy('nomor_urut')->get()],
             'dpr_ri'    => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis','dpr_ri')->orderBy('nomor_urut')->get()],
             'dprd_prov' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis','dprd_prov')->orderBy('nomor_urut')->get()],
@@ -254,8 +258,8 @@ class AdminController extends Controller
         // Master labels
         $master = $this->getMaster($jenis);
         $labels = [];
-        if (in_array($jenis, ['ppwp','dpd'])) {
-            $labels = $master['calons']->map(fn($c) => $jenis === 'ppwp' ? $c->nama_paslon : $c->nama_calon)->toArray();
+        if (in_array($jenis, ['ppwp','dpd','gubernur','bupati'])) {
+            $labels = $master['calons']->map(fn($c) => in_array($jenis, ['ppwp','gubernur','bupati']) ? $c->nama_paslon : $c->nama_calon)->toArray();
         } else {
             $labels = $master['partais']->map(fn($p) => $p->nama_partai)->toArray();
         }
@@ -270,10 +274,10 @@ class AdminController extends Controller
 
     private function buildSuaraData($rekaps, string $jenis): array
     {
-        if (in_array($jenis, ['ppwp','dpd'])) {
+        if (in_array($jenis, ['ppwp','dpd','gubernur','bupati'])) {
             $master = $this->getMaster($jenis);
             return $master['calons']->map(function($calon) use ($rekaps, $jenis) {
-                return $rekaps->sum(fn($r) => $jenis === 'ppwp'
+                return $rekaps->sum(fn($r) => in_array($jenis, ['ppwp','gubernur','bupati'])
                     ? ($r->ppwpSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0)
                     : ($r->dpdSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0));
             })->toArray();

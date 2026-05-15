@@ -23,7 +23,12 @@
 @endif
 
 <div class="space-y-3 mb-8">
+
+@php $aktifJenis = \App\Models\PemiluSetting::aktif(); @endphp
+
 @foreach(App\Models\Dokumen::JENIS as $key => $label)
+@if(in_array(strtolower($key), $aktifJenis))
+
 @php $dok = $uploaded[$key] ?? null; @endphp
 <div class="dark:bg-gray-800 bg-white rounded-xl p-5 border dark:border-gray-700 border-gray-200 flex items-center justify-between flex-wrap gap-4 shadow-sm">
     <div class="flex items-center gap-4">
@@ -76,6 +81,7 @@
     </div>
     @endif
 </div>
+@endif
 @endforeach
 </div>
 

@@ -65,7 +65,12 @@
     </div>
 
     <div id="tps-{{ $tps->id }}" class="hidden">
+    
+    @php $aktifJenis = \App\Models\PemiluSetting::aktif(); @endphp
+
     @foreach(App\Models\Dokumen::JENIS as $key => $label)
+    @if(in_array(strtolower($key), $aktifJenis))
+
     @php $dok = $dokByJenis[$key] ?? null; @endphp
     <div class="flex items-center justify-between px-6 py-4 border-b dark:border-gray-700 border-gray-100 last:border-0 flex-wrap gap-2">
         <div class="flex items-center gap-3">
@@ -102,6 +107,7 @@
         <span class="text-[11px] dark:text-gray-600 text-gray-400">Belum diupload</span>
         @endif
     </div>
+    @endif
     @endforeach
     </div>
 </div>

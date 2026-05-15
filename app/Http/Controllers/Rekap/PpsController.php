@@ -70,6 +70,8 @@ class PpsController extends Controller
     private function getMaster(string $jenis): array
     {
         if ($jenis === 'ppwp') return ['calons' => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get()];
+        if ($jenis === 'gubernur') return ['calons' => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get()];
+        if ($jenis === 'bupati')   return ['calons' => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get()];
         if ($jenis === 'dpd')  return ['calons' => \App\Models\RekapDpdCalon::orderBy('nomor_urut')->get()];
         return ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis',$jenis)->orderBy('nomor_urut')->get()];
     }

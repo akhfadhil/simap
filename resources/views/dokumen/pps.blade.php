@@ -59,8 +59,12 @@
         </div>
     </div>
 
+    @php $aktifJenis = \App\Models\PemiluSetting::aktif(); @endphp
     <div id="tps-{{ $tps->id }}" class="hidden">
+    
     @foreach(App\Models\Dokumen::JENIS as $key => $label)
+    @if(in_array(strtolower($key), $aktifJenis))
+    
     @php $dok = $dokByJenis[$key] ?? null; @endphp
     <div class="px-6 py-4 border-b dark:border-gray-700 border-gray-100 last:border-0">
         <div class="flex items-center justify-between flex-wrap gap-3">
@@ -126,6 +130,7 @@
         </div>
         @endif
     </div>
+    @endif
     @endforeach
     </div>
 </div>

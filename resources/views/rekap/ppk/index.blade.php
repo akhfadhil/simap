@@ -17,7 +17,12 @@
 </p>
 
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+@php $aktifJenis = \App\Models\PemiluSetting::aktif(); @endphp
+
 @foreach(\App\Models\RekapHeader::JENIS_LABELS as $jenis => $label)
+@if(in_array($jenis, $aktifJenis))
+
 @php
     $jenisRekaps = $rekaps[$jenis] ?? collect();
     $totalTps    = \App\Models\Tps::whereHas('desa', fn($q) => $q->where('kecamatan_id', $kecamatan->id))->count();
@@ -53,6 +58,7 @@
         @endif
     </div>
 </a>
+@endif
 @endforeach
 </div>
 @endsection
