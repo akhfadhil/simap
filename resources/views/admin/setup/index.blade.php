@@ -20,7 +20,7 @@
 
 {{-- TAB NAVIGATION --}}
 <div class="flex gap-1 mb-6 dark:bg-gray-900 bg-gray-100 p-1 rounded-xl w-fit">
-    @foreach(['ppwp'=>'PPWP','dpd'=>'DPD','dpr_ri'=>'DPR RI','dprd_prov'=>'DPRD Prov','dprd_kab'=>'DPRD Kab'] as $tab => $label)
+    @foreach(['ppwp'=>'PPWP','gubernur'=>'Gubernur','bupati'=>'Bupati','dpd'=>'DPD','dpr_ri'=>'DPR RI','dprd_prov'=>'DPRD Prov','dprd_kab'=>'DPRD Kab'] as $tab => $label)
     <button onclick="switchTab('{{ $tab }}')" id="tab-{{ $tab }}"
             class="px-4 py-2 text-xs font-semibold rounded-lg transition tab-btn"
             data-tab="{{ $tab }}">
@@ -103,6 +103,100 @@
             </div>
             @empty
             <div class="px-6 py-10 text-center dark:text-gray-600 text-gray-400 text-sm">Belum ada paslon.</div>
+            @endforelse
+        </div>
+    </div>
+</div>
+
+{{-- ══ TAB GUBERNUR ══ --}}
+<div id="panel-gubernur" class="tab-panel hidden">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 p-6 shadow-sm">
+            <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-5 font-semibold">// Tambah Paslon Gubernur</p>
+            <form method="POST" action="{{ route('admin.setup.gubernur.store') }}">
+                @csrf
+                <div class="mb-4">
+                    <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">No. Urut</label>
+                    <input type="number" name="nomor_urut" min="1" max="99" placeholder="1"
+                           class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-4 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">Nama Paslon</label>
+                    <input type="text" name="nama_paslon" placeholder="NAMA CALON - NAMA WAKIL"
+                           class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-4 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
+                </div>
+                <button class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-lg text-sm transition">
+                    Tambah →
+                </button>
+            </form>
+        </div>
+        <div class="lg:col-span-2 dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm overflow-hidden">
+            <div class="p-5 border-b dark:border-gray-700 border-gray-200">
+                <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold">// Daftar Paslon Gubernur ({{ $gubernurCalons->count() }})</p>
+            </div>
+            @forelse($gubernurCalons as $c)
+            <div class="flex items-center justify-between px-6 py-4 border-b dark:border-gray-700 border-gray-100 last:border-0 group">
+                <div class="flex items-center gap-4">
+                    <span class="w-8 h-8 rounded-full bg-red-600 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
+                        {{ $c->nomor_urut }}
+                    </span>
+                    <p class="text-sm font-medium dark:text-gray-100 text-gray-800">{{ $c->nama_paslon }}</p>
+                </div>
+                <form method="POST" action="{{ route('admin.setup.gubernur.destroy', $c) }}"
+                      onsubmit="return confirm('Hapus paslon ini?')" class="opacity-0 group-hover:opacity-100 transition">
+                    @csrf @method('DELETE')
+                    <button class="px-3 py-1.5 rounded-lg text-xs font-medium border border-red-400 text-red-400 hover:bg-red-500 hover:text-white transition">Hapus</button>
+                </form>
+            </div>
+            @empty
+            <div class="px-6 py-10 text-center dark:text-gray-600 text-gray-400 text-sm">Belum ada paslon gubernur.</div>
+            @endforelse
+        </div>
+    </div>
+</div>
+
+{{-- ══ TAB BUPATI ══ --}}
+<div id="panel-bupati" class="tab-panel hidden">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 p-6 shadow-sm">
+            <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-5 font-semibold">// Tambah Paslon Bupati</p>
+            <form method="POST" action="{{ route('admin.setup.bupati.store') }}">
+                @csrf
+                <div class="mb-4">
+                    <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">No. Urut</label>
+                    <input type="number" name="nomor_urut" min="1" max="99" placeholder="1"
+                           class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-4 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">Nama Paslon</label>
+                    <input type="text" name="nama_paslon" placeholder="NAMA CALON - NAMA WAKIL"
+                           class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-4 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
+                </div>
+                <button class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-lg text-sm transition">
+                    Tambah →
+                </button>
+            </form>
+        </div>
+        <div class="lg:col-span-2 dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm overflow-hidden">
+            <div class="p-5 border-b dark:border-gray-700 border-gray-200">
+                <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold">// Daftar Paslon Bupati ({{ $bupatiCalons->count() }})</p>
+            </div>
+            @forelse($bupatiCalons as $c)
+            <div class="flex items-center justify-between px-6 py-4 border-b dark:border-gray-700 border-gray-100 last:border-0 group">
+                <div class="flex items-center gap-4">
+                    <span class="w-8 h-8 rounded-full bg-red-600 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
+                        {{ $c->nomor_urut }}
+                    </span>
+                    <p class="text-sm font-medium dark:text-gray-100 text-gray-800">{{ $c->nama_paslon }}</p>
+                </div>
+                <form method="POST" action="{{ route('admin.setup.bupati.destroy', $c) }}"
+                      onsubmit="return confirm('Hapus paslon ini?')" class="opacity-0 group-hover:opacity-100 transition">
+                    @csrf @method('DELETE')
+                    <button class="px-3 py-1.5 rounded-lg text-xs font-medium border border-red-400 text-red-400 hover:bg-red-500 hover:text-white transition">Hapus</button>
+                </form>
+            </div>
+            @empty
+            <div class="px-6 py-10 text-center dark:text-gray-600 text-gray-400 text-sm">Belum ada paslon bupati.</div>
             @endforelse
         </div>
     </div>
@@ -421,7 +515,7 @@
 
 @push('scripts')
 <script>
-const tabs = ['ppwp','dpd','dpr_ri','dprd_prov','dprd_kab'];
+const tabs = ['ppwp','gubernur','bupati','dpd','dpr_ri','dprd_prov','dprd_kab'];
 
 function switchTab(active) {
     tabs.forEach(t => {

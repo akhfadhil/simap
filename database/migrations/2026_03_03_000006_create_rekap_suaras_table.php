@@ -16,6 +16,42 @@ return new class extends Migration
             $table->unique(['rekap_id', 'calon_id']);
         });
 
+        Schema::create('rekap_gubernur_suaras', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('rekap_id');
+            $table->unsignedBigInteger('calon_id');
+            $table->unsignedInteger('suara')->default(0);
+            $table->timestamps();
+
+            $table->foreign('rekap_id')
+                ->references('id')
+                ->on('rekap_headers')
+                ->onDelete('cascade');
+            $table->foreign('calon_id')
+                ->references('id')
+                ->on('rekap_gubernur_calons')
+                ->onDelete('cascade');
+            $table->unique(['rekap_id', 'calon_id']);
+        });
+
+        Schema::create('rekap_bupati_suaras', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('rekap_id');
+            $table->unsignedBigInteger('calon_id');
+            $table->unsignedInteger('suara')->default(0);
+            $table->timestamps();
+
+            $table->foreign('rekap_id')
+                ->references('id')
+                ->on('rekap_headers')
+                ->onDelete('cascade');
+            $table->foreign('calon_id')
+                ->references('id')
+                ->on('rekap_bupati_calons')
+                ->onDelete('cascade');
+            $table->unique(['rekap_id', 'calon_id']);
+        });
+
         Schema::create('rekap_dpd_suaras', function (Blueprint $table) {
             $table->id();
             $table->foreignId('rekap_id')->constrained('rekap_headers')->onDelete('cascade');
@@ -49,6 +85,8 @@ return new class extends Migration
         Schema::dropIfExists('rekap_caleg_suaras');
         Schema::dropIfExists('rekap_partai_suaras');
         Schema::dropIfExists('rekap_dpd_suaras');
+        Schema::dropIfExists('rekap_bupati_suaras');
+        Schema::dropIfExists('rekap_gubernur_suaras');
         Schema::dropIfExists('rekap_ppwp_suaras');
     }
 };

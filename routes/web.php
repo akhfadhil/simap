@@ -97,7 +97,15 @@ Route::middleware('auth')->group(function () {
         // PPWP
         Route::post('ppwp',                      [App\Http\Controllers\Admin\SetupController::class, 'storePpwp'])->name('ppwp.store');
         Route::delete('ppwp/{calon}',            [App\Http\Controllers\Admin\SetupController::class, 'destroyPpwp'])->name('ppwp.destroy');
-
+        
+        //GUBUERNUR
+        Route::post('gubernur',                  [App\Http\Controllers\Admin\SetupController::class, 'storeGubernur'])->name('gubernur.store');
+        Route::delete('gubernur/{calon}',        [App\Http\Controllers\Admin\SetupController::class, 'destroyGubernur'])->name('gubernur.destroy');
+        
+        //BUPATI
+        Route::post('bupati',                    [App\Http\Controllers\Admin\SetupController::class, 'storeBupati'])->name('bupati.store');
+        Route::delete('bupati/{calon}',          [App\Http\Controllers\Admin\SetupController::class, 'destroyBupati'])->name('bupati.destroy');
+        
         // DPD
         Route::post('dpd',                       [App\Http\Controllers\Admin\SetupController::class, 'storeDpd'])->name('dpd.store');
         Route::delete('dpd/{calon}',             [App\Http\Controllers\Admin\SetupController::class, 'destroyDpd'])->name('dpd.destroy');

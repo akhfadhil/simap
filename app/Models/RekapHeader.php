@@ -40,21 +40,18 @@ class RekapHeader extends Model {
     public function dpdSuaras()   { return $this->hasMany(RekapDpdSuara::class, 'rekap_id'); }
     public function partaiSuaras(){ return $this->hasMany(RekapPartaiSuara::class, 'rekap_id'); }
     public function calegSuaras() { return $this->hasMany(RekapCalegSuara::class, 'rekap_id'); }
+    public function gubernurSuaras() { return $this->hasMany(RekapGubernurSuara::class, 'rekap_id'); }
+    public function bupatiSuaras()   { return $this->hasMany(RekapBupatiSuara::class,   'rekap_id'); }
 
     // Computed: total suara sah
-    // public function getSuaraSahAttribute(): int {
-    //     return match($this->jenis) {
-    //         'ppwp'      => $this->ppwpSuaras->sum('suara'),
-    //         'dpd'       => $this->dpdSuaras->sum('suara'),
-    //         default     => $this->partaiSuaras->sum('suara') + $this->calegSuaras->sum('suara'),
-    //     };
-    // }
 
     public function getSuaraSahAttribute(): int {
-    return match($this->jenis) {
-        'ppwp', 'gubernur', 'bupati' => $this->ppwpSuaras->sum('suara'),
-        'dpd'                         => $this->dpdSuaras->sum('suara'),
-        default                       => $this->partaiSuaras->sum('suara') + $this->calegSuaras->sum('suara'),
+        return match($this->jenis) {
+            'ppwp'      => $this->ppwpSuaras->sum('suara'),
+            'gubernur'  => $this->gubernurSuaras->sum('suara'),
+            'bupati'    => $this->bupatiSuaras->sum('suara'),
+            'dpd'       => $this->dpdSuaras->sum('suara'),
+            default     => $this->partaiSuaras->sum('suara') + $this->calegSuaras->sum('suara'),
         };
     }
 

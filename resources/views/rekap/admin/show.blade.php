@@ -175,9 +175,9 @@
                     Section IV — Perolehan Suara
                 </td>
             </tr>
-            @if(in_array($jenis, ['ppwp','dpd']))
+            @if(in_array($jenis, ['ppwp','dpd','gubernur','bupati']))
             @foreach($master['calons'] as $calon)
-            @php $rowTotal = 0; $name = $jenis === 'ppwp' ? $calon->nama_paslon : $calon->nama_calon; @endphp
+            @php $rowTotal = 0; $name = in_array($jenis, ['ppwp','gubernur','bupati']) ? $calon->nama_paslon : $calon->nama_calon; @endphp
             <tr class="border-b dark:border-gray-700 border-gray-100 last:border-0 dark:hover:bg-gray-750 hover:bg-gray-50">
                 <td class="px-5 py-2.5 text-sm dark:text-gray-200 text-gray-700">
                     <span class="text-xs dark:text-gray-500 text-gray-400 mr-1">{{ $calon->nomor_urut }}.</span>{{ $name }}
@@ -185,9 +185,12 @@
                 @foreach($kecamatans as $kec)
                 @php
                     $kecTpsIds = $kec->desas->flatMap(fn($d) => $d->tps->pluck('id'))->toArray();
-                    $val = $rekaps->whereIn('tps_id', $kecTpsIds)->sum(fn($r) => $jenis === 'ppwp'
-                        ? ($r->ppwpSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0)
-                        : ($r->dpdSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0));
+                    $val = $rekaps->whereIn('tps_id', $kecTpsIds)->sum(fn($r) => match($jenis) {
+                        'ppwp'     => $r->ppwpSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0,
+                        'gubernur' => $r->gubernurSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0,
+                        'bupati'   => $r->bupatiSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0,
+                        default    => $r->dpdSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0,
+                    });
                     $rowTotal += $val;
                 @endphp
                 <td class="px-3 py-2.5 text-center dark:text-gray-400 text-gray-500">{{ number_format($val) }}</td>
@@ -397,14 +400,28 @@
                         Section IV — Perolehan Suara
                     </td>
                 </tr>
-                @if(in_array($jenis, ['ppwp','dpd']))
+                @if(in_array($jenis, ['ppwp','dpd','gubernur','bupati']))
                 @foreach($master['calons'] as $calon)
-                @php $rowTotal = 0; $name = $jenis === 'ppwp' ? $calon->nama_paslon : $calon->nama_calon; @endphp
+                @php $rowTotal = 0; $name = in_array($jenis, ['ppwp','gubernur','bupati']) ? $calon->nama_paslon : $calon->nama_calon; @endphp
                 <tr class="border-b dark:border-gray-700 border-gray-100 last:border-0 dark:hover:bg-gray-750 hover:bg-gray-50">
                     <td class="px-5 py-1.5 text-sm dark:text-gray-200 text-gray-700"><span class="text-xs dark:text-gray-500 text-gray-400 mr-1">{{ $calon->nomor_urut }}.</span>{{ $name }}</td>
                     @foreach($desa->tps as $tps)
-                    @php $r = $rekaps[$tps->id] ?? null; $s = $r ? ($jenis === 'ppwp' ? ($r->ppwpSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0) : ($r->dpdSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0)) : null; $rowTotal += $s ?? 0; @endphp
-                    <td class="px-3 py-1.5 text-center dark:text-gray-400 text-gray-500">{{ $r ? number_format($s) : '—' }}</td>
+                    @php
+                        $r = $rekaps[$tps->id] ?? null;
+                        $suara = $r
+                            ? (
+                                in_array($jenis, ['ppwp', 'gubernur', 'bupati'])
+                                    ? match ($jenis) {
+                                        'ppwp'     => $r->ppwpSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0,
+                                        'gubernur' => $r->gubernurSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0,
+                                        'bupati'   => $r->bupatiSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0,
+                                    }
+                                    : ($r->dpdSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0)
+                            )
+                            : 0;
+                        $rowTotal += $suara;
+                    @endphp
+                    <td class="px-3 py-1.5 text-center dark:text-gray-400 text-gray-500">{{ $r ? number_format($suara) : '—' }}</td>
                     @endforeach
                     <td class="px-3 py-1.5 text-center font-bold text-red-500">{{ number_format($rowTotal) }}</td>
                 </tr>

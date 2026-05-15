@@ -26,14 +26,14 @@ class SetupController extends Controller
                         ->orderBy('nomor_urut')
                         ->get()
                         ->groupBy(fn($p) => (string) $p->dapil_id); // ← cast ke string
+        $gubernurCalons = \App\Models\RekapGubernurCalon::orderBy('nomor_urut')->get();
+        $bupatiCalons   = \App\Models\RekapBupatiCalon::orderBy('nomor_urut')->get();
 
-        // return view('admin.setup.index', compact(
-        //     'ppwpCalons','dpdCalons','partaiDprRi','partaiProv','partaiKab','dapils','kecamatans'
-        // ));
         $pemiluSettings = \App\Models\PemiluSetting::orderByRaw("FIELD(jenis,'ppwp','gubernur','bupati','dpd','dpr_ri','dprd_prov','dprd_kab')")->get()->keyBy('jenis');
 
         return view('admin.setup.index', compact(
-            'ppwpCalons','dpdCalons','partaiDprRi','partaiProv','partaiKab','dapils','kecamatans','pemiluSettings'
+            'ppwpCalons','gubernurCalons','bupatiCalons','dpdCalons',
+            'partaiDprRi','partaiProv','partaiKab','dapils','kecamatans','pemiluSettings'
         ));
     }
 
@@ -128,5 +128,31 @@ class SetupController extends Controller
         ]);
         Kecamatan::find($request->kecamatan_id)->update(['dapil_id' => $request->dapil_id]);
         return back()->with('success', 'Dapil kecamatan berhasil diupdate.');
+    }
+
+    public function storeGubernur(Request $request)
+    {
+        $request->validate(['nomor_urut' => 'required|integer', 'nama_paslon' => 'required|string|max:200']);
+        \App\Models\RekapGubernurCalon::create($request->only('nomor_urut','nama_paslon'));
+        return back()->with('success', 'Paslon Gubernur berhasil ditambahkan.');
+    }
+
+    public function destroyGubernur(\App\Models\RekapGubernurCalon $calon)
+    {
+        $calon->delete();
+        return back()->with('success', 'Paslon Gubernur dihapus.');
+    }
+
+    public function storeBupati(Request $request)
+    {
+        $request->validate(['nomor_urut' => 'required|integer', 'nama_paslon' => 'required|string|max:200']);
+        \App\Models\RekapBupatiCalon::create($request->only('nomor_urut','nama_paslon'));
+        return back()->with('success', 'Paslon Bupati berhasil ditambahkan.');
+    }
+
+    public function destroyBupati(\App\Models\RekapBupatiCalon $calon)
+    {
+        $calon->delete();
+        return back()->with('success', 'Paslon Bupati dihapus.');
     }
 }

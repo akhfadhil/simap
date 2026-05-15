@@ -63,10 +63,10 @@ class PpkController extends Controller
 
     private function getMaster(string $jenis): array
     {
-        if ($jenis === 'ppwp') return ['calons' => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get()];
-        if ($jenis === 'gubernur') return ['calons' => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get()];
-        if ($jenis === 'bupati')   return ['calons' => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get()];
-        if ($jenis === 'dpd')  return ['calons' => \App\Models\RekapDpdCalon::orderBy('nomor_urut')->get()];
+        if ($jenis === 'ppwp')     return ['calons' => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get()];
+        if ($jenis === 'gubernur') return ['calons' => \App\Models\RekapGubernurCalon::orderBy('nomor_urut')->get()];
+        if ($jenis === 'bupati')   return ['calons' => \App\Models\RekapBupatiCalon::orderBy('nomor_urut')->get()];
+        if ($jenis === 'dpd')      return ['calons' => \App\Models\RekapDpdCalon::orderBy('nomor_urut')->get()];
         return ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis',$jenis)->orderBy('nomor_urut')->get()];
     }
 
@@ -74,6 +74,8 @@ class PpkController extends Controller
     {
         return [
             'ppwp'      => ['calons'  => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get()],
+            'gubernur'  => ['calons'  => \App\Models\RekapGubernurCalon::orderBy('nomor_urut')->get()],
+            'bupati'    => ['calons'  => \App\Models\RekapBupatiCalon::orderBy('nomor_urut')->get()],
             'dpd'       => ['calons'  => \App\Models\RekapDpdCalon::orderBy('nomor_urut')->get()],
             'dpr_ri'    => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis','dpr_ri')->orderBy('nomor_urut')->get()],
             'dprd_prov' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis','dprd_prov')->orderBy('nomor_urut')->get()],

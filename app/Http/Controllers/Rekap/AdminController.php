@@ -24,7 +24,14 @@ class AdminController extends Controller
     {
         $kecamatans = Kecamatan::with(['desas.tps'])->orderBy('nama')->get();
         $tpsIds     = Tps::pluck('id');
-        $rekaps     = RekapHeader::with(['ppwpSuaras.calon','dpdSuaras.calon','partaiSuaras.partai','calegSuaras.caleg'])
+        $rekaps     = RekapHeader::with([
+                                    'ppwpSuaras.calon',
+                                    'gubernurSuaras.calon',   // ← tambah ini
+                                    'bupatiSuaras.calon',     // ← tambah ini
+                                    'dpdSuaras.calon',
+                                    'partaiSuaras.partai',
+                                    'calegSuaras.caleg'
+                                ])
                                 ->whereIn('tps_id', $tpsIds)
                                 ->where('jenis', $jenis)
                                 ->get()->keyBy('tps_id');
@@ -65,10 +72,10 @@ class AdminController extends Controller
 
     private function getMaster(string $jenis): array
     {
-        if ($jenis === 'ppwp') return ['calons' => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get()];
-        if ($jenis === 'gubernur') return ['calons' => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get()];
-        if ($jenis === 'bupati')   return ['calons' => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get()];
-        if ($jenis === 'dpd')  return ['calons' => \App\Models\RekapDpdCalon::orderBy('nomor_urut')->get()];
+        if ($jenis === 'ppwp')     return ['calons' => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get()];
+        if ($jenis === 'gubernur') return ['calons' => \App\Models\RekapGubernurCalon::orderBy('nomor_urut')->get()];
+        if ($jenis === 'bupati')   return ['calons' => \App\Models\RekapBupatiCalon::orderBy('nomor_urut')->get()];
+        if ($jenis === 'dpd')      return ['calons' => \App\Models\RekapDpdCalon::orderBy('nomor_urut')->get()];
         return ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis',$jenis)->orderBy('nomor_urut')->get()];
     }
 
@@ -76,8 +83,8 @@ class AdminController extends Controller
     {
         return [
             'ppwp'      => ['calons'  => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get()],
-            'gubernur'  => ['calons'  => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get()],
-            'bupati'    => ['calons'  => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get()],
+            'gubernur'  => ['calons'  => \App\Models\RekapGubernurCalon::orderBy('nomor_urut')->get()],
+            'bupati'    => ['calons'  => \App\Models\RekapBupatiCalon::orderBy('nomor_urut')->get()],
             'dpd'       => ['calons'  => \App\Models\RekapDpdCalon::orderBy('nomor_urut')->get()],
             'dpr_ri'    => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis','dpr_ri')->orderBy('nomor_urut')->get()],
             'dprd_prov' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis','dprd_prov')->orderBy('nomor_urut')->get()],
@@ -277,9 +284,12 @@ class AdminController extends Controller
         if (in_array($jenis, ['ppwp','dpd','gubernur','bupati'])) {
             $master = $this->getMaster($jenis);
             return $master['calons']->map(function($calon) use ($rekaps, $jenis) {
-                return $rekaps->sum(fn($r) => in_array($jenis, ['ppwp','gubernur','bupati'])
-                    ? ($r->ppwpSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0)
-                    : ($r->dpdSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0));
+                return $rekaps->sum(fn($r) => match($jenis) {
+                    'ppwp'     => $r->ppwpSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0,
+                    'gubernur' => $r->gubernurSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0,
+                    'bupati'   => $r->bupatiSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0,
+                    'dpd'      => $r->dpdSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0,
+                });
             })->toArray();
         } else {
             $master = $this->getMaster($jenis);

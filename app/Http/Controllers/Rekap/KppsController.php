@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Rekap;
 use App\Http\Controllers\Controller;
 use App\Models\RekapHeader;
 use App\Models\RekapPpwpCalon;
+use App\Models\RekapGubernurCalon;
+use App\Models\RekapBupatiCalon;
 use App\Models\RekapDpdCalon;
 use App\Models\RekapPartai;
 use Illuminate\Http\Request;
@@ -69,6 +71,14 @@ class KppsController extends Controller
                 foreach ($request->input('suara', []) as $calon_id => $suara) {
                     $rekap->ppwpSuaras()->updateOrCreate(['calon_id' => $calon_id], ['suara' => (int)$suara]);
                 }
+            } elseif ($jenis === 'gubernur') {
+                foreach ($request->input('suara', []) as $calon_id => $suara) {
+                    $rekap->gubernurSuaras()->updateOrCreate(['calon_id' => $calon_id], ['suara' => (int)$suara]);
+                }
+            } elseif ($jenis === 'bupati') {
+                foreach ($request->input('suara', []) as $calon_id => $suara) {
+                    $rekap->bupatiSuaras()->updateOrCreate(['calon_id' => $calon_id], ['suara' => (int)$suara]);
+                }
             } elseif ($jenis === 'dpd') {
                 foreach ($request->input('suara', []) as $calon_id => $suara) {
                     $rekap->dpdSuaras()->updateOrCreate(['calon_id' => $calon_id], ['suara' => (int)$suara]);
@@ -85,6 +95,12 @@ class KppsController extends Controller
             // Finalisasi langsung jika ada flag
             if (request('finalisasi') == '1') {
                 $rekap->update(['status' => 'final', 'difinalisasi_at' => now()]);
+                try {
+                    $tps->load('desa.kecamatan');
+                    app(\App\Services\RekapExportService::class)->handleFinalisasi($tps, $jenis);
+                } catch (\Exception $e) {
+                    \Log::error('Auto export gagal: ' . $e->getMessage());
+                }
             }
         });
 
@@ -117,30 +133,30 @@ class KppsController extends Controller
     //     return back()->with('success', 'Rekap berhasil difinalisasi dan disimpan ke storage.');
     // }
 
-    public function finalisasi(string $jenis)
-    {
-        $this->cekAktif($jenis);
-        $tps   = Auth::user()->tps;
-        $rekap = RekapHeader::where('tps_id', $tps->id)
-                            ->where('jenis', $jenis)
-                            ->firstOrFail();
+    // public function finalisasi(string $jenis)
+    // {
+    //     $this->cekAktif($jenis);
+    //     $tps   = Auth::user()->tps;
+    //     $rekap = RekapHeader::where('tps_id', $tps->id)
+    //                         ->where('jenis', $jenis)
+    //                         ->firstOrFail();
 
-        $rekap->update(['status' => 'final', 'difinalisasi_at' => now()]);
+    //     $rekap->update(['status' => 'final', 'difinalisasi_at' => now()]);
         
-        // \Log::info('Finalisasi dipanggil', ['tps_id' => $tps->id, 'jenis' => $jenis]);
+    //     // \Log::info('Finalisasi dipanggil', ['tps_id' => $tps->id, 'jenis' => $jenis]);
 
-        try {
-            // \Log::info('Masuk try block');
-            $tps->load('desa.kecamatan');
-            app(\App\Services\RekapExportService::class)->handleFinalisasi($tps, $jenis);
-            // \Log::info('handleFinalisasi selesai');
-        } catch (\Exception $e) {
-            \Log::error('Auto export gagal: ' . $e->getMessage());
-        }
+    //     try {
+    //         // \Log::info('Masuk try block');
+    //         $tps->load('desa.kecamatan');
+    //         app(\App\Services\RekapExportService::class)->handleFinalisasi($tps, $jenis);
+    //         // \Log::info('handleFinalisasi selesai');
+    //     } catch (\Exception $e) {
+    //         \Log::error('Auto export gagal: ' . $e->getMessage());
+    //     }
 
-        // return back()->with('success', 'Rekap berhasil difinalisasi dan disimpan ke storage.');
-        return redirect()->route('rekap.index')->with('success', 'Rekap berhasil difinalisasi dan disimpan ke storage.');
-    }
+    //     // return back()->with('success', 'Rekap berhasil difinalisasi dan disimpan ke storage.');
+    //     return redirect()->route('rekap.index')->with('success', 'Rekap berhasil difinalisasi dan disimpan ke storage.');
+    // }
 
     public function export(string $jenis)
     {
@@ -192,17 +208,17 @@ class KppsController extends Controller
         }
 
         if ($jenis === 'gubernur') {
-            if ($rekap) $existingSuara = $rekap->ppwpSuaras->pluck('suara','calon_id')->toArray();
+            if ($rekap) $existingSuara = $rekap->gubernurSuaras->pluck('suara','calon_id')->toArray();
             return [
-                'calons' => RekapPpwpCalon::orderBy('nomor_urut')->get(),
+                'calons' => RekapGubernurCalon::orderBy('nomor_urut')->get(),
                 'suara'  => $existingSuara,
             ];
         }
 
         if ($jenis === 'bupati') {
-            if ($rekap) $existingSuara = $rekap->ppwpSuaras->pluck('suara','calon_id')->toArray();
+            if ($rekap) $existingSuara = $rekap->bupatiSuaras->pluck('suara','calon_id')->toArray();
             return [
-                'calons' => RekapPpwpCalon::orderBy('nomor_urut')->get(),
+                'calons' => RekapBupatiCalon::orderBy('nomor_urut')->get(),
                 'suara'  => $existingSuara,
             ];
         }
@@ -261,12 +277,13 @@ class KppsController extends Controller
         $kecamatan = Auth::user()->tps->desa->kecamatan;
         return [
             'ppwp'      => ['calons'  => RekapPpwpCalon::orderBy('nomor_urut')->get()],
-            'gubernur'  => ['calons'  => RekapPpwpCalon::orderBy('nomor_urut')->get()],
-            'bupati'    => ['calons'  => RekapPpwpCalon::orderBy('nomor_urut')->get()],
+            'gubernur'  => ['calons'  => RekapGubernurCalon::orderBy('nomor_urut')->get()],
+            'bupati'    => ['calons'  => RekapBupatiCalon::orderBy('nomor_urut')->get()],
             'dpd'       => ['calons'  => RekapDpdCalon::orderBy('nomor_urut')->get()],
             'dpr_ri'    => ['partais' => RekapPartai::with('calegs')->where('jenis','dpr_ri')->orderBy('nomor_urut')->get()],
             'dprd_prov' => ['partais' => RekapPartai::with('calegs')->where('jenis','dprd_prov')->orderBy('nomor_urut')->get()],
             'dprd_kab'  => ['partais' => RekapPartai::with('calegs')->where('jenis','dprd_kab')->where('dapil_id', $kecamatan->dapil_id)->orderBy('nomor_urut')->get()],
         ];
     }
+
 }
