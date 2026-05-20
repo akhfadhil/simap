@@ -28,7 +28,14 @@ class PpsController extends Controller
         $this->cekAktif($jenis);
         $desa   = Auth::user()->desa;
         $tpsIds = $desa->tps->pluck('id');
-        $rekaps = RekapHeader::with(['tps','ppwpSuaras.calon','dpdSuaras.calon','partaiSuaras.partai','calegSuaras.caleg'])
+        $relations = match ($jenis) {
+            'ppwp'      => ['tps', 'ppwpSuaras.calon'],
+            'gubernur'  => ['tps', 'gubernurSuaras.calon'],
+            'bupati'    => ['tps', 'bupatiSuaras.calon'],
+            'dpd'       => ['tps', 'dpdSuaras.calon'],
+            default     => ['tps', 'partaiSuaras.partai', 'calegSuaras.caleg'],
+        };
+        $rekaps = RekapHeader::with($relations)
                              ->whereIn('tps_id', $tpsIds)
                              ->where('jenis', $jenis)
                              ->get()->keyBy('tps_id');
@@ -73,7 +80,13 @@ class PpsController extends Controller
         if ($jenis === 'gubernur') return ['calons' => \App\Models\RekapGubernurCalon::orderBy('nomor_urut')->get()];
         if ($jenis === 'bupati')   return ['calons' => \App\Models\RekapBupatiCalon::orderBy('nomor_urut')->get()];
         if ($jenis === 'dpd')      return ['calons' => \App\Models\RekapDpdCalon::orderBy('nomor_urut')->get()];
-        return ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis',$jenis)->orderBy('nomor_urut')->get()];
+        $partais = \App\Models\RekapPartai::with('calegs')->where('jenis', $jenis);
+
+        if ($jenis === 'dprd_kab') {
+            $partais->where('dapil_id', Auth::user()->desa?->kecamatan?->dapil_id);
+        }
+
+        return ['partais' => $partais->orderBy('nomor_urut')->get()];
     }
 
     private function getAllMaster(): array
@@ -85,7 +98,7 @@ class PpsController extends Controller
             'dpd'       => ['calons'  => \App\Models\RekapDpdCalon::orderBy('nomor_urut')->get()],
             'dpr_ri'    => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis','dpr_ri')->orderBy('nomor_urut')->get()],
             'dprd_prov' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis','dprd_prov')->orderBy('nomor_urut')->get()],
-            'dprd_kab'  => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis','dprd_kab')->orderBy('nomor_urut')->get()],
+            'dprd_kab'  => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis','dprd_kab')->where('dapil_id', Auth::user()->desa?->kecamatan?->dapil_id)->orderBy('nomor_urut')->get()],
         ];
     }
 }

@@ -4,10 +4,13 @@ namespace App\Http\Controllers\Rekap;
 use App\Http\Controllers\Controller;
 use App\Models\RekapHeader;
 use App\Models\Kecamatan;
+use App\Models\Dapil;
 use App\Models\Tps;
 use App\Exports\RekapExport;
+use App\Services\RekapAdminCache;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
 {
@@ -22,21 +25,126 @@ class AdminController extends Controller
 
     public function show(string $jenis)
     {
-        $kecamatans = Kecamatan::with(['desas.tps'])->orderBy('nama')->get();
-        $tpsIds     = Tps::pluck('id');
-        $rekaps     = RekapHeader::with([
-                                    'ppwpSuaras.calon',
-                                    'gubernurSuaras.calon',   // ← tambah ini
-                                    'bupatiSuaras.calon',     // ← tambah ini
-                                    'dpdSuaras.calon',
-                                    'partaiSuaras.partai',
-                                    'calegSuaras.caleg'
-                                ])
+        $dapils          = collect();
+        $selectedDapilId = null;
+        $showDetail      = request()->boolean('detail');
+        $detailKecamatanId = (int) request('detail_kecamatan_id');
+
+        if ($jenis === 'dprd_kab') {
+            $dapils          = Dapil::orderBy('nama')->get();
+            $requestedDapilId = (int) request('dapil_id');
+            $selectedDapilId = $dapils->contains('id', $requestedDapilId)
+                ? $requestedDapilId
+                : (int) $dapils->first()?->id;
+            $kecamatans     = Kecamatan::with(['desas.tps'])
+                                ->where('dapil_id', $selectedDapilId)
+                                ->orderBy('nama')
+                                ->get();
+        } else {
+            $kecamatans = Kecamatan::with(['desas.tps'])->orderBy('nama')->get();
+        }
+
+        $detailKecamatan = $kecamatans->firstWhere('id', $detailKecamatanId);
+        $detailKecamatans = $showDetail && $detailKecamatan ? collect([$detailKecamatan]) : collect();
+
+        $tpsIds     = $kecamatans->flatMap(fn($kecamatan) => $kecamatan->desas->flatMap(fn($desa) => $desa->tps->pluck('id')));
+        $detailTpsIds = $detailKecamatans->flatMap(fn($kecamatan) => $kecamatan->desas->flatMap(fn($desa) => $desa->tps->pluck('id')));
+        $relations  = match ($jenis) {
+            'ppwp'      => ['ppwpSuaras.calon'],
+            'gubernur'  => ['gubernurSuaras.calon'],
+            'bupati'    => ['bupatiSuaras.calon'],
+            'dpd'       => ['dpdSuaras.calon'],
+            default     => ['partaiSuaras.partai', 'calegSuaras.caleg'],
+        };
+        $rekaps     = RekapHeader::query()
                                 ->whereIn('tps_id', $tpsIds)
                                 ->where('jenis', $jenis)
                                 ->get()->keyBy('tps_id');
-        $master     = $this->getMaster($jenis);
-        return view('rekap.admin.show', compact('kecamatans', 'jenis', 'rekaps', 'master'));
+        $detailRekaps = $showDetail && $detailTpsIds->isNotEmpty()
+            ? RekapHeader::with($relations)
+                ->whereIn('tps_id', $detailTpsIds)
+                ->where('jenis', $jenis)
+                ->get()
+                ->keyBy('tps_id')
+            : collect();
+        $fieldNames = [
+            'dpt_lk', 'dpt_pr',
+            'pengguna_dpt_lk', 'pengguna_dpt_pr',
+            'pengguna_dptb_lk', 'pengguna_dptb_pr',
+            'pengguna_dpk_lk', 'pengguna_dpk_pr',
+            'ss_diterima', 'ss_digunakan', 'ss_rusak', 'ss_sisa',
+            'disabilitas_lk', 'disabilitas_pr',
+            'suara_tidak_sah',
+        ];
+
+        $kecStats             = [];
+        $kecCalonTotals       = [];
+        $kecPartaiTotals      = [];
+        $kecCalegTotals       = [];
+        $kecPartaiGrandTotals = [];
+        $tpsKecamatan         = [];
+
+        foreach ($kecamatans as $kecamatan) {
+            $kecStats[$kecamatan->id] = array_fill_keys($fieldNames, 0);
+            $kecStats[$kecamatan->id]['suara_sah'] = 0;
+            $kecStats[$kecamatan->id]['suara_total'] = 0;
+            $kecStats[$kecamatan->id]['final'] = 0;
+            $kecStats[$kecamatan->id]['tps_count'] = 0;
+
+            foreach ($kecamatan->desas as $desa) {
+                foreach ($desa->tps as $tps) {
+                    $tpsKecamatan[$tps->id] = $kecamatan->id;
+                    $kecStats[$kecamatan->id]['tps_count']++;
+                }
+            }
+        }
+
+        foreach ($rekaps as $rekap) {
+            $kecamatanId = $tpsKecamatan[$rekap->tps_id] ?? null;
+            if (!$kecamatanId) {
+                continue;
+            }
+
+            foreach ($fieldNames as $field) {
+                $kecStats[$kecamatanId][$field] += (int) ($rekap->{$field} ?? 0);
+            }
+
+            $kecStats[$kecamatanId]['final'] += $rekap->status === 'final' ? 1 : 0;
+        }
+
+        $suaraTotals = $this->aggregateSuaraByKecamatan($jenis, $selectedDapilId);
+        $kecCalonTotals = $suaraTotals['calons'];
+        $kecPartaiTotals = $suaraTotals['partais'];
+        $kecCalegTotals = $suaraTotals['calegs'];
+        $kecPartaiGrandTotals = $suaraTotals['partaiGrandTotals'];
+
+        foreach ($suaraTotals['suaraSah'] as $kecamatanId => $suaraSah) {
+            if (isset($kecStats[$kecamatanId])) {
+                $kecStats[$kecamatanId]['suara_sah'] = $suaraSah;
+            }
+        }
+
+        foreach ($kecStats as $kecamatanId => $stats) {
+            $kecStats[$kecamatanId]['suara_total'] = $stats['suara_sah'] + $stats['suara_tidak_sah'];
+        }
+
+        $master     = $this->getMaster($jenis, $selectedDapilId);
+        return view('rekap.admin.show', compact(
+            'kecamatans',
+            'jenis',
+            'rekaps',
+            'detailRekaps',
+            'detailKecamatans',
+            'detailKecamatanId',
+            'master',
+            'dapils',
+            'selectedDapilId',
+            'kecStats',
+            'kecCalonTotals',
+            'kecPartaiTotals',
+            'kecCalegTotals',
+            'kecPartaiGrandTotals'
+        ));
     }
 
     public function export(string $jenis)
@@ -70,13 +178,111 @@ class AdminController extends Controller
         );
     }
 
-    private function getMaster(string $jenis): array
+    private function getMaster(string $jenis, ?int $dapilId = null): array
     {
         if ($jenis === 'ppwp')     return ['calons' => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get()];
         if ($jenis === 'gubernur') return ['calons' => \App\Models\RekapGubernurCalon::orderBy('nomor_urut')->get()];
         if ($jenis === 'bupati')   return ['calons' => \App\Models\RekapBupatiCalon::orderBy('nomor_urut')->get()];
         if ($jenis === 'dpd')      return ['calons' => \App\Models\RekapDpdCalon::orderBy('nomor_urut')->get()];
-        return ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis',$jenis)->orderBy('nomor_urut')->get()];
+
+        $partais = \App\Models\RekapPartai::with('calegs')->where('jenis', $jenis);
+
+        if ($jenis === 'dprd_kab' && $dapilId) {
+            $partais->where('dapil_id', $dapilId);
+        }
+
+        return ['partais' => $partais->orderBy('nomor_urut')->get()];
+    }
+
+    private function aggregateSuaraByKecamatan(string $jenis, ?int $dapilId = null): array
+    {
+        return RekapAdminCache::rememberAggregate($jenis, $dapilId, function () use ($jenis, $dapilId) {
+        $result = [
+            'calons' => [],
+            'partais' => [],
+            'calegs' => [],
+            'partaiGrandTotals' => [],
+            'suaraSah' => [],
+        ];
+
+        $candidateTables = [
+            'ppwp' => 'rekap_ppwp_suaras',
+            'gubernur' => 'rekap_gubernur_suaras',
+            'bupati' => 'rekap_bupati_suaras',
+            'dpd' => 'rekap_dpd_suaras',
+        ];
+
+        if (isset($candidateTables[$jenis])) {
+            $rows = $this->baseSuaraAggregateQuery($candidateTables[$jenis], $jenis, $dapilId)
+                ->select('k.id as kecamatan_id', 's.calon_id', DB::raw('SUM(s.suara) as total_suara'))
+                ->groupBy('k.id', 's.calon_id')
+                ->get();
+
+            foreach ($rows as $row) {
+                $kecamatanId = (int) $row->kecamatan_id;
+                $calonId = (int) $row->calon_id;
+                $total = (int) $row->total_suara;
+
+                $result['calons'][$kecamatanId][$calonId] = $total;
+                $result['suaraSah'][$kecamatanId] = ($result['suaraSah'][$kecamatanId] ?? 0) + $total;
+            }
+
+            return $result;
+        }
+
+        $partaiRows = $this->baseSuaraAggregateQuery('rekap_partai_suaras', $jenis, $dapilId)
+            ->join('rekap_partais as p', 'p.id', '=', 's.partai_id')
+            ->where('p.jenis', $jenis)
+            ->when($jenis === 'dprd_kab' && $dapilId, fn($query) => $query->where('p.dapil_id', $dapilId))
+            ->select('k.id as kecamatan_id', 's.partai_id', DB::raw('SUM(s.suara) as total_suara'))
+            ->groupBy('k.id', 's.partai_id')
+            ->get();
+
+        foreach ($partaiRows as $row) {
+            $kecamatanId = (int) $row->kecamatan_id;
+            $partaiId = (int) $row->partai_id;
+            $total = (int) $row->total_suara;
+
+            $result['partais'][$kecamatanId][$partaiId] = $total;
+            $result['partaiGrandTotals'][$kecamatanId][$partaiId] =
+                ($result['partaiGrandTotals'][$kecamatanId][$partaiId] ?? 0) + $total;
+            $result['suaraSah'][$kecamatanId] = ($result['suaraSah'][$kecamatanId] ?? 0) + $total;
+        }
+
+        $calegRows = $this->baseSuaraAggregateQuery('rekap_caleg_suaras', $jenis, $dapilId)
+            ->join('rekap_calegs as c', 'c.id', '=', 's.caleg_id')
+            ->join('rekap_partais as p', 'p.id', '=', 'c.partai_id')
+            ->where('p.jenis', $jenis)
+            ->when($jenis === 'dprd_kab' && $dapilId, fn($query) => $query->where('p.dapil_id', $dapilId))
+            ->select('k.id as kecamatan_id', 's.caleg_id', 'p.id as partai_id', DB::raw('SUM(s.suara) as total_suara'))
+            ->groupBy('k.id', 's.caleg_id', 'p.id')
+            ->get();
+
+        foreach ($calegRows as $row) {
+            $kecamatanId = (int) $row->kecamatan_id;
+            $calegId = (int) $row->caleg_id;
+            $partaiId = (int) $row->partai_id;
+            $total = (int) $row->total_suara;
+
+            $result['calegs'][$kecamatanId][$calegId] = $total;
+            $result['partaiGrandTotals'][$kecamatanId][$partaiId] =
+                ($result['partaiGrandTotals'][$kecamatanId][$partaiId] ?? 0) + $total;
+            $result['suaraSah'][$kecamatanId] = ($result['suaraSah'][$kecamatanId] ?? 0) + $total;
+        }
+
+        return $result;
+        });
+    }
+
+    private function baseSuaraAggregateQuery(string $table, string $jenis, ?int $dapilId = null)
+    {
+        return DB::table($table . ' as s')
+            ->join('rekap_headers as h', 'h.id', '=', 's.rekap_id')
+            ->join('tps as t', 't.id', '=', 'h.tps_id')
+            ->join('desas as d', 'd.id', '=', 't.desa_id')
+            ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
+            ->where('h.jenis', $jenis)
+            ->when($jenis === 'dprd_kab' && $dapilId, fn($query) => $query->where('k.dapil_id', $dapilId));
     }
 
     private function getAllMaster(): array
@@ -322,6 +528,7 @@ class AdminController extends Controller
             'status'          => 'draft',
             'difinalisasi_at' => null,
         ]);
+        RekapAdminCache::flushAggregate();
 
         return back()->with('success', 'Rekap ' . $rekap->tps->nama . ' berhasil dibuka kembali.');
     }

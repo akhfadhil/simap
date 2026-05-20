@@ -21,6 +21,23 @@
     </button>
 </div>
 
+@if($jenis === 'dprd_kab')
+<form method="GET" action="{{ route('admin.rekap.show', $jenis) }}"
+      class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm p-4 mb-6">
+    <label for="dapil_id" class="block text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-2 font-semibold">
+        Dapil DPRD Kabupaten
+    </label>
+    <select id="dapil_id" name="dapil_id" onchange="this.form.submit()"
+            class="w-full md:w-80 dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-300 text-gray-600 px-4 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
+        @foreach($dapils as $dapil)
+        <option value="{{ $dapil->id }}" {{ (int) $selectedDapilId === (int) $dapil->id ? 'selected' : '' }}>
+            {{ $dapil->nama }}
+        </option>
+        @endforeach
+    </select>
+</form>
+@endif
+
 {{-- Summary cards --}}
 @php
     $totalDpt    = $rekaps->sum(fn($r) => $r->dpt_lk + $r->dpt_pr);
@@ -28,6 +45,9 @@
     $totalTdkSah = $rekaps->sum('suara_tidak_sah');
     $totalFinal  = $rekaps->where('status','final')->count();
     $totalRekap  = $rekaps->count();
+    $showDetail  = request()->boolean('detail');
+    $detailBaseQuery = request()->except(['detail', 'detail_kecamatan_id']);
+    $detailBaseUrl = route('admin.rekap.show', $jenis) . (count($detailBaseQuery) ? '?' . http_build_query($detailBaseQuery) : '');
 
     $rows1 = [
         ['label'=>'DPT Laki-laki',            'field'=>'dpt_lk'],
@@ -53,13 +73,12 @@
         ['label'=>'Disabilitas Jumlah',    'sum'=>['disabilitas_lk','disabilitas_pr'], 'bold'=>true],
     ];
 
-    // Helper: sum nilai field untuk semua TPS di kecamatan
-    $getKecVal = function($kecamatan, $row) use ($rekaps) {
-        $tpsIds = $kecamatan->desas->flatMap(fn($d) => $d->tps->pluck('id'))->toArray();
-        $kecRekaps = $rekaps->whereIn('tps_id', $tpsIds);
-        return $kecRekaps->sum(fn($r) => isset($row['field'])
-            ? ($r->{$row['field']} ?? 0)
-            : collect($row['sum'])->sum(fn($f) => $r->$f ?? 0));
+    // Helper: ambil agregat per kecamatan yang sudah dihitung di controller.
+    $getKecVal = function($kecamatan, $row) use ($kecStats) {
+        $stats = $kecStats[$kecamatan->id] ?? [];
+        return isset($row['field'])
+            ? ($stats[$row['field']] ?? 0)
+            : collect($row['sum'])->sum(fn($f) => $stats[$f] ?? 0);
     };
 @endphp
 
@@ -105,7 +124,7 @@
                     <th class="text-left px-5 py-3 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold truncate">Keterangan</th>
                     @foreach($kecamatans as $kec)
                     <th class="text-center px-3 py-3 text-[10px] uppercase font-semibold whitespace-nowrap
-                        {{ ($rekaps->first(fn($r) => in_array($r->tps_id, $kec->desas->flatMap(fn($d)=>$d->tps->pluck('id'))->toArray()) && $r->status === 'final'))
+                        {{ (($kecStats[$kec->id]['final'] ?? 0) > 0)
                            ? 'dark:text-gray-500 text-gray-400' : 'text-red-400' }}">
                         {{ $kec->nama }}
                     </th>
@@ -184,13 +203,7 @@
                 </td>
                 @foreach($kecamatans as $kec)
                 @php
-                    $kecTpsIds = $kec->desas->flatMap(fn($d) => $d->tps->pluck('id'))->toArray();
-                    $val = $rekaps->whereIn('tps_id', $kecTpsIds)->sum(fn($r) => match($jenis) {
-                        'ppwp'     => $r->ppwpSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0,
-                        'gubernur' => $r->gubernurSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0,
-                        'bupati'   => $r->bupatiSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0,
-                        default    => $r->dpdSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0,
-                    });
+                    $val = $kecCalonTotals[$kec->id][$calon->id] ?? 0;
                     $rowTotal += $val;
                 @endphp
                 <td class="px-3 py-2.5 text-center dark:text-gray-400 text-gray-500">{{ number_format($val) }}</td>
@@ -209,7 +222,7 @@
                 <tr class="border-b dark:border-gray-700 border-gray-100 dark:bg-gray-700/20 bg-gray-50">
                     <td class="px-5 py-2 text-xs font-bold dark:text-gray-300 text-gray-700 uppercase">Suara Partai</td>
                     @foreach($kecamatans as $kec)
-                    @php $kecTpsIds = $kec->desas->flatMap(fn($d) => $d->tps->pluck('id'))->toArray(); $spKec = $rekaps->whereIn('tps_id', $kecTpsIds)->sum(fn($r) => $r->partaiSuaras->firstWhere('partai_id', $partai->id)?->suara ?? 0); $partaiRowTotal += $spKec; @endphp
+                    @php $spKec = $kecPartaiTotals[$kec->id][$partai->id] ?? 0; $partaiRowTotal += $spKec; @endphp
                     <td class="px-3 py-2 text-center dark:text-gray-400 text-gray-500">{{ number_format($spKec) }}</td>
                     @endforeach
                     <td class="px-3 py-2 text-center font-bold text-red-500">{{ number_format($partaiRowTotal) }}</td>
@@ -219,7 +232,7 @@
                 <tr class="border-b dark:border-gray-700 border-gray-100 last:border-0 dark:hover:bg-gray-750 hover:bg-gray-50">
                     <td class="px-5 py-2"><div class="flex items-center gap-2"><span class="text-xs dark:text-gray-500 text-gray-400 w-4">{{ $caleg->nomor_urut }}.</span><span class="text-sm dark:text-gray-200 text-gray-700">{{ $caleg->nama_caleg }}</span></div></td>
                     @foreach($kecamatans as $kec)
-                    @php $kecTpsIds = $kec->desas->flatMap(fn($d) => $d->tps->pluck('id'))->toArray(); $scKec = $rekaps->whereIn('tps_id', $kecTpsIds)->sum(fn($r) => $r->calegSuaras->firstWhere('caleg_id', $caleg->id)?->suara ?? 0); $calegRowTotal += $scKec; @endphp
+                    @php $scKec = $kecCalegTotals[$kec->id][$caleg->id] ?? 0; $calegRowTotal += $scKec; @endphp
                     <td class="px-3 py-2 text-center dark:text-gray-400 text-gray-500">{{ number_format($scKec) }}</td>
                     @endforeach
                     <td class="px-3 py-2 text-center font-bold text-teal-400">{{ number_format($calegRowTotal) }}</td>
@@ -229,7 +242,7 @@
                 <tr class="border-t-2 dark:border-gray-600 border-gray-300 dark:bg-gray-700/30 bg-gray-50">
                     <td class="px-5 py-2 text-xs font-bold dark:text-gray-300 text-gray-700 uppercase">Total Suara Sah</td>
                     @foreach($kecamatans as $kec)
-                    @php $kecTpsIds = $kec->desas->flatMap(fn($d) => $d->tps->pluck('id'))->toArray(); $colTotal = $rekaps->whereIn('tps_id', $kecTpsIds)->sum(fn($r) => ($r->partaiSuaras->firstWhere('partai_id', $partai->id)?->suara ?? 0) + $r->calegSuaras->whereIn('caleg_id', $partai->calegs->pluck('id'))->sum('suara')); $grandTotal += $colTotal; @endphp
+                    @php $colTotal = $kecPartaiGrandTotals[$kec->id][$partai->id] ?? 0; $grandTotal += $colTotal; @endphp
                     <td class="px-3 py-2 text-center font-bold text-teal-400">{{ number_format($colTotal) }}</td>
                     @endforeach
                     <td class="px-3 py-2 text-center font-bold text-teal-400">{{ number_format($grandTotal) }}</td>
@@ -248,7 +261,7 @@
             <tr class="border-b dark:border-gray-700 border-gray-100 dark:hover:bg-gray-750 hover:bg-gray-50">
                 <td class="px-5 py-2 text-sm dark:text-gray-300 text-gray-600">{{ $row['label'] }}</td>
                 @foreach($kecamatans as $kec)
-                @php $kecTpsIds = $kec->desas->flatMap(fn($d) => $d->tps->pluck('id'))->toArray(); $val = $rekaps->whereIn('tps_id', $kecTpsIds)->sum($row['field']); $rowTotal += $val; @endphp
+                @php $val = $getKecVal($kec, $row); $rowTotal += $val; @endphp
                 <td class="px-3 py-2 text-center dark:text-gray-400 text-gray-500">{{ number_format($val) }}</td>
                 @endforeach
                 <td class="px-3 py-2 text-center font-bold text-red-500">{{ number_format($rowTotal) }}</td>
@@ -258,7 +271,7 @@
             <tr class="dark:bg-gray-700/20 bg-gray-50">
                 <td class="px-5 py-2 text-sm font-bold dark:text-gray-200 text-gray-800">Jumlah Seluruh Suara</td>
                 @foreach($kecamatans as $kec)
-                @php $kecTpsIds = $kec->desas->flatMap(fn($d) => $d->tps->pluck('id'))->toArray(); $val = $rekaps->whereIn('tps_id', $kecTpsIds)->sum(fn($r) => $r->suara_sah + $r->suara_tidak_sah); $rowTotalAll += $val; @endphp
+                @php $val = $kecStats[$kec->id]['suara_total'] ?? 0; $rowTotalAll += $val; @endphp
                 <td class="px-3 py-2 text-center font-bold dark:text-gray-200 text-gray-700">{{ number_format($val) }}</td>
                 @endforeach
                 <td class="px-3 py-2 text-center font-bold text-red-500">{{ number_format($rowTotalAll) }}</td>
@@ -275,10 +288,54 @@
     <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold mb-3">// Detail Per Kecamatan</p>
 </div>
 
-@foreach($kecamatans as $kecamatan)
+<div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm p-4 mb-4">
+    <form method="GET" action="{{ route('admin.rekap.show', $jenis) }}" class="flex flex-col lg:flex-row lg:items-end gap-3">
+        @foreach($detailBaseQuery as $key => $value)
+            @if(is_scalar($value))
+            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+            @endif
+        @endforeach
+
+        <div class="flex-1">
+            <label for="detail_kecamatan_id" class="block text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-2 font-semibold">
+                Pilih Kecamatan
+            </label>
+            <select id="detail_kecamatan_id" name="detail_kecamatan_id"
+                    class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-300 text-gray-600 px-4 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
+                <option value="">— Pilih Kecamatan —</option>
+                @foreach($kecamatans as $kec)
+                <option value="{{ $kec->id }}" {{ (int) $detailKecamatanId === (int) $kec->id ? 'selected' : '' }}>
+                    {{ $kec->nama }}
+                </option>
+                @endforeach
+            </select>
+        </div>
+
+        <button type="submit" name="detail" value="1"
+                class="inline-flex items-center justify-center px-4 py-2.5 rounded-lg text-xs font-semibold bg-red-500 hover:bg-red-600 text-white transition whitespace-nowrap">
+            Tampilkan Detail
+        </button>
+        @if($showDetail)
+    <a href="{{ $detailBaseUrl }}"
+       class="inline-flex items-center justify-center px-4 py-2.5 rounded-lg text-xs font-semibold border dark:border-gray-700 border-gray-300 dark:text-gray-300 text-gray-600 dark:hover:bg-gray-700 hover:bg-gray-100 transition">
+        Sembunyikan Detail
+    </a>
+        @endif
+    </form>
+</div>
+
+@if(!$showDetail || $detailKecamatans->isEmpty())
+<div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm p-6 mb-8">
+    <p class="text-sm font-semibold dark:text-gray-100 text-gray-800">Detail TPS tidak dimuat otomatis</p>
+    <p class="text-xs dark:text-gray-500 text-gray-400 mt-1">
+        Halaman awal dibuat ringan. Pilih satu kecamatan untuk melihat rincian per desa dan TPS.
+    </p>
+</div>
+@else
+@foreach($detailKecamatans as $kecamatan)
 @php
     $kecTpsIds = $kecamatan->desas->flatMap(fn($d) => $d->tps->pluck('id'))->toArray();
-    $kecRekaps = $rekaps->whereIn('tps_id', $kecTpsIds);
+    $kecRekaps = $detailRekaps->whereIn('tps_id', $kecTpsIds);
     $kecFinal  = $kecRekaps->where('status','final')->count();
 @endphp
 <div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm mb-4 overflow-hidden">
@@ -303,7 +360,7 @@
     @foreach($kecamatan->desas as $desa)
     @php
         $desaTpsIds = $desa->tps->pluck('id')->toArray();
-        $desaFinal  = $rekaps->whereIn('tps_id', $desaTpsIds)->where('status','final')->count();
+        $desaFinal  = $detailRekaps->whereIn('tps_id', $desaTpsIds)->where('status','final')->count();
     @endphp
 
     {{-- Sub-header desa --}}
@@ -331,7 +388,7 @@
                         <th class="text-left px-5 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Keterangan</th>
                         @foreach($desa->tps as $tps)
                         <th class="text-center px-3 py-2 text-[10px] uppercase font-semibold whitespace-nowrap
-    {{ ($rekaps[$tps->id] ?? null)?->status === 'final'
+    {{ ($detailRekaps[$tps->id] ?? null)?->status === 'final'
         ? 'dark:text-gray-500 text-gray-400'
         : 'text-red-400' }}">{{ $tps->nama }}</th>
                         @endforeach
@@ -351,7 +408,7 @@
                 <tr class="border-b dark:border-gray-700 border-gray-100 {{ $isBold ? 'dark:bg-gray-700/20 bg-gray-50' : 'dark:hover:bg-gray-750 hover:bg-gray-50' }}">
                     <td class="px-5 py-1.5 text-sm {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-800' : 'dark:text-gray-300 text-gray-600' }}">{{ $row['label'] }}</td>
                     @foreach($desa->tps as $tps)
-                    @php $r = $rekaps[$tps->id] ?? null; $val = $r ? (isset($row['field']) ? ($r->{$row['field']} ?? 0) : collect($row['sum'])->sum(fn($f) => $r->$f ?? 0)) : null; $rowTotal += $val ?? 0; @endphp
+                    @php $r = $detailRekaps[$tps->id] ?? null; $val = $r ? (isset($row['field']) ? ($r->{$row['field']} ?? 0) : collect($row['sum'])->sum(fn($f) => $r->$f ?? 0)) : null; $rowTotal += $val ?? 0; @endphp
                     <td class="px-3 py-1.5 text-center {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500' }}">{{ $r ? number_format($val) : '—' }}</td>
                     @endforeach
                     <td class="px-3 py-1.5 text-center font-bold text-red-500">{{ number_format($rowTotal) }}</td>
@@ -369,7 +426,7 @@
                 <tr class="border-b dark:border-gray-700 border-gray-100 {{ $isBold ? 'dark:bg-gray-700/20 bg-gray-50' : 'dark:hover:bg-gray-750 hover:bg-gray-50' }}">
                     <td class="px-5 py-1.5 text-sm {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-800' : 'dark:text-gray-300 text-gray-600' }}">{{ $row['label'] }}</td>
                     @foreach($desa->tps as $tps)
-                    @php $r = $rekaps[$tps->id] ?? null; $val = $r ? ($r->{$row['field']} ?? 0) : null; $rowTotal += $val ?? 0; @endphp
+                    @php $r = $detailRekaps[$tps->id] ?? null; $val = $r ? ($r->{$row['field']} ?? 0) : null; $rowTotal += $val ?? 0; @endphp
                     <td class="px-3 py-1.5 text-center {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500' }}">{{ $r ? number_format($val) : '—' }}</td>
                     @endforeach
                     <td class="px-3 py-1.5 text-center font-bold text-red-500">{{ number_format($rowTotal) }}</td>
@@ -387,7 +444,7 @@
                 <tr class="border-b dark:border-gray-700 border-gray-100 {{ $isBold ? 'dark:bg-gray-700/20 bg-gray-50' : 'dark:hover:bg-gray-750 hover:bg-gray-50' }}">
                     <td class="px-5 py-1.5 text-sm {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-800' : 'dark:text-gray-300 text-gray-600' }}">{{ $row['label'] }}</td>
                     @foreach($desa->tps as $tps)
-                    @php $r = $rekaps[$tps->id] ?? null; $val = $r ? (isset($row['field']) ? ($r->{$row['field']} ?? 0) : collect($row['sum'])->sum(fn($f) => $r->$f ?? 0)) : null; $rowTotal += $val ?? 0; @endphp
+                    @php $r = $detailRekaps[$tps->id] ?? null; $val = $r ? (isset($row['field']) ? ($r->{$row['field']} ?? 0) : collect($row['sum'])->sum(fn($f) => $r->$f ?? 0)) : null; $rowTotal += $val ?? 0; @endphp
                     <td class="px-3 py-1.5 text-center {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500' }}">{{ $r ? number_format($val) : '—' }}</td>
                     @endforeach
                     <td class="px-3 py-1.5 text-center font-bold text-red-500">{{ number_format($rowTotal) }}</td>
@@ -407,7 +464,7 @@
                     <td class="px-5 py-1.5 text-sm dark:text-gray-200 text-gray-700"><span class="text-xs dark:text-gray-500 text-gray-400 mr-1">{{ $calon->nomor_urut }}.</span>{{ $name }}</td>
                     @foreach($desa->tps as $tps)
                     @php
-                        $r = $rekaps[$tps->id] ?? null;
+                        $r = $detailRekaps[$tps->id] ?? null;
                         $suara = $r
                             ? (
                                 in_array($jenis, ['ppwp', 'gubernur', 'bupati'])
@@ -437,7 +494,7 @@
                 <tr class="border-b dark:border-gray-700 border-gray-100 dark:bg-gray-700/20 bg-gray-50">
                     <td class="px-5 py-1.5 text-xs font-bold dark:text-gray-300 text-gray-700 uppercase">Suara Partai</td>
                     @foreach($desa->tps as $tps)
-                    @php $r = $rekaps[$tps->id] ?? null; $sp = $r ? ($r->partaiSuaras->firstWhere('partai_id', $partai->id)?->suara ?? 0) : null; $partaiRowTotal += $sp ?? 0; @endphp
+                    @php $r = $detailRekaps[$tps->id] ?? null; $sp = $r ? ($r->partaiSuaras->firstWhere('partai_id', $partai->id)?->suara ?? 0) : null; $partaiRowTotal += $sp ?? 0; @endphp
                     <td class="px-3 py-1.5 text-center dark:text-gray-400 text-gray-500">{{ $r ? number_format($sp) : '—' }}</td>
                     @endforeach
                     <td class="px-3 py-1.5 text-center font-bold text-red-500">{{ number_format($partaiRowTotal) }}</td>
@@ -447,7 +504,7 @@
                 <tr class="border-b dark:border-gray-700 border-gray-100 last:border-0 dark:hover:bg-gray-750 hover:bg-gray-50">
                     <td class="px-5 py-1.5"><div class="flex items-center gap-2"><span class="text-xs dark:text-gray-500 text-gray-400 w-4">{{ $caleg->nomor_urut }}.</span><span class="text-sm dark:text-gray-200 text-gray-700">{{ $caleg->nama_caleg }}</span></div></td>
                     @foreach($desa->tps as $tps)
-                    @php $r = $rekaps[$tps->id] ?? null; $sc = $r ? ($r->calegSuaras->firstWhere('caleg_id', $caleg->id)?->suara ?? 0) : null; $calegRowTotal += $sc ?? 0; @endphp
+                    @php $r = $detailRekaps[$tps->id] ?? null; $sc = $r ? ($r->calegSuaras->firstWhere('caleg_id', $caleg->id)?->suara ?? 0) : null; $calegRowTotal += $sc ?? 0; @endphp
                     <td class="px-3 py-1.5 text-center dark:text-gray-400 text-gray-500">{{ $r ? number_format($sc) : '—' }}</td>
                     @endforeach
                     <td class="px-3 py-1.5 text-center font-bold text-teal-400">{{ number_format($calegRowTotal) }}</td>
@@ -457,7 +514,7 @@
                 <tr class="border-t-2 dark:border-gray-600 border-gray-300 dark:bg-gray-700/30 bg-gray-50">
                     <td class="px-5 py-1.5 text-xs font-bold dark:text-gray-300 text-gray-700 uppercase">Total Suara Sah</td>
                     @foreach($desa->tps as $tps)
-                    @php $r = $rekaps[$tps->id] ?? null; $sp = $r ? ($r->partaiSuaras->firstWhere('partai_id', $partai->id)?->suara ?? 0) : 0; $sc_sum = $r ? $r->calegSuaras->whereIn('caleg_id', $partai->calegs->pluck('id'))->sum('suara') : 0; $colTotal = $r ? ($sp + $sc_sum) : null; $grandTotal += $colTotal ?? 0; @endphp
+                    @php $r = $detailRekaps[$tps->id] ?? null; $sp = $r ? ($r->partaiSuaras->firstWhere('partai_id', $partai->id)?->suara ?? 0) : 0; $sc_sum = $r ? $r->calegSuaras->whereIn('caleg_id', $partai->calegs->pluck('id'))->sum('suara') : 0; $colTotal = $r ? ($sp + $sc_sum) : null; $grandTotal += $colTotal ?? 0; @endphp
                     <td class="px-3 py-1.5 text-center font-bold text-teal-400">{{ $r ? number_format($colTotal) : '—' }}</td>
                     @endforeach
                     <td class="px-3 py-1.5 text-center font-bold text-teal-400">{{ number_format($grandTotal) }}</td>
@@ -475,7 +532,7 @@
                 <tr class="border-b dark:border-gray-700 border-gray-100 dark:hover:bg-gray-750 hover:bg-gray-50">
                     <td class="px-5 py-1.5 text-sm dark:text-gray-300 text-gray-600">Jumlah Suara Sah</td>
                     @foreach($desa->tps as $tps)
-                    @php $r = $rekaps[$tps->id] ?? null; $sah = $r ? $r->suara_sah : null; $rowTotalSah += $sah ?? 0; @endphp
+                    @php $r = $detailRekaps[$tps->id] ?? null; $sah = $r ? $r->suara_sah : null; $rowTotalSah += $sah ?? 0; @endphp
                     <td class="px-3 py-1.5 text-center dark:text-gray-400 text-gray-500">{{ $r ? number_format($sah) : '—' }}</td>
                     @endforeach
                     <td class="px-3 py-1.5 text-center font-bold text-red-500">{{ number_format($rowTotalSah) }}</td>
@@ -484,7 +541,7 @@
                 <tr class="border-b dark:border-gray-700 border-gray-100 dark:hover:bg-gray-750 hover:bg-gray-50">
                     <td class="px-5 py-1.5 text-sm dark:text-gray-300 text-gray-600">Jumlah Suara Tidak Sah</td>
                     @foreach($desa->tps as $tps)
-                    @php $r = $rekaps[$tps->id] ?? null; $tdk = $r ? $r->suara_tidak_sah : null; $rowTotalTdk += $tdk ?? 0; @endphp
+                    @php $r = $detailRekaps[$tps->id] ?? null; $tdk = $r ? $r->suara_tidak_sah : null; $rowTotalTdk += $tdk ?? 0; @endphp
                     <td class="px-3 py-1.5 text-center dark:text-gray-400 text-gray-500">{{ $r ? number_format($tdk) : '—' }}</td>
                     @endforeach
                     <td class="px-3 py-1.5 text-center font-bold text-red-500">{{ number_format($rowTotalTdk) }}</td>
@@ -493,7 +550,7 @@
                 <tr class="dark:bg-gray-700/20 bg-gray-50">
                     <td class="px-5 py-1.5 text-sm font-bold dark:text-gray-200 text-gray-800">Jumlah Seluruh Suara</td>
                     @foreach($desa->tps as $tps)
-                    @php $r = $rekaps[$tps->id] ?? null; $all = $r ? ($r->suara_sah + $r->suara_tidak_sah) : null; $rowTotalAll += $all ?? 0; @endphp
+                    @php $r = $detailRekaps[$tps->id] ?? null; $all = $r ? ($r->suara_sah + $r->suara_tidak_sah) : null; $rowTotalAll += $all ?? 0; @endphp
                     <td class="px-3 py-1.5 text-center font-bold dark:text-gray-200 text-gray-700">{{ $r ? number_format($all) : '—' }}</td>
                     @endforeach
                     <td class="px-3 py-1.5 text-center font-bold text-red-500">{{ number_format($rowTotalAll) }}</td>
@@ -501,7 +558,7 @@
                 <tr class="dark:bg-gray-700/10 bg-gray-50 border-t dark:border-gray-700 border-gray-200">
                     <td class="px-5 py-1.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold tracking-wider">Status</td>
                     @foreach($desa->tps as $tps)
-                    @php $r = $rekaps[$tps->id] ?? null; @endphp
+                    @php $r = $detailRekaps[$tps->id] ?? null; @endphp
                     <td class="px-3 py-1.5 text-center">
                         @if(!$r) <span class="text-[9px] px-2 py-1 rounded font-semibold bg-gray-500/20 dark:text-gray-400 text-gray-500 border border-gray-400/30">Kosong</span>
                         @elseif($r->status === 'final')
@@ -529,6 +586,7 @@
     </div>{{-- end kec accordion --}}
 </div>
 @endforeach
+@endif
 
 {{-- Export Modal --}}
 <div id="export-modal" class="hidden fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">

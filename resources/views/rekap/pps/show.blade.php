@@ -46,10 +46,6 @@
 </div>
 
 {{-- ═══ MACRO: header kolom TPS (dipakai berulang) ═══ --}}
-@php
-    function thTps($tpsList) { return $tpsList; } // placeholder, pakai @foreach langsung
-@endphp
-
 {{-- ══════════════════════════════════════
      SECTION I, II, III — Data Pemilih & Surat Suara
      (sama untuk semua jenis pemilihan)
@@ -220,12 +216,12 @@
         <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold">// Section IV — Perolehan Suara</p>
     </div>
 
-@if(in_array($jenis, ['ppwp','dpd']))
+@if(in_array($jenis, ['ppwp','gubernur','bupati','dpd']))
     <div class="overflow-x-auto">
         <table class="w-full text-sm">
             <thead>
                 <tr class="border-b dark:border-gray-700 border-gray-200">
-                    <th class="text-left px-5 py-3 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold min-w-48">{{ $jenis === 'ppwp' ? 'Paslon' : 'Calon' }}</th>
+                    <th class="text-left px-5 py-3 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold min-w-48">{{ in_array($jenis, ['ppwp','gubernur','bupati']) ? 'Paslon' : 'Calon' }}</th>
                     @foreach($tpsList as $tps)
                     <th class="text-center px-3 py-3 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold whitespace-nowrap">{{ $tps->nama }}</th>
                     @endforeach
@@ -242,14 +238,19 @@
                             {{ $calon->nomor_urut }}
                         </span>
                         <span class="text-sm dark:text-gray-200 text-gray-700">
-                            {{ $jenis === 'ppwp' ? $calon->nama_paslon : $calon->nama_calon }}
+                            {{ in_array($jenis, ['ppwp','gubernur','bupati']) ? $calon->nama_paslon : $calon->nama_calon }}
                         </span>
                     </div>
                 </td>
                 @foreach($tpsList as $tps)
                 @php
                     $r = $rekaps[$tps->id] ?? null;
-                    $suaraMap = $r ? ($jenis === 'ppwp' ? $r->ppwpSuaras->pluck('suara','calon_id') : $r->dpdSuaras->pluck('suara','calon_id')) : collect();
+                    $suaraMap = $r ? match($jenis) {
+                        'ppwp'     => $r->ppwpSuaras->pluck('suara','calon_id'),
+                        'gubernur' => $r->gubernurSuaras->pluck('suara','calon_id'),
+                        'bupati'   => $r->bupatiSuaras->pluck('suara','calon_id'),
+                        default    => $r->dpdSuaras->pluck('suara','calon_id'),
+                    } : collect();
                     $s = $suaraMap[$calon->id] ?? null;
                     $rowTotal += $s ?? 0;
                 @endphp

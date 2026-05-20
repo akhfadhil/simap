@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Exports\RekapSheetExport;
+use App\Services\RekapAdminCache;
 use Maatwebsite\Excel\Facades\Excel;
 
 class KppsController extends Controller
@@ -103,6 +104,7 @@ class KppsController extends Controller
                 }
             }
         });
+        RekapAdminCache::flushAggregate();
 
         $label = RekapHeader::JENIS_LABELS[$jenis];
         if (request('finalisasi') == '1') {
@@ -164,7 +166,14 @@ class KppsController extends Controller
         abort_unless(in_array($jenis, self::JENIS), 404);
 
         $tps    = Auth::user()->tps;
-        $rekap  = RekapHeader::with(['ppwpSuaras','dpdSuaras','partaiSuaras','calegSuaras'])
+        $relations = match ($jenis) {
+            'ppwp'      => ['ppwpSuaras'],
+            'gubernur'  => ['gubernurSuaras'],
+            'bupati'    => ['bupatiSuaras'],
+            'dpd'       => ['dpdSuaras'],
+            default     => ['partaiSuaras', 'calegSuaras'],
+        };
+        $rekap  = RekapHeader::with($relations)
                             ->where('tps_id', $tps->id)
                             ->where('jenis', $jenis)
                             ->get();
