@@ -35,7 +35,7 @@
 <form method="GET" class="flex gap-3 mb-6">
     <select name="desa_id" onchange="this.form.submit()"
             class="dark:bg-gray-800 bg-white border dark:border-gray-700 border-gray-300 dark:text-gray-300 text-gray-600 px-4 py-2.5 text-xs rounded-lg focus:border-orange-400 focus:ring-0 focus:outline-none">
-        <option value="">Semua Desa</option>
+        <option value="">Pilih Desa</option>
         @foreach($desas as $desa)
         <option value="{{ $desa->id }}" {{ request('desa_id') == $desa->id ? 'selected' : '' }}>
             {{ $desa->nama }}
@@ -112,7 +112,9 @@
     </div>
 </div>
 @empty
-<div class="text-center py-20 dark:text-gray-600 text-gray-400 text-sm">Belum ada TPS.</div>
+<div class="text-center py-20 dark:text-gray-600 text-gray-400 text-sm">
+    {{ request('desa_id') ? 'Belum ada TPS.' : 'Pilih desa untuk menampilkan dokumen TPS.' }}
+</div>
 @endforelse
 
 @push('scripts')

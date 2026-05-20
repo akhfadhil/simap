@@ -16,7 +16,7 @@
 <form method="GET" class="flex gap-3 mb-8 flex-wrap">
     <select name="kecamatan_id" onchange="this.form.submit()"
             class="dark:bg-gray-800 bg-white border dark:border-gray-700 border-gray-300 dark:text-gray-300 text-gray-600 px-4 py-2.5 text-xs rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
-        <option value="">Semua Kecamatan</option>
+        <option value="">Pilih Kecamatan</option>
         @foreach($kecamatans as $kec)
         <option value="{{ $kec->id }}" {{ request('kecamatan_id') == $kec->id ? 'selected' : '' }}>{{ $kec->nama }}</option>
         @endforeach
@@ -24,13 +24,22 @@
     @if($desas->count())
     <select name="desa_id" onchange="this.form.submit()"
             class="dark:bg-gray-800 bg-white border dark:border-gray-700 border-gray-300 dark:text-gray-300 text-gray-600 px-4 py-2.5 text-xs rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
-        <option value="">Semua Desa</option>
+        <option value="">Pilih Desa</option>
         @foreach($desas as $d)
         <option value="{{ $d->id }}" {{ request('desa_id') == $d->id ? 'selected' : '' }}>{{ $d->nama }}</option>
         @endforeach
     </select>
     @endif
 </form>
+
+@if(!$selectedKecamatanId)
+<div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm p-6 mb-8">
+    <p class="text-sm font-semibold dark:text-gray-100 text-gray-800">Dokumen tidak dimuat otomatis</p>
+    <p class="text-xs dark:text-gray-500 text-gray-400 mt-1">
+        Pilih kecamatan untuk melihat dokumen PPK, lalu pilih desa untuk melihat dokumen TPS.
+    </p>
+</div>
+@endif
 
 {{-- ── Dokumen Kecamatan (PPK) ── --}}
 @if($dokumenKecamatan->count())
@@ -215,7 +224,15 @@
     </div>
 </div>
 @empty
-<div class="text-center py-20 dark:text-gray-600 text-gray-400 text-sm">Belum ada data.</div>
+<div class="text-center py-20 dark:text-gray-600 text-gray-400 text-sm">
+    @if(!$selectedKecamatanId)
+        Pilih kecamatan untuk mulai menampilkan dokumen.
+    @elseif(!$selectedDesaId)
+        Pilih desa untuk menampilkan dokumen TPS.
+    @else
+        Belum ada data.
+    @endif
+</div>
 @endforelse
 
 {{-- Modal Tolak --}}

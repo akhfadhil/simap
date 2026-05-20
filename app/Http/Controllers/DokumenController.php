@@ -105,14 +105,19 @@ class DokumenController extends Controller
             $isAdminView = false;
         }
 
-        $tpsList = Tps::where('desa_id', $desaId)
-            ->with(['dokumens' => fn($q) => $q->with('uploader', 'verifier')])
-            ->when($request->tps_id, fn($q) => $q->where('id', $request->tps_id))
-            ->get();
-
         $desa = \App\Models\Desa::with('kecamatan')->findOrFail($desaId);
+        $tpsOptions = Tps::where('desa_id', $desaId)->orderBy('nama')->get();
+        $selectedTpsId = $request->filled('tps_id') && $tpsOptions->contains('id', (int) $request->tps_id)
+            ? (int) $request->tps_id
+            : null;
 
-        return view('dokumen.pps', compact('tpsList', 'desa', 'isAdminView'));
+        $tpsList = $selectedTpsId
+            ? Tps::where('id', $selectedTpsId)
+                ->with(['dokumens' => fn($q) => $q->with('uploader', 'verifier')])
+                ->get()
+            : collect();
+
+        return view('dokumen.pps', compact('tpsList', 'tpsOptions', 'selectedTpsId', 'desa', 'isAdminView'));
     }
 
     // ── PPS: Verifikasi ────────────────────────────────────────
@@ -164,12 +169,16 @@ class DokumenController extends Controller
         $kecamatan = \App\Models\Kecamatan::findOrFail($kecamatanId);
         $desaIds   = \App\Models\Desa::where('kecamatan_id', $kecamatanId)->pluck('id');
 
-        $tpsList = Tps::whereIn('desa_id', $desaIds)
-            ->with(['desa', 'dokumens.uploader', 'dokumens.verifier'])
-            ->when($request->desa_id, fn($q) => $q->where('desa_id', $request->desa_id))
-            ->get();
-
         $desas = \App\Models\Desa::where('kecamatan_id', $kecamatanId)->get();
+        $selectedDesaId = $request->filled('desa_id') && $desas->contains('id', (int) $request->desa_id)
+            ? (int) $request->desa_id
+            : null;
+
+        $tpsList = $selectedDesaId
+            ? Tps::where('desa_id', $selectedDesaId)
+                ->with(['desa', 'dokumens.uploader', 'dokumens.verifier'])
+                ->get()
+            : collect();
 
         return view('dokumen.ppk', compact('tpsList', 'desas', 'kecamatan', 'isAdminView'));
     }
@@ -248,24 +257,33 @@ class DokumenController extends Controller
             ? Desa::where('kecamatan_id', $request->kecamatan_id)->pluck('id')
             : null;
 
-        // Dokumen TPS
-        $tpsList = Tps::with(['desa.kecamatan', 'dokumens.uploader', 'dokumens.verifier'])
-            ->when($desaIds,           fn($q) => $q->whereIn('desa_id', $desaIds))
-            ->when($request->desa_id,  fn($q) => $q->where('desa_id', $request->desa_id))
-            ->get();
-
-        // Dokumen Kecamatan (dari PPK)
-        $dokumenKecamatan = Dokumen::where('level', 'kecamatan')
-            ->with(['kecamatan', 'uploader', 'verifier'])
-            ->when($request->kecamatan_id, fn($q) => $q->where('kecamatan_id', $request->kecamatan_id))
-            ->get()
-            ->groupBy('kecamatan_id');
-
         $desas = $request->kecamatan_id
             ? Desa::where('kecamatan_id', $request->kecamatan_id)->get()
             : collect();
+        $selectedKecamatanId = $request->filled('kecamatan_id') && $kecamatans->contains('id', (int) $request->kecamatan_id)
+            ? (int) $request->kecamatan_id
+            : null;
+        $selectedDesaId = $request->filled('desa_id') && $desas->contains('id', (int) $request->desa_id)
+            ? (int) $request->desa_id
+            : null;
 
-        return view('dokumen.admin', compact('tpsList', 'kecamatans', 'desas', 'dokumenKecamatan'));
+        // Dokumen TPS hanya dimuat setelah desa dipilih.
+        $tpsList = $selectedDesaId
+            ? Tps::with(['desa.kecamatan', 'dokumens.uploader', 'dokumens.verifier'])
+                ->where('desa_id', $selectedDesaId)
+                ->get()
+            : collect();
+
+        // Dokumen Kecamatan (PPK) hanya dimuat setelah kecamatan dipilih.
+        $dokumenKecamatan = $selectedKecamatanId
+            ? Dokumen::where('level', 'kecamatan')
+                ->with(['kecamatan', 'uploader', 'verifier'])
+                ->where('kecamatan_id', $selectedKecamatanId)
+                ->get()
+                ->groupBy('kecamatan_id')
+            : collect();
+
+        return view('dokumen.admin', compact('tpsList', 'kecamatans', 'desas', 'dokumenKecamatan', 'selectedKecamatanId', 'selectedDesaId'));
     }
 
     // ── Admin: Verifikasi dokumen TPS atau Kecamatan ───────────────

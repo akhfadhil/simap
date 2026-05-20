@@ -37,6 +37,18 @@
 </div>
 @endif
 
+<form method="GET" class="flex gap-3 mb-6">
+    <select name="tps_id" onchange="this.form.submit()"
+            class="dark:bg-gray-800 bg-white border dark:border-gray-700 border-gray-300 dark:text-gray-300 text-gray-600 px-4 py-2.5 text-xs rounded-lg focus:border-teal-400 focus:ring-0 focus:outline-none">
+        <option value="">Pilih TPS</option>
+        @foreach($tpsOptions as $tpsOption)
+        <option value="{{ $tpsOption->id }}" {{ (int) $selectedTpsId === (int) $tpsOption->id ? 'selected' : '' }}>
+            {{ $tpsOption->nama }}
+        </option>
+        @endforeach
+    </select>
+</form>
+
 @forelse($tpsList as $tps)
 @php
     $dokByJenis = $tps->dokumens->keyBy('jenis');
@@ -135,7 +147,9 @@
     </div>
 </div>
 @empty
-<div class="text-center py-20 dark:text-gray-600 text-gray-400 text-sm">Belum ada TPS di desa ini.</div>
+<div class="text-center py-20 dark:text-gray-600 text-gray-400 text-sm">
+    {{ $selectedTpsId ? 'Belum ada TPS di desa ini.' : 'Pilih TPS untuk menampilkan dokumen.' }}
+</div>
 @endforelse
 
 {{-- Modal Tolak --}}
