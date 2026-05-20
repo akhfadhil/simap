@@ -396,6 +396,7 @@ class AdminController extends Controller
         $desaId  = $request->desa_id;
         $tpsId   = $request->tps_id;
         $dapilId = $request->dapil_id;
+        $activeDapilId = $jenis === 'dprd_kab' && $dapilId ? (int) $dapilId : null;
 
         // Tentukan scope TPS
         $tpsQuery = Tps::query();
@@ -420,7 +421,7 @@ class AdminController extends Controller
                 $kecTpsIds = $kec->desas->flatMap(fn($d) => $d->tps->pluck('id'))->toArray();
                 $data[] = [
                     'label'       => $kec->nama,
-                    'suara'       => $this->buildSuaraData($rekaps->whereIn('tps_id', $kecTpsIds), $jenis),
+                    'suara'       => $this->buildSuaraData($rekaps->whereIn('tps_id', $kecTpsIds), $jenis, $activeDapilId),
                     'partisipasi' => $this->buildPartisipasiData($rekaps->whereIn('tps_id', $kecTpsIds)),
                 ];
             }
@@ -431,7 +432,7 @@ class AdminController extends Controller
                 $kecTpsIds = $kec->desas->flatMap(fn($d) => $d->tps->pluck('id'))->toArray();
                 $data[] = [
                     'label'       => $kec->nama,
-                    'suara'       => $this->buildSuaraData($rekaps->whereIn('tps_id', $kecTpsIds), $jenis),
+                    'suara'       => $this->buildSuaraData($rekaps->whereIn('tps_id', $kecTpsIds), $jenis, $activeDapilId),
                     'partisipasi' => $this->buildPartisipasiData($rekaps->whereIn('tps_id', $kecTpsIds)),
                 ];
             }
@@ -442,7 +443,7 @@ class AdminController extends Controller
                 $desaTpsIds = $desa->tps->pluck('id')->toArray();
                 $data[] = [
                     'label'       => $desa->nama,
-                    'suara'       => $this->buildSuaraData($rekaps->whereIn('tps_id', $desaTpsIds), $jenis),
+                    'suara'       => $this->buildSuaraData($rekaps->whereIn('tps_id', $desaTpsIds), $jenis, $activeDapilId),
                     'partisipasi' => $this->buildPartisipasiData($rekaps->whereIn('tps_id', $desaTpsIds)),
                 ];
             }
@@ -453,7 +454,7 @@ class AdminController extends Controller
                 $r = $rekaps->where('tps_id', $tps->id)->first();
                 $data[] = [
                     'label'       => $tps->nama,
-                    'suara'       => $this->buildSuaraData($r ? collect([$r]) : collect(), $jenis),
+                    'suara'       => $this->buildSuaraData($r ? collect([$r]) : collect(), $jenis, $activeDapilId),
                     'partisipasi' => $this->buildPartisipasiData($r ? collect([$r]) : collect()),
                 ];
             }
@@ -463,32 +464,38 @@ class AdminController extends Controller
             $r   = $rekaps->where('tps_id', $tpsId)->first();
             $data[] = [
                 'label'       => $tps->nama,
-                'suara'       => $this->buildSuaraData($r ? collect([$r]) : collect(), $jenis),
+                'suara'       => $this->buildSuaraData($r ? collect([$r]) : collect(), $jenis, $activeDapilId),
                 'partisipasi' => $this->buildPartisipasiData($r ? collect([$r]) : collect()),
             ];
         }
 
         // Master labels
-        $master = $this->getMaster($jenis);
+        $master = $this->getMaster($jenis, $activeDapilId);
         $labels = [];
+        $searchMeta = [];
         if (in_array($jenis, ['ppwp','dpd','gubernur','bupati'])) {
             $labels = $master['calons']->map(fn($c) => in_array($jenis, ['ppwp','gubernur','bupati']) ? $c->nama_paslon : $c->nama_calon)->toArray();
+            $searchMeta = $labels;
         } else {
             $labels = $master['partais']->map(fn($p) => $p->nama_partai)->toArray();
+            $searchMeta = $master['partais']->map(function ($partai) {
+                return trim($partai->nama_partai . ' ' . $partai->calegs->pluck('nama_caleg')->implode(' '));
+            })->toArray();
         }
 
         return response()->json([
             'type'   => in_array($jenis, ['ppwp','dpd']) ? 'pie' : 'bar',
             'jenis'  => $jenis,
             'labels' => $labels,
+            'search_meta' => $searchMeta,
             'data'   => $data,
         ]);
     }
 
-    private function buildSuaraData($rekaps, string $jenis): array
+    private function buildSuaraData($rekaps, string $jenis, ?int $dapilId = null): array
     {
         if (in_array($jenis, ['ppwp','dpd','gubernur','bupati'])) {
-            $master = $this->getMaster($jenis);
+            $master = $this->getMaster($jenis, $dapilId);
             return $master['calons']->map(function($calon) use ($rekaps, $jenis) {
                 return $rekaps->sum(fn($r) => match($jenis) {
                     'ppwp'     => $r->ppwpSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0,
@@ -498,7 +505,7 @@ class AdminController extends Controller
                 });
             })->toArray();
         } else {
-            $master = $this->getMaster($jenis);
+            $master = $this->getMaster($jenis, $dapilId);
             return $master['partais']->map(function($partai) use ($rekaps) {
                 return $rekaps->sum(fn($r) =>
                     ($r->partaiSuaras->firstWhere('partai_id', $partai->id)?->suara ?? 0) +

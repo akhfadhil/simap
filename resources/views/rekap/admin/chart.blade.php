@@ -92,6 +92,24 @@
         select, input, button {
             font-family: inherit;
         }
+
+        .jenis-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.78);
+        }
+
+        .jenis-btn:hover {
+            background: rgba(255, 255, 255, 0.16);
+            color: #ffffff;
+        }
+
+        .jenis-btn.is-active {
+            background: #ffffff;
+            border-color: #ffffff;
+            color: var(--primary);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+        }
     </style>
 </head>
 <body>
@@ -137,16 +155,33 @@
         <div class="mb-7">
             <p class="text-[10px] uppercase tracking-[0.24em] text-white/55 font-semibold mb-2">Filter Utama</p>
             <label class="block text-xs text-white/70 mb-2 font-semibold">Jenis Pemilihan</label>
-            <div class="relative">
-                <select id="f-jenis" onchange="onJenisChange()" class="w-full appearance-none rounded-lg border border-white/10 bg-white/12 px-4 py-3 pr-10 text-sm font-bold text-white outline-none focus:border-red-300 focus:ring-2 focus:ring-red-300/30">
-                    <option value="">Pilih Jenis</option>
-                    @foreach(\App\Models\RekapHeader::JENIS_LABELS as $key => $label)
-                        @if(in_array($key, $aktifJenis))
-                            <option value="{{ $key }}" @selected($key === $defaultJenis)>{{ $label }}</option>
-                        @endif
-                    @endforeach
-                </select>
-                <span class="material-symbols-outlined pointer-events-none absolute right-3 top-3.5 text-white/70">expand_more</span>
+            <input type="hidden" id="f-jenis" value="{{ $defaultJenis }}">
+            <div id="jenis-buttons" class="grid grid-cols-2 gap-2">
+                @foreach(\App\Models\RekapHeader::JENIS_LABELS as $key => $label)
+                    @if(in_array($key, $aktifJenis))
+                        <button type="button"
+                                data-jenis="{{ $key }}"
+                                onclick="selectJenis('{{ $key }}')"
+                                class="jenis-btn min-h-11 rounded-lg border px-3 py-2 text-left text-xs font-bold leading-tight transition">
+                            {{ $label }}
+                        </button>
+                    @endif
+                @endforeach
+            </div>
+
+            <div class="mt-5">
+                <label class="block text-xs text-white/70 mb-2 font-semibold">Cari Partai / Caleg</label>
+                <div class="relative">
+                    <span class="material-symbols-outlined pointer-events-none absolute left-3 top-3 text-white/60 text-lg">search</span>
+                    <input id="f-search"
+                           type="search"
+                           oninput="applyChartSearch()"
+                           placeholder="Ketik nama partai atau caleg"
+                           class="w-full rounded-lg border border-white/10 bg-white/12 py-2.5 pl-10 pr-9 text-sm font-semibold text-white placeholder:text-white/40 outline-none focus:border-red-300 focus:ring-2 focus:ring-red-300/30">
+                    <button type="button" onclick="clearChartSearch()" class="absolute right-2 top-2 hidden h-7 w-7 items-center justify-center rounded-md text-white/60 hover:bg-white/10 hover:text-white" id="clear-search">
+                        <span class="material-symbols-outlined text-base">close</span>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -330,6 +365,7 @@ let chartPart = null;
 let geojsonLayer = null;
 let kecamatanData = {};
 let selectedKec = null;
+let currentChartJson = null;
 
 const map = L.map('map', {
     zoomControl: true,
@@ -343,6 +379,78 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
 
 function formatNumber(value) {
     return (Number(value) || 0).toLocaleString('id-ID');
+}
+
+function normalizeText(value) {
+    return String(value || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+}
+
+function updateJenisButtons() {
+    const selected = document.getElementById('f-jenis').value;
+    document.querySelectorAll('.jenis-btn').forEach((button) => {
+        button.classList.toggle('is-active', button.dataset.jenis === selected);
+    });
+}
+
+function selectJenis(jenis) {
+    if (document.getElementById('f-jenis').value === jenis) return;
+    document.getElementById('f-jenis').value = jenis;
+    updateJenisButtons();
+    onJenisChange();
+}
+
+function clearChartSearch() {
+    document.getElementById('f-search').value = '';
+    applyChartSearch();
+}
+
+function filterChartJson(json) {
+    if (!json) return null;
+
+    const term = normalizeText(document.getElementById('f-search')?.value || '');
+    document.getElementById('clear-search')?.classList.toggle('hidden', term.length === 0);
+    document.getElementById('clear-search')?.classList.toggle('flex', term.length > 0);
+
+    if (!term) return json;
+
+    const searchMeta = json.search_meta || json.labels || [];
+    const indexes = json.labels
+        .map((label, index) => ({ label, index }))
+        .filter((item) => normalizeText(`${item.label} ${searchMeta[item.index] || ''}`).includes(term))
+        .map((item) => item.index);
+
+    return {
+        ...json,
+        labels: indexes.map((index) => json.labels[index]),
+        data: json.data.map((item) => ({
+            ...item,
+            suara: indexes.map((index) => item.suara[index] ?? 0),
+        })),
+    };
+}
+
+function applyChartSearch() {
+    if (!currentChartJson) {
+        document.getElementById('clear-search')?.classList.toggle('hidden', !document.getElementById('f-search')?.value);
+        document.getElementById('clear-search')?.classList.toggle('flex', !!document.getElementById('f-search')?.value);
+        return;
+    }
+
+    const filtered = filterChartJson(currentChartJson);
+    if (!filtered.labels.length) {
+        showError('Partai atau caleg tidak ditemukan pada jenis pemilihan ini.');
+        updateStats([]);
+        updateRanking([]);
+        updateMapColors([]);
+        return;
+    }
+
+    renderCharts(filtered);
+    const level = document.getElementById('f-level').value;
+    if (level === 'kabupaten' || level === 'dapil') updateMapColors(filtered.data);
 }
 
 function getColor(val, max) {
@@ -466,6 +574,7 @@ function setDapilMode(enabled) {
 
 function onJenisChange() {
     const jenis = document.getElementById('f-jenis').value;
+    updateJenisButtons();
     setDapilMode(jenis === 'dprd_kab');
     resetDependentFilters();
     hideCharts();
@@ -551,6 +660,7 @@ function onDesaChange() {
 }
 
 function hideCharts() {
+    currentChartJson = null;
     document.getElementById('chart-placeholder').classList.remove('hidden');
     document.getElementById('chart-loading').classList.add('hidden');
     document.getElementById('chart-error').classList.add('hidden');
@@ -561,6 +671,8 @@ function hideCharts() {
 function showError(message) {
     document.getElementById('chart-placeholder').classList.add('hidden');
     document.getElementById('chart-loading').classList.add('hidden');
+    document.getElementById('card-suara').classList.add('hidden');
+    document.getElementById('card-partisipasi').classList.add('hidden');
     document.getElementById('chart-error').textContent = message;
     document.getElementById('chart-error').classList.remove('hidden');
 }
@@ -596,8 +708,8 @@ async function loadChart() {
         const res = await fetch('{{ route("admin.rekap.chart.data") }}?' + params);
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const json = await res.json();
-        renderCharts(json);
-        if (level === 'kabupaten' || level === 'dapil') updateMapColors(json.data);
+        currentChartJson = json;
+        applyChartSearch();
     } catch (error) {
         console.error(error);
         showError('Gagal memuat data grafik. Periksa koneksi atau data rekap.');
@@ -613,6 +725,10 @@ function renderCharts(json) {
         updateRanking([]);
         return;
     }
+
+    document.getElementById('chart-placeholder').classList.add('hidden');
+    document.getElementById('chart-error').classList.add('hidden');
+    document.getElementById('chart-loading').classList.add('hidden');
 
     const wLabels = json.data.map((item) => item.label);
     const isPie = json.type === 'pie' && json.data.length === 1;
@@ -754,6 +870,7 @@ function updateRanking(data) {
 
 document.addEventListener('DOMContentLoaded', () => {
     const jenis = document.getElementById('f-jenis').value;
+    updateJenisButtons();
     setDapilMode(jenis === 'dprd_kab');
     if (jenis && jenis !== 'dprd_kab') loadChart();
 });
