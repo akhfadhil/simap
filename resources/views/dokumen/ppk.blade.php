@@ -3,6 +3,13 @@
 
 @section('content')
 
+@php
+    $aktifJenis = \App\Models\PemiluSetting::aktif();
+    $aktifDokumenJenis = collect(\App\Models\Dokumen::JENIS)
+        ->filter(fn($label, $key) => in_array(strtolower($key), $aktifJenis, true));
+    $totalJenisAktif = $aktifDokumenJenis->count();
+@endphp
+
 {{-- Banner view mode --}}
 @if(isset($isAdminView) && $isAdminView)
 <div class="dark:bg-orange-950 bg-orange-50 border dark:border-orange-900 border-orange-200 px-5 py-3 mb-6 rounded-lg flex items-center justify-between">
@@ -45,20 +52,24 @@
 </form>
 
 @forelse($tpsList as $tps)
-@php $dokByJenis = $tps->dokumens->keyBy('jenis'); @endphp
+@php
+    $dokByJenis = $tps->dokumens->keyBy('jenis');
+    $totalDokumenAktif = $tps->dokumens->whereIn('jenis', $aktifDokumenJenis->keys())->count();
+    $persenDokumenAktif = $totalJenisAktif > 0 ? min(100, ($totalDokumenAktif / $totalJenisAktif) * 100) : 0;
+@endphp
 <div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 mb-4 shadow-sm overflow-hidden">
     <div class="flex items-center justify-between px-6 py-4 border-b dark:border-gray-700 border-gray-200 cursor-pointer hover:dark:bg-gray-750 hover:bg-gray-50 transition"
          onclick="toggleTps({{ $tps->id }})">
         <div>
             <p class="font-semibold text-sm dark:text-gray-100 text-gray-800">{{ $tps->nama }}</p>
             <p class="text-[11px] dark:text-gray-500 text-gray-400 mt-0.5">
-                {{ $tps->desa->nama }} · {{ $tps->dokumens->count() }}/5 dokumen
+                {{ $tps->desa->nama }} · {{ $totalDokumenAktif }}/{{ $totalJenisAktif }} dokumen
             </p>
         </div>
         <div class="flex items-center gap-3">
             <div class="w-24 h-1.5 dark:bg-gray-700 bg-gray-200 rounded-full">
                 <div class="h-1.5 rounded-full bg-orange-400"
-                     style="width:{{ ($tps->dokumens->count()/5)*100 }}%"></div>
+                     style="width:{{ $persenDokumenAktif }}%"></div>
             </div>
             <span id="arrow-{{ $tps->id }}" class="dark:text-gray-500 text-gray-400 text-xs">▾</span>
         </div>
@@ -66,11 +77,7 @@
 
     <div id="tps-{{ $tps->id }}" class="hidden">
     
-    @php $aktifJenis = \App\Models\PemiluSetting::aktif(); @endphp
-
-    @foreach(App\Models\Dokumen::JENIS as $key => $label)
-    @if(in_array(strtolower($key), $aktifJenis))
-
+    @foreach($aktifDokumenJenis as $key => $label)
     @php $dok = $dokByJenis[$key] ?? null; @endphp
     <div class="flex items-center justify-between px-6 py-4 border-b dark:border-gray-700 border-gray-100 last:border-0 flex-wrap gap-2">
         <div class="flex items-center gap-3">
@@ -107,7 +114,6 @@
         <span class="text-[11px] dark:text-gray-600 text-gray-400">Belum diupload</span>
         @endif
     </div>
-    @endif
     @endforeach
     </div>
 </div>

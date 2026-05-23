@@ -14,8 +14,26 @@
         $desa        = Auth::user()->desa;
         $tpsList     = $desa ? $desa->tps : collect();
         $totalTps    = $tpsList->count();
-        $sudahUpload = $tpsList->filter(fn($t) => $t->dokumens->count() > 0)->count();
-        $terverif    = $tpsList->sum(fn($t) => $t->dokumens->where('status','terverifikasi')->count());
+        $tpsIds      = $tpsList->pluck('id');
+        $aktifJenis  = \App\Models\PemiluSetting::aktif();
+        $totalPemiluAktif = count($aktifJenis);
+        $targetPemiluTps  = $totalTps * $totalPemiluAktif;
+        $dokumenJenisAktif = array_map('strtoupper', $aktifJenis);
+
+        $totalDokumenMasuk = \App\Models\Dokumen::where('level', 'tps')
+                            ->whereIn('tps_id', $tpsIds)
+                            ->whereIn('jenis', $dokumenJenisAktif)
+                            ->count();
+        $persenDokumen = $targetPemiluTps > 0 ? min(100, round(($totalDokumenMasuk / $targetPemiluTps) * 100)) : 0;
+
+        $totalRekapFinal = \App\Models\RekapHeader::select('tps_id')
+                            ->where('status', 'final')
+                            ->whereIn('tps_id', $tpsIds)
+                            ->whereIn('jenis', $aktifJenis)
+                            ->groupBy('tps_id')
+                            ->havingRaw('COUNT(DISTINCT jenis) = ?', [$totalPemiluAktif])
+                            ->count();
+        $persenRekap = $totalTps > 0 ? min(100, round(($totalRekapFinal / $totalTps) * 100)) : 0;
     @endphp
     <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border dark:border-gray-700 border-gray-200 shadow-sm">
         <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">Desa</p>
@@ -28,14 +46,26 @@
         <p class="text-xs dark:text-gray-500 text-gray-400 mt-1">di desa ini</p>
     </div>
     <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border dark:border-gray-700 border-gray-200 shadow-sm">
-        <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">Sudah Upload</p>
-        <p class="font-display text-3xl tracking-wide text-teal-400">{{ $sudahUpload }}</p>
-        <p class="text-xs dark:text-gray-500 text-gray-400 mt-1">dari {{ $totalTps }} TPS</p>
+        <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">Dokumen Masuk</p>
+        <p class="font-display text-3xl tracking-wide text-teal-400">{{ $totalDokumenMasuk }}/{{ $targetPemiluTps }}</p>
+        <div class="mt-2 flex items-center gap-2">
+            <div class="flex-1 h-1.5 dark:bg-gray-700 bg-gray-200 rounded-full">
+                <div class="h-1.5 rounded-full bg-teal-400 transition-all" style="width:{{ $persenDokumen }}%"></div>
+            </div>
+            <span class="text-xs dark:text-gray-500 text-gray-400">{{ $persenDokumen }}%</span>
+        </div>
+        <p class="text-xs dark:text-gray-500 text-gray-400 mt-1">TPS x {{ $totalPemiluAktif }} pemilu aktif</p>
     </div>
     <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border dark:border-gray-700 border-gray-200 shadow-sm">
-        <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">Terverifikasi</p>
-        <p class="font-display text-3xl tracking-wide text-teal-400">{{ $terverif }}</p>
-        <p class="text-xs dark:text-gray-500 text-gray-400 mt-1">dokumen</p>
+        <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">Rekap Finalisasi</p>
+        <p class="font-display text-3xl tracking-wide text-teal-400">{{ $totalRekapFinal }}/{{ $totalTps }}</p>
+        <div class="mt-2 flex items-center gap-2">
+            <div class="flex-1 h-1.5 dark:bg-gray-700 bg-gray-200 rounded-full">
+                <div class="h-1.5 rounded-full bg-teal-400 transition-all" style="width:{{ $persenRekap }}%"></div>
+            </div>
+            <span class="text-xs dark:text-gray-500 text-gray-400">{{ $persenRekap }}%</span>
+        </div>
+        <p class="text-xs dark:text-gray-500 text-gray-400 mt-1">TPS final semua pemilu aktif</p>
     </div>
 </div>
 

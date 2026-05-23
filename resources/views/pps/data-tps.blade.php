@@ -18,10 +18,15 @@
 {{-- Stats --}}
 <div class="grid grid-cols-3 gap-4 mb-8">
     @php
+        $aktifJenis = \App\Models\PemiluSetting::aktif();
+        $aktifDokumenKeys = collect(\App\Models\Dokumen::JENIS)
+            ->filter(fn($label, $key) => in_array(strtolower($key), $aktifJenis, true))
+            ->keys();
+        $totalJenisAktif = $aktifDokumenKeys->count();
         $totalTps      = $tpsList->count();
-        $totalMaxDok   = $totalTps * 5;
-        $totalUploaded = $tpsList->sum(fn($t) => $t->dokumens->count());
-        $totalVerif    = $tpsList->sum(fn($t) => $t->dokumens->where('status','terverifikasi')->count());
+        $totalMaxDok   = $totalTps * $totalJenisAktif;
+        $totalUploaded = $tpsList->sum(fn($t) => $t->dokumens->whereIn('jenis', $aktifDokumenKeys)->count());
+        $totalVerif    = $tpsList->sum(fn($t) => $t->dokumens->whereIn('jenis', $aktifDokumenKeys)->where('status','terverifikasi')->count());
         $persenUpload  = $totalMaxDok > 0 ? round(($totalUploaded / $totalMaxDok) * 100) : 0;
         $persenVerif   = $totalMaxDok > 0 ? round(($totalVerif / $totalMaxDok) * 100) : 0;
     @endphp
@@ -29,7 +34,7 @@
     <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border dark:border-gray-700 border-gray-200 shadow-sm">
         <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">Total TPS</p>
         <p class="font-display text-4xl text-teal-400">{{ $totalTps }}</p>
-        <p class="text-xs dark:text-gray-500 text-gray-400 mt-1">{{ $totalTps * 5 }} dokumen maksimal</p>
+        <p class="text-xs dark:text-gray-500 text-gray-400 mt-1">{{ $totalMaxDok }} dokumen maksimal</p>
     </div>
 
     <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border dark:border-gray-700 border-gray-200 shadow-sm">
@@ -63,10 +68,10 @@
 <div class="space-y-3">
 @forelse($tpsList as $tps)
 @php
-    $totalDok = $tps->dokumens->count();
-    $terverif = $tps->dokumens->where('status','terverifikasi')->count();
+    $totalDok = $tps->dokumens->whereIn('jenis', $aktifDokumenKeys)->count();
+    $terverif = $tps->dokumens->whereIn('jenis', $aktifDokumenKeys)->where('status','terverifikasi')->count();
     $kppsUser = $tps->users->first();
-    $persen   = round(($totalDok / 5) * 100);
+    $persen   = $totalJenisAktif > 0 ? round(($totalDok / $totalJenisAktif) * 100) : 0;
 @endphp
 <div class="dark:bg-gray-800 bg-white rounded-xl p-5 border dark:border-gray-700 border-gray-200 shadow-sm flex items-center justify-between flex-wrap gap-4">
     <div class="flex items-center gap-4">
@@ -82,7 +87,7 @@
                          style="width:{{ $persen }}%"></div>
                 </div>
                 <span class="text-[11px] dark:text-gray-500 text-gray-400">
-                    {{ $totalDok }}/5 dok · {{ $terverif }} terverifikasi
+                    {{ $totalDok }}/{{ $totalJenisAktif }} dok · {{ $terverif }} terverifikasi
                 </span>
             </div>
         </div>

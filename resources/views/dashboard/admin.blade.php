@@ -11,17 +11,25 @@
 {{-- Stats --}}
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
     @php
-        $totalPengguna   = \App\Models\User::count();
-        $totalTps        = \App\Models\Tps::count();
-        $totalKecamatan  = \App\Models\Kecamatan::count();
-        $totalSeharusnya = ($totalTps + $totalKecamatan) * 5;
-        $totalVerif      = \App\Models\Dokumen::where('status','terverifikasi')->count();
-        $persenVerif     = $totalSeharusnya > 0 ? round(($totalVerif / $totalSeharusnya) * 100) : 0;
-        $tpsSelesai      = \App\Models\RekapHeader::select('tps_id')
-                            ->where('status','final')
-                            ->groupBy('tps_id')
-                            ->havingRaw('COUNT(DISTINCT jenis) = 5')
+        $totalPengguna     = \App\Models\User::count();
+        $totalTps          = \App\Models\Tps::count();
+        $aktifJenis        = \App\Models\PemiluSetting::aktif();
+        $totalPemiluAktif  = count($aktifJenis);
+        $targetPemiluTps   = $totalTps * $totalPemiluAktif;
+        $dokumenJenisAktif = array_map('strtoupper', $aktifJenis);
+
+        $totalDokumenMasuk = \App\Models\Dokumen::where('level', 'tps')
+                            ->whereIn('jenis', $dokumenJenisAktif)
                             ->count();
+        $persenDokumen     = $targetPemiluTps > 0 ? min(100, round(($totalDokumenMasuk / $targetPemiluTps) * 100)) : 0;
+
+        $totalRekapFinal   = \App\Models\RekapHeader::select('tps_id')
+                            ->where('status', 'final')
+                            ->whereIn('jenis', $aktifJenis)
+                            ->groupBy('tps_id')
+                            ->havingRaw('COUNT(DISTINCT jenis) = ?', [$totalPemiluAktif])
+                            ->count();
+        $persenRekap       = $totalTps > 0 ? min(100, round(($totalRekapFinal / $totalTps) * 100)) : 0;
     @endphp
 
     <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border dark:border-gray-700 border-gray-200 shadow-sm flex flex-col">
@@ -38,32 +46,32 @@
 
     <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border dark:border-gray-700 border-gray-200 shadow-sm flex flex-col">
         <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">Dokumen Masuk</p>
-        <p class="font-display text-4xl text-red-600 tracking-wide">{{ $totalVerif }}/{{ $totalSeharusnya }}</p>
+        <p class="font-display text-4xl text-red-600 tracking-wide">{{ $totalDokumenMasuk }}/{{ $targetPemiluTps }}</p>
         <div class="mt-auto pt-3">
             <div class="flex items-center gap-2 mb-1">
                 <div class="flex-1 h-1.5 dark:bg-gray-700 bg-gray-200 rounded-full">
-                    <div class="h-1.5 rounded-full bg-red-500 transition-all" style="width:{{ $persenVerif }}%"></div>
+                    <div class="h-1.5 rounded-full bg-red-500 transition-all" style="width:{{ $persenDokumen }}%"></div>
                 </div>
-                <span class="text-xs dark:text-gray-500 text-gray-400">{{ $persenVerif }}%</span>
+                <span class="text-xs dark:text-gray-500 text-gray-400">{{ $persenDokumen }}%</span>
             </div>
-            <p class="text-xs dark:text-gray-500 text-gray-400">dokumen terunggah</p>
+            <p class="text-xs dark:text-gray-500 text-gray-400">TPS x {{ $totalPemiluAktif }} pemilu aktif</p>
         </div>
     </div>
 
     <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border dark:border-gray-700 border-gray-200 shadow-sm flex flex-col">
         <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">Rekap Finalisasi</p>
-        <p class="font-display text-4xl text-red-600 tracking-wide">{{ $tpsSelesai }}/{{ $totalTps }}</p>
+        <p class="font-display text-4xl text-red-600 tracking-wide">{{ $totalRekapFinal }}/{{ $totalTps }}</p>
         <div class="mt-auto pt-3">
             <div class="flex items-center gap-2 mb-1">
                 <div class="flex-1 h-1.5 dark:bg-gray-700 bg-gray-200 rounded-full">
                     <div class="h-1.5 rounded-full bg-red-500 transition-all"
-                         style="width:{{ $totalTps > 0 ? round(($tpsSelesai/$totalTps)*100) : 0 }}%"></div>
+                         style="width:{{ $persenRekap }}%"></div>
                 </div>
                 <span class="text-xs dark:text-gray-500 text-gray-400">
-                    {{ $totalTps > 0 ? round(($tpsSelesai/$totalTps)*100) : 0 }}%
+                    {{ $persenRekap }}%
                 </span>
             </div>
-            <p class="text-xs dark:text-gray-500 text-gray-400">TPS selesai semua rekap</p>
+            <p class="text-xs dark:text-gray-500 text-gray-400">TPS final semua pemilu aktif</p>
         </div>
     </div>
 </div>

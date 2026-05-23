@@ -12,10 +12,23 @@
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
     @php
         $tps      = Auth::user()->tps;
-        $uploaded = $tps ? \App\Models\Dokumen::where('tps_id', $tps->id)->count() : 0;
-        $terverif = $tps ? \App\Models\Dokumen::where('tps_id', $tps->id)->where('status','terverifikasi')->count() : 0;
-        $totalRekap = $tps ? \App\Models\RekapHeader::where('tps_id', $tps->id)->count() : 0;
-        $finalRekap = $tps ? \App\Models\RekapHeader::where('tps_id', $tps->id)->where('status','final')->count() : 0;
+        $aktifJenis = \App\Models\PemiluSetting::aktif();
+        $totalPemiluAktif = count($aktifJenis);
+        $dokumenJenisAktif = array_map('strtoupper', $aktifJenis);
+        $uploaded = $tps
+            ? \App\Models\Dokumen::where('tps_id', $tps->id)->whereIn('jenis', $dokumenJenisAktif)->count()
+            : 0;
+        $terverif = $tps
+            ? \App\Models\Dokumen::where('tps_id', $tps->id)->whereIn('jenis', $dokumenJenisAktif)->where('status','terverifikasi')->count()
+            : 0;
+        $totalRekap = $tps
+            ? \App\Models\RekapHeader::where('tps_id', $tps->id)->whereIn('jenis', $aktifJenis)->count()
+            : 0;
+        $finalRekap = $tps
+            ? \App\Models\RekapHeader::where('tps_id', $tps->id)->whereIn('jenis', $aktifJenis)->where('status','final')->count()
+            : 0;
+        $draftRekap = max(0, $totalRekap - $finalRekap);
+        $belumRekap = max(0, $totalPemiluAktif - $totalRekap);
     @endphp
 
     <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border dark:border-gray-700 border-gray-200 shadow-sm">
@@ -26,24 +39,24 @@
 
     <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border dark:border-gray-700 border-gray-200 shadow-sm">
         <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">Dokumen Upload</p>
-        <p class="font-display text-3xl tracking-wide text-sky-300">{{ $uploaded }}/5</p>
+        <p class="font-display text-3xl tracking-wide text-sky-300">{{ $uploaded }}/{{ $totalPemiluAktif }}</p>
         <p class="text-xs dark:text-gray-500 text-gray-400 mt-1">sudah diupload</p>
     </div>
 
     <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border dark:border-gray-700 border-gray-200 shadow-sm">
         <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">Terverifikasi</p>
-        <p class="font-display text-3xl tracking-wide text-sky-300">{{ $terverif }}/5</p>
+        <p class="font-display text-3xl tracking-wide text-sky-300">{{ $terverif }}/{{ $totalPemiluAktif }}</p>
         <p class="text-xs dark:text-gray-500 text-gray-400 mt-1">oleh PPS</p>
     </div>
 
     <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border dark:border-gray-700 border-gray-200 shadow-sm">
         <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">Rekap Data</p>
-        <p class="font-display text-3xl tracking-wide text-sky-300">{{ $finalRekap }}/5</p>
+        <p class="font-display text-3xl tracking-wide text-sky-300">{{ $finalRekap }}/{{ $totalPemiluAktif }}</p>
         <p class="text-xs dark:text-gray-500 text-gray-400 mt-1">
-            @if($finalRekap === 5)
+            @if($totalPemiluAktif > 0 && $finalRekap === $totalPemiluAktif)
                 semua difinalisasi ✓
             @elseif($totalRekap > 0)
-                {{ $totalRekap - $finalRekap }} draft · {{ 5 - $totalRekap }} belum diisi
+                {{ $draftRekap }} draft · {{ $belumRekap }} belum diisi
             @else
                 belum ada rekap
             @endif
@@ -60,7 +73,7 @@
         <span class="float-right dark:text-gray-600 text-gray-300 group-hover:text-sky-300 transition text-lg">→</span>
         <div class="text-3xl mb-4">📄</div>
         <p class="font-semibold text-sm mb-1 dark:text-gray-100 text-gray-800">Upload Dokumen</p>
-        <p class="text-xs dark:text-gray-500 text-gray-500 leading-relaxed">Upload 5 jenis dokumen PDF hasil pemungutan suara (PPWP, DPR RI, DPD, DPRD Prov, DPRD Kab).</p>
+        <p class="text-xs dark:text-gray-500 text-gray-500 leading-relaxed">Upload dokumen PDF hasil pemungutan suara untuk pemilu aktif.</p>
     </a>
     
     <a href="{{ route('rekap.index') }}"
@@ -68,7 +81,7 @@
         <span class="float-right dark:text-gray-600 text-gray-300 group-hover:text-sky-300 transition text-lg">→</span>
         <div class="text-3xl mb-4">📊</div>
         <p class="font-semibold text-sm mb-1 dark:text-gray-100 text-gray-800">Isi Data Rekapitulasi</p>
-        <p class="text-xs dark:text-gray-500 text-gray-500 leading-relaxed">Input data hasil suara ke dalam tabel rekapitulasi (PPWP, DPR RI, DPD, DPRD Prov, DPRD Kab).</p>
+        <p class="text-xs dark:text-gray-500 text-gray-500 leading-relaxed">Input data hasil suara ke dalam tabel rekapitulasi untuk pemilu aktif.</p>
     </a>
 
 </div>

@@ -3,6 +3,13 @@
 
 @section('content')
 
+@php
+    $aktifJenis = \App\Models\PemiluSetting::aktif();
+    $aktifDokumenJenis = collect(\App\Models\Dokumen::JENIS)
+        ->filter(fn($label, $key) => in_array(strtolower($key), $aktifJenis, true));
+    $totalJenisAktif = $aktifDokumenJenis->count();
+@endphp
+
 <div class="mb-8">
     <a href="{{ route('dashboard.admin') }}"
        class="inline-flex items-center gap-2 text-xs dark:text-gray-500 text-gray-400 hover:text-red-500 transition font-medium mb-4">
@@ -48,24 +55,28 @@
 </p>
 
 @foreach($dokumenKecamatan as $kecId => $dokList)
-@php $kecNama = $dokList->first()->kecamatan->nama; @endphp
+@php
+    $kecNama = $dokList->first()->kecamatan->nama;
+    $totalDokumenAktif = $dokList->whereIn('jenis', $aktifDokumenJenis->keys())->count();
+    $persenDokumenAktif = $totalJenisAktif > 0 ? min(100, ($totalDokumenAktif / $totalJenisAktif) * 100) : 0;
+@endphp
 <div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 mb-4 shadow-sm overflow-hidden">
     <div class="flex items-center justify-between px-6 py-4 border-b dark:border-gray-700 border-gray-200 cursor-pointer hover:dark:bg-gray-750 hover:bg-gray-50 transition"
          onclick="toggleTps('kec-{{ $kecId }}')">
         <div>
             <p class="font-semibold text-sm dark:text-gray-100 text-gray-800">{{ $kecNama }}</p>
-            <p class="text-[11px] dark:text-gray-500 text-gray-400 mt-0.5">{{ $dokList->count() }}/5 dokumen · PPK</p>
+            <p class="text-[11px] dark:text-gray-500 text-gray-400 mt-0.5">{{ $totalDokumenAktif }}/{{ $totalJenisAktif }} dokumen · PPK</p>
         </div>
         <div class="flex items-center gap-3">
             <div class="w-24 h-1.5 dark:bg-gray-700 bg-gray-200 rounded-full">
-                <div class="h-1.5 rounded-full bg-red-500" style="width:{{ ($dokList->count()/5)*100 }}%"></div>
+                <div class="h-1.5 rounded-full bg-red-500" style="width:{{ $persenDokumenAktif }}%"></div>
             </div>
             <span id="arrow-kec-{{ $kecId }}" class="dark:text-gray-500 text-gray-400 text-xs">▾</span>
         </div>
     </div>
 
     <div id="tps-kec-{{ $kecId }}">
-    @foreach(App\Models\Dokumen::JENIS as $key => $label)
+    @foreach($aktifDokumenJenis as $key => $label)
     @php $dok = $dokList->firstWhere('jenis', $key); @endphp
     <div class="px-6 py-4 border-b dark:border-gray-700 border-gray-100 last:border-0">
         <div class="flex items-center justify-between flex-wrap gap-2">
@@ -139,26 +150,30 @@
 </p>
 
 @forelse($tpsList as $tps)
-@php $dokByJenis = $tps->dokumens->keyBy('jenis'); @endphp
+@php
+    $dokByJenis = $tps->dokumens->keyBy('jenis');
+    $totalDokumenAktif = $tps->dokumens->whereIn('jenis', $aktifDokumenJenis->keys())->count();
+    $persenDokumenAktif = $totalJenisAktif > 0 ? min(100, ($totalDokumenAktif / $totalJenisAktif) * 100) : 0;
+@endphp
 <div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 mb-4 shadow-sm overflow-hidden">
     <div class="flex items-center justify-between px-6 py-4 border-b dark:border-gray-700 border-gray-200 cursor-pointer hover:dark:bg-gray-750 hover:bg-gray-50 transition"
          onclick="toggleTps({{ $tps->id }})">
         <div>
             <p class="font-semibold text-sm dark:text-gray-100 text-gray-800">{{ $tps->nama }}</p>
             <p class="text-[11px] dark:text-gray-500 text-gray-400 mt-0.5">
-                {{ $tps->desa->nama }} · {{ $tps->desa->kecamatan->nama }} · {{ $tps->dokumens->count() }}/5 dokumen
+                {{ $tps->desa->nama }} · {{ $tps->desa->kecamatan->nama }} · {{ $totalDokumenAktif }}/{{ $totalJenisAktif }} dokumen
             </p>
         </div>
         <div class="flex items-center gap-3">
             <div class="w-24 h-1.5 dark:bg-gray-700 bg-gray-200 rounded-full">
-                <div class="h-1.5 rounded-full bg-red-500" style="width:{{ ($tps->dokumens->count()/5)*100 }}%"></div>
+                <div class="h-1.5 rounded-full bg-red-500" style="width:{{ $persenDokumenAktif }}%"></div>
             </div>
             <span id="arrow-{{ $tps->id }}" class="dark:text-gray-500 text-gray-400 text-xs">▾</span>
         </div>
     </div>
 
     <div id="tps-{{ $tps->id }}" class="hidden">
-    @foreach(App\Models\Dokumen::JENIS as $key => $label)
+    @foreach($aktifDokumenJenis as $key => $label)
     @php $dok = $dokByJenis[$key] ?? null; @endphp
     <div class="px-6 py-4 border-b dark:border-gray-700 border-gray-100 last:border-0">
         <div class="flex items-center justify-between flex-wrap gap-2">

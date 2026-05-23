@@ -3,6 +3,13 @@
 
 @section('content')
 
+@php
+    $aktifJenis = \App\Models\PemiluSetting::aktif();
+    $aktifDokumenJenis = collect(\App\Models\Dokumen::JENIS)
+        ->filter(fn($label, $key) => in_array(strtolower($key), $aktifJenis, true));
+    $totalJenisAktif = $aktifDokumenJenis->count();
+@endphp
+
 @if(isset($isAdminView) && $isAdminView)
 <div class="dark:bg-teal-950 bg-teal-50 border dark:border-teal-900 border-teal-200 px-5 py-3 mb-6 rounded-lg flex items-center justify-between">
     <div class="flex items-center gap-3">
@@ -52,31 +59,32 @@
 @forelse($tpsList as $tps)
 @php
     $dokByJenis = $tps->dokumens->keyBy('jenis');
-    $totalDok   = $tps->dokumens->count();
-    $verified   = $tps->dokumens->where('status', 'terverifikasi')->count();
+    $totalDok   = $tps->dokumens->whereIn('jenis', $aktifDokumenJenis->keys())->count();
+    $verified   = $tps->dokumens
+                    ->whereIn('jenis', $aktifDokumenJenis->keys())
+                    ->where('status', 'terverifikasi')
+                    ->count();
+    $persenDokumen = $totalJenisAktif > 0 ? min(100, ($totalDok / $totalJenisAktif) * 100) : 0;
 @endphp
 <div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 mb-4 shadow-sm overflow-hidden">
     <div class="flex items-center justify-between px-6 py-4 border-b dark:border-gray-700 border-gray-200 cursor-pointer dark:hover:bg-gray-750 hover:bg-gray-50 transition"
          onclick="toggleTps({{ $tps->id }})">
         <div>
             <p class="font-semibold text-sm dark:text-gray-100 text-gray-800">{{ $tps->nama }}</p>
-            <p class="text-[11px] dark:text-gray-500 text-gray-400 mt-0.5">{{ $verified }}/5 dokumen terverifikasi</p>
+            <p class="text-[11px] dark:text-gray-500 text-gray-400 mt-0.5">{{ $verified }}/{{ $totalJenisAktif }} dokumen terverifikasi</p>
         </div>
         <div class="flex items-center gap-4">
             <div class="w-32 h-1.5 dark:bg-gray-700 bg-gray-200 rounded-full">
-                <div class="h-1.5 rounded-full transition-all bg-teal-400" style="width:{{ ($totalDok/5)*100 }}%"></div>
+                <div class="h-1.5 rounded-full transition-all bg-teal-400" style="width:{{ $persenDokumen }}%"></div>
             </div>
-            <span class="text-[11px] dark:text-gray-500 text-gray-400">{{ $totalDok }}/5</span>
+            <span class="text-[11px] dark:text-gray-500 text-gray-400">{{ $totalDok }}/{{ $totalJenisAktif }}</span>
             <span class="dark:text-gray-500 text-gray-400 text-xs" id="arrow-{{ $tps->id }}">▸</span>
         </div>
     </div>
 
-    @php $aktifJenis = \App\Models\PemiluSetting::aktif(); @endphp
     <div id="tps-{{ $tps->id }}" class="hidden">
     
-    @foreach(App\Models\Dokumen::JENIS as $key => $label)
-    @if(in_array(strtolower($key), $aktifJenis))
-    
+    @foreach($aktifDokumenJenis as $key => $label)
     @php $dok = $dokByJenis[$key] ?? null; @endphp
     <div class="px-6 py-4 border-b dark:border-gray-700 border-gray-100 last:border-0">
         <div class="flex items-center justify-between flex-wrap gap-3">
@@ -142,7 +150,6 @@
         </div>
         @endif
     </div>
-    @endif
     @endforeach
     </div>
 </div>
