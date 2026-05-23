@@ -71,8 +71,34 @@
             border-radius: 8px;
             box-shadow: 0 12px 30px rgba(15, 23, 42, 0.24);
             font-size: 12px;
-            font-weight: 700;
-            padding: 5px 10px;
+            font-weight: 500;
+            padding: 0;
+        }
+
+        .map-tooltip {
+            min-width: 190px;
+            padding: 10px 12px;
+        }
+
+        .map-tooltip-title {
+            display: block;
+            font-size: 13px;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .map-tooltip-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            color: rgba(255, 255, 255, 0.82);
+            font-size: 11px;
+            line-height: 1.45;
+        }
+
+        .map-tooltip-row b {
+            color: #ffffff;
+            font-weight: 800;
         }
 
         .leaflet-container {
@@ -94,21 +120,162 @@
         }
 
         .jenis-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.78);
+            background: #f8fafc;
+            border-color: #e2e8f0;
+            color: #475569;
         }
 
         .jenis-btn:hover {
-            background: rgba(255, 255, 255, 0.16);
-            color: #ffffff;
+            background: #ffffff;
+            border-color: #cbd5e1;
+            color: var(--primary);
         }
 
         .jenis-btn.is-active {
-            background: #ffffff;
-            border-color: #ffffff;
-            color: var(--primary);
-            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #ffffff;
+            box-shadow: 0 12px 28px rgba(0, 31, 69, 0.18);
+        }
+
+        .detail-table-scroll {
+            max-height: 286px;
+            overflow-y: auto;
+        }
+
+        .detail-table-scroll thead {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        @media (max-width: 1280px) {
+            body {
+                overflow: auto;
+            }
+
+            main.chart-shell {
+                height: auto;
+                min-height: 100vh;
+                display: grid;
+                grid-template-columns: 300px minmax(0, 1fr);
+            }
+
+            main.chart-shell > aside:first-child {
+                height: calc(100vh - 4rem);
+                position: sticky;
+                top: 4rem;
+            }
+
+            main.chart-shell > section {
+                min-width: 0;
+            }
+
+            main.chart-shell > aside:last-child {
+                grid-column: 1 / -1;
+                width: auto;
+                height: auto;
+                border-left: 0;
+                border-top: 1px solid var(--line);
+            }
+        }
+
+        @media (max-width: 1024px) {
+            main.chart-shell {
+                display: block;
+                padding-top: 4rem;
+            }
+
+            header {
+                height: auto;
+                min-height: 4rem;
+            }
+
+            main.chart-shell > aside:first-child,
+            main.chart-shell > aside:last-child {
+                width: auto;
+                height: auto;
+                position: static;
+            }
+
+            main.chart-shell > section {
+                height: auto;
+            }
+
+            .map-panel {
+                height: 620px;
+                min-height: 520px;
+            }
+
+            .kpi-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .map-info {
+                top: 13.5rem;
+            }
+        }
+
+        @media (max-width: 640px) {
+            header .h-full {
+                padding: 0.75rem 1rem;
+            }
+
+            main.chart-shell {
+                padding-top: 5rem;
+            }
+
+            main.chart-shell > aside:first-child,
+            main.chart-shell > aside:last-child {
+                padding: 1rem;
+            }
+
+            main.chart-shell > section {
+                padding: 0.75rem;
+            }
+
+            .map-panel {
+                height: 720px;
+                min-height: 640px;
+            }
+
+            .kpi-grid {
+                left: 0.75rem;
+                right: 0.75rem;
+                top: 0.75rem;
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+
+            .kpi-card {
+                padding: 0.75rem;
+            }
+
+            .kpi-card p:nth-child(2) {
+                font-size: 1.25rem;
+                line-height: 1.5rem;
+                margin-top: 0.25rem;
+            }
+
+            .map-info {
+                left: 0.75rem;
+                right: 0.75rem;
+                top: 21rem;
+                max-width: none;
+            }
+
+            #map-legend {
+                left: 0.75rem;
+                right: 0.75rem;
+                bottom: 0.75rem;
+                min-width: 0;
+                max-height: 190px;
+                overflow-y: auto;
+            }
+
+            .detail-table-scroll {
+                max-height: 310px;
+            }
         }
     </style>
 </head>
@@ -150,11 +317,11 @@
     </div>
 </header>
 
-<main class="pt-16 h-screen flex">
-    <aside class="w-[330px] bg-[var(--primary)] text-white h-full overflow-y-auto flex flex-col p-6 shadow-xl z-40">
+<main class="chart-shell pt-16 h-screen flex">
+    <aside class="w-[330px] bg-white text-slate-800 border-r border-slate-200 h-full overflow-y-auto flex flex-col p-6 shadow-xl z-40">
         <div class="mb-7">
-            <p class="text-[10px] uppercase tracking-[0.24em] text-white/55 font-semibold mb-2">Filter Utama</p>
-            <label class="block text-xs text-white/70 mb-2 font-semibold">Jenis Pemilihan</label>
+            <p class="text-[10px] uppercase tracking-[0.24em] text-slate-500 font-bold mb-2">Filter Utama</p>
+            <label class="block text-xs text-slate-600 mb-2 font-semibold">Jenis Pemilihan</label>
             <input type="hidden" id="f-jenis" value="{{ $defaultJenis }}">
             <div id="jenis-buttons" class="grid grid-cols-2 gap-2">
                 @foreach(\App\Models\RekapHeader::JENIS_LABELS as $key => $label)
@@ -170,39 +337,42 @@
             </div>
 
             <div class="mt-5">
-                <label class="block text-xs text-white/70 mb-2 font-semibold">Cari Partai / Caleg</label>
+                <label class="block text-xs text-slate-600 mb-2 font-semibold">Cari Partai / Caleg</label>
                 <div class="relative">
-                    <span class="material-symbols-outlined pointer-events-none absolute left-3 top-3 text-white/60 text-lg">search</span>
+                    <span class="material-symbols-outlined pointer-events-none absolute left-3 top-3 text-slate-400 text-lg">search</span>
                     <input id="f-search"
                            type="search"
                            oninput="applyChartSearch()"
+                           onfocus="renderSearchSuggestions()"
                            placeholder="Ketik nama partai atau caleg"
-                           class="w-full rounded-lg border border-white/10 bg-white/12 py-2.5 pl-10 pr-9 text-sm font-semibold text-white placeholder:text-white/40 outline-none focus:border-red-300 focus:ring-2 focus:ring-red-300/30">
-                    <button type="button" onclick="clearChartSearch()" class="absolute right-2 top-2 hidden h-7 w-7 items-center justify-center rounded-md text-white/60 hover:bg-white/10 hover:text-white" id="clear-search">
+                           autocomplete="off"
+                           class="w-full rounded-lg border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-9 text-sm font-semibold text-slate-800 placeholder:text-slate-400 outline-none focus:border-red-300 focus:ring-2 focus:ring-red-300/30">
+                    <button type="button" onclick="clearChartSearch()" class="absolute right-2 top-2 hidden h-7 w-7 items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-700" id="clear-search">
                         <span class="material-symbols-outlined text-base">close</span>
                     </button>
+                    <div id="search-suggestions" class="hidden absolute left-0 right-0 top-full z-[1200] mt-2 max-h-64 overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-xl"></div>
                 </div>
             </div>
         </div>
 
         <div class="space-y-4">
             <div>
-                <label class="block text-xs text-white/70 mb-2 font-semibold">Level Tampilan</label>
+                <label class="block text-xs text-slate-600 mb-2 font-semibold">Level Tampilan</label>
                 <div class="relative">
-                    <select id="f-level" onchange="onLevelChange()" class="w-full appearance-none rounded-lg border border-white/10 bg-white/12 px-4 py-2.5 pr-10 text-sm font-semibold text-white outline-none focus:border-red-300 focus:ring-2 focus:ring-red-300/30">
+                    <select id="f-level" onchange="onLevelChange()" class="w-full appearance-none rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 pr-10 text-sm font-semibold text-slate-800 outline-none focus:border-red-300 focus:ring-2 focus:ring-red-300/30">
                         <option value="kabupaten">Kabupaten</option>
                         <option value="dapil" class="hidden">Dapil</option>
                         <option value="kecamatan">Kecamatan</option>
                         <option value="desa">Desa</option>
                         <option value="tps">TPS</option>
                     </select>
-                    <span class="material-symbols-outlined pointer-events-none absolute right-3 top-2.5 text-white/70">expand_more</span>
+                    <span class="material-symbols-outlined pointer-events-none absolute right-3 top-2.5 text-slate-500">expand_more</span>
                 </div>
             </div>
 
             <div id="wrap-dapil" class="hidden">
-                <label class="block text-xs text-white/70 mb-2 font-semibold">Dapil</label>
-                <select id="f-dapil" onchange="onDapilChange()" class="w-full rounded-lg border border-white/10 bg-white/12 px-4 py-2.5 text-sm font-semibold text-white outline-none focus:border-red-300">
+                <label class="block text-xs text-slate-600 mb-2 font-semibold">Dapil</label>
+                <select id="f-dapil" onchange="onDapilChange()" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-800 outline-none focus:border-red-300">
                     <option value="">Pilih Dapil</option>
                     @foreach($dapils as $dapil)
                         <option value="{{ $dapil->id }}">{{ $dapil->nama }}</option>
@@ -211,8 +381,8 @@
             </div>
 
             <div id="wrap-kec" class="hidden">
-                <label class="block text-xs text-white/70 mb-2 font-semibold">Kecamatan</label>
-                <select id="f-kec" onchange="onKecChange()" class="w-full rounded-lg border border-white/10 bg-white/12 px-4 py-2.5 text-sm font-semibold text-white outline-none focus:border-red-300">
+                <label class="block text-xs text-slate-600 mb-2 font-semibold">Kecamatan</label>
+                <select id="f-kec" onchange="onKecChange()" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-800 outline-none focus:border-red-300">
                     <option value="">Pilih Kecamatan</option>
                     @foreach($kecamatans as $kec)
                         <option value="{{ $kec->id }}">{{ $kec->nama }}</option>
@@ -221,80 +391,116 @@
             </div>
 
             <div id="wrap-desa" class="hidden">
-                <label class="block text-xs text-white/70 mb-2 font-semibold">Desa</label>
-                <select id="f-desa" onchange="onDesaChange()" class="w-full rounded-lg border border-white/10 bg-white/12 px-4 py-2.5 text-sm font-semibold text-white outline-none focus:border-red-300">
+                <label class="block text-xs text-slate-600 mb-2 font-semibold">Desa</label>
+                <select id="f-desa" onchange="onDesaChange()" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-800 outline-none focus:border-red-300">
                     <option value="">Pilih Desa</option>
                 </select>
             </div>
 
             <div id="wrap-tps" class="hidden">
-                <label class="block text-xs text-white/70 mb-2 font-semibold">TPS</label>
-                <select id="f-tps" onchange="loadChart()" class="w-full rounded-lg border border-white/10 bg-white/12 px-4 py-2.5 text-sm font-semibold text-white outline-none focus:border-red-300">
+                <label class="block text-xs text-slate-600 mb-2 font-semibold">TPS</label>
+                <select id="f-tps" onchange="loadChart()" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-800 outline-none focus:border-red-300">
                     <option value="">Pilih TPS</option>
                 </select>
             </div>
 
-            <button id="wrap-reset-kec" onclick="resetKecFilter()" class="hidden w-full rounded-lg border border-white/15 bg-white/8 px-4 py-2.5 text-xs font-bold text-white/80 hover:bg-white/12">
-                Reset filter kecamatan
+            <button id="wrap-reset-kec" onclick="resetKecFilter()" class="hidden w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-100">
+                Lihat seluruh kabupaten
             </button>
         </div>
 
-        <div class="my-7 h-px bg-white/12"></div>
-
-        <div class="grid grid-cols-2 gap-3">
-            <div class="rounded-xl bg-[var(--red)] p-4">
-                <p class="text-[10px] uppercase tracking-[0.16em] text-white/75 font-semibold">Total Suara</p>
-                <p id="stat-total-suara" class="font-mono-data text-2xl font-bold mt-2">0</p>
-            </div>
-            <div class="rounded-xl bg-white/12 p-4 border border-white/10">
-                <p class="text-[10px] uppercase tracking-[0.16em] text-white/65 font-semibold">Wilayah</p>
-                <p id="stat-total-wilayah" class="font-mono-data text-2xl font-bold mt-2">0</p>
-            </div>
-            <div class="col-span-2 rounded-xl bg-white/12 p-4 border border-white/10 flex items-end justify-between gap-4">
-                <div>
-                    <p class="text-[10px] uppercase tracking-[0.16em] text-white/65 font-semibold">Partisipasi</p>
-                    <p id="stat-partisipasi" class="font-mono-data text-2xl font-bold mt-2 text-red-100">0%</p>
-                </div>
-                <div class="text-right">
-                    <p class="text-[10px] uppercase tracking-[0.16em] text-white/65 font-semibold">DPT</p>
-                    <p id="stat-dpt" class="font-mono-data text-lg font-bold mt-2">0</p>
-                </div>
-            </div>
-        </div>
+        <div class="my-7 h-px bg-slate-200"></div>
 
         <div class="mt-auto pt-6">
-            <div class="rounded-xl border border-white/10 bg-white/8 p-4">
-                <p class="text-[10px] uppercase tracking-[0.18em] text-white/55 font-semibold mb-2">Status Peta</p>
-                <p id="map-selected-label" class="text-sm font-semibold text-white">Klik kecamatan untuk filter</p>
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <p class="text-[10px] uppercase tracking-[0.18em] text-slate-500 font-bold mb-2">Status Peta</p>
+                <p id="map-selected-label" class="text-sm font-semibold text-slate-800">Klik kecamatan untuk filter</p>
             </div>
         </div>
     </aside>
 
-    <section class="flex-1 relative map-grid overflow-hidden">
-        <div id="map" class="absolute inset-0"></div>
+    <section class="flex-1 h-full overflow-y-auto bg-[var(--surface-low)] p-5">
+        <div class="map-panel relative h-[640px] min-h-[520px] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm map-grid">
+            <div id="map" class="absolute inset-0"></div>
 
-        <div class="absolute left-6 top-6 glass-panel rounded-xl border border-slate-200 shadow-lg px-4 py-3 max-w-sm">
-            <p class="text-[10px] uppercase tracking-[0.18em] text-slate-500 font-bold">Peta Sebaran</p>
-            <p class="text-sm text-slate-700 mt-1">Warna kecamatan mengikuti total suara pada filter aktif.</p>
-        </div>
+            <section class="kpi-grid absolute left-6 right-6 top-6 z-[1000] grid grid-cols-4 gap-3">
+                <div class="kpi-card glass-panel rounded-xl border border-slate-200 shadow-lg p-4">
+                    <p class="text-[10px] uppercase tracking-[0.16em] text-slate-500 font-bold">Total Suara</p>
+                    <p id="stat-total-suara" class="font-mono-data text-2xl font-extrabold text-[var(--primary)] mt-2">0</p>
+                    <p class="text-xs text-slate-500 mt-1">suara sah</p>
+                </div>
+                <div class="kpi-card glass-panel rounded-xl border border-slate-200 shadow-lg p-4">
+                    <p class="text-[10px] uppercase tracking-[0.16em] text-slate-500 font-bold">TPS Masuk</p>
+                    <p id="stat-tps-masuk" class="font-mono-data text-2xl font-extrabold text-[var(--primary)] mt-2">0%</p>
+                    <p id="stat-tps-detail" class="text-xs text-slate-500 mt-1">0 / 0 TPS</p>
+                </div>
+                <div class="kpi-card glass-panel rounded-xl border border-slate-200 shadow-lg p-4">
+                    <p class="text-[10px] uppercase tracking-[0.16em] text-slate-500 font-bold">Partisipasi</p>
+                    <p id="stat-partisipasi" class="font-mono-data text-2xl font-extrabold text-[var(--red)] mt-2">0%</p>
+                    <p id="stat-partisipasi-detail" class="text-xs text-slate-500 mt-1">0 hadir / 0 DPT</p>
+                </div>
+                <div class="kpi-card glass-panel rounded-xl border border-slate-200 shadow-lg p-4">
+                    <p class="text-[10px] uppercase tracking-[0.16em] text-slate-500 font-bold">Selisih Teratas</p>
+                    <p id="stat-selisih-teratas" class="font-mono-data text-2xl font-extrabold text-[var(--primary)] mt-2">0%</p>
+                    <p id="stat-selisih-detail" class="text-xs text-slate-500 mt-1">Top 1 vs Top 2</p>
+                </div>
+            </section>
 
-        <div id="map-legend" class="hidden absolute left-6 bottom-6 glass-panel rounded-xl border border-slate-200 shadow-lg p-4 min-w-56">
-            <p class="text-[10px] uppercase tracking-[0.18em] text-slate-500 font-bold mb-3">Legenda Suara</p>
-            <div class="space-y-2">
-                <div class="flex items-center gap-3"><span class="w-4 h-4 rounded" style="background:#fee2e2"></span><span class="text-xs text-slate-600">Rendah</span></div>
-                <div class="flex items-center gap-3"><span class="w-4 h-4 rounded" style="background:#fca5a5"></span><span class="text-xs text-slate-600">Menengah rendah</span></div>
-                <div class="flex items-center gap-3"><span class="w-4 h-4 rounded" style="background:#f87171"></span><span class="text-xs text-slate-600">Menengah</span></div>
-                <div class="flex items-center gap-3"><span class="w-4 h-4 rounded" style="background:#ef4444"></span><span class="text-xs text-slate-600">Tinggi</span></div>
-                <div class="flex items-center gap-3"><span class="w-4 h-4 rounded" style="background:#b91c1c"></span><span class="text-xs text-slate-600">Sangat tinggi</span></div>
+            <div class="map-info absolute left-6 top-36 z-[1000] glass-panel rounded-xl border border-slate-200 shadow-lg px-4 py-3 max-w-sm">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <p class="text-[10px] uppercase tracking-[0.18em] text-slate-500 font-bold">Peta Sebaran</p>
+                        <p class="text-sm text-slate-700 mt-1">Warna wilayah mengikuti data pada filter aktif.</p>
+                    </div>
+                    <button id="map-reset-btn" type="button" onclick="resetKecFilter()" class="hidden shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-[11px] font-bold text-slate-700 shadow-sm hover:bg-slate-50">
+                        Reset
+                    </button>
+                </div>
+            </div>
+
+            <div id="map-legend" class="hidden absolute left-6 bottom-6 z-[1000] glass-panel rounded-xl border border-slate-200 shadow-lg p-4 min-w-56">
+                <p class="text-[10px] uppercase tracking-[0.18em] text-slate-500 font-bold mb-3">Legenda Suara</p>
+                <div class="space-y-2">
+                    <div class="flex items-center gap-3"><span class="w-4 h-4 rounded" style="background:#fee2e2"></span><span class="text-xs text-slate-600">Rendah</span></div>
+                    <div class="flex items-center gap-3"><span class="w-4 h-4 rounded" style="background:#fca5a5"></span><span class="text-xs text-slate-600">Menengah rendah</span></div>
+                    <div class="flex items-center gap-3"><span class="w-4 h-4 rounded" style="background:#f87171"></span><span class="text-xs text-slate-600">Menengah</span></div>
+                    <div class="flex items-center gap-3"><span class="w-4 h-4 rounded" style="background:#ef4444"></span><span class="text-xs text-slate-600">Tinggi</span></div>
+                    <div class="flex items-center gap-3"><span class="w-4 h-4 rounded" style="background:#b91c1c"></span><span class="text-xs text-slate-600">Sangat tinggi</span></div>
+                </div>
             </div>
         </div>
+
+        <section class="mt-5 rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+            <div class="border-b border-slate-200 px-5 py-4">
+                <p class="text-[10px] uppercase tracking-[0.18em] text-slate-500 font-bold">Tabel Detail Kecamatan</p>
+                <p id="detail-table-subtitle" class="text-sm text-slate-600 mt-1">Data mengikuti filter aktif.</p>
+            </div>
+            <div class="detail-table-scroll overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-50 text-[10px] uppercase tracking-[0.16em] text-slate-500">
+                        <tr>
+                            <th class="px-5 py-3 font-bold">Wilayah</th>
+                            <th class="px-5 py-3 font-bold">Pemenang</th>
+                            <th class="px-5 py-3 font-bold text-right">Total Suara</th>
+                            <th class="px-5 py-3 font-bold text-right">Partisipasi</th>
+                            <th class="px-5 py-3 font-bold text-right">TPS Masuk</th>
+                        </tr>
+                    </thead>
+                    <tbody id="detail-table-body" class="divide-y divide-slate-200">
+                        <tr>
+                            <td colspan="5" class="px-5 py-5 text-center text-sm text-slate-500">Belum ada data ditampilkan.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
     </section>
 
     <aside class="w-[410px] bg-white border-l border-slate-200 h-full overflow-y-auto z-40 p-6">
         <div class="flex items-start justify-between gap-4 mb-6">
             <div>
                 <p class="text-[10px] uppercase tracking-[0.22em] text-slate-500 font-bold">Visualisasi</p>
-                <h2 class="text-2xl font-extrabold text-[var(--primary)] mt-1">Ringkasan Grafik</h2>
+                <h2 class="text-2xl font-extrabold text-[var(--primary)] mt-1">Ringkasan</h2>
             </div>
             <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--red-soft)] text-[var(--red)]">
                 <span class="material-symbols-outlined">bar_chart</span>
@@ -313,59 +519,95 @@
 
         <div id="chart-error" class="hidden rounded-xl border border-red-200 bg-red-50 p-5 text-sm font-semibold text-red-700"></div>
 
-        <section id="card-suara" class="hidden rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden mb-5">
+        <section id="card-kandidat" class="hidden rounded-xl border border-slate-200 bg-slate-50 overflow-hidden mb-5">
             <div class="border-b border-slate-200 px-5 py-4">
-                <p class="text-[10px] uppercase tracking-[0.18em] text-slate-500 font-bold">Perolehan Suara</p>
-                <p id="chart-subtitle" class="text-sm text-slate-600 mt-1"></p>
+                <p class="text-[10px] uppercase tracking-[0.18em] text-slate-500 font-bold">Ranking Kandidat</p>
+                <p class="text-sm text-slate-600 mt-1">Perolehan suara utama.</p>
             </div>
-            <div class="p-5">
-                <div class="relative h-[330px]">
-                    <canvas id="chartSuara"></canvas>
-                </div>
-            </div>
-        </section>
-
-        <section id="card-partisipasi" class="hidden rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden mb-5">
-            <div class="border-b border-slate-200 px-5 py-4">
-                <p class="text-[10px] uppercase tracking-[0.18em] text-slate-500 font-bold">Tingkat Partisipasi</p>
-                <p class="text-sm text-slate-600 mt-1">DPT dibanding pengguna hak pilih.</p>
-            </div>
-            <div class="p-5">
-                <div class="relative h-[250px]">
-                    <canvas id="chartPartisipasi"></canvas>
-                </div>
+            <div id="candidate-rank-list" class="divide-y divide-slate-200">
+                <div class="px-5 py-4 text-sm text-slate-500">Belum ada data ditampilkan.</div>
             </div>
         </section>
 
         <section class="rounded-xl border border-slate-200 bg-slate-50 overflow-hidden">
             <div class="border-b border-slate-200 px-5 py-4 flex items-center justify-between">
                 <p class="text-[10px] uppercase tracking-[0.18em] text-slate-500 font-bold">Wilayah Teratas</p>
-                <span class="material-symbols-outlined text-sm text-[var(--red)]">bolt</span>
+                <!-- <span class="material-symbols-outlined text-sm text-[var(--red)]">bolt</span> -->
             </div>
             <div id="rank-list" class="divide-y divide-slate-200">
                 <div class="px-5 py-4 text-sm text-slate-500">Belum ada data ditampilkan.</div>
+            </div>
+        </section>
+
+        <section id="card-quick-stats" class="hidden rounded-xl border border-slate-200 bg-slate-50 overflow-hidden mt-5">
+            <div class="border-b border-slate-200 px-5 py-4">
+                <p class="text-[10px] uppercase tracking-[0.18em] text-slate-500 font-bold">Quick Stats</p>
+            </div>
+            <div class="grid grid-cols-2 gap-3 p-5">
+                <div class="rounded-xl border border-slate-200 bg-white p-4">
+                    <p class="text-[10px] uppercase tracking-[0.12em] text-slate-500 font-bold">Partisipasi tertinggi</p>
+                    <p id="quick-partisipasi" class="mt-2 text-sm font-extrabold text-slate-800 truncate">-</p>
+                </div>
+                <div class="rounded-xl border border-slate-200 bg-white p-4">
+                    <p class="text-[10px] uppercase tracking-[0.12em] text-slate-500 font-bold">DPT terbesar</p>
+                    <p id="quick-dpt" class="mt-2 text-sm font-extrabold text-slate-800 truncate">-</p>
+                </div>
+                <div class="rounded-xl border border-slate-200 bg-white p-4">
+                    <p class="text-[10px] uppercase tracking-[0.12em] text-slate-500 font-bold">Suara sah tertinggi</p>
+                    <p id="quick-suara" class="mt-2 text-sm font-extrabold text-slate-800 truncate">-</p>
+                </div>
+                <div class="rounded-xl border border-slate-200 bg-white p-4">
+                    <p class="text-[10px] uppercase tracking-[0.12em] text-slate-500 font-bold">Selisih tertipis</p>
+                    <p id="quick-selisih" class="mt-2 text-sm font-extrabold text-slate-800 truncate">-</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="card-demografi" class="hidden rounded-xl border border-slate-200 bg-slate-50 overflow-hidden mt-5">
+            <div class="border-b border-slate-200 px-5 py-4">
+                <p class="text-[10px] uppercase tracking-[0.18em] text-slate-500 font-bold">Demografi Pemilih</p>
+            </div>
+            <div class="space-y-4 p-5">
+                <div>
+                    <div class="mb-2 flex items-center justify-between text-sm">
+                        <span class="font-semibold text-slate-600">Laki-laki</span>
+                        <b id="demo-lk-label" class="font-mono-data text-slate-800">0%</b>
+                    </div>
+                    <div class="h-3 overflow-hidden rounded-full bg-slate-200">
+                        <div id="demo-lk-bar" class="h-full rounded-full bg-[var(--primary)]" style="width:0%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="mb-2 flex items-center justify-between text-sm">
+                        <span class="font-semibold text-slate-600">Perempuan</span>
+                        <b id="demo-pr-label" class="font-mono-data text-slate-800">0%</b>
+                    </div>
+                    <div class="h-3 overflow-hidden rounded-full bg-slate-200">
+                        <div id="demo-pr-bar" class="h-full rounded-full bg-[var(--red)]" style="width:0%"></div>
+                    </div>
+                </div>
             </div>
         </section>
     </aside>
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
 const allKecamatans = @json($kecamatans->map(fn($k) => ['id' => $k->id, 'nama' => $k->nama])->values());
 const allDesas = @json($kecamatans->flatMap(fn($k) => $k->desas->map(fn($d) => ['id' => $d->id, 'nama' => $d->nama, 'kecamatan_id' => $k->id]))->values());
 const allTps = @json($kecamatans->flatMap(fn($k) => $k->desas->flatMap(fn($d) => $d->tps->map(fn($t) => ['id' => $t->id, 'nama' => $t->nama, 'desa_id' => $d->id])))->values());
 
-const gridClr = () => 'rgba(15,23,42,0.08)';
-const textClr = () => '#657181';
-const COLORS = ['#c81924', '#002147', '#4e87e7', '#f59e0b', '#10b981', '#7c3aed', '#0891b2', '#db2777', '#64748b', '#ea580c', '#0f766e', '#9333ea', '#2563eb', '#65a30d', '#be123c', '#475569', '#d97706', '#0284c7'];
-
-let chartSuara = null;
-let chartPart = null;
 let geojsonLayer = null;
 let kecamatanData = {};
 let selectedKec = null;
 let currentChartJson = null;
+let kecamatanGeojson = null;
+let desaGeojson = null;
+let currentMapMode = 'kecamatan';
+let currentMapLabels = [];
+
+const WINNER_MAP_TYPES = ['ppwp', 'gubernur', 'bupati'];
+const WINNER_COLORS = ['#c81924', '#002147', '#f59e0b', '#10b981', '#7c3aed', '#0891b2', '#db2777', '#ea580c'];
 
 const map = L.map('map', {
     zoomControl: true,
@@ -381,11 +623,29 @@ function formatNumber(value) {
     return (Number(value) || 0).toLocaleString('id-ID');
 }
 
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function escapeJs(value) {
+    return String(value ?? '')
+        .replace(/\\/g, '\\\\')
+        .replace(/'/g, "\\'")
+        .replace(/\n/g, '\\n')
+        .replace(/\r/g, '\\r');
+}
+
 function normalizeText(value) {
     return String(value || '')
         .toLowerCase()
         .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '');
+        .replace(/[\u0300-\u036f]/g, '')
+        .trim();
 }
 
 function updateJenisButtons() {
@@ -404,7 +664,71 @@ function selectJenis(jenis) {
 
 function clearChartSearch() {
     document.getElementById('f-search').value = '';
+    hideSearchSuggestions();
     applyChartSearch();
+}
+
+function searchSuggestionItems(json = currentChartJson) {
+    if (!json) return [];
+
+    const items = (json.labels || []).map((label, index) => ({
+        label,
+        meta: (json.search_meta?.[index] || label) === label ? '' : json.search_meta?.[index] || '',
+        value: label,
+    }));
+
+    (json.candidate_rank || []).forEach((item) => {
+        items.push({
+            label: item.label,
+            meta: item.meta || '',
+            value: item.label,
+        });
+    });
+
+    const seen = new Set();
+    return items.filter((item) => {
+        const key = normalizeText(`${item.label} ${item.meta}`);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    });
+}
+
+function renderSearchSuggestions() {
+    const box = document.getElementById('search-suggestions');
+    const input = document.getElementById('f-search');
+    const term = normalizeText(input?.value || '');
+    const items = searchSuggestionItems()
+        .filter((item) => !term || normalizeText(`${item.label} ${item.meta}`).includes(term))
+        .slice(0, 8);
+
+    if (!currentChartJson || !items.length) {
+        box.classList.add('hidden');
+        box.innerHTML = '';
+        return;
+    }
+
+    box.innerHTML = items.map((item) => `
+        <button type="button"
+                onclick="selectSearchSuggestion('${escapeJs(item.value)}')"
+                class="block w-full px-4 py-3 text-left hover:bg-slate-50">
+            <span class="block text-sm font-bold text-slate-800">${escapeHtml(item.label)}</span>
+            ${item.meta ? `<span class="mt-0.5 block text-xs text-slate-500">${escapeHtml(item.meta)}</span>` : ''}
+        </button>
+    `).join('');
+    box.classList.remove('hidden');
+}
+
+function selectSearchSuggestion(value) {
+    document.getElementById('f-search').value = value;
+    hideSearchSuggestions();
+    applyChartSearch();
+}
+
+function hideSearchSuggestions() {
+    const box = document.getElementById('search-suggestions');
+    box.classList.add('hidden');
+    box.innerHTML = '';
 }
 
 function filterChartJson(json) {
@@ -413,6 +737,7 @@ function filterChartJson(json) {
     const term = normalizeText(document.getElementById('f-search')?.value || '');
     document.getElementById('clear-search')?.classList.toggle('hidden', term.length === 0);
     document.getElementById('clear-search')?.classList.toggle('flex', term.length > 0);
+    renderSearchSuggestions();
 
     if (!term) return json;
 
@@ -425,6 +750,7 @@ function filterChartJson(json) {
     return {
         ...json,
         labels: indexes.map((index) => json.labels[index]),
+        candidate_rank: json.candidate_rank?.filter((item) => normalizeText(`${item.label} ${item.meta || ''}`).includes(term)) || [],
         data: json.data.map((item) => ({
             ...item,
             suara: indexes.map((index) => item.suara[index] ?? 0),
@@ -436,6 +762,7 @@ function applyChartSearch() {
     if (!currentChartJson) {
         document.getElementById('clear-search')?.classList.toggle('hidden', !document.getElementById('f-search')?.value);
         document.getElementById('clear-search')?.classList.toggle('flex', !!document.getElementById('f-search')?.value);
+        hideSearchSuggestions();
         return;
     }
 
@@ -444,13 +771,15 @@ function applyChartSearch() {
         showError('Partai atau caleg tidak ditemukan pada jenis pemilihan ini.');
         updateStats([]);
         updateRanking([]);
-        updateMapColors([]);
+        updateDetailTable(null);
+        updateMapColors(null);
         return;
     }
 
     renderCharts(filtered);
     const level = document.getElementById('f-level').value;
-    if (level === 'kabupaten' || level === 'dapil') updateMapColors(filtered.data);
+    if (['kabupaten', 'dapil', 'kecamatan'].includes(level)) updateMapColors(filtered);
+    else updateMapColors(null);
 }
 
 function getColor(val, max) {
@@ -463,16 +792,36 @@ function getColor(val, max) {
     return '#fee2e2';
 }
 
+function isWinnerMapType(jenis = document.getElementById('f-jenis').value) {
+    return WINNER_MAP_TYPES.includes(jenis);
+}
+
+function featureName(feature) {
+    const props = feature.properties || {};
+    return currentMapMode === 'desa'
+        ? (props.village || props.nama || '')
+        : (props.nama || props.sub_district || '');
+}
+
+function featureDistrict(feature) {
+    const props = feature.properties || {};
+    return props.sub_district || props.nama || '';
+}
+
 function styleFeature(feature) {
-    const nama = (feature.properties.nama || '').toLowerCase();
-    const values = Object.values(kecamatanData);
+    const nama = featureName(feature);
+    const key = normalizeText(nama);
+    const values = Object.values(kecamatanData).map((item) => item.total || 0);
     const max = values.length ? Math.max(...values) : 0;
-    const val = kecamatanData[nama] ?? 0;
-    const sel = selectedKec && selectedKec.toLowerCase() === nama;
+    const item = kecamatanData[key] || { total: 0, winnerIndex: null };
+    const sel = currentMapMode === 'kecamatan' && selectedKec && normalizeText(selectedKec) === key;
+    const winnerMode = isWinnerMapType();
 
     return {
-        fillColor: getColor(val, max),
-        fillOpacity: max > 0 ? 0.76 : 0.46,
+        fillColor: winnerMode && item.winnerIndex !== null
+            ? WINNER_COLORS[item.winnerIndex % WINNER_COLORS.length]
+            : getColor(item.total, max),
+        fillOpacity: item.total > 0 ? 0.78 : 0.38,
         color: sel ? '#f59e0b' : '#94a3b8',
         weight: sel ? 3 : 1,
         opacity: 1,
@@ -480,39 +829,102 @@ function styleFeature(feature) {
 }
 
 function onEachFeature(feature, layer) {
-    const nama = feature.properties.nama || '';
-    layer.bindTooltip(`<b>${nama}</b>`, {
+    const nama = featureName(feature);
+    layer.bindTooltip(mapTooltipContent(feature), {
         permanent: false,
         direction: 'center',
         className: 'leaflet-tooltip-kec',
     });
     layer.on({
         mouseover: (e) => {
-            if (selectedKec !== nama) e.target.setStyle({ fillOpacity: 0.92, weight: 2 });
+            e.target.setTooltipContent(mapTooltipContent(feature));
+            if (currentMapMode !== 'kecamatan' || selectedKec !== nama) e.target.setStyle({ fillOpacity: 0.92, weight: 2 });
         },
         mouseout: (e) => {
-            if (selectedKec !== nama) geojsonLayer?.resetStyle(e.target);
+            if (currentMapMode !== 'kecamatan' || selectedKec !== nama) geojsonLayer?.resetStyle(e.target);
         },
-        click: () => selectKecamatan(nama),
+        click: () => {
+            if (currentMapMode === 'kecamatan') selectKecamatan(nama);
+        },
     });
+}
+
+function mapTooltipContent(feature) {
+    const nama = featureName(feature);
+    const item = kecamatanData[normalizeText(nama)];
+
+    if (!item || !item.total) {
+        return `<div class="map-tooltip"><span class="map-tooltip-title">${escapeHtml(nama)}</span><div class="map-tooltip-row"><span>Belum ada data</span><b>0</b></div></div>`;
+    }
+
+    const rows = (item.suara || [])
+        .map((suara, index) => ({ label: currentMapLabels[index] || `Calon ${index + 1}`, suara }))
+        .sort((a, b) => b.suara - a.suara)
+        .slice(0, 5);
+
+    return `
+        <div class="map-tooltip">
+            <span class="map-tooltip-title">${escapeHtml(nama)}</span>
+            ${rows.map((row) => `
+                <div class="map-tooltip-row">
+                    <span>${escapeHtml(row.label)}</span>
+                    <b>${formatNumber(row.suara)}</b>
+                </div>
+            `).join('')}
+        </div>
+    `;
 }
 
 fetch('/geojson/banyuwangi_kecamatan.geojson')
     .then((response) => response.json())
     .then((data) => {
-        geojsonLayer = L.geoJSON(data, { style: styleFeature, onEachFeature }).addTo(map);
-        map.fitBounds(geojsonLayer.getBounds());
+        kecamatanGeojson = data;
+        renderMapLayer('kecamatan');
     })
     .catch(() => showError('Peta kecamatan gagal dimuat.'));
 
+fetch('/geojson/banyuwangi_desa_full.geojson')
+    .then((response) => response.json())
+    .then((data) => {
+        desaGeojson = data;
+        if (document.getElementById('f-level').value === 'kecamatan' && selectedKec) {
+            renderMapLayer('desa');
+            geojsonLayer?.setStyle(styleFeature);
+        }
+    })
+    .catch(() => showError('Peta desa gagal dimuat.'));
+
+function renderMapLayer(mode) {
+    const source = mode === 'desa' ? desaGeojson : kecamatanGeojson;
+    if (!source) return;
+
+    if (geojsonLayer) map.removeLayer(geojsonLayer);
+    currentMapMode = mode;
+
+    geojsonLayer = L.geoJSON(source, {
+        filter: (feature) => {
+            if (mode !== 'desa') return true;
+            return selectedKec && normalizeText(featureDistrict(feature)) === normalizeText(selectedKec);
+        },
+        style: styleFeature,
+        onEachFeature,
+    }).addTo(map);
+
+    if (geojsonLayer.getLayers().length) {
+        map.fitBounds(geojsonLayer.getBounds());
+    }
+
+    setTimeout(() => map.invalidateSize(), 0);
+}
+
 function selectKecamatan(namaKec) {
-    const kec = allKecamatans.find((item) => item.nama.toLowerCase() === namaKec.toLowerCase());
+    const kec = allKecamatans.find((item) => normalizeText(item.nama) === normalizeText(namaKec));
     if (!kec) return;
 
     selectedKec = namaKec;
-    geojsonLayer?.setStyle(styleFeature);
     document.getElementById('map-selected-label').textContent = `Kecamatan ${kec.nama}`;
     document.getElementById('wrap-reset-kec').classList.remove('hidden');
+    document.getElementById('map-reset-btn').classList.remove('hidden');
 
     const levelSelect = document.getElementById('f-level');
     if (levelSelect.value === 'kabupaten' || levelSelect.value === 'dapil') {
@@ -526,6 +938,7 @@ function selectKecamatan(namaKec) {
     document.getElementById('f-tps').innerHTML = '<option value="">Pilih TPS</option>';
 
     if (levelSelect.value === 'kecamatan') {
+        renderMapLayer('desa');
         loadChart();
         return;
     }
@@ -538,26 +951,86 @@ function selectKecamatan(namaKec) {
 
 function resetKecFilter() {
     selectedKec = null;
+    const jenis = document.getElementById('f-jenis').value;
+    const levelSelect = document.getElementById('f-level');
+    levelSelect.value = jenis === 'dprd_kab' ? 'dapil' : 'kabupaten';
     document.getElementById('f-kec').value = '';
+    document.getElementById('f-dapil').value = '';
     document.getElementById('f-desa').innerHTML = '<option value="">Pilih Desa</option>';
     document.getElementById('f-tps').innerHTML = '<option value="">Pilih TPS</option>';
+    document.getElementById('wrap-dapil').classList.toggle('hidden', jenis !== 'dprd_kab');
+    document.getElementById('wrap-kec').classList.add('hidden');
+    document.getElementById('wrap-desa').classList.add('hidden');
+    document.getElementById('wrap-tps').classList.add('hidden');
     document.getElementById('map-selected-label').textContent = 'Klik kecamatan untuk filter';
     document.getElementById('wrap-reset-kec').classList.add('hidden');
-    geojsonLayer?.setStyle(styleFeature);
+    document.getElementById('map-reset-btn').classList.add('hidden');
+    renderMapLayer('kecamatan');
     hideCharts();
 
-    if (document.getElementById('f-level').value === 'kabupaten') loadChart();
+    if (levelSelect.value === 'kabupaten') loadChart();
 }
 
-function updateMapColors(data) {
+function updateMapColors(payload) {
+    const json = Array.isArray(payload) ? { data: payload, labels: [], jenis: document.getElementById('f-jenis').value } : payload;
+    const data = json?.data || [];
+    const level = document.getElementById('f-level').value;
+    const mode = level === 'kecamatan' && selectedKec ? 'desa' : 'kecamatan';
+
+    if (currentMapMode !== mode) {
+        renderMapLayer(mode);
+    }
+
+    currentMapLabels = json?.labels || [];
     kecamatanData = {};
     data.forEach((item) => {
-        kecamatanData[item.label.toLowerCase()] = item.suara.reduce((sum, value) => sum + value, 0);
-    });
-    geojsonLayer?.setStyle(styleFeature);
+        const total = item.suara.reduce((sum, value) => sum + value, 0);
+        const winnerIndex = isWinnerMapType(json?.jenis) && total > 0
+            ? item.suara.reduce((bestIndex, value, index, values) => value > values[bestIndex] ? index : bestIndex, 0)
+            : null;
 
-    const total = Object.values(kecamatanData).reduce((sum, value) => sum + value, 0);
-    document.getElementById('map-legend').classList.toggle('hidden', total <= 0);
+        kecamatanData[normalizeText(item.label)] = { total, winnerIndex, suara: item.suara };
+    });
+
+    geojsonLayer?.setStyle(styleFeature);
+    updateMapLegend(json);
+}
+
+function updateMapLegend(json) {
+    const legend = document.getElementById('map-legend');
+    const total = Object.values(kecamatanData).reduce((sum, item) => sum + (item.total || 0), 0);
+
+    if (total <= 0) {
+        legend.classList.add('hidden');
+        return;
+    }
+
+    if (isWinnerMapType(json?.jenis)) {
+        legend.innerHTML = `
+            <p class="text-[10px] uppercase tracking-[0.18em] text-slate-500 font-bold mb-3">Legenda Pemenang</p>
+            <div class="space-y-2">
+                ${(json.labels || []).map((label, index) => `
+                    <div class="flex items-center gap-3">
+                        <span class="w-4 h-4 rounded" style="background:${WINNER_COLORS[index % WINNER_COLORS.length]}"></span>
+                        <span class="text-xs text-slate-600">${escapeHtml(label)}</span>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    } else {
+        legend.innerHTML = `
+            <p class="text-[10px] uppercase tracking-[0.18em] text-slate-500 font-bold mb-3">Legenda Suara</p>
+            <div class="space-y-2">
+                <div class="flex items-center gap-3"><span class="w-4 h-4 rounded" style="background:#fee2e2"></span><span class="text-xs text-slate-600">Rendah</span></div>
+                <div class="flex items-center gap-3"><span class="w-4 h-4 rounded" style="background:#fca5a5"></span><span class="text-xs text-slate-600">Menengah rendah</span></div>
+                <div class="flex items-center gap-3"><span class="w-4 h-4 rounded" style="background:#f87171"></span><span class="text-xs text-slate-600">Menengah</span></div>
+                <div class="flex items-center gap-3"><span class="w-4 h-4 rounded" style="background:#ef4444"></span><span class="text-xs text-slate-600">Tinggi</span></div>
+                <div class="flex items-center gap-3"><span class="w-4 h-4 rounded" style="background:#b91c1c"></span><span class="text-xs text-slate-600">Sangat tinggi</span></div>
+            </div>
+        `;
+    }
+
+    legend.classList.remove('hidden');
 }
 
 function setDapilMode(enabled) {
@@ -585,6 +1058,14 @@ function onJenisChange() {
 function onLevelChange(shouldLoad = true) {
     const level = document.getElementById('f-level').value;
     const jenis = document.getElementById('f-jenis').value;
+
+    if (level === 'kabupaten' || level === 'dapil') {
+        selectedKec = null;
+        document.getElementById('map-selected-label').textContent = 'Klik kecamatan untuk filter';
+        document.getElementById('wrap-reset-kec').classList.add('hidden');
+        document.getElementById('map-reset-btn').classList.add('hidden');
+        renderMapLayer('kecamatan');
+    }
 
     document.getElementById('wrap-dapil').classList.toggle('hidden', !(level === 'dapil' || jenis === 'dprd_kab'));
     document.getElementById('wrap-kec').classList.toggle('hidden', level === 'kabupaten' || level === 'dapil');
@@ -628,9 +1109,10 @@ function onKecChange() {
     selectedKec = kec?.nama || null;
     document.getElementById('map-selected-label').textContent = kec ? `Kecamatan ${kec.nama}` : 'Klik kecamatan untuk filter';
     document.getElementById('wrap-reset-kec').classList.toggle('hidden', !kec);
-    geojsonLayer?.setStyle(styleFeature);
+    document.getElementById('map-reset-btn').classList.toggle('hidden', !kec);
 
     if (level === 'kecamatan') {
+        renderMapLayer('desa');
         loadChart();
         return;
     }
@@ -664,15 +1146,27 @@ function hideCharts() {
     document.getElementById('chart-placeholder').classList.remove('hidden');
     document.getElementById('chart-loading').classList.add('hidden');
     document.getElementById('chart-error').classList.add('hidden');
-    document.getElementById('card-suara').classList.add('hidden');
-    document.getElementById('card-partisipasi').classList.add('hidden');
+    document.getElementById('card-kandidat').classList.add('hidden');
+    document.getElementById('card-quick-stats').classList.add('hidden');
+    document.getElementById('card-demografi').classList.add('hidden');
+    updateCandidateRanking(null);
+    updateQuickStats([]);
+    updateDemographics([]);
+    updateDetailTable(null);
+    updateMapColors(null);
 }
 
 function showError(message) {
     document.getElementById('chart-placeholder').classList.add('hidden');
     document.getElementById('chart-loading').classList.add('hidden');
-    document.getElementById('card-suara').classList.add('hidden');
-    document.getElementById('card-partisipasi').classList.add('hidden');
+    document.getElementById('card-kandidat').classList.add('hidden');
+    document.getElementById('card-quick-stats').classList.add('hidden');
+    document.getElementById('card-demografi').classList.add('hidden');
+    updateCandidateRanking(null);
+    updateQuickStats([]);
+    updateDemographics([]);
+    updateDetailTable(null);
+    updateMapColors(null);
     document.getElementById('chart-error').textContent = message;
     document.getElementById('chart-error').classList.remove('hidden');
 }
@@ -694,8 +1188,9 @@ async function loadChart() {
 
     document.getElementById('chart-placeholder').classList.add('hidden');
     document.getElementById('chart-error').classList.add('hidden');
-    document.getElementById('card-suara').classList.add('hidden');
-    document.getElementById('card-partisipasi').classList.add('hidden');
+    document.getElementById('card-kandidat').classList.add('hidden');
+    document.getElementById('card-quick-stats').classList.add('hidden');
+    document.getElementById('card-demografi').classList.add('hidden');
     document.getElementById('chart-loading').classList.remove('hidden');
 
     const params = new URLSearchParams({ jenis, level });
@@ -722,7 +1217,11 @@ function renderCharts(json) {
     if (!json.data || !json.data.length) {
         showError('Data belum tersedia untuk filter ini.');
         updateStats([]);
+        updateCandidateRanking(null);
         updateRanking([]);
+        updateQuickStats([]);
+        updateDemographics([]);
+        updateDetailTable(null);
         return;
     }
 
@@ -730,111 +1229,127 @@ function renderCharts(json) {
     document.getElementById('chart-error').classList.add('hidden');
     document.getElementById('chart-loading').classList.add('hidden');
 
-    const wLabels = json.data.map((item) => item.label);
-    const isPie = json.type === 'pie' && json.data.length === 1;
-    document.getElementById('chart-subtitle').textContent = json.data.length === 1 ? json.data[0].label : `${json.data.length} wilayah`;
-
-    if (chartSuara) chartSuara.destroy();
-    const ctxS = document.getElementById('chartSuara').getContext('2d');
-
-    if (isPie) {
-        chartSuara = new Chart(ctxS, {
-            type: 'doughnut',
-            data: {
-                labels: json.labels,
-                datasets: [{
-                    data: json.data[0].suara,
-                    backgroundColor: COLORS,
-                    borderWidth: 2,
-                    borderColor: '#ffffff',
-                }],
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '58%',
-                plugins: {
-                    legend: { position: 'right', labels: { color: textClr(), font: { size: 11 }, padding: 12 } },
-                    tooltip: { callbacks: { label: (ctx) => ` ${ctx.label}: ${formatNumber(ctx.parsed)} suara` } },
-                },
-            },
-        });
-    } else {
-        const isMulti = json.data.length > 1;
-        const datasets = isMulti
-            ? json.labels.map((label, index) => ({
-                label,
-                data: json.data.map((item) => item.suara[index] ?? 0),
-                backgroundColor: COLORS[index % COLORS.length],
-                borderRadius: 4,
-            }))
-            : [{
-                label: 'Suara',
-                data: json.data[0].suara,
-                backgroundColor: COLORS,
-                borderRadius: 4,
-            }];
-
-        chartSuara = new Chart(ctxS, {
-            type: 'bar',
-            data: { labels: isMulti ? wLabels : json.labels, datasets },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: isMulti, labels: { color: textClr(), font: { size: 10 } } },
-                    tooltip: { callbacks: { label: (ctx) => ` ${ctx.dataset.label}: ${formatNumber(ctx.parsed.y)}` } },
-                },
-                scales: {
-                    x: { ticks: { color: textClr(), font: { size: 10 }, maxRotation: 45 }, grid: { color: gridClr() } },
-                    y: { ticks: { color: textClr(), font: { size: 10 } }, grid: { color: gridClr() }, beginAtZero: true },
-                },
-            },
-        });
-    }
-
-    document.getElementById('card-suara').classList.remove('hidden');
-
-    if (chartPart) chartPart.destroy();
-    const ctxP = document.getElementById('chartPartisipasi').getContext('2d');
-    chartPart = new Chart(ctxP, {
-        type: 'bar',
-        data: {
-            labels: wLabels,
-            datasets: [
-                { label: 'DPT', data: json.data.map((item) => item.partisipasi.dpt), backgroundColor: 'rgba(100,116,139,0.32)', borderRadius: 4 },
-                { label: 'Hadir', data: json.data.map((item) => item.partisipasi.hadir), backgroundColor: '#c81924', borderRadius: 4 },
-            ],
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { labels: { color: textClr(), font: { size: 10 } } },
-                tooltip: { callbacks: { label: (ctx) => ` ${ctx.dataset.label}: ${formatNumber(ctx.parsed.y)}` } },
-            },
-            scales: {
-                x: { ticks: { color: textClr(), font: { size: 10 }, maxRotation: 45 }, grid: { color: gridClr() } },
-                y: { ticks: { color: textClr(), font: { size: 10 } }, grid: { color: gridClr() }, beginAtZero: true },
-            },
-        },
-    });
-    document.getElementById('card-partisipasi').classList.remove('hidden');
-
-    updateStats(json.data);
+    updateStats(json);
+    updateCandidateRanking(json);
     updateRanking(json.data);
+    updateQuickStats(json.data);
+    updateDemographics(json.data);
+    updateDetailTable(json);
 }
 
-function updateStats(data) {
+function updateCandidateRanking(json) {
+    const card = document.getElementById('card-kandidat');
+    const target = document.getElementById('candidate-rank-list');
+
+    if (!json?.labels?.length || !json?.data?.length) {
+        target.innerHTML = '<div class="px-5 py-4 text-sm text-slate-500">Belum ada data ditampilkan.</div>';
+        return;
+    }
+
+    const rankSource = json.candidate_rank?.length
+        ? json.candidate_rank
+        : json.labels
+            .map((label, index) => ({
+                label,
+                meta: '',
+                suara: json.data.reduce((sum, item) => sum + (item.suara[index] || 0), 0),
+            }))
+            .sort((a, b) => b.suara - a.suara);
+    const totalSuara = rankSource.reduce((sum, item) => sum + (Number(item.suara) || 0), 0);
+    const rank = rankSource.slice(0, 5);
+
+
+    target.innerHTML = rank.map((item, index) => {
+        const persen = totalSuara > 0 ? Math.round((item.suara / totalSuara) * 1000) / 10 : 0;
+        const meta = item.meta ? `<span class="font-semibold text-slate-600">${escapeHtml(item.meta)}</span> &bull; ` : '';
+        return `
+            <div class="px-5 py-4 flex items-start justify-between gap-4">
+                <div class="min-w-0">
+                    <p class="text-sm font-bold text-slate-800 truncate">${index + 1}. ${escapeHtml(item.label)}</p>
+                    <p class="text-xs text-slate-500 mt-0.5">${meta}${formatNumber(item.suara)} suara &bull; ${persen}%</p>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    card.classList.remove('hidden');
+}
+
+function updateStats(payload) {
+    const data = Array.isArray(payload) ? payload : (payload?.data || []);
     const totalSuara = data.reduce((sum, item) => sum + item.suara.reduce((a, b) => a + b, 0), 0);
     const totalDpt = data.reduce((sum, item) => sum + (item.partisipasi?.dpt || 0), 0);
     const totalHadir = data.reduce((sum, item) => sum + (item.partisipasi?.hadir || 0), 0);
-    const persen = totalDpt > 0 ? Math.round((totalHadir / totalDpt) * 1000) / 10 : 0;
+    const totalTpsMasuk = data.reduce((sum, item) => sum + (item.partisipasi?.tps_masuk || 0), 0);
+    const totalTps = data.reduce((sum, item) => sum + (item.partisipasi?.tps_total || 0), 0);
+    const partisipasiPersen = totalDpt > 0 ? Math.round((totalHadir / totalDpt) * 1000) / 10 : 0;
+    const tpsPersen = totalTps > 0 ? Math.round((totalTpsMasuk / totalTps) * 1000) / 10 : 0;
+
+    let sortedTotals = [];
+    if (!Array.isArray(payload) && payload?.candidate_rank?.length) {
+        sortedTotals = payload.candidate_rank.map((item) => Number(item.suara) || 0).sort((a, b) => b - a);
+    } else {
+        const totalsByCandidate = [];
+        data.forEach((item) => {
+            item.suara.forEach((suara, index) => {
+                totalsByCandidate[index] = (totalsByCandidate[index] || 0) + suara;
+            });
+        });
+        sortedTotals = totalsByCandidate.sort((a, b) => b - a);
+    }
+    const topMargin = sortedTotals.length > 1 ? sortedTotals[0] - sortedTotals[1] : 0;
+    const topMarginPersen = totalSuara > 0 ? Math.round((topMargin / totalSuara) * 1000) / 10 : 0;
 
     document.getElementById('stat-total-suara').textContent = formatNumber(totalSuara);
-    document.getElementById('stat-total-wilayah').textContent = formatNumber(data.length);
-    document.getElementById('stat-partisipasi').textContent = `${persen}%`;
-    document.getElementById('stat-dpt').textContent = formatNumber(totalDpt);
+    document.getElementById('stat-tps-masuk').textContent = `${tpsPersen}%`;
+    document.getElementById('stat-tps-detail').textContent = `${formatNumber(totalTpsMasuk)} / ${formatNumber(totalTps)} TPS`;
+    document.getElementById('stat-partisipasi').textContent = `${partisipasiPersen}%`;
+    document.getElementById('stat-partisipasi-detail').textContent = `${formatNumber(totalHadir)} hadir / ${formatNumber(totalDpt)} DPT`;
+    document.getElementById('stat-selisih-teratas').textContent = `${topMarginPersen}%`;
+    document.getElementById('stat-selisih-detail').textContent = `${formatNumber(topMargin)} suara`;
+}
+
+function updateDetailTable(json) {
+    const target = document.getElementById('detail-table-body');
+    const subtitle = document.getElementById('detail-table-subtitle');
+
+    if (!json?.data?.length) {
+        target.innerHTML = '<tr><td colspan="5" class="px-5 py-5 text-center text-sm text-slate-500">Belum ada data ditampilkan.</td></tr>';
+        subtitle.textContent = 'Data mengikuti filter aktif.';
+        return;
+    }
+
+    const levelLabels = {
+        kabupaten: 'Kecamatan',
+        dapil: 'Kecamatan',
+        kecamatan: 'Desa',
+        desa: 'TPS',
+        tps: 'TPS',
+    };
+    const level = document.getElementById('f-level').value;
+    subtitle.textContent = `Detail per ${levelLabels[level] || 'wilayah'} pada filter aktif.`;
+
+    target.innerHTML = json.data.map((item) => {
+        const totalSuara = item.suara.reduce((sum, value) => sum + value, 0);
+        const winnerIndex = item.suara.reduce((bestIndex, value, index, values) => value > values[bestIndex] ? index : bestIndex, 0);
+        const pemenang = totalSuara > 0 ? (json.labels[winnerIndex] || '-') : '-';
+        const dpt = item.partisipasi?.dpt || 0;
+        const hadir = item.partisipasi?.hadir || 0;
+        const partisipasi = dpt > 0 ? Math.round((hadir / dpt) * 1000) / 10 : 0;
+        const tpsMasuk = item.partisipasi?.tps_masuk || 0;
+        const tpsTotal = item.partisipasi?.tps_total || 0;
+        const tpsPersen = tpsTotal > 0 ? Math.round((tpsMasuk / tpsTotal) * 1000) / 10 : 0;
+
+        return `
+            <tr class="hover:bg-slate-50">
+                <td class="px-5 py-4 font-bold text-slate-800">${escapeHtml(item.label)}</td>
+                <td class="px-5 py-4 text-slate-600">${escapeHtml(pemenang)}</td>
+                <td class="px-5 py-4 text-right font-mono-data font-bold text-[var(--primary)]">${formatNumber(totalSuara)}</td>
+                <td class="px-5 py-4 text-right font-mono-data text-slate-700">${partisipasi}%</td>
+                <td class="px-5 py-4 text-right font-mono-data text-slate-700">${tpsPersen}%</td>
+            </tr>
+        `;
+    }).join('');
 }
 
 function updateRanking(data) {
@@ -868,11 +1383,80 @@ function updateRanking(data) {
     }).join('');
 }
 
+function updateQuickStats(data) {
+    const card = document.getElementById('card-quick-stats');
+    const defaults = {
+        'quick-partisipasi': '-',
+        'quick-dpt': '-',
+        'quick-suara': '-',
+        'quick-selisih': '-',
+    };
+
+    if (!data.length) {
+        Object.entries(defaults).forEach(([id, value]) => document.getElementById(id).textContent = value);
+        return;
+    }
+
+    const rows = data.map((item) => {
+        const suaraTotal = item.suara.reduce((a, b) => a + b, 0);
+        const sortedSuara = [...item.suara].sort((a, b) => b - a);
+        const dpt = item.partisipasi?.dpt || 0;
+        const hadir = item.partisipasi?.hadir || 0;
+
+        return {
+            label: item.label,
+            suara: suaraTotal,
+            dpt,
+            persen: dpt > 0 ? (hadir / dpt) * 100 : 0,
+            margin: sortedSuara.length > 1 ? sortedSuara[0] - sortedSuara[1] : null,
+        };
+    });
+
+    const byPartisipasi = [...rows].sort((a, b) => b.persen - a.persen)[0];
+    const byDpt = [...rows].sort((a, b) => b.dpt - a.dpt)[0];
+    const bySuara = [...rows].sort((a, b) => b.suara - a.suara)[0];
+    const byMargin = rows
+        .filter((item) => item.margin !== null)
+        .sort((a, b) => a.margin - b.margin)[0];
+
+    document.getElementById('quick-partisipasi').textContent = byPartisipasi?.label || '-';
+    document.getElementById('quick-dpt').textContent = byDpt?.label || '-';
+    document.getElementById('quick-suara').textContent = bySuara?.label || '-';
+    document.getElementById('quick-selisih').textContent = byMargin?.label || '-';
+    card.classList.remove('hidden');
+}
+
+function updateDemographics(data) {
+    const card = document.getElementById('card-demografi');
+    const totalLk = data.reduce((sum, item) => sum + (item.partisipasi?.dpt_lk || 0), 0);
+    const totalPr = data.reduce((sum, item) => sum + (item.partisipasi?.dpt_pr || 0), 0);
+    const total = totalLk + totalPr;
+    const persenLk = total > 0 ? Math.round((totalLk / total) * 1000) / 10 : 0;
+    const persenPr = total > 0 ? Math.round((totalPr / total) * 1000) / 10 : 0;
+
+    document.getElementById('demo-lk-label').textContent = `${persenLk}%`;
+    document.getElementById('demo-pr-label').textContent = `${persenPr}%`;
+    document.getElementById('demo-lk-bar').style.width = `${Math.min(100, persenLk)}%`;
+    document.getElementById('demo-pr-bar').style.width = `${Math.min(100, persenPr)}%`;
+
+    if (data.length) card.classList.remove('hidden');
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const jenis = document.getElementById('f-jenis').value;
     updateJenisButtons();
     setDapilMode(jenis === 'dprd_kab');
     if (jenis && jenis !== 'dprd_kab') loadChart();
+});
+
+document.addEventListener('click', (event) => {
+    if (!event.target.closest('#f-search') && !event.target.closest('#search-suggestions')) {
+        hideSearchSuggestions();
+    }
+});
+
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') hideSearchSuggestions();
 });
 </script>
 </body>

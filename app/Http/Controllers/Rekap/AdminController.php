@@ -422,7 +422,7 @@ class AdminController extends Controller
                 $data[] = [
                     'label'       => $kec->nama,
                     'suara'       => $this->buildSuaraData($rekaps->whereIn('tps_id', $kecTpsIds), $jenis, $activeDapilId),
-                    'partisipasi' => $this->buildPartisipasiData($rekaps->whereIn('tps_id', $kecTpsIds)),
+                    'partisipasi' => $this->buildPartisipasiData($rekaps->whereIn('tps_id', $kecTpsIds), count($kecTpsIds)),
                 ];
             }
         } elseif ($level === 'dapil' && $dapilId) {
@@ -433,7 +433,7 @@ class AdminController extends Controller
                 $data[] = [
                     'label'       => $kec->nama,
                     'suara'       => $this->buildSuaraData($rekaps->whereIn('tps_id', $kecTpsIds), $jenis, $activeDapilId),
-                    'partisipasi' => $this->buildPartisipasiData($rekaps->whereIn('tps_id', $kecTpsIds)),
+                    'partisipasi' => $this->buildPartisipasiData($rekaps->whereIn('tps_id', $kecTpsIds), count($kecTpsIds)),
                 ];
             }
         } elseif ($level === 'kecamatan' && $kecId) {
@@ -444,7 +444,7 @@ class AdminController extends Controller
                 $data[] = [
                     'label'       => $desa->nama,
                     'suara'       => $this->buildSuaraData($rekaps->whereIn('tps_id', $desaTpsIds), $jenis, $activeDapilId),
-                    'partisipasi' => $this->buildPartisipasiData($rekaps->whereIn('tps_id', $desaTpsIds)),
+                    'partisipasi' => $this->buildPartisipasiData($rekaps->whereIn('tps_id', $desaTpsIds), count($desaTpsIds)),
                 ];
             }
         } elseif ($level === 'desa' && $desaId) {
@@ -455,7 +455,7 @@ class AdminController extends Controller
                 $data[] = [
                     'label'       => $tps->nama,
                     'suara'       => $this->buildSuaraData($r ? collect([$r]) : collect(), $jenis, $activeDapilId),
-                    'partisipasi' => $this->buildPartisipasiData($r ? collect([$r]) : collect()),
+                    'partisipasi' => $this->buildPartisipasiData($r ? collect([$r]) : collect(), 1),
                 ];
             }
         } elseif ($level === 'tps' && $tpsId) {
@@ -465,7 +465,7 @@ class AdminController extends Controller
             $data[] = [
                 'label'       => $tps->nama,
                 'suara'       => $this->buildSuaraData($r ? collect([$r]) : collect(), $jenis, $activeDapilId),
-                'partisipasi' => $this->buildPartisipasiData($r ? collect([$r]) : collect()),
+                'partisipasi' => $this->buildPartisipasiData($r ? collect([$r]) : collect(), 1),
             ];
         }
 
@@ -488,8 +488,38 @@ class AdminController extends Controller
             'jenis'  => $jenis,
             'labels' => $labels,
             'search_meta' => $searchMeta,
+            'candidate_rank' => $this->buildCandidateRanking($rekaps, $jenis, $activeDapilId),
             'data'   => $data,
         ]);
+    }
+
+    private function buildCandidateRanking($rekaps, string $jenis, ?int $dapilId = null): array
+    {
+        if (!in_array($jenis, ['dpr_ri', 'dprd_prov', 'dprd_kab'])) {
+            return [];
+        }
+
+        $partais = $this->getMaster($jenis, $dapilId)['partais'];
+        $calegs = $partais
+            ->flatMap(fn($partai) => $partai->calegs->map(fn($caleg) => [
+                'id' => $caleg->id,
+                'nama_caleg' => $caleg->nama_caleg,
+                'nama_partai' => $partai->nama_partai,
+            ]));
+
+        return $calegs
+            ->map(function ($caleg) use ($rekaps) {
+                $suara = $rekaps->sum(fn($rekap) => $rekap->calegSuaras->firstWhere('caleg_id', $caleg['id'])?->suara ?? 0);
+
+                return [
+                    'label' => $caleg['nama_caleg'],
+                    'meta' => $caleg['nama_partai'],
+                    'suara' => $suara,
+                ];
+            })
+            ->sortByDesc('suara')
+            ->values()
+            ->toArray();
     }
 
     private function buildSuaraData($rekaps, string $jenis, ?int $dapilId = null): array
@@ -515,13 +545,17 @@ class AdminController extends Controller
         }
     }
 
-    private function buildPartisipasiData($rekaps): array
+    private function buildPartisipasiData($rekaps, ?int $tpsTotal = null): array
     {
         return [
             'dpt'   => $rekaps->sum(fn($r) => ($r->dpt_lk ?? 0) + ($r->dpt_pr ?? 0)),
+            'dpt_lk' => $rekaps->sum(fn($r) => $r->dpt_lk ?? 0),
+            'dpt_pr' => $rekaps->sum(fn($r) => $r->dpt_pr ?? 0),
             'hadir' => $rekaps->sum(fn($r) => ($r->pengguna_dpt_lk ?? 0) + ($r->pengguna_dpt_pr ?? 0) +
                                             ($r->pengguna_dptb_lk ?? 0) + ($r->pengguna_dptb_pr ?? 0) +
                                             ($r->pengguna_dpk_lk ?? 0) + ($r->pengguna_dpk_pr ?? 0)),
+            'tps_masuk' => $rekaps->pluck('tps_id')->unique()->count(),
+            'tps_total' => $tpsTotal ?? $rekaps->pluck('tps_id')->unique()->count(),
         ];
     }
 
