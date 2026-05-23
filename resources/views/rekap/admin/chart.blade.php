@@ -211,6 +211,11 @@
             z-index: 1;
         }
 
+        .candidate-rank-scroll {
+            max-height: 350px;
+            overflow-y: auto;
+        }
+
         @media (max-width: 1280px) {
             body {
                 overflow: auto;
@@ -599,7 +604,7 @@
                     <thead class="bg-slate-50 text-[10px] uppercase tracking-[0.16em] text-slate-500">
                         <tr>
                             <th class="px-5 py-3 font-bold">Wilayah</th>
-                            <th class="px-5 py-3 font-bold">Pemenang</th>
+                            <th id="detail-subject-header" class="px-5 py-3 font-bold">Pemenang</th>
                             <th class="px-5 py-3 font-bold text-right">Total Suara</th>
                             <th class="px-5 py-3 font-bold text-right">Partisipasi</th>
                             <th class="px-5 py-3 font-bold text-right">TPS Masuk</th>
@@ -643,7 +648,7 @@
                 <p class="text-[10px] uppercase tracking-[0.18em] text-slate-500 font-bold">Ranking Kandidat</p>
                 <p class="text-sm text-slate-600 mt-1">Perolehan suara utama.</p>
             </div>
-            <div id="candidate-rank-list" class="divide-y divide-slate-200">
+            <div id="candidate-rank-list" class="candidate-rank-scroll divide-y divide-slate-200">
                 <div class="px-5 py-4 text-sm text-slate-500">Belum ada data ditampilkan.</div>
             </div>
         </section>
@@ -796,7 +801,8 @@ function searchSuggestionItems(json = currentChartJson) {
         value: label,
     }));
 
-    (json.candidate_rank || []).forEach((item) => {
+    const candidates = json.candidate_series?.length ? json.candidate_series : (json.candidate_rank || []);
+    candidates.forEach((item) => {
         items.push({
             label: item.label,
             meta: item.meta || '',
@@ -861,15 +867,53 @@ function filterChartJson(json) {
     if (!term) return json;
 
     const searchMeta = json.search_meta || json.labels || [];
-    const indexes = json.labels
+    const partyIndexes = json.labels
+        .map((label, index) => ({ label, index }))
+        .filter((item) => normalizeText(item.label).includes(term))
+        .map((item) => item.index);
+    const candidateMatches = partyIndexes.length
+        ? []
+        : (json.candidate_series || [])
+            .filter((item) => normalizeText(`${item.label} ${item.meta || ''}`).includes(term));
+
+    if (candidateMatches.length) {
+        const candidateRank = candidateMatches
+            .map((item) => ({
+                id: item.id,
+                label: item.label,
+                meta: item.meta || '',
+                suara: (item.suara || []).reduce((sum, value) => sum + (Number(value) || 0), 0),
+            }))
+            .sort((a, b) => b.suara - a.suara);
+
+        return {
+            ...json,
+            search_mode: 'candidate',
+            labels: candidateMatches.map((item) => item.label),
+            search_meta: candidateMatches.map((item) => item.meta || ''),
+            candidate_rank: candidateRank,
+            data: json.data.map((item, groupIndex) => ({
+                ...item,
+                suara: candidateMatches.map((candidate) => candidate.suara?.[groupIndex] ?? 0),
+            })),
+        };
+    }
+
+    const indexes = partyIndexes.length
+        ? partyIndexes
+        : json.labels
         .map((label, index) => ({ label, index }))
         .filter((item) => normalizeText(`${item.label} ${searchMeta[item.index] || ''}`).includes(term))
         .map((item) => item.index);
+    const selectedParties = new Set(indexes.map((index) => normalizeText(json.labels[index])));
 
     return {
         ...json,
+        search_mode: partyIndexes.length ? 'party' : null,
         labels: indexes.map((index) => json.labels[index]),
-        candidate_rank: json.candidate_rank?.filter((item) => normalizeText(`${item.label} ${item.meta || ''}`).includes(term)) || [],
+        candidate_rank: partyIndexes.length
+            ? json.candidate_rank?.filter((item) => selectedParties.has(normalizeText(item.meta || ''))) || []
+            : json.candidate_rank?.filter((item) => normalizeText(`${item.label} ${item.meta || ''}`).includes(term)) || [],
         data: json.data.map((item) => ({
             ...item,
             suara: indexes.map((index) => item.suara[index] ?? 0),
@@ -1375,8 +1419,9 @@ function updateCandidateRanking(json) {
             }))
             .sort((a, b) => b.suara - a.suara);
     const totalSuara = rankSource.reduce((sum, item) => sum + (Number(item.suara) || 0), 0);
-    const rank = rankSource.slice(0, 5);
-
+    const term = normalizeText(document.getElementById('f-search')?.value || '');
+    const isPartySearch = term.length > 0 && (json.labels || []).some((label) => normalizeText(label).includes(term));
+    const rank = rankSource.slice(0, isPartySearch ? rankSource.length : 20);
 
     target.innerHTML = rank.map((item, index) => {
         const persen = totalSuara > 0 ? Math.round((item.suara / totalSuara) * 1000) / 10 : 0;
@@ -1431,10 +1476,12 @@ function updateStats(payload) {
 function updateDetailTable(json) {
     const target = document.getElementById('detail-table-body');
     const subtitle = document.getElementById('detail-table-subtitle');
+    const subjectHeader = document.getElementById('detail-subject-header');
 
     if (!json?.data?.length) {
         target.innerHTML = '<tr><td colspan="5" class="px-5 py-5 text-center text-sm text-slate-500">Belum ada data ditampilkan.</td></tr>';
         subtitle.textContent = 'Data mengikuti filter aktif.';
+        subjectHeader.textContent = 'Pemenang';
         return;
     }
 
@@ -1446,12 +1493,18 @@ function updateDetailTable(json) {
         tps: 'TPS',
     };
     const level = document.getElementById('f-level').value;
-    subtitle.textContent = `Detail per ${levelLabels[level] || 'wilayah'} pada filter aktif.`;
+    const candidateMode = json.search_mode === 'candidate';
+    subtitle.textContent = candidateMode
+        ? `Perolehan suara caleg per ${levelLabels[level] || 'wilayah'} pada filter aktif.`
+        : `Detail per ${levelLabels[level] || 'wilayah'} pada filter aktif.`;
+    subjectHeader.textContent = candidateMode ? 'Caleg' : 'Pemenang';
 
     target.innerHTML = json.data.map((item) => {
         const totalSuara = item.suara.reduce((sum, value) => sum + value, 0);
         const winnerIndex = item.suara.reduce((bestIndex, value, index, values) => value > values[bestIndex] ? index : bestIndex, 0);
-        const pemenang = totalSuara > 0 ? (json.labels[winnerIndex] || '-') : '-';
+        const pemenang = candidateMode
+            ? (json.labels.length === 1 ? json.labels[0] : (json.labels[winnerIndex] || '-'))
+            : (totalSuara > 0 ? (json.labels[winnerIndex] || '-') : '-');
         const dpt = item.partisipasi?.dpt || 0;
         const hadir = item.partisipasi?.hadir || 0;
         const partisipasi = dpt > 0 ? Math.round((hadir / dpt) * 1000) / 10 : 0;

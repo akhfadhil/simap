@@ -398,6 +398,14 @@ class AdminController extends Controller
         $dapilId = $request->dapil_id;
         $activeDapilId = $jenis === 'dprd_kab' && $dapilId ? (int) $dapilId : null;
 
+        if (in_array($jenis, ['dpr_ri', 'dprd_prov', 'dprd_kab'], true)) {
+            return $this->chartLegislatifData($jenis, $level, $kecId, $desaId, $tpsId, $dapilId, $activeDapilId);
+        }
+
+        if (in_array($jenis, ['ppwp', 'dpd', 'gubernur', 'bupati'], true)) {
+            return $this->chartCalonData($jenis, $level, $kecId, $desaId, $tpsId, $dapilId);
+        }
+
         // Tentukan scope TPS
         $tpsQuery = Tps::query();
         if ($tpsId)       $tpsQuery->where('id', $tpsId);
@@ -491,6 +499,404 @@ class AdminController extends Controller
             'candidate_rank' => $this->buildCandidateRanking($rekaps, $jenis, $activeDapilId),
             'data'   => $data,
         ]);
+    }
+
+    private function chartCalonData(string $jenis, string $level, $kecId, $desaId, $tpsId, $dapilId)
+    {
+        return response()->json(RekapAdminCache::rememberChart([
+            'version' => 1,
+            'jenis' => $jenis,
+            'level' => $level,
+            'kecamatan_id' => $kecId,
+            'desa_id' => $desaId,
+            'tps_id' => $tpsId,
+            'dapil_id' => $dapilId,
+        ], function () use ($jenis, $level, $kecId, $desaId, $tpsId, $dapilId) {
+        $config = $this->chartCalonConfig($jenis);
+        $master = $this->getMaster($jenis);
+        $calons = $master['calons'];
+        $labels = $calons->map(fn($calon) => $calon->{$config['label']})->toArray();
+        $calonIds = $calons->pluck('id')->map(fn($id) => (int) $id)->values()->all();
+        $calonIndex = array_flip($calonIds);
+        $groups = $this->chartGroupRows($level, $kecId, $desaId, $tpsId, $dapilId);
+        $groupExpr = $this->chartGroupExpression($level);
+
+        $suaraByGroup = [];
+        foreach ($groups as $group) {
+            $suaraByGroup[(int) $group['id']] = array_fill(0, count($calonIds), 0);
+        }
+
+        if ($groups->isNotEmpty() && count($calonIds) > 0) {
+            $suaraRows = $this->applyChartScope(
+                    DB::table($config['table'] . ' as s')
+                        ->join('rekap_headers as h', 'h.id', '=', 's.rekap_id')
+                        ->join('tps as t', 't.id', '=', 'h.tps_id')
+                        ->join('desas as d', 'd.id', '=', 't.desa_id')
+                        ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id'),
+                    $jenis,
+                    $kecId,
+                    $desaId,
+                    $tpsId,
+                    $dapilId
+                )
+                ->whereIn('s.calon_id', $calonIds)
+                ->selectRaw($groupExpr . ' as group_id, s.calon_id, SUM(s.suara) as total_suara')
+                ->groupBy(DB::raw($groupExpr), 's.calon_id')
+                ->get();
+
+            foreach ($suaraRows as $row) {
+                $groupId = (int) $row->group_id;
+                $calonId = (int) $row->calon_id;
+                if (isset($suaraByGroup[$groupId], $calonIndex[$calonId])) {
+                    $suaraByGroup[$groupId][$calonIndex[$calonId]] = (int) $row->total_suara;
+                }
+            }
+        }
+
+        $partisipasiRows = $this->applyChartScope(
+                DB::table('rekap_headers as h')
+                    ->join('tps as t', 't.id', '=', 'h.tps_id')
+                    ->join('desas as d', 'd.id', '=', 't.desa_id')
+                    ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id'),
+                $jenis,
+                $kecId,
+                $desaId,
+                $tpsId,
+                $dapilId
+            )
+            ->selectRaw($groupExpr . ' as group_id')
+            ->selectRaw('SUM(COALESCE(h.dpt_lk, 0)) as dpt_lk')
+            ->selectRaw('SUM(COALESCE(h.dpt_pr, 0)) as dpt_pr')
+            ->selectRaw('SUM(COALESCE(h.pengguna_dpt_lk, 0) + COALESCE(h.pengguna_dpt_pr, 0) + COALESCE(h.pengguna_dptb_lk, 0) + COALESCE(h.pengguna_dptb_pr, 0) + COALESCE(h.pengguna_dpk_lk, 0) + COALESCE(h.pengguna_dpk_pr, 0)) as hadir')
+            ->selectRaw('COUNT(DISTINCT h.tps_id) as tps_masuk')
+            ->groupBy(DB::raw($groupExpr))
+            ->get()
+            ->keyBy(fn($row) => (int) $row->group_id);
+
+        $data = $groups->map(function ($group) use ($suaraByGroup, $partisipasiRows) {
+            $groupId = (int) $group['id'];
+            $partisipasi = $partisipasiRows->get($groupId);
+            $dptLk = (int) ($partisipasi->dpt_lk ?? 0);
+            $dptPr = (int) ($partisipasi->dpt_pr ?? 0);
+
+            return [
+                'label' => $group['label'],
+                'suara' => $suaraByGroup[$groupId] ?? [],
+                'partisipasi' => [
+                    'dpt' => $dptLk + $dptPr,
+                    'dpt_lk' => $dptLk,
+                    'dpt_pr' => $dptPr,
+                    'hadir' => (int) ($partisipasi->hadir ?? 0),
+                    'tps_masuk' => (int) ($partisipasi->tps_masuk ?? 0),
+                    'tps_total' => (int) $group['tps_total'],
+                ],
+            ];
+        })->values()->toArray();
+
+        $candidateTotals = array_fill(0, count($labels), 0);
+        foreach ($data as $row) {
+            foreach ($row['suara'] as $index => $suara) {
+                $candidateTotals[$index] = ($candidateTotals[$index] ?? 0) + (int) $suara;
+            }
+        }
+
+        return [
+            'type' => in_array($jenis, ['ppwp', 'dpd'], true) ? 'pie' : 'bar',
+            'jenis' => $jenis,
+            'labels' => $labels,
+            'search_meta' => $labels,
+            'candidate_rank' => collect($labels)
+                ->map(fn($label, $index) => [
+                    'label' => $label,
+                    'meta' => '',
+                    'suara' => (int) ($candidateTotals[$index] ?? 0),
+                ])
+                ->sortByDesc('suara')
+                ->values()
+                ->toArray(),
+            'data' => $data,
+        ];
+        }));
+    }
+
+    private function chartCalonConfig(string $jenis): array
+    {
+        return match ($jenis) {
+            'ppwp' => ['table' => 'rekap_ppwp_suaras', 'label' => 'nama_paslon'],
+            'gubernur' => ['table' => 'rekap_gubernur_suaras', 'label' => 'nama_paslon'],
+            'bupati' => ['table' => 'rekap_bupati_suaras', 'label' => 'nama_paslon'],
+            'dpd' => ['table' => 'rekap_dpd_suaras', 'label' => 'nama_calon'],
+        };
+    }
+
+    private function chartLegislatifData(string $jenis, string $level, $kecId, $desaId, $tpsId, $dapilId, ?int $activeDapilId)
+    {
+        return response()->json(RekapAdminCache::rememberChart([
+            'version' => 2,
+            'jenis' => $jenis,
+            'level' => $level,
+            'kecamatan_id' => $kecId,
+            'desa_id' => $desaId,
+            'tps_id' => $tpsId,
+            'dapil_id' => $dapilId,
+            'active_dapil_id' => $activeDapilId,
+        ], function () use ($jenis, $level, $kecId, $desaId, $tpsId, $dapilId, $activeDapilId) {
+        $master = $this->getMaster($jenis, $activeDapilId);
+        $partais = $master['partais'];
+        $labels = $partais->map(fn($p) => $p->nama_partai)->toArray();
+        $searchMeta = $partais->map(function ($partai) {
+            return trim($partai->nama_partai . ' ' . $partai->calegs->pluck('nama_caleg')->implode(' '));
+        })->toArray();
+
+        $groups = $this->chartGroupRows($level, $kecId, $desaId, $tpsId, $dapilId);
+        $partaiIds = $partais->pluck('id')->map(fn($id) => (int) $id)->values()->all();
+        $partaiIndex = array_flip($partaiIds);
+        $groupExpr = $this->chartGroupExpression($level);
+        $calegs = $partais
+            ->flatMap(fn($partai) => $partai->calegs->map(fn($caleg) => [
+                'id' => (int) $caleg->id,
+                'nama_caleg' => $caleg->nama_caleg,
+                'nama_partai' => $partai->nama_partai,
+            ]));
+
+        $suaraByGroup = [];
+        foreach ($groups as $group) {
+            $suaraByGroup[(int) $group['id']] = array_fill(0, count($partaiIds), 0);
+        }
+        $groupIndex = array_flip($groups->pluck('id')->map(fn($id) => (int) $id)->values()->all());
+        $suaraByCaleg = array_fill_keys($calegs->pluck('id')->values()->all(), 0);
+        $candidateSeriesByCaleg = [];
+        foreach ($suaraByCaleg as $calegId => $_) {
+            $candidateSeriesByCaleg[(int) $calegId] = array_fill(0, $groups->count(), 0);
+        }
+
+        if ($groups->isNotEmpty() && count($partaiIds) > 0) {
+            $partaiRows = $this->applyChartScope(
+                    DB::table('rekap_partai_suaras as s')
+                        ->join('rekap_headers as h', 'h.id', '=', 's.rekap_id')
+                        ->join('tps as t', 't.id', '=', 'h.tps_id')
+                        ->join('desas as d', 'd.id', '=', 't.desa_id')
+                        ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
+                        ->join('rekap_partais as p', 'p.id', '=', 's.partai_id'),
+                    $jenis,
+                    $kecId,
+                    $desaId,
+                    $tpsId,
+                    $dapilId
+                )
+                ->where('p.jenis', $jenis)
+                ->when($jenis === 'dprd_kab' && $activeDapilId, fn($query) => $query->where('p.dapil_id', $activeDapilId))
+                ->whereIn('s.partai_id', $partaiIds)
+                ->selectRaw($groupExpr . ' as group_id, s.partai_id, SUM(s.suara) as total_suara')
+                ->groupBy(DB::raw($groupExpr), 's.partai_id')
+                ->get();
+
+            foreach ($partaiRows as $row) {
+                $groupId = (int) $row->group_id;
+                $partaiId = (int) $row->partai_id;
+                if (isset($suaraByGroup[$groupId], $partaiIndex[$partaiId])) {
+                    $suaraByGroup[$groupId][$partaiIndex[$partaiId]] += (int) $row->total_suara;
+                }
+            }
+
+            $calegRows = $this->applyChartScope(
+                    DB::table('rekap_caleg_suaras as s')
+                        ->join('rekap_headers as h', 'h.id', '=', 's.rekap_id')
+                        ->join('tps as t', 't.id', '=', 'h.tps_id')
+                        ->join('desas as d', 'd.id', '=', 't.desa_id')
+                        ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
+                        ->join('rekap_calegs as c', 'c.id', '=', 's.caleg_id')
+                        ->join('rekap_partais as p', 'p.id', '=', 'c.partai_id'),
+                    $jenis,
+                    $kecId,
+                    $desaId,
+                    $tpsId,
+                    $dapilId
+                )
+                ->where('p.jenis', $jenis)
+                ->when($jenis === 'dprd_kab' && $activeDapilId, fn($query) => $query->where('p.dapil_id', $activeDapilId))
+                ->whereIn('p.id', $partaiIds)
+                ->selectRaw($groupExpr . ' as group_id, p.id as partai_id, s.caleg_id, SUM(s.suara) as total_suara')
+                ->groupBy(DB::raw($groupExpr), 'p.id', 's.caleg_id')
+                ->get();
+
+            foreach ($calegRows as $row) {
+                $groupId = (int) $row->group_id;
+                $partaiId = (int) $row->partai_id;
+                $calegId = (int) $row->caleg_id;
+                $total = (int) $row->total_suara;
+                if (isset($suaraByGroup[$groupId], $partaiIndex[$partaiId])) {
+                    $suaraByGroup[$groupId][$partaiIndex[$partaiId]] += $total;
+                }
+                if (array_key_exists($calegId, $suaraByCaleg)) {
+                    $suaraByCaleg[$calegId] += $total;
+                }
+                if (isset($groupIndex[$groupId], $candidateSeriesByCaleg[$calegId])) {
+                    $candidateSeriesByCaleg[$calegId][$groupIndex[$groupId]] += $total;
+                }
+            }
+        }
+
+        $partisipasiRows = $this->applyChartScope(
+                DB::table('rekap_headers as h')
+                    ->join('tps as t', 't.id', '=', 'h.tps_id')
+                    ->join('desas as d', 'd.id', '=', 't.desa_id')
+                    ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id'),
+                $jenis,
+                $kecId,
+                $desaId,
+                $tpsId,
+                $dapilId
+            )
+            ->selectRaw($groupExpr . ' as group_id')
+            ->selectRaw('SUM(COALESCE(h.dpt_lk, 0)) as dpt_lk')
+            ->selectRaw('SUM(COALESCE(h.dpt_pr, 0)) as dpt_pr')
+            ->selectRaw('SUM(COALESCE(h.pengguna_dpt_lk, 0) + COALESCE(h.pengguna_dpt_pr, 0) + COALESCE(h.pengguna_dptb_lk, 0) + COALESCE(h.pengguna_dptb_pr, 0) + COALESCE(h.pengguna_dpk_lk, 0) + COALESCE(h.pengguna_dpk_pr, 0)) as hadir')
+            ->selectRaw('COUNT(DISTINCT h.tps_id) as tps_masuk')
+            ->groupBy(DB::raw($groupExpr))
+            ->get()
+            ->keyBy(fn($row) => (int) $row->group_id);
+
+        $data = $groups->map(function ($group) use ($suaraByGroup, $partisipasiRows) {
+            $groupId = (int) $group['id'];
+            $partisipasi = $partisipasiRows->get($groupId);
+            $dptLk = (int) ($partisipasi->dpt_lk ?? 0);
+            $dptPr = (int) ($partisipasi->dpt_pr ?? 0);
+
+            return [
+                'label' => $group['label'],
+                'suara' => $suaraByGroup[$groupId] ?? [],
+                'partisipasi' => [
+                    'dpt' => $dptLk + $dptPr,
+                    'dpt_lk' => $dptLk,
+                    'dpt_pr' => $dptPr,
+                    'hadir' => (int) ($partisipasi->hadir ?? 0),
+                    'tps_masuk' => (int) ($partisipasi->tps_masuk ?? 0),
+                    'tps_total' => (int) $group['tps_total'],
+                ],
+            ];
+        })->values()->toArray();
+
+        return [
+            'type' => 'bar',
+            'jenis' => $jenis,
+            'labels' => $labels,
+            'search_meta' => $searchMeta,
+            'candidate_rank' => $calegs
+                ->map(fn($caleg) => [
+                    'id' => $caleg['id'],
+                    'label' => $caleg['nama_caleg'],
+                    'meta' => $caleg['nama_partai'],
+                    'suara' => (int) ($suaraByCaleg[$caleg['id']] ?? 0),
+                ])
+                ->sortByDesc('suara')
+                ->values()
+                ->toArray(),
+            'candidate_series' => $calegs
+                ->map(fn($caleg) => [
+                    'id' => $caleg['id'],
+                    'label' => $caleg['nama_caleg'],
+                    'meta' => $caleg['nama_partai'],
+                    'suara' => $candidateSeriesByCaleg[$caleg['id']] ?? array_fill(0, $groups->count(), 0),
+                ])
+                ->values()
+                ->toArray(),
+            'data' => $data,
+        ];
+        }));
+    }
+
+    private function chartGroupRows(string $level, $kecId, $desaId, $tpsId, $dapilId)
+    {
+        if ($level === 'kabupaten') {
+            return Kecamatan::with(['desas.tps:id,desa_id'])
+                ->orderBy('nama')
+                ->get()
+                ->map(fn($kec) => [
+                    'id' => (int) $kec->id,
+                    'label' => $kec->nama,
+                    'tps_total' => $kec->desas->sum(fn($desa) => $desa->tps->count()),
+                ]);
+        }
+
+        if ($level === 'dapil' && $dapilId) {
+            return Kecamatan::with(['desas.tps:id,desa_id'])
+                ->where('dapil_id', $dapilId)
+                ->orderBy('nama')
+                ->get()
+                ->map(fn($kec) => [
+                    'id' => (int) $kec->id,
+                    'label' => $kec->nama,
+                    'tps_total' => $kec->desas->sum(fn($desa) => $desa->tps->count()),
+                ]);
+        }
+
+        if ($level === 'kecamatan' && $kecId) {
+            return \App\Models\Desa::withCount('tps')
+                ->where('kecamatan_id', $kecId)
+                ->orderBy('nama')
+                ->get()
+                ->map(fn($desa) => [
+                    'id' => (int) $desa->id,
+                    'label' => $desa->nama,
+                    'tps_total' => (int) $desa->tps_count,
+                ]);
+        }
+
+        if ($level === 'desa' && $desaId) {
+            return Tps::where('desa_id', $desaId)
+                ->orderBy('nama')
+                ->get()
+                ->map(fn($tps) => [
+                    'id' => (int) $tps->id,
+                    'label' => $tps->nama,
+                    'tps_total' => 1,
+                ]);
+        }
+
+        if ($level === 'tps' && $tpsId) {
+            return Tps::where('id', $tpsId)
+                ->get()
+                ->map(fn($tps) => [
+                    'id' => (int) $tps->id,
+                    'label' => $tps->nama,
+                    'tps_total' => 1,
+                ]);
+        }
+
+        return collect();
+    }
+
+    private function chartGroupExpression(string $level): string
+    {
+        return match ($level) {
+            'kecamatan' => 'd.id',
+            'desa', 'tps' => 't.id',
+            default => 'k.id',
+        };
+    }
+
+    private function applyChartScope($query, string $jenis, $kecId, $desaId, $tpsId, $dapilId)
+    {
+        $query->where('h.jenis', $jenis);
+
+        if ($tpsId) {
+            return $query->where('t.id', $tpsId);
+        }
+
+        if ($desaId) {
+            return $query->where('d.id', $desaId);
+        }
+
+        if ($kecId) {
+            return $query->where('k.id', $kecId);
+        }
+
+        if ($dapilId) {
+            return $query->where('k.dapil_id', $dapilId);
+        }
+
+        return $query;
     }
 
     private function buildCandidateRanking($rekaps, string $jenis, ?int $dapilId = null): array
