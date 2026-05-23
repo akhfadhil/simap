@@ -1,7 +1,11 @@
-@extends('layouts.app')
+@extends('layouts.role-dashboard')
 @section('title', 'Dokumen Kecamatan')
+@section('role_key', 'ppk')
+@section('role_title', 'PPK')
+@section('role_subtitle', 'Panitia Pemilihan Kecamatan')
+@section('role_active', 'dokumen')
 
-@section('content')
+@section('role_content')
 
 @php
     $aktifJenis = \App\Models\PemiluSetting::aktif();
@@ -23,18 +27,11 @@
         ← Kembali
     </a>
 </div>
-@else
-<div class="mb-4">
-    <a href="{{ route('dashboard.ppk') }}"
-       class="inline-flex items-center gap-2 text-xs dark:text-gray-500 text-gray-400 hover:text-red-500 transition font-medium">
-        ← Kembali ke Dashboard
-    </a>
-</div>
 @endif
 
 <div class="mb-8">
     <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-2 font-semibold">// PPK — Rekap Dokumen</p>
-    <h1 class="font-display text-4xl tracking-[2px] text-orange-400">DOKUMEN KECAMATAN</h1>
+    <h1 class="font-display text-4xl tracking-[2px] admin-text">DOKUMEN KECAMATAN</h1>
     <p class="dark:text-gray-400 text-gray-500 text-sm mt-1">{{ $kecamatan->nama ?? '' }}</p>
 </div>
 

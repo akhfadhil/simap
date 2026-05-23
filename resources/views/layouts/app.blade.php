@@ -15,6 +15,7 @@
     <link rel="icon" type="image/png" href="{{ asset('images\logo-kpu.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Bebas+Neue&display=swap" rel="stylesheet">
+    @stack('styles')
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .font-display { font-family: 'Bebas Neue', sans-serif; }
@@ -32,8 +33,9 @@
     </style>
 </head>
 
-<body class="dark:bg-gray-950 bg-slate-200 dark:text-gray-100 text-gray-800 min-h-screen transition-colors duration-200">
+<body class="@yield('body_class', 'dark:bg-gray-950 bg-slate-200 dark:text-gray-100 text-gray-800 min-h-screen transition-colors duration-200')">
 
+@if(! View::hasSection('fullscreen'))
 {{-- ── TOPBAR ────────────────────────────────────────────── --}}
 <header class="sticky top-0 z-50 dark:bg-gray-900 bg-white border-b dark:border-gray-800 border-gray-200 shadow-sm">
     <div class="max-w-7xl mx-auto px-4 lg:px-8 h-16 flex items-center justify-between gap-4">
@@ -107,11 +109,16 @@
         </div>
     </div>
 </header>
+@endif
 
 {{-- ── CONTENT ───────────────────────────────────────────── --}}
+@if(View::hasSection('fullscreen'))
+    @yield('content')
+@else
 <main class="max-w-7xl mx-auto px-4 lg:px-8 py-6">
     @yield('content')
 </main>
+@endif
 
 {{-- Modal Preview PDF --}}
 <div id="pdf-modal" class="hidden fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">

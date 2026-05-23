@@ -1,14 +1,11 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 @section('title', 'Kelola Desa')
+@section('admin_active', 'desa')
 
-@section('content')
+@section('admin_content')
 <div class="mb-8">
-    <a href="{{ route('dashboard.admin') }}"
-       class="inline-flex items-center gap-2 text-xs dark:text-gray-500 text-gray-400 hover:text-red-500 transition font-medium mb-4">
-        ← Kembali ke Dashboard
-    </a>
     <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-2 font-semibold">// Admin — Wilayah</p>
-    <h1 class="font-display text-4xl tracking-[2px] text-red-600">KELOLA DESA</h1>
+    <h1 class="font-display text-4xl tracking-[2px] admin-text">KELOLA DESA</h1>
 </div>
 
 @if(session('success'))
@@ -53,14 +50,19 @@
             <form method="GET" class="flex items-center gap-3">
                 <select name="kecamatan_id" onchange="this.form.submit()"
                         class="dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-300 text-gray-600 px-3 py-2 text-xs rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
-                    <option value="">Semua Kecamatan</option>
+                    <option value="">Pilih Kecamatan</option>
                     @foreach($kecamatans as $kec)
                     <option value="{{ $kec->id }}" {{ request('kecamatan_id') == $kec->id ? 'selected' : '' }}>{{ $kec->nama }}</option>
                     @endforeach
                 </select>
-                <span class="text-[10px] dark:text-gray-500 text-gray-400 font-semibold uppercase tracking-wider">{{ $desas->count() }} Desa</span>
+                <span class="text-[10px] dark:text-gray-500 text-gray-400 font-semibold uppercase tracking-wider">
+                    {{ request('kecamatan_id') ? $desas->count() . ' Desa' : 'Pilih filter' }}
+                </span>
             </form>
         </div>
+        @if(! request('kecamatan_id'))
+        <div class="px-6 py-10 text-center dark:text-gray-600 text-gray-400 text-sm">Pilih kecamatan untuk menampilkan desa.</div>
+        @else
         @forelse($desas as $desa)
         <div class="flex items-center justify-between px-6 py-4 border-b dark:border-gray-700 border-gray-100 last:border-0 dark:hover:bg-gray-750 hover:bg-gray-50 transition group">
             <div>
@@ -86,8 +88,9 @@
             </div>
         </div>
         @empty
-        <div class="px-6 py-10 text-center dark:text-gray-600 text-gray-400 text-sm">Belum ada desa.</div>
+        <div class="px-6 py-10 text-center dark:text-gray-600 text-gray-400 text-sm">Belum ada desa pada kecamatan ini.</div>
         @endforelse
+        @endif
     </div>
 </div>
 

@@ -1,14 +1,11 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 @section('title', 'Setup Data Pemilu')
+@section('admin_active', 'setup')
 
-@section('content')
+@section('admin_content')
 <div class="mb-8">
-    <a href="{{ route('dashboard.admin') }}"
-       class="inline-flex items-center gap-2 text-xs dark:text-gray-500 text-gray-400 hover:text-red-500 transition font-medium mb-4">
-        ← Kembali ke Dashboard
-    </a>
     <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-2 font-semibold">// Admin — Setup</p>
-    <h1 class="font-display text-4xl tracking-[2px] text-red-600">SETUP DATA PEMILU</h1>
+    <h1 class="font-display text-4xl tracking-[2px] admin-text">SETUP DATA PEMILU</h1>
     <p class="dark:text-gray-400 text-gray-500 text-sm mt-1">Input master data paslon, calon, partai, dan caleg.</p>
 </div>
 

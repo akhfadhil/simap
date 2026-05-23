@@ -52,6 +52,68 @@
             line-height: 1;
         }
 
+        .admin-nav-sidebar {
+            background: rgba(255, 255, 255, 0.94);
+            border-color: var(--line);
+        }
+
+        .admin-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 24px;
+            color: var(--muted);
+            font-size: 14px;
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+
+        .admin-nav-item:hover {
+            background: var(--surface-soft);
+            color: var(--red);
+        }
+
+        .admin-nav-item.active {
+            background: var(--red-soft);
+            color: var(--red);
+            border-right: 4px solid var(--red);
+        }
+
+        .admin-mobile-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 80;
+            background: rgba(15, 23, 42, 0.46);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .admin-mobile-drawer {
+            position: fixed;
+            inset: 0 auto 0 0;
+            z-index: 90;
+            width: min(82vw, 20rem);
+            transform: translateX(-100%);
+            transition: transform 0.25s ease;
+        }
+
+        #admin-mobile-menu:checked ~ .admin-mobile-overlay {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #admin-mobile-menu:checked ~ .admin-mobile-drawer {
+            transform: translateX(0);
+        }
+
+        @media (min-width: 768px) {
+            .admin-mobile-overlay,
+            .admin-mobile-drawer {
+                display: none;
+            }
+        }
+
         .map-grid {
             background-color: var(--surface-low);
             background-image: radial-gradient(circle at 2px 2px, var(--map-dot) 1px, transparent 0);
@@ -285,17 +347,58 @@
     $defaultJenis = collect(\App\Models\RekapHeader::JENIS_LABELS)
         ->keys()
         ->first(fn ($key) => in_array($key, $aktifJenis));
+    $adminMenus = [
+        ['key' => 'dashboard', 'label' => 'Beranda', 'icon' => 'dashboard', 'route' => route('dashboard.admin')],
+        ['key' => 'users', 'label' => 'Pengguna', 'icon' => 'group', 'route' => route('admin.users.index')],
+        ['key' => 'chart', 'label' => 'Grafik & Statistik', 'icon' => 'bar_chart', 'route' => route('admin.rekap.chart')],
+        ['key' => 'kecamatan', 'label' => 'Kelola Kecamatan', 'icon' => 'map', 'route' => route('admin.kecamatan.index')],
+        ['key' => 'desa', 'label' => 'Kelola Desa', 'icon' => 'location_city', 'route' => route('admin.desa.index')],
+        ['key' => 'tps', 'label' => 'Kelola TPS', 'icon' => 'pin_drop', 'route' => route('admin.tps.index')],
+        ['key' => 'dokumen', 'label' => 'Rekap Dokumen', 'icon' => 'folder_open', 'route' => route('dokumen.admin')],
+        ['key' => 'rekap', 'label' => 'Rekapitulasi Data', 'icon' => 'analytics', 'route' => route('admin.rekap.index')],
+        ['key' => 'setup', 'label' => 'Setup Data Pemilu', 'icon' => 'settings', 'route' => route('admin.setup.index')],
+    ];
 @endphp
+
+<input id="admin-mobile-menu" type="checkbox" class="hidden">
+<label for="admin-mobile-menu" class="admin-mobile-overlay"></label>
+<aside class="admin-mobile-drawer admin-nav-sidebar flex flex-col border-r">
+    <div class="p-5 flex items-center justify-between border-b border-slate-200">
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-lg bg-red-50 border border-red-100 flex items-center justify-center overflow-hidden">
+                <img src="{{ asset('images/logo-kpu.png') }}" alt="SIMAP Logo" class="w-8 h-8 object-contain">
+            </div>
+            <div>
+                <p class="text-lg font-extrabold text-[var(--primary)] leading-none">SIMAP</p>
+                <p class="font-mono-data text-[10px] uppercase tracking-widest text-slate-500 mt-1">Administrator</p>
+            </div>
+        </div>
+        <label for="admin-mobile-menu" class="cursor-pointer p-2 text-slate-500 hover:text-red-600">
+            <span class="material-symbols-outlined">close</span>
+        </label>
+    </div>
+    <nav class="flex-1 py-4 overflow-y-auto">
+        @foreach($adminMenus as $menu)
+            <a class="admin-nav-item {{ $menu['key'] === 'chart' ? 'active' : '' }}" href="{{ $menu['route'] }}">
+                <span class="material-symbols-outlined">{{ $menu['icon'] }}</span>
+                <span>{{ $menu['label'] }}</span>
+            </a>
+        @endforeach
+    </nav>
+</aside>
 
 <header class="fixed top-0 left-0 right-0 z-50 h-16 bg-white border-b border-slate-200 shadow-sm">
     <div class="h-full px-6 flex items-center justify-between gap-6">
         <div class="flex items-center gap-4 min-w-0">
+            <label for="admin-mobile-menu" class="md:hidden cursor-pointer -ml-2 p-2 text-slate-500 hover:text-red-600">
+                <span class="material-symbols-outlined text-3xl">menu</span>
+            </label>
             <a href="{{ route('dashboard.admin') }}" class="w-10 h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center overflow-hidden shrink-0">
                 <img src="{{ asset('images/logo-kpu.png') }}" alt="KPU" class="w-8 h-8 object-contain">
             </a>
             <div class="min-w-0">
-                <p class="text-[11px] uppercase tracking-[0.22em] text-slate-500 font-semibold">SIMAP Analytics</p>
-                <h1 class="text-lg font-extrabold text-[var(--primary)] truncate">Grafik & Statistik Pemilu Banyuwangi</h1>
+                <p class="text-[11px] uppercase tracking-[0.22em] text-slate-500 font-semibold">Sistem Informasi</p>
+                <h1 class="text-lg font-extrabold text-[var(--primary)] truncate">Sistem Informasi Manajemen Arsip Pemilu</h1>
             </div>
         </div>
 
@@ -309,15 +412,31 @@
                 <p class="text-[10px] uppercase tracking-[0.18em] text-slate-500 font-semibold">Operator</p>
                 <p class="text-sm font-bold text-slate-800">{{ Auth::user()->name }}</p>
             </div>
-            <a href="{{ route('dashboard.admin') }}" class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50">
-                <span class="material-symbols-outlined text-base">arrow_back</span>
-                Dashboard
-            </a>
         </div>
     </div>
 </header>
 
 <main class="chart-shell pt-16 h-screen flex">
+    <aside class="admin-nav-sidebar hidden md:flex flex-col w-64 border-r h-full overflow-y-auto shrink-0 z-40">
+        <div class="p-6 border-b border-slate-200">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-9 h-9 rounded-lg bg-red-50 border border-red-100 flex items-center justify-center overflow-hidden">
+                    <img src="{{ asset('images/logo-kpu.png') }}" alt="SIMAP Logo" class="w-8 h-8 object-contain">
+                </div>
+                <p class="text-xl font-extrabold text-[var(--primary)] leading-none">SIMAP</p>
+            </div>
+            <span class="font-mono-data text-[10px] uppercase tracking-widest text-red-600 bg-red-50 px-2 py-1 rounded">Administrator</span>
+        </div>
+        <nav class="flex-1 py-4">
+            @foreach($adminMenus as $menu)
+                <a class="admin-nav-item {{ $menu['key'] === 'chart' ? 'active' : '' }}" href="{{ $menu['route'] }}">
+                    <span class="material-symbols-outlined">{{ $menu['icon'] }}</span>
+                    <span>{{ $menu['label'] }}</span>
+                </a>
+            @endforeach
+        </nav>
+    </aside>
+
     <aside class="w-[330px] bg-white text-slate-800 border-r border-slate-200 h-full overflow-y-auto flex flex-col p-6 shadow-xl z-40">
         <div class="mb-7">
             <p class="text-[10px] uppercase tracking-[0.24em] text-slate-500 font-bold mb-2">Filter Utama</p>

@@ -1,7 +1,8 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 @section('title', 'Semua Dokumen')
+@section('admin_active', 'dokumen')
 
-@section('content')
+@section('admin_content')
 
 @php
     $aktifJenis = \App\Models\PemiluSetting::aktif();
@@ -11,12 +12,8 @@
 @endphp
 
 <div class="mb-8">
-    <a href="{{ route('dashboard.admin') }}"
-       class="inline-flex items-center gap-2 text-xs dark:text-gray-500 text-gray-400 hover:text-red-500 transition font-medium mb-4">
-        ← Kembali ke Dashboard
-    </a>
     <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-2 font-semibold">// Admin — Semua Dokumen</p>
-    <h1 class="font-display text-4xl tracking-[2px] text-red-600">REKAP DOKUMEN</h1>
+    <h1 class="font-display text-4xl tracking-[2px] admin-text">REKAP DOKUMEN</h1>
 </div>
 
 @if(session('backup_result'))

@@ -1,7 +1,11 @@
-@extends('layouts.app')
+@extends('layouts.role-dashboard')
 @section('title', 'Upload Dokumen')
+@section('role_key', 'kpps')
+@section('role_title', 'KPPS')
+@section('role_subtitle', 'Kelompok Penyelenggara Pemungutan Suara')
+@section('role_active', 'upload')
 
-@section('content')
+@section('role_content')
 
 {{-- Banner view mode --}}
 @if(isset($isAdminView) && $isAdminView)
@@ -22,20 +26,13 @@
         ← Kembali
     </a>
 </div>
-@else
-<div class="mb-4">
-    <a href="{{ route('dashboard.kpps') }}"
-       class="inline-flex items-center gap-2 text-xs dark:text-gray-500 text-gray-400 hover:text-red-500 transition font-medium">
-        ← Kembali ke Dashboard
-    </a>
-</div>
 @endif
 
 <div class="mb-8">
     <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-2 font-semibold">
         // KPPS — {{ $tps->desa->kecamatan->nama }}
     </p>
-    <h1 class="font-display text-4xl tracking-[2px] text-sky-300">UPLOAD DOKUMEN</h1>
+    <h1 class="font-display text-4xl tracking-[2px] admin-text">UPLOAD DOKUMEN</h1>
     <p class="dark:text-gray-400 text-gray-500 text-sm mt-1">{{ $tps->nama }} · {{ $tps->desa->nama }}</p>
 </div>
 

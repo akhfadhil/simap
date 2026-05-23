@@ -1,7 +1,11 @@
-@extends('layouts.app')
+@extends('layouts.role-dashboard')
 @section('title', 'Verifikasi Dokumen')
+@section('role_key', 'pps')
+@section('role_title', 'PPS')
+@section('role_subtitle', 'Panitia Pemungutan Suara')
+@section('role_active', 'verifikasi')
 
-@section('content')
+@section('role_content')
 
 @php
     $aktifJenis = \App\Models\PemiluSetting::aktif();
@@ -24,15 +28,11 @@
        onclick="fetch('/clear-view-session')"
        class="text-xs font-semibold dark:text-gray-400 text-gray-500 hover:text-red-500 transition">← Kembali</a>
 </div>
-@else
-<div class="mb-4">
-    <a href="{{ route('dashboard.pps') }}" class="inline-flex items-center gap-2 text-xs dark:text-gray-500 text-gray-400 hover:text-red-500 transition font-medium">← Kembali ke Dashboard</a>
-</div>
 @endif
 
 <div class="mb-8">
     <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-2 font-semibold">// PPS — Verifikasi Dokumen</p>
-    <h1 class="font-display text-4xl tracking-[2px] text-teal-400">DOKUMEN TPS</h1>
+    <h1 class="font-display text-4xl tracking-[2px] admin-text">DOKUMEN TPS</h1>
     <p class="dark:text-gray-400 text-gray-500 text-sm mt-1">
         {{ isset($desa) ? $desa->nama . ' · ' . $desa->kecamatan->nama : (Auth::user()->desa->nama ?? '') }}
     </p>

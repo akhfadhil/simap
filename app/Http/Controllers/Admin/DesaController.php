@@ -11,10 +11,16 @@ class DesaController extends Controller
     public function index(Request $request)
     {
         $kecamatans = Kecamatan::all();
-        $desas = Desa::with('kecamatan')
-            ->when($request->kecamatan_id, fn($q) => $q->where('kecamatan_id', $request->kecamatan_id))
-            ->withCount('tps')
-            ->latest()->get();
+        $desas = collect();
+
+        if ($request->filled('kecamatan_id')) {
+            $desas = Desa::with('kecamatan')
+                ->where('kecamatan_id', $request->kecamatan_id)
+                ->withCount('tps')
+                ->latest()
+                ->get();
+        }
+
         return view('admin.wilayah.desa', compact('desas', 'kecamatans'));
     }
 

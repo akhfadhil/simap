@@ -1,5 +1,4 @@
 @extends('layouts.app')
-@section('title', 'Dashboard Admin')
 @section('fullscreen', true)
 @section('body_class', 'admin-dashboard min-h-screen overflow-x-hidden selection:bg-[#ff535b] selection:text-[#5b000e]')
 
@@ -12,7 +11,6 @@
         --admin-grid-dot: rgba(15, 23, 42, .08);
         --admin-sidebar: rgba(255, 255, 255, .92);
         --admin-topbar: rgba(255, 255, 255, .9);
-        --admin-surface: rgba(255, 255, 255, .82);
         --admin-surface-strong: #eef2f7;
         --admin-border: rgba(15, 23, 42, .1);
         --admin-text: #1f2937;
@@ -20,14 +18,12 @@
         --admin-muted-soft: rgba(71, 85, 105, .55);
         --admin-primary: #bb152c;
         --admin-primary-soft: rgba(187, 21, 44, .1);
-        --admin-danger: #e63946;
     }
     html.dark {
         --admin-bg: #0a0d14;
         --admin-grid-dot: rgba(255, 255, 255, .05);
         --admin-sidebar: rgba(11, 14, 21, .9);
         --admin-topbar: rgba(16, 19, 26, .9);
-        --admin-surface: rgba(17, 24, 39, .7);
         --admin-surface-strong: #272a32;
         --admin-border: rgba(255, 255, 255, .06);
         --admin-text: #e1e2ec;
@@ -35,14 +31,8 @@
         --admin-muted-soft: rgba(228, 190, 188, .55);
         --admin-primary: #ffb3b1;
         --admin-primary-soft: rgba(255, 179, 177, .1);
-        --admin-danger: #e63946;
     }
-    .admin-dashboard {
-        background: var(--admin-bg);
-        color: var(--admin-text);
-        font-family: 'Geist', sans-serif;
-        transition: background-color .2s ease, color .2s ease;
-    }
+    .admin-dashboard { background: var(--admin-bg); color: var(--admin-text); font-family: 'Geist', sans-serif; }
     .admin-display { font-family: 'Barlow Condensed', sans-serif; letter-spacing: .02em; }
     .admin-mono { font-family: 'JetBrains Mono', monospace; }
     .admin-grid {
@@ -53,19 +43,8 @@
         background-size: 32px 32px;
         pointer-events: none;
     }
-    .admin-sidebar {
-        background: var(--admin-sidebar);
-        border-color: var(--admin-border);
-    }
-    .admin-topbar {
-        background: var(--admin-topbar);
-        border-color: var(--admin-border);
-    }
-    .admin-glass {
-        background: var(--admin-surface);
-        backdrop-filter: blur(12px);
-        border: 1px solid var(--admin-border);
-    }
+    .admin-sidebar { background: var(--admin-sidebar); border-color: var(--admin-border); }
+    .admin-topbar { background: var(--admin-topbar); border-color: var(--admin-border); }
     .admin-surface-strong { background: var(--admin-surface-strong); }
     .admin-border { border-color: var(--admin-border); }
     .admin-text { color: var(--admin-text); }
@@ -73,10 +52,7 @@
     .admin-muted-soft { color: var(--admin-muted-soft); }
     .admin-primary { color: var(--admin-primary); }
     .admin-primary-bg { background: var(--admin-primary-soft); }
-    .admin-icon-button {
-        color: var(--admin-muted);
-        transition: color .2s ease, transform .2s ease;
-    }
+    .admin-icon-button { color: var(--admin-muted); transition: color .2s ease, transform .2s ease; }
     .admin-icon-button:hover { color: var(--admin-primary); }
     .admin-top-link { color: var(--admin-muted); }
     .admin-top-link:hover { color: var(--admin-primary); }
@@ -111,65 +87,30 @@
         transform: translateX(-100%);
         transition: transform .25s ease;
     }
-    #admin-mobile-menu:checked ~ .admin-mobile-overlay {
-        opacity: 1;
-        pointer-events: auto;
-    }
-    #admin-mobile-menu:checked ~ .admin-mobile-drawer {
-        transform: translateX(0);
-    }
+    #admin-mobile-menu:checked ~ .admin-mobile-overlay { opacity: 1; pointer-events: auto; }
+    #admin-mobile-menu:checked ~ .admin-mobile-drawer { transform: translateX(0); }
     @media (min-width: 768px) {
         .admin-mobile-overlay,
-        .admin-mobile-drawer {
-            display: none;
-        }
+        .admin-mobile-drawer { display: none; }
     }
-    .admin-stat {
-        animation: adminIn .8s cubic-bezier(.16, 1, .3, 1) both;
-    }
-    @keyframes adminIn {
-        from { opacity: 0; transform: translateY(30px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    .material-symbols-outlined {
-        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-    }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
     .material-symbols-filled { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
 </style>
 @endpush
 
 @section('content')
 @php
-    $totalPengguna     = \App\Models\User::count();
-    $totalTps          = \App\Models\Tps::count();
-    $aktifJenis        = \App\Models\PemiluSetting::aktif();
-    $totalPemiluAktif  = count($aktifJenis);
-    $targetPemiluTps   = $totalTps * $totalPemiluAktif;
-    $dokumenJenisAktif = array_map('strtoupper', $aktifJenis);
-
-    $totalDokumenMasuk = \App\Models\Dokumen::where('level', 'tps')
-                        ->whereIn('jenis', $dokumenJenisAktif)
-                        ->count();
-    $persenDokumen     = $targetPemiluTps > 0 ? min(100, round(($totalDokumenMasuk / $targetPemiluTps) * 100)) : 0;
-
-    $totalRekapFinal   = \App\Models\RekapHeader::select('tps_id')
-                        ->where('status', 'final')
-                        ->whereIn('jenis', $aktifJenis)
-                        ->groupBy('tps_id')
-                        ->havingRaw('COUNT(DISTINCT jenis) = ?', [$totalPemiluAktif])
-                        ->count();
-    $persenRekap       = $totalTps > 0 ? min(100, round(($totalRekapFinal / $totalTps) * 100)) : 0;
-
+    $adminActive = trim($__env->yieldContent('admin_active', ''));
     $menus = [
-        ['label' => 'Beranda', 'icon' => 'dashboard', 'route' => route('dashboard.admin'), 'active' => true],
-        ['label' => 'Pengguna', 'icon' => 'group', 'route' => route('admin.users.index')],
-        ['label' => 'Grafik & Statistik', 'icon' => 'bar_chart', 'route' => route('admin.rekap.chart')],
-        ['label' => 'Kelola Kecamatan', 'icon' => 'map', 'route' => route('admin.kecamatan.index')],
-        ['label' => 'Kelola Desa', 'icon' => 'location_city', 'route' => route('admin.desa.index')],
-        ['label' => 'Kelola TPS', 'icon' => 'pin_drop', 'route' => route('admin.tps.index')],
-        ['label' => 'Rekap Dokumen', 'icon' => 'folder_open', 'route' => route('dokumen.admin')],
-        ['label' => 'Rekapitulasi Data', 'icon' => 'analytics', 'route' => route('admin.rekap.index')],
-        ['label' => 'Setup Data Pemilu', 'icon' => 'settings', 'route' => route('admin.setup.index')],
+        ['key' => 'dashboard', 'label' => 'Beranda', 'icon' => 'dashboard', 'route' => route('dashboard.admin')],
+        ['key' => 'users', 'label' => 'Pengguna', 'icon' => 'group', 'route' => route('admin.users.index')],
+        ['key' => 'chart', 'label' => 'Grafik & Statistik', 'icon' => 'bar_chart', 'route' => route('admin.rekap.chart')],
+        ['key' => 'kecamatan', 'label' => 'Kelola Kecamatan', 'icon' => 'map', 'route' => route('admin.kecamatan.index')],
+        ['key' => 'desa', 'label' => 'Kelola Desa', 'icon' => 'location_city', 'route' => route('admin.desa.index')],
+        ['key' => 'tps', 'label' => 'Kelola TPS', 'icon' => 'pin_drop', 'route' => route('admin.tps.index')],
+        ['key' => 'dokumen', 'label' => 'Rekap Dokumen', 'icon' => 'folder_open', 'route' => route('dokumen.admin')],
+        ['key' => 'rekap', 'label' => 'Rekapitulasi Data', 'icon' => 'analytics', 'route' => route('admin.rekap.index')],
+        ['key' => 'setup', 'label' => 'Setup Data Pemilu', 'icon' => 'settings', 'route' => route('admin.setup.index')],
     ];
 @endphp
 
@@ -194,22 +135,12 @@
 
     <nav class="flex-1 py-4 space-y-1 overflow-y-auto">
         @foreach($menus as $menu)
-            <a class="admin-nav-item {{ ! empty($menu['active']) ? 'active' : '' }}" href="{{ $menu['route'] }}">
-                <span class="material-symbols-outlined {{ ! empty($menu['active']) ? 'material-symbols-filled' : '' }}">{{ $menu['icon'] }}</span>
+            <a class="admin-nav-item {{ $adminActive === $menu['key'] ? 'active' : '' }}" href="{{ $menu['route'] }}">
+                <span class="material-symbols-outlined {{ $adminActive === $menu['key'] ? 'material-symbols-filled' : '' }}">{{ $menu['icon'] }}</span>
                 <span>{{ $menu['label'] }}</span>
             </a>
         @endforeach
     </nav>
-
-    <div class="p-4 mt-auto border-t admin-border">
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit" class="w-full flex items-center gap-4 text-[#ff6f6f] px-6 py-3 hover:text-[#e63946] transition">
-                <span class="material-symbols-outlined">logout</span>
-                <span>Log Keluar</span>
-            </button>
-        </form>
-    </div>
 </aside>
 
 <div class="flex min-h-screen">
@@ -228,8 +159,8 @@
 
         <nav class="flex-1 mt-4 space-y-1 overflow-y-auto">
             @foreach($menus as $menu)
-                <a class="admin-nav-item {{ ! empty($menu['active']) ? 'active' : '' }}" href="{{ $menu['route'] }}">
-                    <span class="material-symbols-outlined {{ ! empty($menu['active']) ? 'material-symbols-filled' : '' }}">{{ $menu['icon'] }}</span>
+                <a class="admin-nav-item {{ $adminActive === $menu['key'] ? 'active' : '' }}" href="{{ $menu['route'] }}">
+                    <span class="material-symbols-outlined {{ $adminActive === $menu['key'] ? 'material-symbols-filled' : '' }}">{{ $menu['icon'] }}</span>
                     <span>{{ $menu['label'] }}</span>
                 </a>
             @endforeach
@@ -284,72 +215,8 @@
         </header>
 
         <div class="p-4 lg:p-8 overflow-y-auto">
-            <div class="mb-10 admin-stat" style="animation-delay: .1s">
-                <p class="admin-mono admin-muted-soft tracking-[.3em] text-xs mb-2">// ADMINISTRATOR</p>
-                <h2 class="admin-display text-5xl lg:text-6xl admin-text leading-tight">DASHBOARD</h2>
-                <p class="admin-muted text-lg max-w-2xl mt-2">Kelola seluruh sistem, wilayah, pengguna, dan dokumen pemilu.</p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-12">
-                <div class="admin-glass p-5 rounded-lg admin-stat" style="animation-delay: .2s" title="Jumlah total akun yang terdaftar dalam sistem">
-                    <div class="flex justify-between items-start mb-4">
-                        <span class="admin-display admin-muted tracking-widest text-[10px]">TOTAL PENGGUNA</span>
-                    </div>
-                    <div class="flex items-baseline gap-2">
-                        <span class="admin-display text-4xl text-[#e63946]">{{ number_format($totalPengguna) }}</span>
-                        <span class="admin-mono admin-muted-soft text-[11px] uppercase">terdaftar</span>
-                    </div>
-                </div>
-
-                <div class="admin-glass p-5 rounded-lg admin-stat" style="animation-delay: .3s" title="Total cakupan titik pemungutan suara di seluruh wilayah">
-                    <div class="flex justify-between items-start mb-4">
-                        <span class="admin-display admin-muted tracking-widest text-[10px]">WILAYAH TPS</span>
-                    </div>
-                    <div class="flex items-baseline gap-2">
-                        <span class="admin-display text-4xl text-[#e63946]">{{ number_format($totalTps) }}</span>
-                        <span class="admin-mono admin-muted-soft text-[11px] uppercase">titik</span>
-                    </div>
-                </div>
-
-                <div class="admin-glass p-5 rounded-lg admin-stat" style="animation-delay: .4s" title="Persentase dokumen yang telah berhasil diunggah ke sistem">
-                    <div class="flex justify-between items-start mb-4">
-                        <span class="admin-display admin-muted tracking-widest text-[10px]">DOKUMEN MASUK</span>
-                        <span class="admin-muted text-[10px] admin-mono">TPS x {{ $totalPemiluAktif }} AKTIF</span>
-                    </div>
-                    <div class="flex items-baseline gap-2">
-                        <span class="admin-display text-4xl text-[#e63946]">{{ number_format($totalDokumenMasuk) }}/{{ number_format($targetPemiluTps) }}</span>
-                        <span class="admin-mono admin-muted-soft text-[11px] uppercase">{{ $persenDokumen }}% proses</span>
-                    </div>
-                    <div class="admin-surface-strong mt-6 h-1 w-full overflow-hidden rounded-full">
-                        <div class="h-full bg-[#e4bebc]/40" style="width:{{ $persenDokumen }}%"></div>
-                    </div>
-                </div>
-
-                <div class="admin-glass p-5 rounded-lg admin-stat" style="animation-delay: .5s" title="Status finalisasi data dari seluruh TPS yang ada">
-                    <div class="flex justify-between items-start mb-4">
-                        <span class="admin-display admin-muted tracking-widest text-[10px]">REKAP FINALISASI</span>
-                        <div class="flex items-center gap-1">
-                            <span class="w-1.5 h-1.5 rounded-full bg-[#e63946]"></span>
-                            <span class="text-[#e63946] text-[10px] admin-mono">COMPLETED</span>
-                        </div>
-                    </div>
-                    <div class="flex items-baseline gap-2">
-                        <span class="admin-display text-4xl text-[#e63946]">{{ number_format($totalRekapFinal) }}/{{ number_format($totalTps) }}</span>
-                    </div>
-                    <p class="admin-mono admin-muted-soft text-[10px] uppercase mt-1">TPS final semua pemilu aktif</p>
-                    <div class="admin-surface-strong mt-4 h-1 w-full overflow-hidden rounded-full">
-                        <div class="h-full bg-[#e63946]" style="width:{{ $persenRekap }}%"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mt-12 py-8 border-t admin-border opacity-60">
-            </div>
+            @yield('admin_content')
         </div>
     </main>
 </div>
-
-<a href="{{ route('admin.users.index') }}" class="fixed bottom-8 right-8 w-14 h-14 bg-[#e63946] rounded-full flex items-center justify-center text-white shadow-[0_0_20px_rgba(230,57,70,.4)] hover:scale-110 active:scale-95 transition z-[100]" title="Tambah pengguna">
-    <span class="material-symbols-outlined text-3xl">add</span>
-</a>
 @endsection

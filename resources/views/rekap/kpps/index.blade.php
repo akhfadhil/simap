@@ -1,14 +1,14 @@
-@extends('layouts.app')
+@extends('layouts.role-dashboard')
 @section('title', 'Rekapitulasi Data')
+@section('role_key', 'kpps')
+@section('role_title', 'KPPS')
+@section('role_subtitle', 'Kelompok Penyelenggara Pemungutan Suara')
+@section('role_active', 'rekap')
 
-@section('content')
+@section('role_content')
 <div class="mb-8">
-    <a href="{{ route('dashboard.kpps') }}"
-       class="inline-flex items-center gap-2 text-xs dark:text-gray-500 text-gray-400 hover:text-red-500 transition font-medium mb-4">
-        ← Kembali ke Dashboard
-    </a>
     <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-2 font-semibold">// KPPS — Rekapitulasi</p>
-    <h1 class="font-display text-4xl tracking-[2px] text-sky-300">ISI DATA REKAPITULASI</h1>
+    <h1 class="font-display text-4xl tracking-[2px] admin-text">ISI DATA REKAPITULASI</h1>
     <p class="dark:text-gray-400 text-gray-500 text-sm mt-1">{{ $tps->nama }} · {{ $tps->desa->nama }}</p>
 </div>
 

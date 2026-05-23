@@ -1,15 +1,15 @@
-@extends('layouts.app')
+@extends('layouts.role-dashboard')
 @section('title', 'Data PPS')
+@section('role_key', 'ppk')
+@section('role_title', 'PPK')
+@section('role_subtitle', 'Panitia Pemilihan Kecamatan')
+@section('role_active', 'pps')
 
-@section('content')
+@section('role_content')
 
 <div class="mb-8">
-    <a href="{{ route('dashboard.ppk') }}"
-       class="inline-flex items-center gap-2 text-xs dark:text-gray-500 text-gray-400 hover:text-red-500 transition font-medium mb-4">
-        ← Kembali ke Dashboard
-    </a>
     <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-2 font-semibold">// PPK — Data PPS</p>
-    <h1 class="font-display text-4xl tracking-[2px] text-orange-400">DATA PPS</h1>
+    <h1 class="font-display text-4xl tracking-[2px] admin-text">DATA PPS</h1>
     <p class="dark:text-gray-400 text-gray-500 text-sm mt-1">{{ Auth::user()->kecamatan->nama ?? '' }}</p>
 </div>
 
