@@ -52,9 +52,7 @@ class SetupController extends Controller
 
     public function storePpwp(Request $request)
     {
-        $request->validate(['nomor_urut' => 'required|integer', 'nama_paslon' => 'required|string|max:200']);
-        RekapPpwpCalon::create($request->only('nomor_urut','nama_paslon'));
-        return back()->with('success', 'Paslon PPWP berhasil ditambahkan.');
+        return $this->storePaslonBatch($request, RekapPpwpCalon::class, 'Paslon PPWP berhasil ditambahkan.');
     }
 
     public function destroyPpwp(RekapPpwpCalon $calon)
@@ -65,9 +63,7 @@ class SetupController extends Controller
 
     public function storeDpd(Request $request)
     {
-        $request->validate(['nomor_urut' => 'required|integer', 'nama_calon' => 'required|string|max:200']);
-        RekapDpdCalon::create($request->only('nomor_urut','nama_calon'));
-        return back()->with('success', 'Calon DPD berhasil ditambahkan.');
+        return $this->storeCalonBatch($request, RekapDpdCalon::class, 'Calon DPD berhasil ditambahkan.');
     }
 
     public function destroyDpd(RekapDpdCalon $calon)
@@ -80,11 +76,49 @@ class SetupController extends Controller
     {
         $request->validate([
             'jenis'       => 'required|in:dpr_ri,dprd_prov,dprd_kab',
-            'nomor_urut'  => 'required|integer',
-            'nama_partai' => 'required|string|max:200',
+            'partais'     => 'required|array',
+            'partais.*.nomor_urut'  => 'nullable|integer|min:1|max:999',
+            'partais.*.nama_partai' => 'nullable|string|max:200',
             'dapil_id'    => 'required_if:jenis,dprd_kab|nullable|exists:dapils,id',
         ]);
-        RekapPartai::create($request->only('jenis','nomor_urut','nama_partai','dapil_id'));
+
+        $rows = collect($request->input('partais', []));
+        $hasIncompleteRow = $rows->contains(function ($row) {
+            $nomor = trim((string) ($row['nomor_urut'] ?? ''));
+            $nama = trim((string) ($row['nama_partai'] ?? ''));
+
+            return ($nomor === '') xor ($nama === '');
+        });
+
+        if ($hasIncompleteRow) {
+            return back()
+                ->withErrors(['partais' => 'Lengkapi nomor urut dan nama partai pada setiap baris yang diisi.'])
+                ->withInput();
+        }
+
+        $validRows = $rows
+            ->map(fn($row) => [
+                'nomor_urut' => trim((string) ($row['nomor_urut'] ?? '')),
+                'nama_partai' => trim((string) ($row['nama_partai'] ?? '')),
+            ])
+            ->filter(fn($row) => $row['nomor_urut'] !== '' && $row['nama_partai'] !== '')
+            ->values();
+
+        if ($validRows->isEmpty()) {
+            return back()
+                ->withErrors(['partais' => 'Isi minimal satu baris partai.'])
+                ->withInput();
+        }
+
+        foreach ($validRows as $row) {
+            RekapPartai::create([
+                'jenis' => $request->jenis,
+                'nomor_urut' => (int) $row['nomor_urut'],
+                'nama_partai' => $row['nama_partai'],
+                'dapil_id' => $request->jenis === 'dprd_kab' ? $request->dapil_id : null,
+            ]);
+        }
+
         return back()->with('success', 'Partai berhasil ditambahkan.');
     }
 
@@ -123,18 +157,22 @@ class SetupController extends Controller
     public function assignDapil(Request $request)
     {
         $request->validate([
-            'kecamatan_id' => 'required|exists:kecamatans,id',
-            'dapil_id'     => 'nullable|exists:dapils,id',
+            'kecamatan_dapil' => 'required|array',
+            'kecamatan_dapil.*' => 'nullable|exists:dapils,id',
         ]);
-        Kecamatan::find($request->kecamatan_id)->update(['dapil_id' => $request->dapil_id]);
+
+        foreach ($request->input('kecamatan_dapil', []) as $kecamatanId => $dapilId) {
+            Kecamatan::whereKey($kecamatanId)->update([
+                'dapil_id' => $dapilId ?: null,
+            ]);
+        }
+
         return back()->with('success', 'Dapil kecamatan berhasil diupdate.');
     }
 
     public function storeGubernur(Request $request)
     {
-        $request->validate(['nomor_urut' => 'required|integer', 'nama_paslon' => 'required|string|max:200']);
-        \App\Models\RekapGubernurCalon::create($request->only('nomor_urut','nama_paslon'));
-        return back()->with('success', 'Paslon Gubernur berhasil ditambahkan.');
+        return $this->storePaslonBatch($request, \App\Models\RekapGubernurCalon::class, 'Paslon Gubernur berhasil ditambahkan.');
     }
 
     public function destroyGubernur(\App\Models\RekapGubernurCalon $calon)
@@ -145,14 +183,104 @@ class SetupController extends Controller
 
     public function storeBupati(Request $request)
     {
-        $request->validate(['nomor_urut' => 'required|integer', 'nama_paslon' => 'required|string|max:200']);
-        \App\Models\RekapBupatiCalon::create($request->only('nomor_urut','nama_paslon'));
-        return back()->with('success', 'Paslon Bupati berhasil ditambahkan.');
+        return $this->storePaslonBatch($request, \App\Models\RekapBupatiCalon::class, 'Paslon Bupati berhasil ditambahkan.');
     }
 
     public function destroyBupati(\App\Models\RekapBupatiCalon $calon)
     {
         $calon->delete();
         return back()->with('success', 'Paslon Bupati dihapus.');
+    }
+
+    private function storePaslonBatch(Request $request, string $modelClass, string $successMessage)
+    {
+        $request->validate([
+            'calons' => 'required|array',
+            'calons.*.nomor_urut' => 'nullable|integer|min:1|max:99',
+            'calons.*.nama_paslon' => 'nullable|string|max:200',
+        ]);
+
+        $rows = collect($request->input('calons', []));
+        $hasIncompleteRow = $rows->contains(function ($row) {
+            $nomor = trim((string) ($row['nomor_urut'] ?? ''));
+            $nama = trim((string) ($row['nama_paslon'] ?? ''));
+
+            return ($nomor === '') xor ($nama === '');
+        });
+
+        if ($hasIncompleteRow) {
+            return back()
+                ->withErrors(['calons' => 'Lengkapi nomor urut dan nama paslon pada setiap baris yang diisi.'])
+                ->withInput();
+        }
+
+        $validRows = $rows
+            ->map(fn($row) => [
+                'nomor_urut' => trim((string) ($row['nomor_urut'] ?? '')),
+                'nama_paslon' => trim((string) ($row['nama_paslon'] ?? '')),
+            ])
+            ->filter(fn($row) => $row['nomor_urut'] !== '' && $row['nama_paslon'] !== '')
+            ->values();
+
+        if ($validRows->isEmpty()) {
+            return back()
+                ->withErrors(['calons' => 'Isi minimal satu baris paslon.'])
+                ->withInput();
+        }
+
+        foreach ($validRows as $row) {
+            $modelClass::create([
+                'nomor_urut' => (int) $row['nomor_urut'],
+                'nama_paslon' => $row['nama_paslon'],
+            ]);
+        }
+
+        return back()->with('success', $successMessage);
+    }
+
+    private function storeCalonBatch(Request $request, string $modelClass, string $successMessage)
+    {
+        $request->validate([
+            'calons' => 'required|array',
+            'calons.*.nomor_urut' => 'nullable|integer|min:1|max:999',
+            'calons.*.nama_calon' => 'nullable|string|max:200',
+        ]);
+
+        $rows = collect($request->input('calons', []));
+        $hasIncompleteRow = $rows->contains(function ($row) {
+            $nomor = trim((string) ($row['nomor_urut'] ?? ''));
+            $nama = trim((string) ($row['nama_calon'] ?? ''));
+
+            return ($nomor === '') xor ($nama === '');
+        });
+
+        if ($hasIncompleteRow) {
+            return back()
+                ->withErrors(['calons' => 'Lengkapi nomor urut dan nama calon pada setiap baris yang diisi.'])
+                ->withInput();
+        }
+
+        $validRows = $rows
+            ->map(fn($row) => [
+                'nomor_urut' => trim((string) ($row['nomor_urut'] ?? '')),
+                'nama_calon' => trim((string) ($row['nama_calon'] ?? '')),
+            ])
+            ->filter(fn($row) => $row['nomor_urut'] !== '' && $row['nama_calon'] !== '')
+            ->values();
+
+        if ($validRows->isEmpty()) {
+            return back()
+                ->withErrors(['calons' => 'Isi minimal satu baris calon.'])
+                ->withInput();
+        }
+
+        foreach ($validRows as $row) {
+            $modelClass::create([
+                'nomor_urut' => (int) $row['nomor_urut'],
+                'nama_calon' => $row['nama_calon'],
+            ]);
+        }
+
+        return back()->with('success', $successMessage);
     }
 }

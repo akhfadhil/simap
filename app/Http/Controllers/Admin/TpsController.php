@@ -10,39 +10,73 @@ use Illuminate\Http\Request;
 
 class TpsController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $kecamatans = Kecamatan::with(['desas.tps'])->orderBy('nama')->get();
-        return view('admin.tps.index', compact('kecamatans'));
+        $kecamatans = Kecamatan::with(['desas' => fn ($query) => $query->orderBy('nama')])
+            ->orderBy('nama')
+            ->get();
+
+        $selectedKecamatanId = $request->integer('kecamatan_id') ?: null;
+        $selectedDesaId = $request->integer('desa_id') ?: null;
+        $filteredTps = collect();
+
+        if ($selectedKecamatanId || $selectedDesaId) {
+            $filteredTps = Tps::with('desa.kecamatan')
+                ->when($selectedDesaId, fn ($query) => $query->where('desa_id', $selectedDesaId))
+                ->when(! $selectedDesaId && $selectedKecamatanId, function ($query) use ($selectedKecamatanId) {
+                    $query->whereHas('desa', fn ($desaQuery) => $desaQuery->where('kecamatan_id', $selectedKecamatanId));
+                })
+                ->orderBy('nama')
+                ->get();
+        }
+
+        return view('admin.tps.index', compact('kecamatans', 'filteredTps', 'selectedKecamatanId', 'selectedDesaId'));
     }
 
     /**
-     * Bulk store: buat TPS 001 s/d {jumlah} untuk desa tertentu.
-     * Jika TPS sudah ada di rentang itu, skip (insertOrIgnore by nama+desa_id).
+     * Bulk store: buat TPS 001 s/d {jumlah} untuk beberapa desa.
+     * Jika TPS sudah ada di rentang itu, skip.
      */
     public function store(Request $request)
     {
         $request->validate([
-            'desa_id' => 'required|exists:desas,id',
-            'jumlah'  => 'required|integer|min:1|max:999',
+            'jumlah_tps' => 'required|array',
+            'jumlah_tps.*' => 'nullable|integer|min:0|max:999',
         ]);
 
-        $desaId  = $request->desa_id;
-        $jumlah  = (int) $request->jumlah;
+        $rows = collect($request->input('jumlah_tps'))
+            ->map(fn ($jumlah) => (int) $jumlah)
+            ->filter(fn ($jumlah) => $jumlah > 0);
+
+        if ($rows->isEmpty()) {
+            return back()
+                ->withErrors(['jumlah_tps' => 'Isi minimal satu jumlah TPS.'])
+                ->withInput();
+        }
+
+        $desas = Desa::whereIn('id', $rows->keys())->get()->keyBy('id');
         $created = 0;
+        $processed = 0;
 
-        for ($i = 1; $i <= $jumlah; $i++) {
-            $nama = 'TPS ' . str_pad($i, 3, '0', STR_PAD_LEFT);
+        foreach ($rows as $desaId => $jumlah) {
+            if (! $desas->has($desaId)) {
+                continue;
+            }
 
-            $exists = Tps::where('desa_id', $desaId)->where('nama', $nama)->exists();
-            if (!$exists) {
-                Tps::create(['nama' => $nama, 'desa_id' => $desaId]);
-                $created++;
+            $processed++;
+
+            for ($i = 1; $i <= $jumlah; $i++) {
+                $nama = 'TPS ' . str_pad($i, 3, '0', STR_PAD_LEFT);
+
+                $exists = Tps::where('desa_id', $desaId)->where('nama', $nama)->exists();
+                if (! $exists) {
+                    Tps::create(['nama' => $nama, 'desa_id' => $desaId]);
+                    $created++;
+                }
             }
         }
 
-        $desa = Desa::find($desaId);
-        return back()->with('success', "Berhasil membuat {$created} TPS baru di {$desa->nama}. (TPS yang sudah ada dilewati)");
+        return back()->with('success', "Berhasil membuat {$created} TPS baru dari {$processed} desa. (TPS yang sudah ada dilewati)");
     }
 
     /**
