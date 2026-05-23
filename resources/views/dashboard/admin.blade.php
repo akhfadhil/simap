@@ -73,6 +73,8 @@
     .admin-muted-soft { color: var(--admin-muted-soft); }
     .admin-primary { color: var(--admin-primary); }
     .admin-primary-bg { background: var(--admin-primary-soft); }
+    .role-accent { color: var(--role-accent, #e63946); }
+    .role-accent-bg { background: color-mix(in srgb, var(--role-accent, #e63946) 14%, transparent); }
     .admin-icon-button {
         color: var(--admin-muted);
         transition: color .2s ease, transform .2s ease;
@@ -342,6 +344,8 @@
                     </div>
                 </div>
             </div>
+
+            @include('dashboard.partials.election-summary', ['electionSummary' => $electionSummary])
 
             <div class="mt-12 py-8 border-t admin-border opacity-60">
             </div>

@@ -81,4 +81,6 @@
         </div>
     </div>
 </div>
+
+@include('dashboard.partials.election-summary', ['electionSummary' => $electionSummary])
 @endsection

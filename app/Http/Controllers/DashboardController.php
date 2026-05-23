@@ -1,14 +1,34 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Services\DashboardElectionSummary;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
-    public function admin() { $this->checkRole('admin'); return view('dashboard.admin'); }
-    public function ppk()   { $this->checkRole('ppk');   return view('dashboard.ppk'); }
-    public function pps()   { $this->checkRole('pps');   return view('dashboard.pps'); }
-    public function kpps()  { $this->checkRole('kpps');  return view('dashboard.kpps'); }
+    public function admin(DashboardElectionSummary $summary)
+    {
+        $this->checkRole('admin');
+        return view('dashboard.admin', ['electionSummary' => $summary->forUser(Auth::user())]);
+    }
+
+    public function ppk(DashboardElectionSummary $summary)
+    {
+        $this->checkRole('ppk');
+        return view('dashboard.ppk', ['electionSummary' => $summary->forUser(Auth::user())]);
+    }
+
+    public function pps(DashboardElectionSummary $summary)
+    {
+        $this->checkRole('pps');
+        return view('dashboard.pps', ['electionSummary' => $summary->forUser(Auth::user())]);
+    }
+
+    public function kpps(DashboardElectionSummary $summary)
+    {
+        $this->checkRole('kpps');
+        return view('dashboard.kpps', ['electionSummary' => $summary->forUser(Auth::user())]);
+    }
 
     private function checkRole(string $role)
     {
