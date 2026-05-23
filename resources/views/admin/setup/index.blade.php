@@ -18,6 +18,25 @@
 </div>
 @endif
 
+@if(session('seed_result'))
+<div class="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 px-4 py-3 text-xs mb-6 rounded-lg font-medium">
+    {{ session('seed_result') }}
+</div>
+@endif
+
+{{-- Tools Setup --}}
+<div class="dark:bg-gray-800 bg-white rounded-xl p-6 border-l-4 border border-l-blue-500 dark:border-gray-700 border-gray-200 shadow-sm mb-8">
+    <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">// Tools Setup</p>
+    <p class="font-semibold text-sm mb-1 dark:text-gray-100 text-gray-800">Seed Partai</p>
+    <p class="text-xs dark:text-gray-500 text-gray-500 leading-relaxed mb-4">Isi otomatis 18 partai untuk DPR RI, DPRD Provinsi, dan DPRD Kabupaten per dapil. Aman dijalankan berulang.</p>
+    <form method="POST" action="{{ route('admin.tools.seed-partai') }}">
+        @csrf
+        <button class="px-4 py-2 text-xs font-semibold bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition">
+            Jalankan Seeder
+        </button>
+    </form>
+</div>
+
 {{-- TAB NAVIGATION --}}
 <div class="flex gap-1 mb-6 dark:bg-gray-900 bg-gray-100 p-1 rounded-xl w-fit">
     @foreach(['ppwp'=>'PPWP','gubernur'=>'Gubernur','bupati'=>'Bupati','dpd'=>'DPD','dpr_ri'=>'DPR RI','dprd_prov'=>'DPRD Prov','dprd_kab'=>'DPRD Kab'] as $tab => $label)

@@ -19,6 +19,25 @@
     <h1 class="font-display text-4xl tracking-[2px] text-red-600">REKAP DOKUMEN</h1>
 </div>
 
+@if(session('backup_result'))
+<div class="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400 px-4 py-3 text-xs mb-6 rounded-lg font-medium">
+    {{ session('backup_result') }}
+</div>
+@endif
+
+{{-- Tools Dokumen --}}
+<div class="dark:bg-gray-800 bg-white rounded-xl p-6 border-l-4 border border-l-amber-500 dark:border-gray-700 border-gray-200 shadow-sm mb-8">
+    <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">// Tools Dokumen</p>
+    <p class="font-semibold text-sm mb-1 dark:text-gray-100 text-gray-800">Backup Dokumen</p>
+    <p class="text-xs dark:text-gray-500 text-gray-500 leading-relaxed mb-4">Pindahkan file PDF dokumen yang sudah terverifikasi ke folder backup eksternal.</p>
+    <form method="POST" action="{{ route('admin.tools.backup') }}">
+        @csrf
+        <button class="px-4 py-2 text-xs font-semibold bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition">
+            Jalankan Backup
+        </button>
+    </form>
+</div>
+
 {{-- Filter --}}
 <form method="GET" class="flex gap-3 mb-8 flex-wrap">
     <select name="kecamatan_id" onchange="this.form.submit()"

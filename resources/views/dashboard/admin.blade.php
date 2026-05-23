@@ -146,7 +146,7 @@
 
 </div>
 
-{{-- Tools Admin --}}
+{{-- Tools Admin
 <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-4 pb-3 border-b dark:border-gray-800 border-gray-200 font-semibold mt-8">// Tools</p>
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
@@ -181,4 +181,5 @@
     </div>
 
 </div>
+--}}
 @endsection
