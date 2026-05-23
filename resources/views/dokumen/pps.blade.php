@@ -64,7 +64,7 @@
                     ->whereIn('jenis', $aktifDokumenJenis->keys())
                     ->where('status', 'terverifikasi')
                     ->count();
-    $persenDokumen = $totalJenisAktif > 0 ? min(100, ($totalDok / $totalJenisAktif) * 100) : 0;
+    $persenDokumen = $totalJenisAktif > 0 ? min(100, ($verified / $totalJenisAktif) * 100) : 0;
 @endphp
 <div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 mb-4 shadow-sm overflow-hidden">
     <div class="flex items-center justify-between px-6 py-4 border-b dark:border-gray-700 border-gray-200 cursor-pointer dark:hover:bg-gray-750 hover:bg-gray-50 transition"
@@ -77,7 +77,7 @@
             <div class="w-32 h-1.5 dark:bg-gray-700 bg-gray-200 rounded-full">
                 <div class="h-1.5 rounded-full transition-all bg-teal-400" style="width:{{ $persenDokumen }}%"></div>
             </div>
-            <span class="text-[11px] dark:text-gray-500 text-gray-400">{{ $totalDok }}/{{ $totalJenisAktif }}</span>
+            <span class="text-[11px] dark:text-gray-500 text-gray-400">{{ $verified }}/{{ $totalJenisAktif }}</span>
             <span class="dark:text-gray-500 text-gray-400 text-xs" id="arrow-{{ $tps->id }}">▸</span>
         </div>
     </div>

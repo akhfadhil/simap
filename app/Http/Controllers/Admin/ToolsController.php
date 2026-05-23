@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -10,14 +11,21 @@ class ToolsController extends Controller
     {
         $exit = Artisan::call('backup:dokumen');
         $output = trim(Artisan::output());
-        $msg = $exit === 0 ? $output : 'Backup selesai.';
-        return back()->with('backup_result', '✓ ' . $msg);
+        $lines = collect(preg_split('/\r\n|\r|\n/', $output))
+            ->map(fn($line) => trim($line))
+            ->filter();
+        $summary = $lines->first(fn($line) => str_contains($line, 'Backup dokumen selesai.'))
+            ?? $lines->first(fn($line) => str_contains($line, 'Tidak ada dokumen terverifikasi'))
+            ?? ($exit === 0 ? 'Backup dokumen selesai.' : 'Backup dokumen gagal dijalankan.');
+
+        return back()->with('backup_result', $summary);
     }
 
     public function seedPartai()
     {
         Artisan::call('db:seed', ['--class' => 'PartaiSeeder', '--force' => true]);
         $output = trim(Artisan::output());
-        return back()->with('seed_result', '✓ ' . $output);
+
+        return back()->with('seed_result', 'OK ' . $output);
     }
 }

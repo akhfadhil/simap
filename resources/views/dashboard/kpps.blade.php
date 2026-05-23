@@ -43,19 +43,19 @@
     </div>
 
     <div class="admin-glass p-5 rounded-lg">
-        <span class="admin-display admin-muted tracking-widest text-[10px]">DOKUMEN UPLOAD</span>
+        <span class="admin-display admin-muted tracking-widest text-[10px]">DOKUMEN TERVERIFIKASI</span>
+        <div class="mt-4 flex items-baseline gap-2">
+            <span class="admin-display text-4xl role-accent">{{ $terverif }}/{{ $totalPemiluAktif }}</span>
+        </div>
+        <p class="admin-mono admin-muted-soft text-[11px] uppercase mt-2">sudah terverifikasi</p>
+    </div>
+
+    <div class="admin-glass p-5 rounded-lg">
+        <span class="admin-display admin-muted tracking-widest text-[10px]">DOKUMEN MASUK</span>
         <div class="mt-4 flex items-baseline gap-2">
             <span class="admin-display text-4xl role-accent">{{ $uploaded }}/{{ $totalPemiluAktif }}</span>
         </div>
         <p class="admin-mono admin-muted-soft text-[11px] uppercase mt-2">sudah diupload</p>
-    </div>
-
-    <div class="admin-glass p-5 rounded-lg">
-        <span class="admin-display admin-muted tracking-widest text-[10px]">TERVERIFIKASI</span>
-        <div class="mt-4 flex items-baseline gap-2">
-            <span class="admin-display text-4xl role-accent">{{ $terverif }}/{{ $totalPemiluAktif }}</span>
-        </div>
-        <p class="admin-mono admin-muted-soft text-[11px] uppercase mt-2">oleh PPS</p>
     </div>
 
     <div class="admin-glass p-5 rounded-lg">

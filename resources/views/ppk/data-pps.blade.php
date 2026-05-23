@@ -15,6 +15,17 @@
 
 {{-- Stats --}}
 <div class="grid grid-cols-3 gap-4 mb-8">
+    @php
+        $aktifJenis = \App\Models\PemiluSetting::aktif();
+        $aktifDokumenKeys = collect(\App\Models\Dokumen::JENIS)
+            ->filter(fn($label, $key) => in_array(strtolower($key), $aktifJenis, true))
+            ->keys();
+        $totalJenisAktif = $aktifDokumenKeys->count();
+        $totalMaxDok = $desas->sum(fn($d) => $d->tps->count()) * $totalJenisAktif;
+        $totalTerverifikasi = $desas->sum(fn($d) => $d->tps->sum(
+            fn($t) => $t->dokumens->whereIn('jenis', $aktifDokumenKeys)->where('status', 'terverifikasi')->count()
+        ));
+    @endphp
     <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border dark:border-gray-700 border-gray-200 shadow-sm">
         <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">Total Desa/PPS</p>
         <p class="font-display text-4xl text-orange-400">{{ $desas->count() }}</p>
@@ -24,12 +35,8 @@
         <p class="font-display text-4xl text-orange-400">{{ $desas->sum(fn($d) => $d->tps->count()) }}</p>
     </div>
     <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border dark:border-gray-700 border-gray-200 shadow-sm">
-        <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">Dokumen Masuk</p>
-        @php
-            $totalDok = $desas->sum(fn($d) => $d->tps->sum(fn($t) => $t->dokumens->count()));
-            $totalMax = $desas->sum(fn($d) => $d->tps->count()) * 5;
-        @endphp
-        <p class="font-display text-4xl text-orange-400">{{ $totalDok }}/{{ $totalMax }}</p>
+        <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">Terverifikasi</p>
+        <p class="font-display text-4xl text-orange-400">{{ $totalTerverifikasi }}/{{ $totalMaxDok }}</p>
     </div>
 </div>
 
@@ -42,10 +49,11 @@
 @forelse($desas as $desa)
 @php
     $totalTps = $desa->tps->count();
-    $totalDok = $desa->tps->sum(fn($t) => $t->dokumens->count());
-    $terverif = $desa->tps->sum(fn($t) => $t->dokumens->where('status','terverifikasi')->count());
+    $totalDok = $desa->tps->sum(fn($t) => $t->dokumens->whereIn('jenis', $aktifDokumenKeys)->count());
+    $terverif = $desa->tps->sum(fn($t) => $t->dokumens->whereIn('jenis', $aktifDokumenKeys)->where('status','terverifikasi')->count());
     $ppsUser  = $desa->users->first();
-    $persen   = $totalTps > 0 ? round(($totalDok / ($totalTps * 5)) * 100) : 0;
+    $targetDok = $totalTps * $totalJenisAktif;
+    $persen   = $targetDok > 0 ? round(($terverif / $targetDok) * 100) : 0;
 @endphp
 <div class="dark:bg-gray-800 bg-white rounded-xl p-5 border dark:border-gray-700 border-gray-200 shadow-sm flex items-center justify-between flex-wrap gap-4">
     <div class="flex items-center gap-4">
@@ -61,7 +69,7 @@
                          style="width:{{ $persen }}%"></div>
                 </div>
                 <span class="text-[11px] dark:text-gray-500 text-gray-400">
-                    {{ $totalDok }}/{{ $totalTps * 5 }} dok · {{ $terverif }} terverifikasi
+                    {{ $terverif }}/{{ $targetDok }} terverifikasi · {{ $totalDok }} masuk
                 </span>
             </div>
         </div>

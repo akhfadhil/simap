@@ -74,14 +74,18 @@
 @php
     $kecNama = $dokList->first()->kecamatan->nama;
     $totalDokumenAktif = $dokList->whereIn('jenis', $aktifDokumenJenis->keys())->count();
-    $persenDokumenAktif = $totalJenisAktif > 0 ? min(100, ($totalDokumenAktif / $totalJenisAktif) * 100) : 0;
+    $totalTerverifikasiAktif = $dokList
+        ->whereIn('jenis', $aktifDokumenJenis->keys())
+        ->where('status', 'terverifikasi')
+        ->count();
+    $persenDokumenAktif = $totalJenisAktif > 0 ? min(100, ($totalTerverifikasiAktif / $totalJenisAktif) * 100) : 0;
 @endphp
 <div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 mb-4 shadow-sm overflow-hidden">
     <div class="flex items-center justify-between px-6 py-4 border-b dark:border-gray-700 border-gray-200 cursor-pointer hover:dark:bg-gray-750 hover:bg-gray-50 transition"
          onclick="toggleTps('kec-{{ $kecId }}')">
         <div>
             <p class="font-semibold text-sm dark:text-gray-100 text-gray-800">{{ $kecNama }}</p>
-            <p class="text-[11px] dark:text-gray-500 text-gray-400 mt-0.5">{{ $totalDokumenAktif }}/{{ $totalJenisAktif }} dokumen · PPK</p>
+            <p class="text-[11px] dark:text-gray-500 text-gray-400 mt-0.5">{{ $totalTerverifikasiAktif }}/{{ $totalJenisAktif }} terverifikasi · {{ $totalDokumenAktif }} masuk · PPK</p>
         </div>
         <div class="flex items-center gap-3">
             <div class="w-24 h-1.5 dark:bg-gray-700 bg-gray-200 rounded-full">
@@ -169,7 +173,11 @@
 @php
     $dokByJenis = $tps->dokumens->keyBy('jenis');
     $totalDokumenAktif = $tps->dokumens->whereIn('jenis', $aktifDokumenJenis->keys())->count();
-    $persenDokumenAktif = $totalJenisAktif > 0 ? min(100, ($totalDokumenAktif / $totalJenisAktif) * 100) : 0;
+    $totalTerverifikasiAktif = $tps->dokumens
+        ->whereIn('jenis', $aktifDokumenJenis->keys())
+        ->where('status', 'terverifikasi')
+        ->count();
+    $persenDokumenAktif = $totalJenisAktif > 0 ? min(100, ($totalTerverifikasiAktif / $totalJenisAktif) * 100) : 0;
 @endphp
 <div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 mb-4 shadow-sm overflow-hidden">
     <div class="flex items-center justify-between px-6 py-4 border-b dark:border-gray-700 border-gray-200 cursor-pointer hover:dark:bg-gray-750 hover:bg-gray-50 transition"
@@ -177,7 +185,7 @@
         <div>
             <p class="font-semibold text-sm dark:text-gray-100 text-gray-800">{{ $tps->nama }}</p>
             <p class="text-[11px] dark:text-gray-500 text-gray-400 mt-0.5">
-                {{ $tps->desa->nama }} · {{ $tps->desa->kecamatan->nama }} · {{ $totalDokumenAktif }}/{{ $totalJenisAktif }} dokumen
+                {{ $tps->desa->nama }} · {{ $tps->desa->kecamatan->nama }} · {{ $totalTerverifikasiAktif }}/{{ $totalJenisAktif }} terverifikasi · {{ $totalDokumenAktif }} masuk
             </p>
         </div>
         <div class="flex items-center gap-3">

@@ -27,7 +27,6 @@
         $totalMaxDok   = $totalTps * $totalJenisAktif;
         $totalUploaded = $tpsList->sum(fn($t) => $t->dokumens->whereIn('jenis', $aktifDokumenKeys)->count());
         $totalVerif    = $tpsList->sum(fn($t) => $t->dokumens->whereIn('jenis', $aktifDokumenKeys)->where('status','terverifikasi')->count());
-        $persenUpload  = $totalMaxDok > 0 ? round(($totalUploaded / $totalMaxDok) * 100) : 0;
         $persenVerif   = $totalMaxDok > 0 ? round(($totalVerif / $totalMaxDok) * 100) : 0;
     @endphp
 
@@ -38,14 +37,9 @@
     </div>
 
     <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border dark:border-gray-700 border-gray-200 shadow-sm">
-        <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">Sudah Upload</p>
+        <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">Dokumen Masuk</p>
         <p class="font-display text-4xl text-teal-400">{{ $totalUploaded }}/{{ $totalMaxDok }}</p>
-        <div class="mt-2 flex items-center gap-2">
-            <div class="flex-1 h-1.5 dark:bg-gray-700 bg-gray-200 rounded-full">
-                <div class="h-1.5 rounded-full bg-teal-400 transition-all" style="width:{{ $persenUpload }}%"></div>
-            </div>
-            <span class="text-xs dark:text-gray-500 text-gray-400">{{ $persenUpload }}%</span>
-        </div>
+        <p class="text-xs dark:text-gray-500 text-gray-400 mt-1">menunggu proses verifikasi</p>
     </div>
 
     <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border dark:border-gray-700 border-gray-200 shadow-sm">
@@ -71,7 +65,7 @@
     $totalDok = $tps->dokumens->whereIn('jenis', $aktifDokumenKeys)->count();
     $terverif = $tps->dokumens->whereIn('jenis', $aktifDokumenKeys)->where('status','terverifikasi')->count();
     $kppsUser = $tps->users->first();
-    $persen   = $totalJenisAktif > 0 ? round(($totalDok / $totalJenisAktif) * 100) : 0;
+    $persen   = $totalJenisAktif > 0 ? round(($terverif / $totalJenisAktif) * 100) : 0;
 @endphp
 <div class="dark:bg-gray-800 bg-white rounded-xl p-5 border dark:border-gray-700 border-gray-200 shadow-sm flex items-center justify-between flex-wrap gap-4">
     <div class="flex items-center gap-4">
@@ -87,7 +81,7 @@
                          style="width:{{ $persen }}%"></div>
                 </div>
                 <span class="text-[11px] dark:text-gray-500 text-gray-400">
-                    {{ $totalDok }}/{{ $totalJenisAktif }} dok · {{ $terverif }} terverifikasi
+                    {{ $terverif }}/{{ $totalJenisAktif }} terverifikasi · {{ $totalDok }} masuk
                 </span>
             </div>
         </div>

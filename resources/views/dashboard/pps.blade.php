@@ -16,11 +16,12 @@
     $targetPemiluTps  = $totalTps * $totalPemiluAktif;
     $dokumenJenisAktif = array_map('strtoupper', $aktifJenis);
 
-    $totalDokumenMasuk = \App\Models\Dokumen::where('level', 'tps')
+    $totalDokumenTerverifikasi = \App\Models\Dokumen::where('level', 'tps')
                         ->whereIn('tps_id', $tpsIds)
                         ->whereIn('jenis', $dokumenJenisAktif)
+                        ->where('status', 'terverifikasi')
                         ->count();
-    $persenDokumen = $targetPemiluTps > 0 ? min(100, round(($totalDokumenMasuk / $targetPemiluTps) * 100)) : 0;
+    $persenDokumen = $targetPemiluTps > 0 ? min(100, round(($totalDokumenTerverifikasi / $targetPemiluTps) * 100)) : 0;
 
     $totalRekapFinal = \App\Models\RekapHeader::select('tps_id')
                         ->where('status', 'final')
@@ -57,11 +58,11 @@
 
     <div class="admin-glass p-5 rounded-lg">
         <div class="flex justify-between items-start mb-4">
-            <span class="admin-display admin-muted tracking-widest text-[10px]">DOKUMEN MASUK</span>
+            <span class="admin-display admin-muted tracking-widest text-[10px]">DOKUMEN TERVERIFIKASI</span>
             <span class="admin-muted text-[10px] admin-mono">TPS x {{ $totalPemiluAktif }} AKTIF</span>
         </div>
         <div class="flex items-baseline gap-2">
-            <span class="admin-display text-4xl role-accent">{{ number_format($totalDokumenMasuk) }}/{{ number_format($targetPemiluTps) }}</span>
+            <span class="admin-display text-4xl role-accent">{{ number_format($totalDokumenTerverifikasi) }}/{{ number_format($targetPemiluTps) }}</span>
             <span class="admin-mono admin-muted-soft text-[11px] uppercase">{{ $persenDokumen }}%</span>
         </div>
         <div class="admin-surface-strong mt-6 h-1 w-full overflow-hidden rounded-full">
