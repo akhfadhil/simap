@@ -3,12 +3,11 @@ namespace App\Http\Controllers\Rekap;
 
 use App\Http\Controllers\Controller;
 use App\Models\RekapHeader;
-use App\Exports\RekapExport;
-use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Auth;
 
 class PpsController extends Controller
 {
+    // Menampilkan daftar rekap TPS dalam desa PPS.
     public function index()
     {
         $desa    = Auth::user()->desa;
@@ -18,11 +17,13 @@ class PpsController extends Controller
         return view('rekap.pps.index', compact('desa', 'rekaps'));
     }
 
+    // Memastikan jenis pemilihan sedang aktif.
     private function cekAktif(string $jenis): void
     {
         abort_if(!in_array($jenis, \App\Models\PemiluSetting::aktif()), 403, 'Jenis pemilu ini tidak aktif.');
     }
 
+    // Menampilkan rekap per TPS untuk jenis pemilihan.
     public function show(string $jenis)
     {
         $this->cekAktif($jenis);
@@ -44,6 +45,7 @@ class PpsController extends Controller
         return view('rekap.pps.show', compact('desa', 'jenis', 'rekaps', 'tpsList', 'master'));
     }
 
+    // Mengekspor rekap desa untuk jenis pemilihan.
     public function export(string $jenis)
     {
         $this->cekAktif($jenis);
@@ -52,7 +54,7 @@ class PpsController extends Controller
 
         $rekaps = RekapHeader::with(['ppwpSuaras','gubernurSuaras','bupatiSuaras','dpdSuaras','partaiSuaras','calegSuaras'])
                             ->whereIn('tps_id', $tpsIds)
-                            ->where('jenis', $jenis)  // filter jenis!
+                            ->where('jenis', $jenis)
                             ->get();
 
         $tpsList = $desa->tps;
@@ -74,6 +76,7 @@ class PpsController extends Controller
         return \Maatwebsite\Excel\Facades\Excel::download($sheet, $filename);
     }
 
+    // Mengambil master data sesuai jenis pemilihan.
     private function getMaster(string $jenis): array
     {
         if ($jenis === 'ppwp')     return ['calons' => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get()];
@@ -89,6 +92,7 @@ class PpsController extends Controller
         return ['partais' => $partais->orderBy('nomor_urut')->get()];
     }
 
+    // Mengambil semua master data untuk kebutuhan export.
     private function getAllMaster(): array
     {
         return [

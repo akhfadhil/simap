@@ -6,6 +6,7 @@ use App\Models\Tps;
 
 class PpsController extends Controller
 {
+    // Menampilkan daftar TPS dalam desa PPS.
     public function dataTps()
     {
         $user = Auth::user();
@@ -18,11 +19,11 @@ class PpsController extends Controller
         return view('pps.data-tps', compact('tpsList'));
     }
 
+    // Mengaktifkan mode lihat/upload dokumen KPPS untuk TPS tertentu.
     public function viewTps(Tps $tps)
     {
         $user = Auth::user();
 
-        // Pastikan TPS ini milik desa si PPS
         abort_if($tps->desa_id !== $user->desa_id, 403);
 
         session(['admin_view_tps_id' => $tps->id]);

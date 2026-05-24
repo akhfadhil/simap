@@ -19,6 +19,7 @@ class KppsController extends Controller
 {
     const JENIS = ['ppwp', 'gubernur', 'bupati', 'dpd', 'dpr_ri', 'dprd_prov', 'dprd_kab'];
     
+    // Menampilkan daftar rekap milik TPS user.
     public function index()
     {
         $tps    = Auth::user()->tps;
@@ -27,12 +28,14 @@ class KppsController extends Controller
         return view('rekap.kpps.index', compact('tps', 'rekaps'));
     }
 
+    // Memastikan jenis pemilihan sedang aktif.
     private function cekAktif(string $jenis): void
     {
         $aktif = \App\Models\PemiluSetting::aktif();
         abort_if(!in_array($jenis, $aktif), 403, 'Jenis pemilu ini tidak aktif.');
     }
 
+    // Menampilkan form input rekap untuk jenis pemilihan.
     public function form(string $jenis)
     {
         $this->cekAktif($jenis);
@@ -43,6 +46,7 @@ class KppsController extends Controller
         return view('rekap.kpps.form', compact('tps', 'jenis', 'rekap', 'data'));
     }
 
+    // Menyimpan draft rekap atau langsung finalisasi.
     public function store(Request $request, string $jenis)
     {
         $this->cekAktif($jenis);
@@ -93,7 +97,6 @@ class KppsController extends Controller
                 }
             }
 
-            // Finalisasi langsung jika ada flag
             if (request('finalisasi') == '1') {
                 $rekap->update(['status' => 'final', 'difinalisasi_at' => now()]);
                 try {
@@ -114,52 +117,7 @@ class KppsController extends Controller
         return redirect()->route('rekap.index')->with('success', "Rekap {$label} berhasil disimpan.");
     }
 
-    // public function finalisasi(string $jenis)
-    // {
-    //     $tps   = Auth::user()->tps;
-    //     $rekap = RekapHeader::where('tps_id', $tps->id)
-    //                         ->where('jenis', $jenis)
-    //                         ->firstOrFail();
-
-    //     $rekap->update(['status' => 'final', 'difinalisasi_at' => now()]);
-
-    //     // Auto export ke storage
-    //     try {
-    //         $tps->load('desa.kecamatan');
-    //         app(\App\Services\RekapExportService::class)->handleFinalisasi($tps, $jenis);
-    //     } catch (\Exception $e) {
-    //         // Jangan gagalkan finalisasi jika export error
-    //         \Log::error('Auto export gagal: ' . $e->getMessage());
-    //     }
-
-    //     return back()->with('success', 'Rekap berhasil difinalisasi dan disimpan ke storage.');
-    // }
-
-    // public function finalisasi(string $jenis)
-    // {
-    //     $this->cekAktif($jenis);
-    //     $tps   = Auth::user()->tps;
-    //     $rekap = RekapHeader::where('tps_id', $tps->id)
-    //                         ->where('jenis', $jenis)
-    //                         ->firstOrFail();
-
-    //     $rekap->update(['status' => 'final', 'difinalisasi_at' => now()]);
-        
-    //     // \Log::info('Finalisasi dipanggil', ['tps_id' => $tps->id, 'jenis' => $jenis]);
-
-    //     try {
-    //         // \Log::info('Masuk try block');
-    //         $tps->load('desa.kecamatan');
-    //         app(\App\Services\RekapExportService::class)->handleFinalisasi($tps, $jenis);
-    //         // \Log::info('handleFinalisasi selesai');
-    //     } catch (\Exception $e) {
-    //         \Log::error('Auto export gagal: ' . $e->getMessage());
-    //     }
-
-    //     // return back()->with('success', 'Rekap berhasil difinalisasi dan disimpan ke storage.');
-    //     return redirect()->route('rekap.index')->with('success', 'Rekap berhasil difinalisasi dan disimpan ke storage.');
-    // }
-
+    // Mengekspor rekap TPS untuk jenis pemilihan.
     public function export(string $jenis)
     {
         $this->cekAktif($jenis);
@@ -197,6 +155,7 @@ class KppsController extends Controller
         return Excel::download($sheet, $filename);
     }
 
+    // Mengambil master data dan suara existing untuk form.
     private function getMasterData(string $jenis, ?RekapHeader $rekap): array
     {
         $existingSuara  = [];
@@ -281,6 +240,7 @@ class KppsController extends Controller
         return [];
     }
 
+    // Mengambil semua master data untuk kebutuhan export.
     private function getAllMaster(): array
     {
         $kecamatan = Auth::user()->tps->desa->kecamatan;

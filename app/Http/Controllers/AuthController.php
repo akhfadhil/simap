@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
+    // Menampilkan halaman login atau redirect jika sudah login.
     public function showLogin()
     {
         if (Auth::check()) {
@@ -14,6 +15,7 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
+    // Memproses login dan mengarahkan user ke dashboard sesuai role.
     public function login(Request $request)
     {
         $request->validate([
@@ -37,6 +39,7 @@ class AuthController extends Controller
             ->withInput();
     }
 
+    // Menghapus session login user.
     public function logout(Request $request)
     {
         Auth::logout();

@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Storage;
 
 class DokumenController extends Controller
 {
-    // ── KPPS: Form Upload ──────────────────────────────────────
+    // Menampilkan form upload dokumen TPS.
     public function uploadForm()
     {
         $user = Auth::user();
@@ -34,7 +34,7 @@ class DokumenController extends Controller
         return view('dokumen.upload', compact('tps', 'uploaded', 'isAdminView'));
     }
 
-    // ── KPPS: Store / Replace ──────────────────────────────────
+    // Menyimpan atau mengganti dokumen TPS.
     public function store(Request $request)
     {
         $user = Auth::user();
@@ -54,7 +54,6 @@ class DokumenController extends Controller
 
         $tps = Tps::with('desa.kecamatan')->findOrFail($tpsId);
 
-        // Hapus file lama kalau ada
         $existing = Dokumen::where('tps_id', $tps->id)
             ->where('jenis', $request->jenis)
             ->first();
@@ -64,7 +63,6 @@ class DokumenController extends Controller
             $existing->delete();
         }
 
-        // Buat path terstruktur
         $kecFolder  = preg_replace('/[^A-Za-z0-9_\-]/', '_', $tps->desa->kecamatan->nama);
         $desaFolder = preg_replace('/[^A-Za-z0-9_\-]/', '_', $tps->desa->nama);
         $tpsFolder  = preg_replace('/[^A-Za-z0-9_\-]/', '_', $tps->nama);
@@ -90,12 +88,11 @@ class DokumenController extends Controller
         return back()->with('success', Dokumen::JENIS[$request->jenis] . ' berhasil diupload.');
     }
     
-    // ── PPS: Index ─────────────────────────────────────────────
+    // Menampilkan dokumen TPS untuk diverifikasi PPS.
     public function indexPps(Request $request)
     {
         $user = Auth::user();
 
-        // Admin atau PPK sedang view-as-pps
         if (session('admin_view_desa_id')) {
             $desaId      = session('admin_view_desa_id');
             $isAdminView = true;
@@ -120,7 +117,7 @@ class DokumenController extends Controller
         return view('dokumen.pps', compact('tpsList', 'tpsOptions', 'selectedTpsId', 'desa', 'isAdminView'));
     }
 
-    // ── PPS: Verifikasi ────────────────────────────────────────
+    // Memverifikasi atau menolak dokumen TPS oleh PPS.
     public function verifikasi(Request $request, Dokumen $dokumen)
     {
         $user = Auth::user();
@@ -151,12 +148,11 @@ class DokumenController extends Controller
         return back()->with('success', 'Dokumen berhasil diverifikasi.');
     }
 
-    // ── PPK: Index ─────────────────────────────────────────────
+    // Menampilkan rekap dokumen TPS untuk PPK.
     public function indexPpk(Request $request)
     {
         $user = Auth::user();
 
-        // Kalau admin sedang view-as-ppk, pakai kecamatan dari session
         if ($user->role === 'admin' && session('admin_view_kecamatan_id')) {
             $kecamatanId = session('admin_view_kecamatan_id');
             $isAdminView = true;
@@ -183,7 +179,7 @@ class DokumenController extends Controller
         return view('dokumen.ppk', compact('tpsList', 'desas', 'kecamatan', 'isAdminView'));
     }
 
-    // ── PPK: Form Upload ───────────────────────────────────────────
+    // Menampilkan form upload dokumen kecamatan.
     public function uploadFormPpk()
     {
         $user = Auth::user();
@@ -199,7 +195,7 @@ class DokumenController extends Controller
         return view('dokumen.upload_ppk', compact('kecamatan', 'uploaded'));
     }
 
-    // ── PPK: Store ─────────────────────────────────────────────────
+    // Menyimpan atau mengganti dokumen kecamatan.
     public function storePpk(Request $request)
     {
         $user = Auth::user();
@@ -213,7 +209,6 @@ class DokumenController extends Controller
         
         $kecamatan = \App\Models\Kecamatan::findOrFail($user->kecamatan_id);
 
-        // Hapus file lama kalau ada
         $existing = Dokumen::where('kecamatan_id', $kecamatan->id)
             ->where('level', 'kecamatan')
             ->where('jenis', $request->jenis)
@@ -224,7 +219,6 @@ class DokumenController extends Controller
             $existing->delete();
         }
 
-        // Buat path terstruktur
         $kecFolder = preg_replace('/[^A-Za-z0-9_\-]/', '_', $kecamatan->nama);
 
         $file = $request->file('file');
@@ -248,7 +242,7 @@ class DokumenController extends Controller
         return back()->with('success', Dokumen::JENIS[$request->jenis] . ' berhasil diupload.');
     }
     
-    // ── Admin: Index ───────────────────────────────────────────
+    // Menampilkan rekap dokumen seluruh wilayah untuk admin.
     public function indexAdmin(Request $request)
     {
         $kecamatans = Kecamatan::all();
@@ -286,7 +280,7 @@ class DokumenController extends Controller
         return view('dokumen.admin', compact('tpsList', 'kecamatans', 'desas', 'dokumenKecamatan', 'selectedKecamatanId', 'selectedDesaId'));
     }
 
-    // ── Admin: Verifikasi dokumen TPS atau Kecamatan ───────────────
+    // Memverifikasi atau menolak dokumen oleh admin.
     public function verifikasiAdmin(Request $request, Dokumen $dokumen)
     {
         abort_if(Auth::user()->role !== 'admin', 403);
@@ -314,12 +308,11 @@ class DokumenController extends Controller
         return back()->with('success', 'Dokumen berhasil diverifikasi.');
     }
 
-    // ── Preview PDF (semua role, dengan guard) ─────────────────
+    // Menampilkan preview PDF jika user berhak akses.
     public function preview(Dokumen $dokumen)
     {
         $this->authorizeAccess($dokumen);
 
-        // File sudah diarsipkan
         if ($dokumen->is_archived) {
             return response()->view('dokumen.archived', [
                 'dokumen'   => $dokumen,
@@ -336,7 +329,7 @@ class DokumenController extends Controller
         ]);
     }
 
-    // ── Download PDF ───────────────────────────────────────────
+    // Mengunduh PDF jika user berhak akses.
     public function download(Dokumen $dokumen)
     {
         $this->authorizeAccess($dokumen);
@@ -350,23 +343,19 @@ class DokumenController extends Controller
         return Storage::download($dokumen->file_path, $dokumen->file_name);
     }
 
-    // ── Admin: Restore file dari backup ───────────────────────
+    // Mengembalikan dokumen dari folder backup.
     public function restore(Dokumen $dokumen)
     {
         abort_if(Auth::user()->role !== 'admin', 403);
         abort_if(!$dokumen->is_archived, 400, 'Dokumen ini tidak dalam status diarsipkan.');
 
         $backupDir  = config('filesystems.backup_path', storage_path('app/backup'));
-        // $archivedAt = $dokumen->archived_at ?? $dokumen->created_at;
-        // $subDir     = $archivedAt->format('Y') . DIRECTORY_SEPARATOR . $archivedAt->format('m');
-        // $backupPath = $backupDir . DIRECTORY_SEPARATOR . $subDir . DIRECTORY_SEPARATOR . basename($dokumen->file_path);
         $backupPath = $backupDir . DIRECTORY_SEPARATOR . $dokumen->file_path;
 
         if (!file_exists($backupPath)) {
             return back()->with('error', 'File backup tidak ditemukan di server. Hubungi administrator.');
         }
 
-        // Pastikan folder storage tujuan ada
         $storageDir = dirname(Storage::path($dokumen->file_path));
         if (!is_dir($storageDir)) {
             mkdir($storageDir, 0755, true);
@@ -381,7 +370,7 @@ class DokumenController extends Controller
         return back()->with('error', 'Gagal melakukan restore. Silakan coba lagi.');
     }
 
-    // ── Guard: pastikan user boleh akses dokumen ini ───────────
+    // Mengecek hak akses user terhadap dokumen.
     private function authorizeAccess(Dokumen $dokumen): void
     {
         $user = Auth::user();

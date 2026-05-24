@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Artisan;
 
 class ToolsController extends Controller
 {
+    // Menjalankan backup dokumen terverifikasi lewat Artisan.
     public function backup()
     {
         $exit = Artisan::call('backup:dokumen');
@@ -21,6 +22,7 @@ class ToolsController extends Controller
         return back()->with('backup_result', $summary);
     }
 
+    // Menjalankan ulang seeder partai dari halaman setup.
     public function seedPartai()
     {
         Artisan::call('db:seed', ['--class' => 'PartaiSeeder', '--force' => true]);

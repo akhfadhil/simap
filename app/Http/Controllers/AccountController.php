@@ -8,11 +8,13 @@ use Illuminate\Support\Facades\Hash;
 
 class AccountController extends Controller
 {
+    // Menampilkan form ubah password user.
     public function editPassword()
     {
         return view('account.password');
     }
 
+    // Memvalidasi dan menyimpan password baru user.
     public function updatePassword(Request $request)
     {
         $request->validate([

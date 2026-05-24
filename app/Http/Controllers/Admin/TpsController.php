@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 
 class TpsController extends Controller
 {
+    // Menampilkan daftar TPS sesuai filter kecamatan/desa.
     public function index(Request $request)
     {
         $kecamatans = Kecamatan::with(['desas' => fn ($query) => $query->orderBy('nama')])
@@ -33,10 +34,7 @@ class TpsController extends Controller
         return view('admin.tps.index', compact('kecamatans', 'filteredTps', 'selectedKecamatanId', 'selectedDesaId'));
     }
 
-    /**
-     * Bulk store: buat TPS 001 s/d {jumlah} untuk beberapa desa.
-     * Jika TPS sudah ada di rentang itu, skip.
-     */
+    // Membuat TPS massal per desa dan melewati TPS yang sudah ada.
     public function store(Request $request)
     {
         $request->validate([
@@ -79,9 +77,7 @@ class TpsController extends Controller
         return back()->with('success', "Berhasil membuat {$created} TPS baru dari {$processed} desa. (TPS yang sudah ada dilewati)");
     }
 
-    /**
-     * Update nama TPS.
-     */
+    // Memperbarui nama TPS.
     public function update(Request $request, Tps $tps)
     {
         $request->validate([
@@ -93,6 +89,7 @@ class TpsController extends Controller
         return back()->with('success', "Nama TPS berhasil diubah menjadi \"{$tps->nama}\".");
     }
 
+    // Menghapus TPS.
     public function destroy(Tps $tps)
     {
         $nama = $tps->nama;

@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 
 class DesaController extends Controller
 {
+    // Menampilkan daftar desa sesuai filter kecamatan.
     public function index(Request $request)
     {
         $kecamatans = Kecamatan::all();
@@ -24,6 +25,7 @@ class DesaController extends Controller
         return view('admin.wilayah.desa', compact('desas', 'kecamatans'));
     }
 
+    // Menyimpan desa baru.
     public function store(Request $request)
     {
         $request->validate([
@@ -34,6 +36,7 @@ class DesaController extends Controller
         return back()->with('success', 'Desa berhasil ditambahkan.');
     }
 
+    // Memperbarui data desa.
     public function update(Request $request, Desa $desa)
     {
         $request->validate([
@@ -44,6 +47,7 @@ class DesaController extends Controller
         return back()->with('success', 'Desa berhasil diupdate.');
     }
 
+    // Menghapus desa.
     public function destroy(Desa $desa)
     {
         $desa->delete();

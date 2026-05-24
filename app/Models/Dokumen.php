@@ -17,14 +17,6 @@ class Dokumen extends Model
         'is_archived'  => 'boolean',
     ];
 
-    // const JENIS = [
-    //     'PPWP'       => 'PPWP',
-    //     'DPR_RI'     => 'DPR RI',
-    //     'DPD'        => 'DPD',
-    //     'DPRD_PROV'  => 'DPRD Provinsi',
-    //     'DPRD_KAB'   => 'DPRD Kabupaten/Kota',
-    // ];
-
     const JENIS = [
         'PPWP'      => 'Presiden & Wakil Presiden',
         'GUBERNUR'  => 'Gubernur & Wakil Gubernur',
@@ -48,8 +40,12 @@ class Dokumen extends Model
     ];
 
 
+    // Relasi TPS pemilik dokumen.
     public function tps()       { return $this->belongsTo(Tps::class); }
+    // Relasi kecamatan untuk dokumen level PPK.
     public function kecamatan() { return $this->belongsTo(Kecamatan::class); }
+    // Relasi user yang mengupload dokumen.
     public function uploader()  { return $this->belongsTo(User::class, 'uploaded_by'); }
+    // Relasi user yang memverifikasi dokumen.
     public function verifier()  { return $this->belongsTo(User::class, 'verified_by'); }
 }

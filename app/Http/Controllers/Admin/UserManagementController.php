@@ -14,6 +14,7 @@ use Illuminate\Validation\ValidationException;
 
 class UserManagementController extends Controller
 {
+    // Menampilkan daftar user setelah filter dipilih.
     public function index()
     {
         $usersLoaded = $this->hasUserFilter(request());
@@ -31,6 +32,7 @@ class UserManagementController extends Controller
         return view('admin.users.index', compact('users', 'usersLoaded', 'kecamatans', 'desas', 'tpsList'));
     }
 
+    // Mengekspor daftar user sesuai filter ke CSV.
     public function export(Request $request)
     {
         if (!$this->hasUserFilter($request)) {
@@ -67,6 +69,7 @@ class UserManagementController extends Controller
         ]);
     }
 
+    // Menyimpan user baru dari form admin.
     public function store(Request $request)
     {
         $request->validate([
@@ -92,6 +95,7 @@ class UserManagementController extends Controller
         return back()->with('success', 'User berhasil ditambahkan.');
     }
 
+    // Memperbarui data user yang sudah ada.
     public function update(Request $request, User $user)
     {
         $request->validate([
@@ -119,12 +123,14 @@ class UserManagementController extends Controller
         return back()->with('success', 'User berhasil diupdate.');
     }
 
+    // Menghapus user.
     public function destroy(User $user)
     {
         $user->delete();
         return back()->with('success', 'User berhasil dihapus.');
     }
 
+    // Menampilkan halaman bulk input user per wilayah.
     public function bulk(Request $request)
     {
         $role = $request->input('role', 'kpps');
@@ -156,6 +162,7 @@ class UserManagementController extends Controller
         ));
     }
 
+    // Menyimpan hasil bulk input user.
     public function bulkStore(Request $request)
     {
         $data = $request->validate([
@@ -254,6 +261,7 @@ class UserManagementController extends Controller
             ->with('success', "Bulk user selesai. Dibuat: {$created}, diperbarui: {$updated}.");
     }
 
+    // Menyiapkan baris bulk user PPK per kecamatan.
     private function bulkPpkRows()
     {
         return Kecamatan::with(['users' => fn($query) => $query->where('role', 'ppk')])
@@ -269,6 +277,7 @@ class UserManagementController extends Controller
             ));
     }
 
+    // Menyiapkan baris bulk user PPS per desa.
     private function bulkPpsRows(int $kecamatanId)
     {
         return Desa::with(['kecamatan', 'users' => fn($query) => $query->where('role', 'pps')])
@@ -285,6 +294,7 @@ class UserManagementController extends Controller
             ));
     }
 
+    // Menyiapkan baris bulk user KPPS per TPS.
     private function bulkKppsRows(int $desaId)
     {
         return Tps::with(['desa.kecamatan', 'users' => fn($query) => $query->where('role', 'kpps')])
@@ -301,6 +311,7 @@ class UserManagementController extends Controller
             ));
     }
 
+    // Membentuk satu baris data untuk tabel bulk.
     private function bulkRow(int $id, string $label, string $scope, ?User $user, string $nameSuggestion, string $usernameSuggestion): array
     {
         return [
@@ -313,6 +324,7 @@ class UserManagementController extends Controller
         ];
     }
 
+    // Mengambil entity wilayah untuk role bulk.
     private function bulkEntity(string $role, int $entityId): array
     {
         $entity = match ($role) {
@@ -330,6 +342,7 @@ class UserManagementController extends Controller
         return ['label' => $entity->nama];
     }
 
+    // Mencari user existing untuk role dan wilayah tertentu.
     private function existingUserForRole(string $role, int $entityId): ?User
     {
         return User::where('role', $role)
@@ -339,17 +352,20 @@ class UserManagementController extends Controller
             ->first();
     }
 
+    // Membuat saran username berdasarkan role dan wilayah.
     private function suggestUsername(string $role, int $id, string $name): string
     {
         $slug = Str::slug($name, '_') ?: 'wilayah';
         return Str::limit("{$role}_{$id}_{$slug}", 50, '');
     }
 
+    // Mengecek apakah user sudah memilih filter daftar pengguna.
     private function hasUserFilter(Request $request): bool
     {
         return $request->filled('role') || $request->filled('kecamatan_id') || $request->filled('desa_id');
     }
 
+    // Membentuk query user sesuai filter.
     private function filteredUsers(Request $request)
     {
         return User::with('kecamatan', 'desa.kecamatan', 'tps.desa.kecamatan')
@@ -370,6 +386,7 @@ class UserManagementController extends Controller
             });
     }
 
+    // Mengambil nama kecamatan dari scope user.
     private function userKecamatanName(User $user): string
     {
         return match ($user->role) {
@@ -380,6 +397,7 @@ class UserManagementController extends Controller
         };
     }
 
+    // Mengambil nama desa dari scope user.
     private function userDesaName(User $user): string
     {
         return match ($user->role) {

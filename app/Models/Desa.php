@@ -7,7 +7,10 @@ class Desa extends Model
 {
     protected $fillable = ['nama', 'kecamatan_id'];
 
+    // Relasi kecamatan pemilik desa.
     public function kecamatan() { return $this->belongsTo(Kecamatan::class); }
+    // Relasi TPS dalam desa.
     public function tps()       { return $this->hasMany(Tps::class); }
+    // Relasi user PPS di desa.
     public function users()     { return $this->hasMany(User::class); }
 }

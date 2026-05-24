@@ -3,11 +3,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
 use App\Models\Desa;
-use App\Models\Tps;
-use App\Models\Dokumen;
 
 class PpkController extends Controller
 {
+    // Menampilkan daftar PPS/desa dalam kecamatan PPK.
     public function dataPps()
     {
         $user = Auth::user();
@@ -20,11 +19,11 @@ class PpkController extends Controller
         return view('ppk.data-pps', compact('desas'));
     }
 
+    // Mengaktifkan mode lihat dokumen PPS untuk desa tertentu.
     public function viewPps(Desa $desa)
     {
         $user = Auth::user();
 
-        // Pastikan desa ini milik kecamatan si PPK
         abort_if($desa->kecamatan_id !== $user->kecamatan_id, 403);
 
         session(['admin_view_desa_id' => $desa->id]);

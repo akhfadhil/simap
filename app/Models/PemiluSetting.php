@@ -8,7 +8,7 @@ class PemiluSetting extends Model
     protected $fillable = ['jenis', 'is_active'];
     protected $casts    = ['is_active' => 'boolean'];
 
-    // Cache aktif jenis agar tidak query berulang
+    // Mengambil daftar jenis pemilihan yang aktif.
     public static function aktif(): array
     {
         return static::where('is_active', true)->pluck('jenis')->toArray();

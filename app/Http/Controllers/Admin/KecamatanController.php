@@ -7,12 +7,14 @@ use Illuminate\Http\Request;
 
 class KecamatanController extends Controller
 {
+    // Menampilkan daftar kecamatan.
     public function index()
     {
         $kecamatans = Kecamatan::withCount('desas')->latest()->get();
         return view('admin.wilayah.kecamatan', compact('kecamatans'));
     }
 
+    // Menyimpan kecamatan baru.
     public function store(Request $request)
     {
         $request->validate(['nama' => 'required|string|max:100|unique:kecamatans']);
@@ -20,6 +22,7 @@ class KecamatanController extends Controller
         return back()->with('success', 'Kecamatan berhasil ditambahkan.');
     }
 
+    // Memperbarui nama kecamatan.
     public function update(Request $request, Kecamatan $kecamatan)
     {
         $request->validate(['nama' => 'required|string|max:100|unique:kecamatans,nama,' . $kecamatan->id]);
@@ -27,6 +30,7 @@ class KecamatanController extends Controller
         return back()->with('success', 'Kecamatan berhasil diupdate.');
     }
 
+    // Menghapus kecamatan.
     public function destroy(Kecamatan $kecamatan)
     {
         $kecamatan->delete();

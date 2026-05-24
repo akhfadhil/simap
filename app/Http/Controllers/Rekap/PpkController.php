@@ -5,11 +5,10 @@ use App\Http\Controllers\Controller;
 use App\Models\RekapHeader;
 use App\Models\Tps;
 use Illuminate\Support\Facades\Auth;
-use App\Exports\RekapExport;
-use Maatwebsite\Excel\Facades\Excel;
 
 class PpkController extends Controller
 {
+    // Menampilkan daftar rekap TPS dalam kecamatan PPK.
     public function index()
     {
         $kecamatan = Auth::user()->kecamatan;
@@ -18,11 +17,13 @@ class PpkController extends Controller
         return view('rekap.ppk.index', compact('kecamatan', 'rekaps'));
     }
 
+    // Memastikan jenis pemilihan sedang aktif.
     private function cekAktif(string $jenis): void
     {
         abort_if(!in_array($jenis, \App\Models\PemiluSetting::aktif()), 403, 'Jenis pemilu ini tidak aktif.');
     }
 
+    // Menampilkan rekap per desa dan detail TPS.
     public function show(string $jenis)
     {
         $this->cekAktif($jenis);
@@ -142,6 +143,7 @@ class PpkController extends Controller
         ));
     }
 
+    // Mengekspor rekap kecamatan untuk jenis pemilihan.
     public function export(string $jenis)
     {
         $this->cekAktif($jenis);
@@ -166,6 +168,7 @@ class PpkController extends Controller
         );
     }
 
+    // Mengambil master data sesuai jenis pemilihan.
     private function getMaster(string $jenis): array
     {
         if ($jenis === 'ppwp')     return ['calons' => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get()];
@@ -181,6 +184,7 @@ class PpkController extends Controller
         return ['partais' => $partais->orderBy('nomor_urut')->get()];
     }
 
+    // Mengambil semua master data untuk kebutuhan export.
     private function getAllMaster(): array
     {
         return [

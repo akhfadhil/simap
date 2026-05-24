@@ -6,14 +6,13 @@ use App\Models\RekapHeader;
 use App\Models\Kecamatan;
 use App\Models\Dapil;
 use App\Models\Tps;
-use App\Exports\RekapExport;
 use App\Services\RekapAdminCache;
-use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
 {
+    // Menampilkan daftar rekap kabupaten dengan filter kecamatan.
     public function index()
     {
         $kecamatans = Kecamatan::all();
@@ -23,6 +22,7 @@ class AdminController extends Controller
         return view('rekap.admin.index', compact('kecamatans', 'rekaps'));
     }
 
+    // Menampilkan rekap agregat kabupaten untuk jenis pemilihan.
     public function show(string $jenis)
     {
         $dapils          = collect();
@@ -147,6 +147,7 @@ class AdminController extends Controller
         ));
     }
 
+    // Mengekspor rekap admin untuk jenis pemilihan.
     public function export(string $jenis)
     {
         $kecId  = request('kecamatan_id');
@@ -178,6 +179,7 @@ class AdminController extends Controller
         );
     }
 
+    // Mengambil master data sesuai jenis pemilihan dan dapil.
     private function getMaster(string $jenis, ?int $dapilId = null): array
     {
         if ($jenis === 'ppwp')     return ['calons' => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get()];
@@ -194,6 +196,7 @@ class AdminController extends Controller
         return ['partais' => $partais->orderBy('nomor_urut')->get()];
     }
 
+    // Menghitung agregat suara per kecamatan.
     private function aggregateSuaraByKecamatan(string $jenis, ?int $dapilId = null): array
     {
         return RekapAdminCache::rememberAggregate($jenis, $dapilId, function () use ($jenis, $dapilId) {
@@ -274,6 +277,7 @@ class AdminController extends Controller
         });
     }
 
+    // Membentuk query dasar agregasi suara.
     private function baseSuaraAggregateQuery(string $table, string $jenis, ?int $dapilId = null)
     {
         return DB::table($table . ' as s')
@@ -285,6 +289,7 @@ class AdminController extends Controller
             ->when($jenis === 'dprd_kab' && $dapilId, fn($query) => $query->where('k.dapil_id', $dapilId));
     }
 
+    // Mengambil semua master data untuk kebutuhan export.
     private function getAllMaster(): array
     {
         return [
@@ -298,17 +303,17 @@ class AdminController extends Controller
         ];
     }
 
+    // Menampilkan halaman export rekap.
     public function exportPage()
     {
         $kecamatans = \App\Models\Kecamatan::orderBy('nama')->get();
         return view('rekap.admin.export', compact('kecamatans'));
     }
 
+    // Mengunduh export rekap sesuai level wilayah.
     public function exportDownload(Request $request)
     {
         $request->validate([
-            // 'jenis' => 'required|in:ppwp,dpd,dpr_ri,dprd_prov,dprd_kab',
-            // Di validasi jenis di KppsController
             'jenis' => 'required|in:ppwp,gubernur,bupati,dpd,dpr_ri,dprd_prov,dprd_kab',
             'level' => 'required|in:tps,desa,kecamatan,kabupaten',
         ]);
@@ -366,11 +371,8 @@ class AdminController extends Controller
                 $wilayah = 'Kabupaten';
                 $filename = 'Rekap_' . strtoupper($jenis) . '_Kabupaten.xlsx';
 
-                // Untuk kabupaten, group desas per kecamatan sebagai "desas" di RekapTotalSheet
                 $kecamatans = \App\Models\Kecamatan::with('desas.tps')->get();
-                // Buat pseudo-desas yang merepresentasikan kecamatan
                 $pseudoDesas = $kecamatans->map(function($kec) {
-                    $kec->nama = $kec->nama; // pakai nama kecamatan
                     $kec->tps  = $kec->desas->flatMap(fn($d) => $d->tps);
                     return $kec;
                 });
@@ -381,6 +383,7 @@ class AdminController extends Controller
         }
     }
 
+    // Menampilkan halaman grafik dan statistik.
     public function chartPage()
     {
         $kecamatans = Kecamatan::with(['desas.tps'])->orderBy('nama')->get();
@@ -388,6 +391,7 @@ class AdminController extends Controller
         return view('rekap.admin.chart', compact('kecamatans', 'dapils'));
     }
 
+    // Mengambil data JSON untuk grafik dan peta.
     public function chartData(\Illuminate\Http\Request $request)
     {
         $jenis   = $request->jenis;
@@ -406,7 +410,6 @@ class AdminController extends Controller
             return $this->chartCalonData($jenis, $level, $kecId, $desaId, $tpsId, $dapilId);
         }
 
-        // Tentukan scope TPS
         $tpsQuery = Tps::query();
         if ($tpsId)       $tpsQuery->where('id', $tpsId);
         elseif ($desaId)  $tpsQuery->where('desa_id', $desaId);
@@ -419,11 +422,9 @@ class AdminController extends Controller
                     ->where('jenis', $jenis)
                     ->get();
 
-        // Tentukan label & grouping
         $data = [];
 
         if ($level === 'kabupaten') {
-            // Per kecamatan
             $kecamatans = Kecamatan::with(['desas.tps'])->orderBy('nama')->get();
             foreach ($kecamatans as $kec) {
                 $kecTpsIds = $kec->desas->flatMap(fn($d) => $d->tps->pluck('id'))->toArray();
@@ -434,7 +435,6 @@ class AdminController extends Controller
                 ];
             }
         } elseif ($level === 'dapil' && $dapilId) {
-            // Per kecamatan dalam dapil tsb
             $kecamatans = Kecamatan::with(['desas.tps'])->where('dapil_id', $dapilId)->orderBy('nama')->get();
             foreach ($kecamatans as $kec) {
                 $kecTpsIds = $kec->desas->flatMap(fn($d) => $d->tps->pluck('id'))->toArray();
@@ -445,7 +445,6 @@ class AdminController extends Controller
                 ];
             }
         } elseif ($level === 'kecamatan' && $kecId) {
-            // Per desa
             $desas = \App\Models\Desa::where('kecamatan_id', $kecId)->with('tps')->orderBy('nama')->get();
             foreach ($desas as $desa) {
                 $desaTpsIds = $desa->tps->pluck('id')->toArray();
@@ -456,7 +455,6 @@ class AdminController extends Controller
                 ];
             }
         } elseif ($level === 'desa' && $desaId) {
-            // Per TPS
             $tpsList = \App\Models\Tps::where('desa_id', $desaId)->orderBy('nama')->get();
             foreach ($tpsList as $tps) {
                 $r = $rekaps->where('tps_id', $tps->id)->first();
@@ -467,7 +465,6 @@ class AdminController extends Controller
                 ];
             }
         } elseif ($level === 'tps' && $tpsId) {
-            // Single TPS
             $tps = Tps::find($tpsId);
             $r   = $rekaps->where('tps_id', $tpsId)->first();
             $data[] = [
@@ -477,7 +474,6 @@ class AdminController extends Controller
             ];
         }
 
-        // Master labels
         $master = $this->getMaster($jenis, $activeDapilId);
         $labels = [];
         $searchMeta = [];
@@ -501,6 +497,7 @@ class AdminController extends Controller
         ]);
     }
 
+    // Mengambil data chart untuk pemilihan berbasis calon/paslon.
     private function chartCalonData(string $jenis, string $level, $kecId, $desaId, $tpsId, $dapilId)
     {
         return response()->json(RekapAdminCache::rememberChart([
@@ -619,6 +616,7 @@ class AdminController extends Controller
         }));
     }
 
+    // Mengambil konfigurasi tabel suara calon/paslon.
     private function chartCalonConfig(string $jenis): array
     {
         return match ($jenis) {
@@ -629,6 +627,7 @@ class AdminController extends Controller
         };
     }
 
+    // Mengambil data chart untuk pemilihan legislatif.
     private function chartLegislatifData(string $jenis, string $level, $kecId, $desaId, $tpsId, $dapilId, ?int $activeDapilId)
     {
         return response()->json(RekapAdminCache::rememberChart([
@@ -806,6 +805,7 @@ class AdminController extends Controller
         }));
     }
 
+    // Mengambil baris wilayah untuk grouping chart.
     private function chartGroupRows(string $level, $kecId, $desaId, $tpsId, $dapilId)
     {
         if ($level === 'kabupaten') {
@@ -867,6 +867,7 @@ class AdminController extends Controller
         return collect();
     }
 
+    // Menentukan ekspresi SQL grouping chart.
     private function chartGroupExpression(string $level): string
     {
         return match ($level) {
@@ -876,6 +877,7 @@ class AdminController extends Controller
         };
     }
 
+    // Menerapkan filter scope wilayah pada query chart.
     private function applyChartScope($query, string $jenis, $kecId, $desaId, $tpsId, $dapilId)
     {
         $query->where('h.jenis', $jenis);
@@ -899,6 +901,7 @@ class AdminController extends Controller
         return $query;
     }
 
+    // Membentuk ranking kandidat/caleg untuk sidebar chart.
     private function buildCandidateRanking($rekaps, string $jenis, ?int $dapilId = null): array
     {
         if (!in_array($jenis, ['dpr_ri', 'dprd_prov', 'dprd_kab'])) {
@@ -928,6 +931,7 @@ class AdminController extends Controller
             ->toArray();
     }
 
+    // Membentuk data suara untuk chart fallback.
     private function buildSuaraData($rekaps, string $jenis, ?int $dapilId = null): array
     {
         if (in_array($jenis, ['ppwp','dpd','gubernur','bupati'])) {
@@ -951,6 +955,7 @@ class AdminController extends Controller
         }
     }
 
+    // Menghitung data partisipasi dari rekap.
     private function buildPartisipasiData($rekaps, ?int $tpsTotal = null): array
     {
         return [
@@ -965,6 +970,7 @@ class AdminController extends Controller
         ];
     }
 
+    // Membuka rekap final agar bisa diedit ulang.
     public function unlock(Request $request, string $jenis)
     {
         $rekap = RekapHeader::where('tps_id', $request->tps_id)

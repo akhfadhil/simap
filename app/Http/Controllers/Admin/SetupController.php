@@ -12,6 +12,7 @@ use App\Models\Kecamatan;
 
 class SetupController extends Controller
 {
+    // Menampilkan halaman setup master data pemilu.
     public function index()
     {
         $ppwpCalons  = RekapPpwpCalon::orderBy('nomor_urut')->get();
@@ -25,7 +26,7 @@ class SetupController extends Controller
                         ->orderBy('dapil_id')
                         ->orderBy('nomor_urut')
                         ->get()
-                        ->groupBy(fn($p) => (string) $p->dapil_id); // ← cast ke string
+                        ->groupBy(fn($p) => (string) $p->dapil_id);
         $gubernurCalons = \App\Models\RekapGubernurCalon::orderBy('nomor_urut')->get();
         $bupatiCalons   = \App\Models\RekapBupatiCalon::orderBy('nomor_urut')->get();
 
@@ -37,6 +38,7 @@ class SetupController extends Controller
         ));
     }
 
+    // Menyimpan status aktif/nonaktif jenis pemilihan.
     public function updatePemiluSettings(Request $request)
     {
         $jenisList = ['ppwp','gubernur','bupati','dpd','dpr_ri','dprd_prov','dprd_kab'];
@@ -50,28 +52,33 @@ class SetupController extends Controller
         return back()->with('success', 'Pengaturan jenis pemilu berhasil disimpan.');
     }
 
+    // Menyimpan batch paslon PPWP.
     public function storePpwp(Request $request)
     {
         return $this->storePaslonBatch($request, RekapPpwpCalon::class, 'Paslon PPWP berhasil ditambahkan.');
     }
 
+    // Menghapus paslon PPWP.
     public function destroyPpwp(RekapPpwpCalon $calon)
     {
         $calon->delete();
         return back()->with('success', 'Paslon dihapus.');
     }
 
+    // Menyimpan batch calon DPD.
     public function storeDpd(Request $request)
     {
         return $this->storeCalonBatch($request, RekapDpdCalon::class, 'Calon DPD berhasil ditambahkan.');
     }
 
+    // Menghapus calon DPD.
     public function destroyDpd(RekapDpdCalon $calon)
     {
         $calon->delete();
         return back()->with('success', 'Calon DPD dihapus.');
     }
 
+    // Menyimpan partai untuk DPR/DPRD.
     public function storePartai(Request $request)
     {
         $request->validate([
@@ -122,12 +129,14 @@ class SetupController extends Controller
         return back()->with('success', 'Partai berhasil ditambahkan.');
     }
 
+    // Menghapus partai beserta calegnya.
     public function destroyPartai(RekapPartai $partai)
     {
-        $partai->delete(); // calegs cascade
+        $partai->delete();
         return back()->with('success', 'Partai dan caleg-calegnya dihapus.');
     }
 
+    // Menyimpan caleg pada partai tertentu.
     public function storeCaleg(Request $request, RekapPartai $partai)
     {
         $request->validate(['nomor_urut' => 'required|integer', 'nama_caleg' => 'required|string|max:200']);
@@ -135,12 +144,14 @@ class SetupController extends Controller
         return back()->with('success', 'Caleg berhasil ditambahkan.');
     }
 
+    // Menghapus caleg.
     public function destroyCaleg(RekapCaleg $caleg)
     {
         $caleg->delete();
         return back()->with('success', 'Caleg dihapus.');
     }
 
+    // Menyimpan dapil baru.
     public function storeDapil(Request $request)
     {
         $request->validate(['nama' => 'required|string|max:100']);
@@ -148,12 +159,14 @@ class SetupController extends Controller
         return back()->with('success', 'Dapil berhasil ditambahkan.');
     }
 
+    // Menghapus dapil.
     public function destroyDapil(Dapil $dapil)
     {
         $dapil->delete();
         return back()->with('success', 'Dapil dihapus.');
     }
 
+    // Menghubungkan kecamatan ke dapil.
     public function assignDapil(Request $request)
     {
         $request->validate([
@@ -170,28 +183,33 @@ class SetupController extends Controller
         return back()->with('success', 'Dapil kecamatan berhasil diupdate.');
     }
 
+    // Menyimpan batch paslon gubernur.
     public function storeGubernur(Request $request)
     {
         return $this->storePaslonBatch($request, \App\Models\RekapGubernurCalon::class, 'Paslon Gubernur berhasil ditambahkan.');
     }
 
+    // Menghapus paslon gubernur.
     public function destroyGubernur(\App\Models\RekapGubernurCalon $calon)
     {
         $calon->delete();
         return back()->with('success', 'Paslon Gubernur dihapus.');
     }
 
+    // Menyimpan batch paslon bupati.
     public function storeBupati(Request $request)
     {
         return $this->storePaslonBatch($request, \App\Models\RekapBupatiCalon::class, 'Paslon Bupati berhasil ditambahkan.');
     }
 
+    // Menghapus paslon bupati.
     public function destroyBupati(\App\Models\RekapBupatiCalon $calon)
     {
         $calon->delete();
         return back()->with('success', 'Paslon Bupati dihapus.');
     }
 
+    // Menyimpan beberapa paslon dari form batch.
     private function storePaslonBatch(Request $request, string $modelClass, string $successMessage)
     {
         $request->validate([
@@ -238,6 +256,7 @@ class SetupController extends Controller
         return back()->with('success', $successMessage);
     }
 
+    // Menyimpan beberapa calon dari form batch.
     private function storeCalonBatch(Request $request, string $modelClass, string $successMessage)
     {
         $request->validate([
