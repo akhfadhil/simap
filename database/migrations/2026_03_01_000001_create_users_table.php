@@ -10,12 +10,13 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('username')->unique();
-            $table->enum('role', ['admin', 'komisioner', 'ppk', 'pps', 'kpps']);
+            $table->enum('role', ['admin', 'komisioner', 'partai', 'ppk', 'pps', 'kpps']);
             $table->string('name');
             $table->string('password');
             $table->unsignedBigInteger('kecamatan_id')->nullable();
             $table->unsignedBigInteger('desa_id')->nullable();
             $table->unsignedBigInteger('tps_id')->nullable();
+            $table->unsignedBigInteger('partai_id')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

@@ -10,9 +10,9 @@ class RekapAdminCache
     private const CHART_KEYS = 'rekap_admin_chart_keys';
     private const DASHBOARD_KEYS = 'rekap_dashboard_summary_keys';
 
-    public static function rememberAggregate(string $jenis, ?int $dapilId, callable $callback): array
+    public static function rememberAggregate(string $jenis, ?int $dapilId, callable $callback, array $scope = []): array
     {
-        $key = self::aggregateKey($jenis, $dapilId);
+        $key = self::aggregateKey($jenis, $dapilId, $scope);
         $keys = Cache::get(self::AGGREGATE_KEYS, []);
 
         if (!in_array($key, $keys, true)) {
@@ -68,8 +68,8 @@ class RekapAdminCache
         Cache::forget(self::DASHBOARD_KEYS);
     }
 
-    private static function aggregateKey(string $jenis, ?int $dapilId): string
+    private static function aggregateKey(string $jenis, ?int $dapilId, array $scope = []): string
     {
-        return 'rekap_admin_aggregate_' . $jenis . '_' . ($dapilId ?: 'all');
+        return 'rekap_admin_aggregate_' . $jenis . '_' . ($dapilId ?: 'all') . '_' . md5(json_encode($scope));
     }
 }

@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Route;
 // ── Auth ──────────────────────────────────────────────────────
 Route::get('/',        [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login',  [AuthController::class, 'login'])->name('login.post');
+Route::get('/partai/login', [AuthController::class, 'showPartaiLogin'])->name('partai.login');
+Route::post('/partai/login', [AuthController::class, 'loginPartai'])->name('partai.login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // ── Protected ─────────────────────────────────────────────────
@@ -25,6 +27,7 @@ Route::middleware('auth')->group(function () {
     // Dashboard
     Route::get('/dashboard/admin', [DashboardController::class, 'admin'])->name('dashboard.admin');
     Route::get('/dashboard/komisioner', [DashboardController::class, 'komisioner'])->name('dashboard.komisioner');
+    Route::get('/dashboard/partai', fn() => redirect()->route('admin.rekap.chart'))->name('dashboard.partai');
     Route::get('/dashboard/ppk',   [DashboardController::class, 'ppk'])->name('dashboard.ppk');
     Route::get('/dashboard/pps',   [DashboardController::class, 'pps'])->name('dashboard.pps');
     Route::get('/dashboard/kpps',  [DashboardController::class, 'kpps'])->name('dashboard.kpps');
@@ -157,7 +160,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // ── REKAP VIEW (Admin) ───────────────────────────────────
-    Route::prefix('admin/rekap')->name('admin.rekap.')->middleware('role:admin,komisioner')->group(function () {
+    Route::prefix('admin/rekap')->name('admin.rekap.')->middleware('role:admin,komisioner,partai')->group(function () {
         Route::get('/',                   [App\Http\Controllers\Rekap\AdminController::class, 'index'])->name('index');
         Route::get('chart',               [App\Http\Controllers\Rekap\AdminController::class, 'chartPage'])->name('chart');      
         Route::get('chart/data',          [App\Http\Controllers\Rekap\AdminController::class, 'chartData'])->name('chart.data');

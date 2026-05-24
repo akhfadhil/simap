@@ -353,9 +353,13 @@
         ->keys()
         ->first(fn ($key) => in_array($key, $aktifJenis));
     $isKomisioner = Auth::user()->role === 'komisioner';
-    $roleLabel = $isKomisioner ? 'Komisioner' : 'Administrator';
+    $isPartai = Auth::user()->role === 'partai';
+    $roleLabel = $isPartai ? 'Partai' : ($isKomisioner ? 'Komisioner' : 'Administrator');
     $homeRoute = route('dashboard.' . Auth::user()->role);
-    $adminMenus = $isKomisioner ? [
+    $adminMenus = $isPartai ? [
+        ['key' => 'chart', 'label' => 'Grafik & Statistik', 'icon' => 'bar_chart', 'route' => route('admin.rekap.chart')],
+        ['key' => 'rekap', 'label' => 'Rekapitulasi Data', 'icon' => 'analytics', 'route' => route('admin.rekap.index')],
+    ] : ($isKomisioner ? [
         ['key' => 'dashboard', 'label' => 'Beranda', 'icon' => 'dashboard', 'route' => route('dashboard.komisioner')],
         ['key' => 'chart', 'label' => 'Grafik & Statistik', 'icon' => 'bar_chart', 'route' => route('admin.rekap.chart')],
         ['key' => 'dokumen', 'label' => 'Rekap Dokumen', 'icon' => 'folder_open', 'route' => route('dokumen.admin')],
@@ -370,7 +374,7 @@
         ['key' => 'dokumen', 'label' => 'Rekap Dokumen', 'icon' => 'folder_open', 'route' => route('dokumen.admin')],
         ['key' => 'rekap', 'label' => 'Rekapitulasi Data', 'icon' => 'analytics', 'route' => route('admin.rekap.index')],
         ['key' => 'setup', 'label' => 'Setup Data Pemilu', 'icon' => 'settings', 'route' => route('admin.setup.index')],
-    ];
+    ]);
 @endphp
 
 <input id="admin-mobile-menu" type="checkbox" class="hidden">

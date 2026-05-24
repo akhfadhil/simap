@@ -6,6 +6,13 @@ use App\Models\Desa;
 use App\Models\Dokumen;
 use App\Models\Kecamatan;
 use App\Models\PemiluSetting;
+use App\Models\RekapCaleg;
+use App\Models\RekapCalegSuara;
+use App\Models\RekapHeader;
+use App\Models\RekapPartai;
+use App\Models\RekapPartaiSuara;
+use App\Models\RekapPpwpCalon;
+use App\Models\RekapPpwpSuara;
 use App\Models\Tps;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -271,6 +278,30 @@ class RoleHierarchyAccessTest extends TestCase
             ->assertSee('operator_admin');
     }
 
+    public function test_admin_can_create_party_user_from_user_management(): void
+    {
+        $partai = RekapPartai::create(['jenis' => 'dpr_ri', 'nomor_urut' => 3, 'nama_partai' => 'Partai C']);
+
+        $this->actingAs($this->admin)
+            ->post(route('admin.users.store'), [
+                'name' => 'Operator Partai C',
+                'username' => 'partai_c',
+                'password' => 'partai123',
+                'role' => 'partai',
+                'partai_id' => $partai->id,
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('users', [
+            'username' => 'partai_c',
+            'role' => 'partai',
+            'partai_id' => $partai->id,
+            'kecamatan_id' => null,
+            'desa_id' => null,
+            'tps_id' => null,
+        ]);
+    }
+
     public function test_admin_cannot_delete_current_account(): void
     {
         $this->actingAs($this->admin)
@@ -282,6 +313,77 @@ class RoleHierarchyAccessTest extends TestCase
             'id' => $this->admin->id,
             'role' => 'admin',
         ]);
+    }
+
+    public function test_partai_login_only_sees_own_party_for_legislative_chart(): void
+    {
+        PemiluSetting::create(['jenis' => 'dpr_ri', 'is_active' => true]);
+
+        $partaiA = RekapPartai::create(['jenis' => 'dpr_ri', 'nomor_urut' => 1, 'nama_partai' => 'Partai A']);
+        $partaiB = RekapPartai::create(['jenis' => 'dpr_ri', 'nomor_urut' => 2, 'nama_partai' => 'Partai B']);
+        $calegA = RekapCaleg::create(['partai_id' => $partaiA->id, 'nomor_urut' => 1, 'nama_caleg' => 'Caleg A']);
+        $calegB = RekapCaleg::create(['partai_id' => $partaiB->id, 'nomor_urut' => 1, 'nama_caleg' => 'Caleg B']);
+        $partaiUser = $this->user('partai', ['partai_id' => $partaiA->id]);
+
+        $rekap = RekapHeader::create([
+            'tps_id' => $this->tpsA->id,
+            'jenis' => 'dpr_ri',
+            'status' => 'final',
+            'dpt_lk' => 10,
+            'dpt_pr' => 10,
+            'pengguna_dpt_lk' => 8,
+            'pengguna_dpt_pr' => 7,
+            'suara_tidak_sah' => 1,
+            'diinput_oleh' => $this->kppsA->id,
+        ]);
+        RekapPartaiSuara::create(['rekap_id' => $rekap->id, 'partai_id' => $partaiA->id, 'suara' => 10]);
+        RekapPartaiSuara::create(['rekap_id' => $rekap->id, 'partai_id' => $partaiB->id, 'suara' => 20]);
+        RekapCalegSuara::create(['rekap_id' => $rekap->id, 'caleg_id' => $calegA->id, 'suara' => 5]);
+        RekapCalegSuara::create(['rekap_id' => $rekap->id, 'caleg_id' => $calegB->id, 'suara' => 15]);
+
+        $this->post(route('partai.login.post'), [
+            'username' => $partaiUser->username,
+            'password' => 'password',
+        ])->assertRedirect(route('dashboard.partai'));
+
+        $payload = $this->actingAs($partaiUser)
+            ->getJson(route('admin.rekap.chart.data', ['jenis' => 'dpr_ri', 'level' => 'kabupaten']))
+            ->assertOk()
+            ->json();
+
+        $this->assertSame(['Partai A'], $payload['labels']);
+        $this->assertSame('Caleg A', $payload['candidate_rank'][0]['label']);
+        $this->assertStringNotContainsString('Partai B', json_encode($payload));
+        $this->assertStringNotContainsString('Caleg B', json_encode($payload));
+    }
+
+    public function test_partai_login_still_sees_all_ppwp_candidates(): void
+    {
+        $partaiA = RekapPartai::create(['jenis' => 'dpr_ri', 'nomor_urut' => 1, 'nama_partai' => 'Partai A']);
+        $partaiUser = $this->user('partai', ['partai_id' => $partaiA->id]);
+        $calonA = RekapPpwpCalon::create(['nomor_urut' => 1, 'nama_paslon' => 'Paslon A']);
+        $calonB = RekapPpwpCalon::create(['nomor_urut' => 2, 'nama_paslon' => 'Paslon B']);
+
+        $rekap = RekapHeader::create([
+            'tps_id' => $this->tpsA->id,
+            'jenis' => 'ppwp',
+            'status' => 'final',
+            'dpt_lk' => 10,
+            'dpt_pr' => 10,
+            'pengguna_dpt_lk' => 8,
+            'pengguna_dpt_pr' => 7,
+            'suara_tidak_sah' => 1,
+            'diinput_oleh' => $this->kppsA->id,
+        ]);
+        RekapPpwpSuara::create(['rekap_id' => $rekap->id, 'calon_id' => $calonA->id, 'suara' => 10]);
+        RekapPpwpSuara::create(['rekap_id' => $rekap->id, 'calon_id' => $calonB->id, 'suara' => 20]);
+
+        $payload = $this->actingAs($partaiUser)
+            ->getJson(route('admin.rekap.chart.data', ['jenis' => 'ppwp', 'level' => 'kabupaten']))
+            ->assertOk()
+            ->json();
+
+        $this->assertSame(['Paslon A', 'Paslon B'], $payload['labels']);
     }
 
     private function user(string $role, array $attributes = []): User

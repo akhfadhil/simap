@@ -18,7 +18,7 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name', 'username', 'role', 'email', 'password',
-        'kecamatan_id', 'desa_id', 'tps_id',
+        'kecamatan_id', 'desa_id', 'tps_id', 'partai_id',
     ];
 
     /**
@@ -46,6 +46,7 @@ class User extends Authenticatable
         return match($this->role) {
             'admin' => '#E63946',
             'komisioner' => '#2563EB',
+            'partai' => '#7C3AED',
             'ppk'   => '#F4A261',
             'pps'   => '#2EC4B6',
             'kpps'  => '#A8DADC',
@@ -63,4 +64,6 @@ class User extends Authenticatable
     public function desa()      { return $this->belongsTo(Desa::class); }
     // Relasi TPS untuk user KPPS.
     public function tps()       { return $this->belongsTo(Tps::class); }
+    // Relasi partai untuk akun partai.
+    public function partai()    { return $this->belongsTo(RekapPartai::class, 'partai_id'); }
 }

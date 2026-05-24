@@ -251,7 +251,7 @@
         <div>
             <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-2 font-semibold">// Admin — Pengguna</p>
             <h1 class="font-display text-4xl tracking-[2px] admin-text">MANAJEMEN PENGGUNA</h1>
-            <p class="dark:text-gray-400 text-gray-500 text-sm mt-1">Kelola akun Admin/Operator, Komisioner, PPK, PPS, dan KPPS.</p>
+            <p class="dark:text-gray-400 text-gray-500 text-sm mt-1">Kelola akun Admin/Operator, Komisioner, Partai, PPK, PPS, dan KPPS.</p>
         </div>
         <div class="flex items-center gap-2 flex-wrap justify-end">
             <a href="{{ route('admin.users.bulk') }}"
@@ -287,6 +287,7 @@
             <option value="">Semua Role</option>
             <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>Admin/Operator</option>
             <option value="komisioner" {{ request('role') == 'komisioner' ? 'selected' : '' }}>Komisioner</option>
+            <option value="partai" {{ request('role') == 'partai' ? 'selected' : '' }}>Partai</option>
             <option value="ppk"  {{ request('role') == 'ppk'  ? 'selected' : '' }}>PPK</option>
             <option value="pps"  {{ request('role') == 'pps'  ? 'selected' : '' }}>PPS</option>
             <option value="kpps" {{ request('role') == 'kpps' ? 'selected' : '' }}>KPPS</option>
@@ -356,6 +357,7 @@
         $roleColor = match($user->role) {
             'admin' => '#DC2626',
             'komisioner' => '#2563EB',
+            'partai' => '#7C3AED',
             'ppk'  => '#F4A261',
             'pps'  => '#2EC4B6',
             'kpps' => '#A8DADC',
@@ -365,6 +367,7 @@
             'ppk'  => $user->kecamatan->nama ?? '-',
             'pps'  => ($user->desa->nama ?? '-') . ' / ' . ($user->desa->kecamatan->nama ?? '-'),
             'kpps' => ($user->tps->nama ?? '-') . ' / ' . ($user->tps->desa->nama ?? '-'),
+            'partai' => ($user->partai?->nomor_urut ? $user->partai->nomor_urut . '. ' : '') . ($user->partai?->nama_partai ?? '-'),
             default => '-'
         };
     @endphp
@@ -512,6 +515,7 @@ $labelClass = "block text-xs font-semibold dark:text-gray-400 text-gray-600 uppe
                     <option value="">- Pilih Role -</option>
                     <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin/Operator - Akses penuh sistem</option>
                     <option value="komisioner" {{ old('role') == 'komisioner' ? 'selected' : '' }}>Komisioner - Akses baca data kabupaten</option>
+                    <option value="partai" {{ old('role') == 'partai' ? 'selected' : '' }}>Partai - Grafik dan rekap partai</option>
                     <option value="ppk"  {{ old('role') == 'ppk'  ? 'selected' : '' }}>PPK — Panitia Pemilihan Kecamatan</option>
                     <option value="pps"  {{ old('role') == 'pps'  ? 'selected' : '' }}>PPS — Panitia Pemungutan Suara</option>
                     <option value="kpps" {{ old('role') == 'kpps' ? 'selected' : '' }}>KPPS — Kelompok Penyelenggara</option>
@@ -519,6 +523,15 @@ $labelClass = "block text-xs font-semibold dark:text-gray-400 text-gray-600 uppe
             </div>
 
             <div id="tambah-wilayah" class="space-y-4 hidden">
+                <div id="tambah-field-partai" class="hidden">
+                    <label class="{{ $labelClass }}">Partai</label>
+                    <select name="partai_id" class="{{ $inputClass }}">
+                        <option value="">- Pilih Partai -</option>
+                        @foreach($partais as $partai)
+                        <option value="{{ $partai->id }}">{{ $partai->nomor_urut }}. {{ $partai->nama_partai }}</option>
+                        @endforeach
+                    </select>
+                </div>
                 <div id="tambah-field-kecamatan" class="hidden">
                     <label class="{{ $labelClass }}">Kecamatan</label>
                     <select name="kecamatan_id" class="{{ $inputClass }}">
@@ -611,6 +624,15 @@ $labelClass = "block text-xs font-semibold dark:text-gray-400 text-gray-600 uppe
                        class="w-full dark:bg-gray-900 bg-gray-100 border dark:border-gray-700 border-gray-200 dark:text-gray-500 text-gray-400 px-4 py-2.5 text-sm rounded-lg cursor-not-allowed" readonly>
             </div>
 
+            <div id="edit-wilayah-partai" class="hidden">
+                <label class="{{ $labelClass }}">Partai</label>
+                <select name="partai_id" id="edit-partai" class="{{ $inputClass }}">
+                    @foreach($partais as $partai)
+                    <option value="{{ $partai->id }}">{{ $partai->nomor_urut }}. {{ $partai->nama_partai }}</option>
+                    @endforeach
+                </select>
+            </div>
+
             <div id="edit-wilayah-ppk" class="hidden">
                 <label class="{{ $labelClass }}">Kecamatan</label>
                 <select name="kecamatan_id" id="edit-kecamatan" class="{{ $inputClass }}">
@@ -690,13 +712,14 @@ $labelClass = "block text-xs font-semibold dark:text-gray-400 text-gray-600 uppe
     function updateWilayahField(prefix) {
         const role = document.getElementById(prefix + '-role').value;
         const wrap = document.getElementById(prefix + '-wilayah');
-        ['kecamatan','kecamatan-pps','field-desa','kecamatan-kpps','field-desa-kpps','field-tps'].forEach(f => {
+        ['partai','kecamatan','kecamatan-pps','field-desa','kecamatan-kpps','field-desa-kpps','field-tps'].forEach(f => {
             const el = document.getElementById(prefix + '-field-' + f);
             if (el) el.classList.add('hidden');
         });
         if (!role || role === 'admin' || role === 'komisioner') { wrap.classList.add('hidden'); return; }
         wrap.classList.remove('hidden');
-        if (role === 'ppk')       document.getElementById(prefix + '-field-kecamatan').classList.remove('hidden');
+        if (role === 'partai')    document.getElementById(prefix + '-field-partai').classList.remove('hidden');
+        else if (role === 'ppk')  document.getElementById(prefix + '-field-kecamatan').classList.remove('hidden');
         else if (role === 'pps')  document.getElementById(prefix + '-field-kecamatan-pps').classList.remove('hidden');
         else if (role === 'kpps') document.getElementById(prefix + '-field-kecamatan-kpps').classList.remove('hidden');
     }
@@ -730,8 +753,11 @@ $labelClass = "block text-xs font-semibold dark:text-gray-400 text-gray-600 uppe
         document.getElementById('edit-username').value     = user.username;
         document.getElementById('edit-role-display').value = user.role.toUpperCase();
         document.getElementById('edit-form').action        = `/admin/users/${user.id}`;
-        ['ppk','pps','kpps'].forEach(r => document.getElementById('edit-wilayah-' + r).classList.add('hidden'));
-        if (user.role === 'ppk') {
+        ['partai','ppk','pps','kpps'].forEach(r => document.getElementById('edit-wilayah-' + r).classList.add('hidden'));
+        if (user.role === 'partai') {
+            document.getElementById('edit-wilayah-partai').classList.remove('hidden');
+            if (user.partai_id) document.getElementById('edit-partai').value = user.partai_id;
+        } else if (user.role === 'ppk') {
             document.getElementById('edit-wilayah-ppk').classList.remove('hidden');
             if (user.kecamatan_id) document.getElementById('edit-kecamatan').value = user.kecamatan_id;
         } else if (user.role === 'pps') {

@@ -8,6 +8,7 @@ use App\Models\Dapil;
 use App\Models\Tps;
 use App\Services\RekapAdminCache;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
@@ -188,18 +189,42 @@ class AdminController extends Controller
         if ($jenis === 'dpd')      return ['calons' => \App\Models\RekapDpdCalon::orderBy('nomor_urut')->get()];
 
         $partais = \App\Models\RekapPartai::with('calegs')->where('jenis', $jenis);
+        $partaiNomor = $this->partaiScopeNomor($jenis);
 
         if ($jenis === 'dprd_kab' && $dapilId) {
             $partais->where('dapil_id', $dapilId);
         }
 
+        if ($partaiNomor) {
+            $partais->where('nomor_urut', $partaiNomor);
+        }
+
         return ['partais' => $partais->orderBy('nomor_urut')->get()];
+    }
+
+    // Mengambil nomor partai untuk akun partai pada jenis legislatif.
+    private function partaiScopeNomor(string $jenis): ?int
+    {
+        if (!Auth::check() || Auth::user()->role !== 'partai') {
+            return null;
+        }
+
+        if (!in_array($jenis, ['dpr_ri', 'dprd_prov', 'dprd_kab'], true)) {
+            return null;
+        }
+
+        $partai = Auth::user()->partai;
+        abort_if(!$partai, 403, 'Akun partai belum dihubungkan ke master partai.');
+
+        return (int) $partai->nomor_urut;
     }
 
     // Menghitung agregat suara per kecamatan.
     private function aggregateSuaraByKecamatan(string $jenis, ?int $dapilId = null): array
     {
-        return RekapAdminCache::rememberAggregate($jenis, $dapilId, function () use ($jenis, $dapilId) {
+        $partaiNomor = $this->partaiScopeNomor($jenis);
+
+        return RekapAdminCache::rememberAggregate($jenis, $dapilId, function () use ($jenis, $dapilId, $partaiNomor) {
         $result = [
             'calons' => [],
             'partais' => [],
@@ -236,6 +261,7 @@ class AdminController extends Controller
         $partaiRows = $this->baseSuaraAggregateQuery('rekap_partai_suaras', $jenis, $dapilId)
             ->join('rekap_partais as p', 'p.id', '=', 's.partai_id')
             ->where('p.jenis', $jenis)
+            ->when($partaiNomor, fn($query) => $query->where('p.nomor_urut', $partaiNomor))
             ->when($jenis === 'dprd_kab' && $dapilId, fn($query) => $query->where('p.dapil_id', $dapilId))
             ->select('k.id as kecamatan_id', 's.partai_id', DB::raw('SUM(s.suara) as total_suara'))
             ->groupBy('k.id', 's.partai_id')
@@ -256,6 +282,7 @@ class AdminController extends Controller
             ->join('rekap_calegs as c', 'c.id', '=', 's.caleg_id')
             ->join('rekap_partais as p', 'p.id', '=', 'c.partai_id')
             ->where('p.jenis', $jenis)
+            ->when($partaiNomor, fn($query) => $query->where('p.nomor_urut', $partaiNomor))
             ->when($jenis === 'dprd_kab' && $dapilId, fn($query) => $query->where('p.dapil_id', $dapilId))
             ->select('k.id as kecamatan_id', 's.caleg_id', 'p.id as partai_id', DB::raw('SUM(s.suara) as total_suara'))
             ->groupBy('k.id', 's.caleg_id', 'p.id')
@@ -274,7 +301,7 @@ class AdminController extends Controller
         }
 
         return $result;
-        });
+        }, ['partai_nomor' => $partaiNomor]);
     }
 
     // Membentuk query dasar agregasi suara.
@@ -292,14 +319,18 @@ class AdminController extends Controller
     // Mengambil semua master data untuk kebutuhan export.
     private function getAllMaster(): array
     {
+        $partaiNomorDprRi = $this->partaiScopeNomor('dpr_ri');
+        $partaiNomorDprdProv = $this->partaiScopeNomor('dprd_prov');
+        $partaiNomorDprdKab = $this->partaiScopeNomor('dprd_kab');
+
         return [
             'ppwp'      => ['calons'  => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get()],
             'gubernur'  => ['calons'  => \App\Models\RekapGubernurCalon::orderBy('nomor_urut')->get()],
             'bupati'    => ['calons'  => \App\Models\RekapBupatiCalon::orderBy('nomor_urut')->get()],
             'dpd'       => ['calons'  => \App\Models\RekapDpdCalon::orderBy('nomor_urut')->get()],
-            'dpr_ri'    => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis','dpr_ri')->orderBy('nomor_urut')->get()],
-            'dprd_prov' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis','dprd_prov')->orderBy('nomor_urut')->get()],
-            'dprd_kab'  => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis','dprd_kab')->orderBy('nomor_urut')->get()],
+            'dpr_ri'    => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis','dpr_ri')->when($partaiNomorDprRi, fn($q) => $q->where('nomor_urut', $partaiNomorDprRi))->orderBy('nomor_urut')->get()],
+            'dprd_prov' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis','dprd_prov')->when($partaiNomorDprdProv, fn($q) => $q->where('nomor_urut', $partaiNomorDprdProv))->orderBy('nomor_urut')->get()],
+            'dprd_kab'  => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis','dprd_kab')->when($partaiNomorDprdKab, fn($q) => $q->where('nomor_urut', $partaiNomorDprdKab))->orderBy('nomor_urut')->get()],
         ];
     }
 
@@ -630,6 +661,8 @@ class AdminController extends Controller
     // Mengambil data chart untuk pemilihan legislatif.
     private function chartLegislatifData(string $jenis, string $level, $kecId, $desaId, $tpsId, $dapilId, ?int $activeDapilId)
     {
+        $partaiNomor = $this->partaiScopeNomor($jenis);
+
         return response()->json(RekapAdminCache::rememberChart([
             'version' => 2,
             'jenis' => $jenis,
@@ -639,6 +672,7 @@ class AdminController extends Controller
             'tps_id' => $tpsId,
             'dapil_id' => $dapilId,
             'active_dapil_id' => $activeDapilId,
+            'partai_nomor' => $partaiNomor,
         ], function () use ($jenis, $level, $kecId, $desaId, $tpsId, $dapilId, $activeDapilId) {
         $master = $this->getMaster($jenis, $activeDapilId);
         $partais = $master['partais'];

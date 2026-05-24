@@ -31,6 +31,7 @@
         .role-kpps  { background: rgba(168,218,220,0.15); color: #5BA4CF; border: 1px solid rgba(168,218,220,0.35); }
         .role-admin { background: rgba(220,38,38,0.15); color: #DC2626; border: 1px solid rgba(220,38,38,0.35); }
         .role-komisioner { background: rgba(37,99,235,0.15); color: #2563EB; border: 1px solid rgba(37,99,235,0.35); }
+        .role-partai { background: rgba(124,58,237,0.15); color: #7C3AED; border: 1px solid rgba(124,58,237,0.35); }
     </style>
 </head>
 

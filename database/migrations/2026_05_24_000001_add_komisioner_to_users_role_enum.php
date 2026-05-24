@@ -11,7 +11,7 @@ return new class extends Migration
             return;
         }
 
-        DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('admin','komisioner','ppk','pps','kpps') NOT NULL");
+        DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('admin','komisioner','partai','ppk','pps','kpps') NOT NULL");
     }
 
     public function down(): void

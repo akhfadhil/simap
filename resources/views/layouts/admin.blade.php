@@ -102,9 +102,13 @@
 @php
     $adminActive = trim($__env->yieldContent('admin_active', ''));
     $isKomisioner = Auth::user()->role === 'komisioner';
-    $roleLabel = $isKomisioner ? 'Komisioner' : 'Administrator';
-    $userRoleLabel = $isKomisioner ? 'Komisioner' : 'Admin Utama';
-    $menus = $isKomisioner ? [
+    $isPartai = Auth::user()->role === 'partai';
+    $roleLabel = $isPartai ? 'Partai' : ($isKomisioner ? 'Komisioner' : 'Administrator');
+    $userRoleLabel = $isPartai ? (Auth::user()->partai?->nama_partai ?? 'Akun Partai') : ($isKomisioner ? 'Komisioner' : 'Admin Utama');
+    $menus = $isPartai ? [
+        ['key' => 'chart', 'label' => 'Grafik & Statistik', 'icon' => 'bar_chart', 'route' => route('admin.rekap.chart')],
+        ['key' => 'rekap', 'label' => 'Rekapitulasi Data', 'icon' => 'analytics', 'route' => route('admin.rekap.index')],
+    ] : ($isKomisioner ? [
         ['key' => 'dashboard', 'label' => 'Beranda', 'icon' => 'dashboard', 'route' => route('dashboard.komisioner')],
         ['key' => 'chart', 'label' => 'Grafik & Statistik', 'icon' => 'bar_chart', 'route' => route('admin.rekap.chart')],
         ['key' => 'dokumen', 'label' => 'Rekap Dokumen', 'icon' => 'folder_open', 'route' => route('dokumen.admin')],
@@ -119,7 +123,7 @@
         ['key' => 'dokumen', 'label' => 'Rekap Dokumen', 'icon' => 'folder_open', 'route' => route('dokumen.admin')],
         ['key' => 'rekap', 'label' => 'Rekapitulasi Data', 'icon' => 'analytics', 'route' => route('admin.rekap.index')],
         ['key' => 'setup', 'label' => 'Setup Data Pemilu', 'icon' => 'settings', 'route' => route('admin.setup.index')],
-    ];
+    ]);
 @endphp
 
 <div class="admin-grid"></div>
