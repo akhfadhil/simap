@@ -94,6 +94,14 @@
             {{-- Divider --}}
             <div class="w-px h-6 dark:bg-gray-700 bg-gray-200"></div>
 
+            <a href="{{ route('password.edit') }}"
+               class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium dark:text-gray-400 text-gray-500 dark:hover:bg-gray-800 hover:bg-gray-100 hover:text-red-500 dark:hover:text-red-400 transition">
+                <span class="hidden sm:inline">Password</span>
+            </a>
+
+            {{-- Divider --}}
+            <div class="w-px h-6 dark:bg-gray-700 bg-gray-200"></div>
+
             {{-- Logout --}}
             <form method="POST" action="{{ route('logout') }}">
                 @csrf

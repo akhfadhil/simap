@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AccountController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DokumenController;
 use App\Http\Controllers\PpkController;
@@ -18,6 +19,8 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // ── Protected ─────────────────────────────────────────────────
 Route::middleware('auth')->group(function () {
+    Route::get('/password', [AccountController::class, 'editPassword'])->name('password.edit');
+    Route::post('/password', [AccountController::class, 'updatePassword'])->name('password.update');
 
     // Dashboard
     Route::get('/dashboard/admin', [DashboardController::class, 'admin'])->name('dashboard.admin');
@@ -82,6 +85,9 @@ Route::middleware('auth')->group(function () {
         Route::resource('kecamatan', KecamatanController::class)->only(['index', 'store', 'update', 'destroy']);
         Route::resource('desa',      DesaController::class)->only(['index', 'store', 'update', 'destroy']);
         Route::resource('tps',       TpsController::class)->only(['index', 'store', 'update', 'destroy']);
+        Route::get('users/bulk',     [UserManagementController::class, 'bulk'])->name('users.bulk');
+        Route::post('users/bulk',    [UserManagementController::class, 'bulkStore'])->name('users.bulk.store');
+        Route::get('users/export',   [UserManagementController::class, 'export'])->name('users.export');
         Route::resource('users',     UserManagementController::class)->only(['index', 'store', 'update', 'destroy']);
 
         Route::get('/kecamatan/{kecamatan}/view', [DashboardController::class, 'viewAsPpk'])->name('kecamatan.view');

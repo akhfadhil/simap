@@ -167,6 +167,10 @@
         </nav>
 
         <div class="p-4 mt-auto border-t admin-border">
+            <a href="{{ route('password.edit') }}" class="w-full flex items-center gap-4 admin-muted px-6 py-3 hover:text-[#e63946] transition">
+                <span class="material-symbols-outlined">lock_reset</span>
+                <span>Ubah Password</span>
+            </a>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit" class="w-full flex items-center gap-4 text-[#ff6f6f] px-6 py-3 hover:text-[#e63946] transition">

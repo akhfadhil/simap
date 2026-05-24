@@ -155,6 +155,10 @@
     </nav>
 
     <div class="p-4 mt-auto border-t admin-border">
+        <a href="{{ route('password.edit') }}" class="w-full flex items-center gap-4 admin-muted px-6 py-3 hover:text-[#e63946] transition">
+            <span class="material-symbols-outlined">lock_reset</span>
+            <span>Ubah Password</span>
+        </a>
         <form method="POST" action="{{ route('logout') }}">
             @csrf
             <button type="submit" class="w-full flex items-center gap-4 text-[#ff6f6f] px-6 py-3 hover:text-[#e63946] transition">
@@ -189,6 +193,10 @@
         </nav>
 
         <div class="p-4 mt-auto border-t admin-border">
+            <a href="{{ route('password.edit') }}" class="w-full flex items-center gap-4 admin-muted px-6 py-3 hover:text-[#e63946] transition">
+                <span class="material-symbols-outlined">lock_reset</span>
+                <span>Ubah Password</span>
+            </a>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit" class="w-full flex items-center gap-4 text-[#ff6f6f] px-6 py-3 hover:text-[#e63946] transition">
@@ -245,10 +253,16 @@
             <h1 class="font-display text-4xl tracking-[2px] admin-text">MANAJEMEN PENGGUNA</h1>
             <p class="dark:text-gray-400 text-gray-500 text-sm mt-1">Kelola akun PPK, PPS, dan KPPS.</p>
         </div>
-        <button onclick="openModal('tambah')"
-                class="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold px-5 py-2.5 rounded-lg transition mt-1">
-            + Tambah User
-        </button>
+        <div class="flex items-center gap-2 flex-wrap justify-end">
+            <a href="{{ route('admin.users.bulk') }}"
+               class="flex items-center gap-2 border dark:border-gray-700 border-gray-300 dark:text-gray-300 text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-xs font-semibold px-5 py-2.5 rounded-lg transition mt-1">
+                Bulk Input
+            </a>
+            <button onclick="openModal('tambah')"
+                    class="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold px-5 py-2.5 rounded-lg transition mt-1">
+                + Tambah User
+            </button>
+        </div>
     </div>
 </div>
 
@@ -304,13 +318,28 @@
            class="text-xs dark:text-gray-500 text-gray-400 hover:text-red-500 transition">× Reset</a>
         @endif
 
+        @if($usersLoaded)
+        <a href="{{ route('admin.users.export', request()->only('role', 'kecamatan_id', 'desa_id')) }}"
+           class="px-4 py-2.5 rounded-lg text-xs font-semibold border border-green-500 text-green-600 dark:text-green-400 hover:bg-green-500 hover:text-white transition">
+            Export CSV
+        </a>
+        @endif
+
         <span class="text-[10px] dark:text-gray-500 text-gray-400 font-semibold uppercase tracking-wider">
-            {{ $users->total() }} User
+            {{ $usersLoaded ? $users->total() . ' User' : 'Pilih filter untuk memuat user' }}
         </span>
     </form>
 </div>
 
 {{-- Tabel --}}
+@if(!$usersLoaded)
+<div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm p-8 text-center mb-8">
+    <p class="text-sm font-semibold dark:text-gray-100 text-gray-800">Daftar user tidak dimuat otomatis</p>
+    <p class="text-xs dark:text-gray-500 text-gray-400 mt-1">
+        Pilih role, kecamatan, atau desa untuk menampilkan user. Ini menjaga halaman tetap ringan saat jumlah user besar.
+    </p>
+</div>
+@else
 <div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm overflow-x-auto">
     <div class="grid grid-cols-12 min-w-[860px] px-6 py-3 border-b dark:border-gray-700 border-gray-200">
         <div class="col-span-3 text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Nama</div>
@@ -371,9 +400,10 @@
     </div>
     @endforelse
 </div>
+@endif
 
 {{-- Pagination --}}
-@if($users->hasPages())
+@if($usersLoaded && $users->hasPages())
 <div class="flex items-center justify-between mt-4 flex-wrap gap-3">
     <p class="text-xs dark:text-gray-500 text-gray-400">
         Menampilkan <span class="font-semibold dark:text-gray-300 text-gray-600">{{ $users->firstItem() }}–{{ $users->lastItem() }}</span>
@@ -469,8 +499,8 @@ $labelClass = "block text-xs font-semibold dark:text-gray-400 text-gray-600 uppe
                 <input type="text" name="username" value="{{ old('username') }}" placeholder="cth: ppk_andir" class="{{ $inputClass }}">
             </div>
             <div>
-                <label class="{{ $labelClass }}">Password</label>
-                <input type="password" name="password" placeholder="Min. 6 karakter" class="{{ $inputClass }}">
+                <label class="{{ $labelClass }}">Password <span class="dark:text-gray-600 text-gray-400 normal-case tracking-normal font-normal">(kosong = username)</span></label>
+                <input type="password" name="password" placeholder="Opsional, min. 6 karakter" class="{{ $inputClass }}">
             </div>
             <div>
                 <label class="{{ $labelClass }}">Role</label>
