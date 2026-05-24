@@ -45,7 +45,7 @@
     {{-- Akun Demo --}}
     <!-- <div class="dark:bg-gray-800 bg-white border dark:border-gray-700 border-gray-200 rounded-xl p-4 mt-4 shadow-sm">
         <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">// Akun Demo</p>
-        @foreach(['admin'=>'admin123','ppk'=>'ppk123','pps'=>'pps123','kpps'=>'kpps123'] as $u => $p)
+        @foreach(['admin'=>'admin123','komisioner'=>'komisioner123','ppk'=>'ppk123','pps'=>'pps123','kpps'=>'kpps123'] as $u => $p)
         <div class="flex justify-between text-xs dark:text-gray-500 text-gray-400 py-1">
             <span class="uppercase font-semibold">{{ $u }}</span>
             <span class="dark:text-gray-400 text-gray-500">{{ $u }} / {{ $p }}</span>

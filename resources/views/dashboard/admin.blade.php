@@ -142,6 +142,9 @@
 
 @section('content')
 @php
+    $isKomisioner = Auth::user()->role === 'komisioner';
+    $roleLabel = $isKomisioner ? 'Komisioner' : 'Administrator';
+    $userRoleLabel = $isKomisioner ? 'Komisioner' : 'Admin Utama';
     $totalPengguna     = \App\Models\User::count();
     $totalTps          = \App\Models\Tps::count();
     $aktifJenis        = \App\Models\PemiluSetting::aktif();
@@ -163,7 +166,12 @@
                         ->count();
     $persenRekap       = $totalTps > 0 ? min(100, round(($totalRekapFinal / $totalTps) * 100)) : 0;
 
-    $menus = [
+    $menus = $isKomisioner ? [
+        ['label' => 'Beranda', 'icon' => 'dashboard', 'route' => route('dashboard.komisioner'), 'active' => true],
+        ['label' => 'Grafik & Statistik', 'icon' => 'bar_chart', 'route' => route('admin.rekap.chart')],
+        ['label' => 'Rekap Dokumen', 'icon' => 'folder_open', 'route' => route('dokumen.admin')],
+        ['label' => 'Rekapitulasi Data', 'icon' => 'analytics', 'route' => route('admin.rekap.index')],
+    ] : [
         ['label' => 'Beranda', 'icon' => 'dashboard', 'route' => route('dashboard.admin'), 'active' => true],
         ['label' => 'Pengguna', 'icon' => 'group', 'route' => route('admin.users.index')],
         ['label' => 'Grafik & Statistik', 'icon' => 'bar_chart', 'route' => route('admin.rekap.chart')],
@@ -187,7 +195,7 @@
             </div>
             <div>
                 <h1 class="admin-display admin-primary text-2xl leading-none">SIMAP</h1>
-                <span class="admin-mono admin-muted-soft text-[10px] uppercase tracking-widest">Administrator</span>
+                <span class="admin-mono admin-muted-soft text-[10px] uppercase tracking-widest">{{ $roleLabel }}</span>
             </div>
         </div>
         <label for="admin-mobile-menu" class="admin-icon-button cursor-pointer p-2">
@@ -229,7 +237,7 @@
                 <h1 class="admin-display admin-primary text-2xl leading-none">SIMAP</h1>
             </div>
             <div class="admin-primary-bg px-2 py-1 w-max rounded-sm">
-                <span class="admin-display admin-primary uppercase text-[10px] tracking-[.2em]">Administrator</span>
+                <span class="admin-display admin-primary uppercase text-[10px] tracking-[.2em]">{{ $roleLabel }}</span>
             </div>
         </div>
 
@@ -285,7 +293,7 @@
                 <div class="flex items-center gap-3">
                     <div class="text-right hidden sm:block">
                         <p class="admin-text text-xs font-bold leading-none">{{ strtoupper(Auth::user()->name) }}</p>
-                        <p class="admin-muted text-[10px] leading-none mt-1">Admin Utama</p>
+                        <p class="admin-muted text-[10px] leading-none mt-1">{{ $userRoleLabel }}</p>
                     </div>
                     <div class="w-8 h-8 rounded-full bg-[#e63946] flex items-center justify-center text-white font-bold text-xs">
                         {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
@@ -296,9 +304,11 @@
 
         <div class="p-4 lg:p-8 overflow-y-auto">
             <div class="mb-10 admin-stat" style="animation-delay: .1s">
-                <p class="admin-mono admin-muted-soft tracking-[.3em] text-xs mb-2">// ADMINISTRATOR</p>
+                <p class="admin-mono admin-muted-soft tracking-[.3em] text-xs mb-2">// {{ strtoupper($roleLabel) }}</p>
                 <h2 class="admin-display text-5xl lg:text-6xl admin-text leading-tight">DASHBOARD</h2>
-                <p class="admin-muted text-lg max-w-2xl mt-2">Kelola seluruh sistem, wilayah, pengguna, dan dokumen pemilu.</p>
+                <p class="admin-muted text-lg max-w-2xl mt-2">
+                    {{ $isKomisioner ? 'Pantau ringkasan dokumen, rekapitulasi, dan grafik pemilu seluruh kabupaten.' : 'Kelola seluruh sistem, wilayah, pengguna, dan dokumen pemilu.' }}
+                </p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-12">
@@ -362,7 +372,9 @@
     </main>
 </div>
 
+@unless($isKomisioner)
 <a href="{{ route('admin.users.index') }}" class="fixed bottom-8 right-8 w-14 h-14 bg-[#e63946] rounded-full flex items-center justify-center text-white shadow-[0_0_20px_rgba(230,57,70,.4)] hover:scale-110 active:scale-95 transition z-[100]" title="Tambah pengguna">
     <span class="material-symbols-outlined text-3xl">add</span>
 </a>
+@endunless
 @endsection

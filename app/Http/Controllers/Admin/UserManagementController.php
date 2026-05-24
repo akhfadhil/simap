@@ -76,7 +76,7 @@ class UserManagementController extends Controller
             'name'         => 'required|string|max:100',
             'username'     => 'required|string|unique:users|max:50',
             'password'     => 'nullable|string|min:6',
-            'role'         => 'required|in:ppk,pps,kpps',
+            'role'         => 'required|in:admin,komisioner,ppk,pps,kpps',
             'kecamatan_id' => 'required_if:role,ppk|nullable|exists:kecamatans,id',
             'desa_id'      => 'required_if:role,pps|nullable|exists:desas,id',
             'tps_id'       => 'required_if:role,kpps|nullable|exists:tps,id',
@@ -124,8 +124,16 @@ class UserManagementController extends Controller
     }
 
     // Menghapus user.
-    public function destroy(User $user)
+    public function destroy(Request $request, User $user)
     {
+        if ($request->user()->is($user)) {
+            return back()->with('error', 'Akun yang sedang dipakai tidak bisa dihapus.');
+        }
+
+        if ($user->role === 'admin' && User::where('role', 'admin')->count() <= 1) {
+            return back()->with('error', 'Minimal harus ada satu akun admin/operator.');
+        }
+
         $user->delete();
         return back()->with('success', 'User berhasil dihapus.');
     }
@@ -369,7 +377,6 @@ class UserManagementController extends Controller
     private function filteredUsers(Request $request)
     {
         return User::with('kecamatan', 'desa.kecamatan', 'tps.desa.kecamatan')
-            ->where('role', '!=', 'admin')
             ->when($request->filled('role'), fn($query) => $query->where('role', $request->role))
             ->when($request->filled('kecamatan_id'), function ($query) use ($request) {
                 $query->where(function ($query) use ($request) {

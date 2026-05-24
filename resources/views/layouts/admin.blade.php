@@ -101,7 +101,15 @@
 @section('content')
 @php
     $adminActive = trim($__env->yieldContent('admin_active', ''));
-    $menus = [
+    $isKomisioner = Auth::user()->role === 'komisioner';
+    $roleLabel = $isKomisioner ? 'Komisioner' : 'Administrator';
+    $userRoleLabel = $isKomisioner ? 'Komisioner' : 'Admin Utama';
+    $menus = $isKomisioner ? [
+        ['key' => 'dashboard', 'label' => 'Beranda', 'icon' => 'dashboard', 'route' => route('dashboard.komisioner')],
+        ['key' => 'chart', 'label' => 'Grafik & Statistik', 'icon' => 'bar_chart', 'route' => route('admin.rekap.chart')],
+        ['key' => 'dokumen', 'label' => 'Rekap Dokumen', 'icon' => 'folder_open', 'route' => route('dokumen.admin')],
+        ['key' => 'rekap', 'label' => 'Rekapitulasi Data', 'icon' => 'analytics', 'route' => route('admin.rekap.index')],
+    ] : [
         ['key' => 'dashboard', 'label' => 'Beranda', 'icon' => 'dashboard', 'route' => route('dashboard.admin')],
         ['key' => 'users', 'label' => 'Pengguna', 'icon' => 'group', 'route' => route('admin.users.index')],
         ['key' => 'chart', 'label' => 'Grafik & Statistik', 'icon' => 'bar_chart', 'route' => route('admin.rekap.chart')],
@@ -125,7 +133,7 @@
             </div>
             <div>
                 <h1 class="admin-display admin-primary text-2xl leading-none">SIMAP</h1>
-                <span class="admin-mono admin-muted-soft text-[10px] uppercase tracking-widest">Administrator</span>
+                <span class="admin-mono admin-muted-soft text-[10px] uppercase tracking-widest">{{ $roleLabel }}</span>
             </div>
         </div>
         <label for="admin-mobile-menu" class="admin-icon-button cursor-pointer p-2">
@@ -153,7 +161,7 @@
                 <h1 class="admin-display admin-primary text-2xl leading-none">SIMAP</h1>
             </div>
             <div class="admin-primary-bg px-2 py-1 w-max rounded-sm">
-                <span class="admin-display admin-primary uppercase text-[10px] tracking-[.2em]">Administrator</span>
+                <span class="admin-display admin-primary uppercase text-[10px] tracking-[.2em]">{{ $roleLabel }}</span>
             </div>
         </div>
 
@@ -209,7 +217,7 @@
                 <div class="flex items-center gap-3">
                     <div class="text-right hidden sm:block">
                         <p class="admin-text text-xs font-bold leading-none">{{ strtoupper(Auth::user()->name) }}</p>
-                        <p class="admin-muted text-[10px] leading-none mt-1">Admin Utama</p>
+                        <p class="admin-muted text-[10px] leading-none mt-1">{{ $userRoleLabel }}</p>
                     </div>
                     <div class="w-8 h-8 rounded-full bg-[#e63946] flex items-center justify-center text-white font-bold text-xs">
                         {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}

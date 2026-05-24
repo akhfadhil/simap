@@ -350,14 +350,14 @@ class DokumenController extends Controller
 
         if ($dokumen->level === 'kecamatan') {
             $allowed = match($user->role) {
-                'admin' => true,
+                'admin', 'komisioner' => true,
                 'ppk'   => $dokumen->kecamatan_id === $user->kecamatan_id,
                 default => false,
             };
         } else {
             $tps = Tps::with('desa')->findOrFail($dokumen->tps_id);
             $allowed = match($user->role) {
-                'admin' => true,
+                'admin', 'komisioner' => true,
                 'ppk'   => \App\Models\Desa::where('kecamatan_id', $user->kecamatan_id)
                                 ->where('id', $tps->desa_id)->exists(),
                 'pps'   => $tps->desa_id === $user->desa_id,

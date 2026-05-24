@@ -46,6 +46,7 @@
     $totalFinal  = $rekaps->where('status','final')->count();
     $totalRekap  = $rekaps->count();
     $showDetail  = request()->boolean('detail');
+    $canUnlockRekap = Auth::user()->role === 'admin';
     $detailBaseQuery = request()->except(['detail', 'detail_kecamatan_id']);
     $detailBaseUrl = route('admin.rekap.show', $jenis) . (count($detailBaseQuery) ? '?' . http_build_query($detailBaseQuery) : '');
 
@@ -564,10 +565,12 @@
                         @elseif($r->status === 'final')
                             <div class="flex flex-col items-center gap-1">
                                 <span class="text-[9px] px-2 py-1 rounded font-semibold bg-teal-500/20 text-teal-400 border border-teal-500/40">Final</span>
-                                <button onclick="openUnlockModal({{ $r->tps_id }}, '{{ addslashes($tps->nama) }}')"
-                                        class="text-[9px] px-2 py-0.5 rounded font-semibold border border-orange-400/40 text-orange-400 hover:bg-orange-400/10 transition whitespace-nowrap">
-                                    ↩ Buka
-                                </button>
+                                @if($canUnlockRekap)
+                                    <button onclick="openUnlockModal({{ $r->tps_id }}, '{{ addslashes($tps->nama) }}')"
+                                            class="text-[9px] px-2 py-0.5 rounded font-semibold border border-orange-400/40 text-orange-400 hover:bg-orange-400/10 transition whitespace-nowrap">
+                                        ↩ Buka
+                                    </button>
+                                @endif
                             </div>
                         @else <span class="text-[9px] px-2 py-1 rounded font-semibold bg-orange-400/20 text-orange-400 border border-orange-400/40">Draft</span>
                         @endif
@@ -648,6 +651,7 @@
     </div>
 </div>
 
+@if($canUnlockRekap)
 {{-- Modal Unlock Rekap --}}
 <div id="modal-unlock" class="hidden fixed inset-0 z-[999] flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeUnlockModal()"></div>
@@ -680,6 +684,7 @@
         </form>
     </div>
 </div>
+@endif
 
 @push('scripts')
 <script>
@@ -782,6 +787,7 @@
     }
 
     function openUnlockModal(tpsId, tpsNama) {
+        if (!document.getElementById('unlock-form')) return;
         document.getElementById('unlock-label').textContent =
             'Status rekap ' + tpsNama + ' akan dikembalikan ke Draft dan KPPS dapat mengedit kembali.';
         document.getElementById('unlock-form').action =
@@ -790,6 +796,7 @@
         document.body.style.overflow = 'hidden';
     }
     function closeUnlockModal() {
+        if (!document.getElementById('modal-unlock')) return;
         document.getElementById('modal-unlock').classList.add('hidden');
         document.body.style.overflow = '';
     }

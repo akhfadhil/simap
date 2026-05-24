@@ -352,7 +352,15 @@
     $defaultJenis = collect(\App\Models\RekapHeader::JENIS_LABELS)
         ->keys()
         ->first(fn ($key) => in_array($key, $aktifJenis));
-    $adminMenus = [
+    $isKomisioner = Auth::user()->role === 'komisioner';
+    $roleLabel = $isKomisioner ? 'Komisioner' : 'Administrator';
+    $homeRoute = route('dashboard.' . Auth::user()->role);
+    $adminMenus = $isKomisioner ? [
+        ['key' => 'dashboard', 'label' => 'Beranda', 'icon' => 'dashboard', 'route' => route('dashboard.komisioner')],
+        ['key' => 'chart', 'label' => 'Grafik & Statistik', 'icon' => 'bar_chart', 'route' => route('admin.rekap.chart')],
+        ['key' => 'dokumen', 'label' => 'Rekap Dokumen', 'icon' => 'folder_open', 'route' => route('dokumen.admin')],
+        ['key' => 'rekap', 'label' => 'Rekapitulasi Data', 'icon' => 'analytics', 'route' => route('admin.rekap.index')],
+    ] : [
         ['key' => 'dashboard', 'label' => 'Beranda', 'icon' => 'dashboard', 'route' => route('dashboard.admin')],
         ['key' => 'users', 'label' => 'Pengguna', 'icon' => 'group', 'route' => route('admin.users.index')],
         ['key' => 'chart', 'label' => 'Grafik & Statistik', 'icon' => 'bar_chart', 'route' => route('admin.rekap.chart')],
@@ -375,7 +383,7 @@
             </div>
             <div>
                 <p class="text-lg font-extrabold text-[var(--primary)] leading-none">SIMAP</p>
-                <p class="font-mono-data text-[10px] uppercase tracking-widest text-slate-500 mt-1">Administrator</p>
+                <p class="font-mono-data text-[10px] uppercase tracking-widest text-slate-500 mt-1">{{ $roleLabel }}</p>
             </div>
         </div>
         <label for="admin-mobile-menu" class="cursor-pointer p-2 text-slate-500 hover:text-red-600">
@@ -398,7 +406,7 @@
             <label for="admin-mobile-menu" class="md:hidden cursor-pointer -ml-2 p-2 text-slate-500 hover:text-red-600">
                 <span class="material-symbols-outlined text-3xl">menu</span>
             </label>
-            <a href="{{ route('dashboard.admin') }}" class="w-10 h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center overflow-hidden shrink-0">
+            <a href="{{ $homeRoute }}" class="w-10 h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center overflow-hidden shrink-0">
                 <img src="{{ asset('images/logo-kpu.png') }}" alt="KPU" class="w-8 h-8 object-contain">
             </a>
             <div class="min-w-0">
@@ -430,7 +438,7 @@
                 </div>
                 <p class="text-xl font-extrabold text-[var(--primary)] leading-none">SIMAP</p>
             </div>
-            <span class="font-mono-data text-[10px] uppercase tracking-widest text-red-600 bg-red-50 px-2 py-1 rounded">Administrator</span>
+            <span class="font-mono-data text-[10px] uppercase tracking-widest text-red-600 bg-red-50 px-2 py-1 rounded">{{ $roleLabel }}</span>
         </div>
         <nav class="flex-1 py-4">
             @foreach($adminMenus as $menu)

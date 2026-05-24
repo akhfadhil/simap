@@ -18,6 +18,15 @@ class DashboardController extends Controller
         return view('dashboard.admin', ['electionSummary' => $summary->forUser(Auth::user())]);
     }
 
+    // Menampilkan dashboard komisioner kabupaten.
+    public function komisioner(DashboardElectionSummary $summary)
+    {
+        $this->checkRole('komisioner');
+        session()->forget(['admin_view_kecamatan_id', 'admin_view_desa_id', 'admin_view_tps_id']);
+
+        return view('dashboard.admin', ['electionSummary' => $summary->forUser(Auth::user())]);
+    }
+
     // Menampilkan dashboard PPK sesuai kecamatan user.
     public function ppk(DashboardElectionSummary $summary)
     {

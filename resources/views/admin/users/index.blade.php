@@ -251,7 +251,7 @@
         <div>
             <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-2 font-semibold">// Admin — Pengguna</p>
             <h1 class="font-display text-4xl tracking-[2px] admin-text">MANAJEMEN PENGGUNA</h1>
-            <p class="dark:text-gray-400 text-gray-500 text-sm mt-1">Kelola akun PPK, PPS, dan KPPS.</p>
+            <p class="dark:text-gray-400 text-gray-500 text-sm mt-1">Kelola akun Admin/Operator, Komisioner, PPK, PPS, dan KPPS.</p>
         </div>
         <div class="flex items-center gap-2 flex-wrap justify-end">
             <a href="{{ route('admin.users.bulk') }}"
@@ -285,6 +285,8 @@
         <select name="role" onchange="this.form.submit()"
                 class="dark:bg-gray-800 bg-white border dark:border-gray-700 border-gray-300 dark:text-gray-300 text-gray-600 px-4 py-2.5 text-xs rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
             <option value="">Semua Role</option>
+            <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>Admin/Operator</option>
+            <option value="komisioner" {{ request('role') == 'komisioner' ? 'selected' : '' }}>Komisioner</option>
             <option value="ppk"  {{ request('role') == 'ppk'  ? 'selected' : '' }}>PPK</option>
             <option value="pps"  {{ request('role') == 'pps'  ? 'selected' : '' }}>PPS</option>
             <option value="kpps" {{ request('role') == 'kpps' ? 'selected' : '' }}>KPPS</option>
@@ -352,6 +354,8 @@
     @forelse($users as $user)
     @php
         $roleColor = match($user->role) {
+            'admin' => '#DC2626',
+            'komisioner' => '#2563EB',
             'ppk'  => '#F4A261',
             'pps'  => '#2EC4B6',
             'kpps' => '#A8DADC',
@@ -505,7 +509,9 @@ $labelClass = "block text-xs font-semibold dark:text-gray-400 text-gray-600 uppe
             <div>
                 <label class="{{ $labelClass }}">Role</label>
                 <select name="role" id="tambah-role" onchange="updateWilayahField('tambah')" class="{{ $inputClass }}">
-                    <option value="">— Pilih Role —</option>
+                    <option value="">- Pilih Role -</option>
+                    <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin/Operator - Akses penuh sistem</option>
+                    <option value="komisioner" {{ old('role') == 'komisioner' ? 'selected' : '' }}>Komisioner - Akses baca data kabupaten</option>
                     <option value="ppk"  {{ old('role') == 'ppk'  ? 'selected' : '' }}>PPK — Panitia Pemilihan Kecamatan</option>
                     <option value="pps"  {{ old('role') == 'pps'  ? 'selected' : '' }}>PPS — Panitia Pemungutan Suara</option>
                     <option value="kpps" {{ old('role') == 'kpps' ? 'selected' : '' }}>KPPS — Kelompok Penyelenggara</option>
@@ -688,7 +694,7 @@ $labelClass = "block text-xs font-semibold dark:text-gray-400 text-gray-600 uppe
             const el = document.getElementById(prefix + '-field-' + f);
             if (el) el.classList.add('hidden');
         });
-        if (!role) { wrap.classList.add('hidden'); return; }
+        if (!role || role === 'admin' || role === 'komisioner') { wrap.classList.add('hidden'); return; }
         wrap.classList.remove('hidden');
         if (role === 'ppk')       document.getElementById(prefix + '-field-kecamatan').classList.remove('hidden');
         else if (role === 'pps')  document.getElementById(prefix + '-field-kecamatan-pps').classList.remove('hidden');

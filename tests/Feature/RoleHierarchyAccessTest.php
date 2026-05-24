@@ -22,6 +22,7 @@ class RoleHierarchyAccessTest extends TestCase
     private Tps $tpsA;
     private Tps $tpsB;
     private User $admin;
+    private User $komisioner;
     private User $ppkA;
     private User $ppsA;
     private User $kppsA;
@@ -39,6 +40,7 @@ class RoleHierarchyAccessTest extends TestCase
         PemiluSetting::create(['jenis' => 'ppwp', 'is_active' => true]);
 
         $this->admin = $this->user('admin');
+        $this->komisioner = $this->user('komisioner');
         $this->ppkA = $this->user('ppk', ['kecamatan_id' => $this->kecamatanA->id]);
         $this->ppsA = $this->user('pps', ['desa_id' => $this->desaA->id]);
         $this->kppsA = $this->user('kpps', ['tps_id' => $this->tpsA->id]);
@@ -176,6 +178,110 @@ class RoleHierarchyAccessTest extends TestCase
         $this->actingAs($this->kppsA)
             ->get(route('admin.kecamatan.index'))
             ->assertForbidden();
+    }
+
+    public function test_komisioner_can_only_read_admin_documents_rekap_and_charts(): void
+    {
+        $this->post(route('login.post'), [
+            'username' => $this->komisioner->username,
+            'password' => 'password',
+        ])->assertRedirect(route('dashboard.komisioner'));
+
+        $this->actingAs($this->komisioner)
+            ->get(route('dashboard.komisioner'))
+            ->assertOk();
+
+        $this->actingAs($this->komisioner)
+            ->get(route('dokumen.admin'))
+            ->assertOk();
+
+        $this->actingAs($this->komisioner)
+            ->get(route('admin.rekap.index'))
+            ->assertOk();
+
+        $this->actingAs($this->komisioner)
+            ->get(route('admin.rekap.chart'))
+            ->assertOk();
+
+        $this->actingAs($this->komisioner)
+            ->get(route('admin.users.index'))
+            ->assertForbidden();
+
+        $this->actingAs($this->komisioner)
+            ->get(route('admin.kecamatan.index'))
+            ->assertForbidden();
+
+        $this->actingAs($this->komisioner)
+            ->get(route('admin.setup.index'))
+            ->assertForbidden();
+    }
+
+    public function test_komisioner_cannot_mutate_admin_documents_or_rekap(): void
+    {
+        $dokumen = Dokumen::create([
+            'tps_id' => $this->tpsA->id,
+            'uploaded_by' => $this->kppsA->id,
+            'jenis' => 'PPWP',
+            'level' => 'tps',
+            'status' => 'menunggu_verifikasi',
+            'file_path' => 'dummy.pdf',
+            'file_name' => 'dummy.pdf',
+            'file_size' => 1,
+        ]);
+
+        $this->actingAs($this->komisioner)
+            ->post(route('dokumen.verifikasi.admin', $dokumen), ['aksi' => 'terverifikasi'])
+            ->assertForbidden();
+
+        $this->actingAs($this->komisioner)
+            ->post(route('dokumen.restore', $dokumen))
+            ->assertForbidden();
+
+        $this->actingAs($this->komisioner)
+            ->post(route('admin.tools.backup'))
+            ->assertForbidden();
+
+        $this->actingAs($this->komisioner)
+            ->post(route('admin.rekap.unlock', 'ppwp'), ['tps_id' => $this->tpsA->id])
+            ->assertForbidden();
+    }
+
+    public function test_admin_can_manage_admin_operator_users(): void
+    {
+        $this->actingAs($this->admin)
+            ->post(route('admin.users.store'), [
+                'name' => 'Operator Admin',
+                'username' => 'operator_admin',
+                'password' => 'operator123',
+                'role' => 'admin',
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('users', [
+            'username' => 'operator_admin',
+            'role' => 'admin',
+            'kecamatan_id' => null,
+            'desa_id' => null,
+            'tps_id' => null,
+        ]);
+
+        $this->actingAs($this->admin)
+            ->get(route('admin.users.index', ['role' => 'admin']))
+            ->assertOk()
+            ->assertSee('operator_admin');
+    }
+
+    public function test_admin_cannot_delete_current_account(): void
+    {
+        $this->actingAs($this->admin)
+            ->delete(route('admin.users.destroy', $this->admin))
+            ->assertRedirect()
+            ->assertSessionHas('error');
+
+        $this->assertDatabaseHas('users', [
+            'id' => $this->admin->id,
+            'role' => 'admin',
+        ]);
     }
 
     private function user(string $role, array $attributes = []): User

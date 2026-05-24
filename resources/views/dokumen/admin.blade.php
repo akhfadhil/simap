@@ -9,6 +9,7 @@
     $aktifDokumenJenis = collect(\App\Models\Dokumen::JENIS)
         ->filter(fn($label, $key) => in_array(strtolower($key), $aktifJenis, true));
     $totalJenisAktif = $aktifDokumenJenis->count();
+    $canManageDocuments = Auth::user()->role === 'admin';
 @endphp
 
 <div class="mb-8">
@@ -22,6 +23,7 @@
 </div>
 @endif
 
+@if($canManageDocuments)
 {{-- Tools Dokumen --}}
 <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border-l-4 border border-l-amber-500 dark:border-gray-700 border-gray-200 shadow-sm mb-8">
     <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">// Tools Dokumen</p>
@@ -34,6 +36,7 @@
         </button>
     </form>
 </div>
+@endif
 
 {{-- Filter --}}
 <form method="GET" class="flex gap-3 mb-8 flex-wrap">
@@ -131,7 +134,7 @@
                    class="px-3 py-1.5 rounded-lg text-xs font-medium border dark:border-gray-600 border-gray-300 dark:text-gray-400 text-gray-500 dark:hover:bg-gray-700 hover:bg-gray-100 transition">
                     Unduh
                 </a>
-                @if($dok->status === 'menunggu_verifikasi')
+                @if($canManageDocuments && $dok->status === 'menunggu_verifikasi')
                 <button onclick="openTolakModal('{{ route('dokumen.verifikasi.admin', $dok) }}', '{{ $label }}')"
                         class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-red-400/40 text-red-400 hover:bg-red-500/10 transition">
                     ✗ Tolak
@@ -232,7 +235,7 @@
                    class="px-3 py-1.5 rounded-lg text-xs font-medium border dark:border-gray-600 border-gray-300 dark:text-gray-400 text-gray-500 dark:hover:bg-gray-700 hover:bg-gray-100 transition">
                     Unduh
                 </a>
-                @if($dok->status === 'menunggu_verifikasi')
+                @if($canManageDocuments && $dok->status === 'menunggu_verifikasi')
                 <button onclick="openTolakModal('{{ route('dokumen.verifikasi.admin', $dok) }}', '{{ $label }}')"
                         class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-red-400/40 text-red-400 hover:bg-red-500/10 transition">
                     ✗ Tolak
@@ -274,6 +277,7 @@
 </div>
 @endforelse
 
+@if($canManageDocuments)
 {{-- Modal Tolak --}}
 <div id="modal-tolak" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeTolakModal()"></div>
@@ -302,6 +306,7 @@
         </form>
     </div>
 </div>
+@endif
 
 @push('scripts')
 <script>
@@ -313,11 +318,13 @@ function toggleTps(id) {
     arrow.textContent = el.classList.contains('hidden') ? '▸' : '▾';
 }
 function openTolakModal(action, label) {
+    if (!document.getElementById('modal-tolak-form')) return;
     document.getElementById('modal-tolak-form').action = action;
     document.getElementById('modal-tolak-label').textContent = label;
     document.getElementById('modal-tolak').classList.remove('hidden');
 }
 function closeTolakModal() {
+    if (!document.getElementById('modal-tolak')) return;
     document.getElementById('modal-tolak').classList.add('hidden');
     document.getElementById('modal-tolak-form').querySelector('textarea').value = '';
 }

@@ -24,6 +24,7 @@ Route::middleware('auth')->group(function () {
 
     // Dashboard
     Route::get('/dashboard/admin', [DashboardController::class, 'admin'])->name('dashboard.admin');
+    Route::get('/dashboard/komisioner', [DashboardController::class, 'komisioner'])->name('dashboard.komisioner');
     Route::get('/dashboard/ppk',   [DashboardController::class, 'ppk'])->name('dashboard.ppk');
     Route::get('/dashboard/pps',   [DashboardController::class, 'pps'])->name('dashboard.pps');
     Route::get('/dashboard/kpps',  [DashboardController::class, 'kpps'])->name('dashboard.kpps');
@@ -71,9 +72,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/pps/view-tps/{tps}', [PpsController::class, 'viewTps'])->name('pps.view-tps');
     });
 
-    // Admin
+    // Admin & Komisioner read-only
+    Route::middleware('role:admin,komisioner')->group(function () {
+        Route::get('/dokumen/semua', [DokumenController::class, 'indexAdmin'])->name('dokumen.admin');
+    });
+
+    // Admin write actions
     Route::middleware('role:admin')->group(function () {
-        Route::get('/dokumen/semua',                               [DokumenController::class, 'indexAdmin'])->name('dokumen.admin');
         Route::post('/dokumen/{dokumen}/verifikasi-admin',         [DokumenController::class, 'verifikasiAdmin'])->name('dokumen.verifikasi.admin');
         Route::post('/dokumen/{dokumen}/restore',                  [DokumenController::class, 'restore'])->name('dokumen.restore')->middleware('role:admin');
         Route::post('admin/tools/backup',      [App\Http\Controllers\Admin\ToolsController::class, 'backup'])->name('admin.tools.backup');
@@ -152,13 +157,15 @@ Route::middleware('auth')->group(function () {
     });
 
     // ── REKAP VIEW (Admin) ───────────────────────────────────
-    Route::prefix('admin/rekap')->name('admin.rekap.')->middleware('role:admin')->group(function () {
+    Route::prefix('admin/rekap')->name('admin.rekap.')->middleware('role:admin,komisioner')->group(function () {
         Route::get('/',                   [App\Http\Controllers\Rekap\AdminController::class, 'index'])->name('index');
         Route::get('chart',               [App\Http\Controllers\Rekap\AdminController::class, 'chartPage'])->name('chart');      
         Route::get('chart/data',          [App\Http\Controllers\Rekap\AdminController::class, 'chartData'])->name('chart.data');
         Route::get('export/download',     [App\Http\Controllers\Rekap\AdminController::class, 'exportDownload'])->name('export.download'); // ← tambah, SEBELUM {jenis}
-        Route::post('{jenis}/unlock',     [App\Http\Controllers\Rekap\AdminController::class, 'unlock'])->name('unlock');
         Route::get('{jenis}/export',      [App\Http\Controllers\Rekap\AdminController::class, 'export'])->name('export');
         Route::get('{jenis}',             [App\Http\Controllers\Rekap\AdminController::class, 'show'])->name('show');
     });
+    Route::post('admin/rekap/{jenis}/unlock', [App\Http\Controllers\Rekap\AdminController::class, 'unlock'])
+        ->middleware('role:admin')
+        ->name('admin.rekap.unlock');
 });

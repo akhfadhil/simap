@@ -973,6 +973,8 @@ class AdminController extends Controller
     // Membuka rekap final agar bisa diedit ulang.
     public function unlock(Request $request, string $jenis)
     {
+        abort_if($request->user()?->role !== 'admin', 403);
+
         $rekap = RekapHeader::where('tps_id', $request->tps_id)
                             ->where('jenis', $jenis)
                             ->firstOrFail();

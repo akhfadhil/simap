@@ -45,6 +45,7 @@ class User extends Authenticatable
     {
         return match($this->role) {
             'admin' => '#E63946',
+            'komisioner' => '#2563EB',
             'ppk'   => '#F4A261',
             'pps'   => '#2EC4B6',
             'kpps'  => '#A8DADC',
