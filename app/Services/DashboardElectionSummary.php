@@ -50,10 +50,10 @@ class DashboardElectionSummary
 
     private function scopeForUser(User $user): array
     {
-        if ($user->role === 'admin' && session('admin_view_tps_id')) {
+        if (session('admin_view_tps_id')) {
             $tps = Tps::with('desa.kecamatan')->find(session('admin_view_tps_id'));
 
-            if ($tps) {
+            if ($tps && $this->canAccessTps($user, $tps)) {
                 return [
                     'type' => 'tps',
                     'id' => $tps->id,
@@ -63,10 +63,10 @@ class DashboardElectionSummary
             }
         }
 
-        if ($user->role === 'admin' && session('admin_view_desa_id')) {
+        if (session('admin_view_desa_id')) {
             $desa = Desa::with('kecamatan')->find(session('admin_view_desa_id'));
 
-            if ($desa) {
+            if ($desa && $this->canAccessDesa($user, $desa)) {
                 return [
                     'type' => 'desa',
                     'id' => $desa->id,
@@ -76,10 +76,10 @@ class DashboardElectionSummary
             }
         }
 
-        if ($user->role === 'admin' && session('admin_view_kecamatan_id')) {
+        if (session('admin_view_kecamatan_id')) {
             $kecamatan = Kecamatan::find(session('admin_view_kecamatan_id'));
 
-            if ($kecamatan) {
+            if ($kecamatan && $this->canAccessKecamatan($user, $kecamatan)) {
                 return [
                     'type' => 'kecamatan',
                     'id' => $kecamatan->id,
@@ -169,6 +169,36 @@ class DashboardElectionSummary
             'scope' => $scope['label'],
             'rows' => $rows,
         ];
+    }
+
+    private function canAccessKecamatan(User $user, Kecamatan $kecamatan): bool
+    {
+        return match ($user->role) {
+            'admin' => true,
+            'ppk' => $user->kecamatan_id === $kecamatan->id,
+            default => false,
+        };
+    }
+
+    private function canAccessDesa(User $user, Desa $desa): bool
+    {
+        return match ($user->role) {
+            'admin' => true,
+            'ppk' => $user->kecamatan_id === $desa->kecamatan_id,
+            'pps' => $user->desa_id === $desa->id,
+            default => false,
+        };
+    }
+
+    private function canAccessTps(User $user, Tps $tps): bool
+    {
+        return match ($user->role) {
+            'admin' => true,
+            'ppk' => $user->kecamatan_id === $tps->desa?->kecamatan_id,
+            'pps' => $user->desa_id === $tps->desa_id,
+            'kpps' => $user->tps_id === $tps->id,
+            default => false,
+        };
     }
 
     private function partySection(string $jenis, array $scope, ?int $dapilId = null, ?string $dapilName = null): array

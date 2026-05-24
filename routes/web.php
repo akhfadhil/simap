@@ -37,7 +37,7 @@ Route::middleware('auth')->group(function () {
     })->name('clear.view.session');
 
     // Dokumen — KPPS, PPS (view as kpps), & Admin
-    Route::middleware('role:kpps,pps,admin')->group(function () {
+    Route::middleware('role:kpps,pps,ppk,admin')->group(function () {
         Route::get('/dokumen/upload',  [DokumenController::class, 'uploadForm'])->name('dokumen.upload');
         Route::post('/dokumen/upload', [DokumenController::class, 'store'])->name('dokumen.store');
     });
@@ -66,7 +66,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // PPS
-    Route::middleware('role:pps,admin')->group(function () {
+    Route::middleware('role:pps,ppk,admin')->group(function () {
         Route::get('/pps/data-tps',       [PpsController::class, 'dataTps'])->name('pps.data-tps');
         Route::get('/pps/view-tps/{tps}', [PpsController::class, 'viewTps'])->name('pps.view-tps');
     });
@@ -129,7 +129,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // ── REKAP INPUT (KPPS) ───────────────────────────────────
-    Route::prefix('rekap')->name('rekap.')->middleware('role:kpps,admin')->group(function () {
+    Route::prefix('rekap')->name('rekap.')->middleware('role:kpps,pps,ppk,admin')->group(function () {
         Route::get('/',                    [App\Http\Controllers\Rekap\KppsController::class, 'index'])->name('index');
         Route::get('{jenis}/export',       [App\Http\Controllers\Rekap\KppsController::class, 'export'])->name('export'); // ← sebelum {jenis}
         Route::get('{jenis}',              [App\Http\Controllers\Rekap\KppsController::class, 'form'])->name('form');
@@ -138,7 +138,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // ── REKAP VIEW (PPS) ─────────────────────────────────────
-    Route::prefix('pps/rekap')->name('pps.rekap.')->middleware('role:pps,admin')->group(function () {
+    Route::prefix('pps/rekap')->name('pps.rekap.')->middleware('role:pps,ppk,admin')->group(function () {
         Route::get('/',                          [App\Http\Controllers\Rekap\PpsController::class, 'index'])->name('index');
         Route::get('{jenis}',                    [App\Http\Controllers\Rekap\PpsController::class, 'show'])->name('show');
         Route::get('{jenis}/export', [App\Http\Controllers\Rekap\PpsController::class, 'export'])->name('export');

@@ -23,7 +23,10 @@
 </p>
 
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-@php $aktifJenis = \App\Models\PemiluSetting::aktif(); @endphp
+@php
+    $aktifJenis = \App\Models\PemiluSetting::aktif();
+    $canEditRekap = Auth::user()->role === 'kpps';
+@endphp
 
 @foreach(\App\Models\RekapHeader::JENIS_LABELS as $jenis => $label)
 @if(in_array($jenis, $aktifJenis))
@@ -75,7 +78,7 @@
     @endif
 
     <div class="p-4 flex gap-2">
-        @if($isFinal)
+        @if(!$canEditRekap || $isFinal)
             <a href="{{ route('rekap.form', $jenis) }}"
                class="flex-1 text-center px-3 py-2 rounded-lg text-xs font-medium border dark:border-gray-600 border-gray-300 dark:text-gray-400 text-gray-500 dark:hover:bg-gray-700 hover:bg-gray-100 transition">
                 Lihat

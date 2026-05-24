@@ -32,7 +32,7 @@ class PpsController extends Controller
             'admin_view_tps_id' => $tps->id,
         ]);
 
-        return redirect()->route(Auth::user()->role === 'admin' ? 'dashboard.kpps' : 'dokumen.upload');
+        return redirect()->route('dashboard.kpps');
     }
 
     private function activeDesa(): Desa
@@ -42,6 +42,14 @@ class PpsController extends Controller
         if ($user->role === 'admin') {
             abort_if(!session('admin_view_desa_id'), 403, 'Pilih desa yang ingin dilihat.');
             return Desa::findOrFail(session('admin_view_desa_id'));
+        }
+
+        if ($user->role === 'ppk') {
+            abort_if(!session('admin_view_desa_id'), 403, 'Pilih desa yang ingin dilihat.');
+            $desa = Desa::findOrFail(session('admin_view_desa_id'));
+            abort_if($desa->kecamatan_id !== $user->kecamatan_id, 403, 'Akses ditolak.');
+
+            return $desa;
         }
 
         abort_if(!$user->desa_id, 403, 'Akun belum di-assign ke Desa.');

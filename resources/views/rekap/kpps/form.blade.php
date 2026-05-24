@@ -38,7 +38,17 @@
 </div>
 @endif
 
-@php $isFinal = $rekap && $rekap->status === 'final'; @endphp
+@php
+    $canEditRekap = Auth::user()->role === 'kpps';
+    $isFinal = $rekap && $rekap->status === 'final';
+    $readOnly = !$canEditRekap || $isFinal;
+@endphp
+
+@if(!$canEditRekap)
+<div class="dark:bg-orange-950 bg-orange-50 border dark:border-orange-900 border-orange-200 px-5 py-3 mb-6 rounded-lg">
+    <p class="text-xs font-semibold text-orange-500">Mode lihat saja. Rekapitulasi data hanya bisa diubah oleh KPPS pemilik TPS.</p>
+</div>
+@endif
 
 <form method="POST" action="{{ route('rekap.store', $jenis) }}" id="rekap-form">
 @csrf
@@ -66,14 +76,14 @@
             <div class="col-span-3">
                 <label class="block text-[10px] dark:text-gray-500 text-gray-400 mb-1">LK</label>
                 <input type="number" name="{{ $f['lk'] }}" min="0" value="{{ old($f['lk'], $rekap?->{$f['lk']} ?? 0) }}"
-                       {{ $isFinal ? 'disabled' : '' }}
-                       class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-3 py-2 text-sm rounded-lg focus:border-sky-400 focus:ring-0 focus:outline-none {{ $isFinal ? 'opacity-60 cursor-not-allowed' : '' }}">
+                       {{ $readOnly ? 'disabled' : '' }}
+                       class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-3 py-2 text-sm rounded-lg focus:border-sky-400 focus:ring-0 focus:outline-none {{ $readOnly ? 'opacity-60 cursor-not-allowed' : '' }}">
             </div>
             <div class="col-span-3">
                 <label class="block text-[10px] dark:text-gray-500 text-gray-400 mb-1">PR</label>
                 <input type="number" name="{{ $f['pr'] }}" min="0" value="{{ old($f['pr'], $rekap?->{$f['pr']} ?? 0) }}"
-                       {{ $isFinal ? 'disabled' : '' }}
-                       class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-3 py-2 text-sm rounded-lg focus:border-sky-400 focus:ring-0 focus:outline-none {{ $isFinal ? 'opacity-60 cursor-not-allowed' : '' }}">
+                       {{ $readOnly ? 'disabled' : '' }}
+                       class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-3 py-2 text-sm rounded-lg focus:border-sky-400 focus:ring-0 focus:outline-none {{ $readOnly ? 'opacity-60 cursor-not-allowed' : '' }}">
             </div>
             <div class="col-span-1">
                 <label class="block text-[10px] dark:text-gray-500 text-gray-400 mb-1">JML</label>
@@ -104,8 +114,8 @@
         <div>
             <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 mb-2">{{ $label }}</label>
             <input type="number" name="{{ $name }}" min="0" value="{{ old($name, $rekap?->{$name} ?? 0) }}"
-                   {{ $isFinal ? 'disabled' : '' }}
-                   class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-3 py-2 text-sm rounded-lg focus:border-sky-400 focus:ring-0 focus:outline-none {{ $isFinal ? 'opacity-60 cursor-not-allowed' : '' }}">
+                   {{ $readOnly ? 'disabled' : '' }}
+                   class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-3 py-2 text-sm rounded-lg focus:border-sky-400 focus:ring-0 focus:outline-none {{ $readOnly ? 'opacity-60 cursor-not-allowed' : '' }}">
         </div>
         @endforeach
 
@@ -136,14 +146,14 @@
         <div class="col-span-3">
             <label class="block text-[10px] dark:text-gray-500 text-gray-400 mb-1">LK</label>
             <input type="number" name="disabilitas_lk" min="0" value="{{ old('disabilitas_lk', $rekap?->disabilitas_lk ?? 0) }}"
-                {{ $isFinal ? 'disabled' : '' }}
-                class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-3 py-2 text-sm rounded-lg focus:border-sky-400 focus:ring-0 focus:outline-none {{ $isFinal ? 'opacity-60 cursor-not-allowed' : '' }}">
+                {{ $readOnly ? 'disabled' : '' }}
+                class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-3 py-2 text-sm rounded-lg focus:border-sky-400 focus:ring-0 focus:outline-none {{ $readOnly ? 'opacity-60 cursor-not-allowed' : '' }}">
         </div>
         <div class="col-span-3">
             <label class="block text-[10px] dark:text-gray-500 text-gray-400 mb-1">PR</label>
             <input type="number" name="disabilitas_pr" min="0" value="{{ old('disabilitas_pr', $rekap?->disabilitas_pr ?? 0) }}"
-                {{ $isFinal ? 'disabled' : '' }}
-                class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-3 py-2 text-sm rounded-lg focus:border-sky-400 focus:ring-0 focus:outline-none {{ $isFinal ? 'opacity-60 cursor-not-allowed' : '' }}">
+                {{ $readOnly ? 'disabled' : '' }}
+                class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-3 py-2 text-sm rounded-lg focus:border-sky-400 focus:ring-0 focus:outline-none {{ $readOnly ? 'opacity-60 cursor-not-allowed' : '' }}">
         </div>
         <div class="col-span-1">
             <label class="block text-[10px] dark:text-gray-500 text-gray-400 mb-1">JML</label>
@@ -180,8 +190,8 @@
             </p>
             <input type="number" name="suara[{{ $calon->id }}]" min="0"
                    value="{{ old('suara.'.$calon->id, $data['suara'][$calon->id] ?? 0) }}"
-                   {{ $isFinal ? 'disabled' : '' }}
-                   class="w-28 dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-3 py-2 text-sm rounded-lg focus:border-sky-400 focus:ring-0 focus:outline-none text-right {{ $isFinal ? 'opacity-60 cursor-not-allowed' : '' }}">
+                   {{ $readOnly ? 'disabled' : '' }}
+                   class="w-28 dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-3 py-2 text-sm rounded-lg focus:border-sky-400 focus:ring-0 focus:outline-none text-right {{ $readOnly ? 'opacity-60 cursor-not-allowed' : '' }}">
         </div>
         @endforeach
         </div>
@@ -209,8 +219,8 @@
                     <label class="text-xs dark:text-gray-400 text-gray-500 font-medium">Suara Partai</label>
                     <input type="number" name="suara_partai[{{ $partai->id }}]" min="0"
                            value="{{ old('suara_partai.'.$partai->id, $data['suara_partai'][$partai->id] ?? 0) }}"
-                           {{ $isFinal ? 'disabled' : '' }}
-                           class="w-28 dark:bg-gray-900 bg-white border dark:border-gray-600 border-gray-300 dark:text-gray-100 text-gray-800 px-3 py-1.5 text-sm rounded-lg focus:border-sky-400 focus:ring-0 focus:outline-none text-right {{ $isFinal ? 'opacity-60 cursor-not-allowed' : '' }}">
+                           {{ $readOnly ? 'disabled' : '' }}
+                           class="w-28 dark:bg-gray-900 bg-white border dark:border-gray-600 border-gray-300 dark:text-gray-100 text-gray-800 px-3 py-1.5 text-sm rounded-lg focus:border-sky-400 focus:ring-0 focus:outline-none text-right {{ $readOnly ? 'opacity-60 cursor-not-allowed' : '' }}">
                 </div>
             </div>
             {{-- Caleg --}}
@@ -222,8 +232,8 @@
                 </div>
                 <input type="number" name="suara_caleg[{{ $caleg->id }}]" min="0"
                        value="{{ old('suara_caleg.'.$caleg->id, $data['suara_caleg'][$caleg->id] ?? 0) }}"
-                       {{ $isFinal ? 'disabled' : '' }}
-                       class="w-28 dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-3 py-1.5 text-sm rounded-lg focus:border-sky-400 focus:ring-0 focus:outline-none text-right {{ $isFinal ? 'opacity-60 cursor-not-allowed' : '' }}">
+                       {{ $readOnly ? 'disabled' : '' }}
+                       class="w-28 dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-3 py-1.5 text-sm rounded-lg focus:border-sky-400 focus:ring-0 focus:outline-none text-right {{ $readOnly ? 'opacity-60 cursor-not-allowed' : '' }}">
             </div>
             @endforeach
 
@@ -271,8 +281,8 @@
             <p class="flex-1 text-sm dark:text-gray-300 text-gray-700">Jumlah suara tidak sah</p>
             <input type="number" name="suara_tidak_sah" id="input-tidak-sah" min="0"
                    value="{{ old('suara_tidak_sah', $rekap?->suara_tidak_sah ?? 0) }}"
-                   {{ $isFinal ? 'disabled' : '' }}
-                   class="w-36 dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-3 py-2 text-sm rounded-lg focus:border-sky-400 focus:ring-0 focus:outline-none text-right {{ $isFinal ? 'opacity-60 cursor-not-allowed' : '' }}">
+                   {{ $readOnly ? 'disabled' : '' }}
+                   class="w-36 dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-3 py-2 text-sm rounded-lg focus:border-sky-400 focus:ring-0 focus:outline-none text-right {{ $readOnly ? 'opacity-60 cursor-not-allowed' : '' }}">
         </div>
 
         {{-- Jumlah Suara Sah + Tidak Sah (otomatis) --}}
@@ -291,7 +301,7 @@
 </div>
 
 {{-- Tombol Aksi --}}
-@if(!$isFinal)
+@if($canEditRekap && !$isFinal)
 <div class="flex gap-3">
     <button type="submit"
             class="flex-1 bg-sky-500 hover:bg-sky-600 text-white font-semibold py-3 rounded-xl text-sm transition">
@@ -304,7 +314,9 @@
 </div>
 @else
 <div class="dark:bg-gray-800 bg-gray-50 rounded-xl border dark:border-gray-700 border-gray-200 p-4 text-center">
-    <p class="text-sm dark:text-gray-400 text-gray-500">Data sudah difinalisasi dan tidak bisa diubah.</p>
+    <p class="text-sm dark:text-gray-400 text-gray-500">
+        {{ $isFinal ? 'Data sudah difinalisasi dan tidak bisa diubah.' : 'Mode lihat saja. Data hanya bisa diubah oleh KPPS.' }}
+    </p>
 </div>
 @endif
 

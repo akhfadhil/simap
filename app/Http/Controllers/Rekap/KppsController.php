@@ -50,6 +50,8 @@ class KppsController extends Controller
     // Menyimpan draft rekap atau langsung finalisasi.
     public function store(Request $request, string $jenis)
     {
+        abort_if(Auth::user()->role !== 'kpps', 403, 'Akses ditolak.');
+
         $this->cekAktif($jenis);
         abort_unless(in_array($jenis, self::JENIS), 404);
         $tps = $this->activeTps();
@@ -116,6 +118,25 @@ class KppsController extends Controller
         }
 
         return redirect()->route('rekap.index')->with('success', "Rekap {$label} berhasil disimpan.");
+    }
+
+    public function finalisasi(string $jenis)
+    {
+        abort_if(Auth::user()->role !== 'kpps', 403, 'Akses ditolak.');
+        $this->cekAktif($jenis);
+        abort_unless(in_array($jenis, self::JENIS), 404);
+
+        $tps = $this->activeTps();
+        $rekap = RekapHeader::where('tps_id', $tps->id)->where('jenis', $jenis)->firstOrFail();
+
+        if ($rekap->status === 'final') {
+            return redirect()->route('rekap.index')->with('success', 'Rekap sudah difinalisasi.');
+        }
+
+        $rekap->update(['status' => 'final', 'difinalisasi_at' => now()]);
+        RekapAdminCache::flushAggregate();
+
+        return redirect()->route('rekap.index')->with('success', 'Rekap berhasil difinalisasi.');
     }
 
     // Mengekspor rekap TPS untuk jenis pemilihan.
@@ -260,9 +281,20 @@ class KppsController extends Controller
     {
         $user = Auth::user();
 
-        if ($user->role === 'admin') {
+        if (in_array($user->role, ['admin', 'ppk', 'pps'], true)) {
             abort_if(!session('admin_view_tps_id'), 403, 'Pilih TPS yang ingin dilihat.');
-            return Tps::with('desa.kecamatan.dapil')->findOrFail(session('admin_view_tps_id'));
+            $tps = Tps::with('desa.kecamatan.dapil')->findOrFail(session('admin_view_tps_id'));
+
+            $allowed = match ($user->role) {
+                'admin' => true,
+                'ppk' => $tps->desa?->kecamatan_id === $user->kecamatan_id,
+                'pps' => $tps->desa_id === $user->desa_id,
+                default => false,
+            };
+
+            abort_if(!$allowed, 403, 'Akses ditolak.');
+
+            return $tps;
         }
 
         abort_if(!$user->tps_id, 403, 'Akun belum di-assign ke TPS.');

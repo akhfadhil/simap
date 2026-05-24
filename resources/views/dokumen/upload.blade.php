@@ -8,7 +8,7 @@
 @section('role_content')
 
 {{-- Banner view mode --}}
-@if(isset($isAdminView) && $isAdminView && Auth::user()->role !== 'admin')
+@if(false && isset($isAdminView) && $isAdminView)
 <div class="dark:bg-sky-950 bg-sky-50 border dark:border-sky-900 border-sky-200 px-5 py-3 mb-6 rounded-lg flex items-center justify-between">
     <div class="flex items-center gap-3">
         <span class="text-sky-400 text-xs font-semibold">👁 MODE VIEW</span>

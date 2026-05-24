@@ -14,18 +14,8 @@ class DokumenController extends Controller
     // Menampilkan form upload dokumen TPS.
     public function uploadForm()
     {
-        $user = Auth::user();
-
-        if (session('admin_view_tps_id')) {
-            $tpsId       = session('admin_view_tps_id');
-            $isAdminView = true;
-        } else {
-            abort_if(!$user->tps_id, 403, 'Akun belum di-assign ke TPS.');
-            $tpsId       = $user->tps_id;
-            $isAdminView = false;
-        }
-
-        $tps = Tps::with('desa.kecamatan')->findOrFail($tpsId);
+        $tps = $this->activeTps();
+        $isAdminView = Auth::user()->role !== 'kpps';
 
         $uploaded = Dokumen::where('tps_id', $tps->id)
             ->get()
@@ -38,21 +28,15 @@ class DokumenController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
+        abort_if($user->role !== 'kpps', 403, 'Akses ditolak.');
 
-        if (session('admin_view_tps_id')) {
-            $tpsId = session('admin_view_tps_id');
-        } else {
-            abort_if(!$user->tps_id, 403, 'Akun belum di-assign ke TPS.');
-            $tpsId = $user->tps_id;
-        }
+        $tps = $this->activeTps();
 
         $request->validate([
             'jenis' => 'required|in:' . implode(',', array_keys(Dokumen::JENIS)),
             'file'  => 'required|file|mimes:pdf|max:10240',
         ]);
         abort_if(!in_array(strtolower($request->jenis), \App\Models\PemiluSetting::aktif()), 403, 'Jenis pemilu ini tidak aktif.');
-
-        $tps = Tps::with('desa.kecamatan')->findOrFail($tpsId);
 
         $existing = Dokumen::where('tps_id', $tps->id)
             ->where('jenis', $request->jenis)
@@ -91,19 +75,10 @@ class DokumenController extends Controller
     // Menampilkan dokumen TPS untuk diverifikasi PPS.
     public function indexPps(Request $request)
     {
-        $user = Auth::user();
+        $desa = $this->activeDesa();
+        $isAdminView = Auth::user()->role !== 'pps';
 
-        if (session('admin_view_desa_id')) {
-            $desaId      = session('admin_view_desa_id');
-            $isAdminView = true;
-        } else {
-            abort_if(!$user->desa_id, 403, 'Akun belum di-assign ke Desa.');
-            $desaId      = $user->desa_id;
-            $isAdminView = false;
-        }
-
-        $desa = \App\Models\Desa::with('kecamatan')->findOrFail($desaId);
-        $tpsOptions = Tps::where('desa_id', $desaId)->orderBy('nama')->get();
+        $tpsOptions = Tps::where('desa_id', $desa->id)->orderBy('nama')->get();
         $selectedTpsId = $request->filled('tps_id') && $tpsOptions->contains('id', (int) $request->tps_id)
             ? (int) $request->tps_id
             : null;
@@ -121,9 +96,12 @@ class DokumenController extends Controller
     public function verifikasi(Request $request, Dokumen $dokumen)
     {
         $user = Auth::user();
+        abort_if($user->role !== 'pps', 403, 'Akses ditolak.');
+
+        $desa = $this->activeDesa();
 
         $tps = Tps::findOrFail($dokumen->tps_id);
-        abort_if($tps->desa_id !== $user->desa_id, 403);
+        abort_if($tps->desa_id !== $desa->id, 403);
 
         $aksi = $request->input('aksi', 'terverifikasi');
 
@@ -403,5 +381,52 @@ class DokumenController extends Controller
         abort_if(!$user->kecamatan_id, 403, 'Akun belum di-assign ke Kecamatan.');
 
         return Kecamatan::findOrFail($user->kecamatan_id);
+    }
+
+    private function activeDesa(): Desa
+    {
+        $user = Auth::user();
+
+        if ($user->role === 'admin') {
+            abort_if(!session('admin_view_desa_id'), 403, 'Pilih desa yang ingin dilihat.');
+            return Desa::with('kecamatan')->findOrFail(session('admin_view_desa_id'));
+        }
+
+        if ($user->role === 'ppk') {
+            abort_if(!session('admin_view_desa_id'), 403, 'Pilih desa yang ingin dilihat.');
+            $desa = Desa::with('kecamatan')->findOrFail(session('admin_view_desa_id'));
+            abort_if($desa->kecamatan_id !== $user->kecamatan_id, 403, 'Akses ditolak.');
+
+            return $desa;
+        }
+
+        abort_if(!$user->desa_id, 403, 'Akun belum di-assign ke Desa.');
+
+        return Desa::with('kecamatan')->findOrFail($user->desa_id);
+    }
+
+    private function activeTps(): Tps
+    {
+        $user = Auth::user();
+
+        if (in_array($user->role, ['admin', 'ppk', 'pps'], true)) {
+            abort_if(!session('admin_view_tps_id'), 403, 'Pilih TPS yang ingin dilihat.');
+            $tps = Tps::with('desa.kecamatan')->findOrFail(session('admin_view_tps_id'));
+
+            $allowed = match ($user->role) {
+                'admin' => true,
+                'ppk' => $tps->desa?->kecamatan_id === $user->kecamatan_id,
+                'pps' => $tps->desa_id === $user->desa_id,
+                default => false,
+            };
+
+            abort_if(!$allowed, 403, 'Akses ditolak.');
+
+            return $tps;
+        }
+
+        abort_if(!$user->tps_id, 403, 'Akun belum di-assign ke TPS.');
+
+        return Tps::with('desa.kecamatan')->findOrFail($user->tps_id);
     }
 }

@@ -32,7 +32,7 @@ class PpkController extends Controller
         ]);
         session()->forget('admin_view_tps_id');
 
-        return redirect()->route(Auth::user()->role === 'admin' ? 'dashboard.pps' : 'dokumen.pps');
+        return redirect()->route('dashboard.pps');
     }
 
     private function activeKecamatan(): Kecamatan
