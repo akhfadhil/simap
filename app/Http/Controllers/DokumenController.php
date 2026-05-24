@@ -182,10 +182,7 @@ class DokumenController extends Controller
     // Menampilkan form upload dokumen kecamatan.
     public function uploadFormPpk()
     {
-        $user = Auth::user();
-        abort_if(!$user->kecamatan_id, 403, 'Akun belum di-assign ke Kecamatan.');
-
-        $kecamatan = \App\Models\Kecamatan::findOrFail($user->kecamatan_id);
+        $kecamatan = $this->activePpkKecamatan();
 
         $uploaded = Dokumen::where('kecamatan_id', $kecamatan->id)
             ->where('level', 'kecamatan')
@@ -199,15 +196,13 @@ class DokumenController extends Controller
     public function storePpk(Request $request)
     {
         $user = Auth::user();
-        abort_if(!$user->kecamatan_id, 403, 'Akun belum di-assign ke Kecamatan.');
+        $kecamatan = $this->activePpkKecamatan();
 
         $request->validate([
             'jenis' => 'required|in:' . implode(',', array_keys(Dokumen::JENIS)),
             'file'  => 'required|file|mimes:pdf|max:10240',
         ]);
         abort_if(!in_array(strtolower($request->jenis), \App\Models\PemiluSetting::aktif()), 403, 'Jenis pemilu ini tidak aktif.');
-        
-        $kecamatan = \App\Models\Kecamatan::findOrFail($user->kecamatan_id);
 
         $existing = Dokumen::where('kecamatan_id', $kecamatan->id)
             ->where('level', 'kecamatan')
@@ -394,5 +389,19 @@ class DokumenController extends Controller
         }
 
         abort_if(!$allowed, 403);
+    }
+
+    private function activePpkKecamatan(): Kecamatan
+    {
+        $user = Auth::user();
+
+        if ($user->role === 'admin') {
+            abort_if(!session('admin_view_kecamatan_id'), 403, 'Pilih kecamatan yang ingin dilihat.');
+            return Kecamatan::findOrFail(session('admin_view_kecamatan_id'));
+        }
+
+        abort_if(!$user->kecamatan_id, 403, 'Akun belum di-assign ke Kecamatan.');
+
+        return Kecamatan::findOrFail($user->kecamatan_id);
     }
 }

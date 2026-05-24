@@ -15,7 +15,7 @@
 @endphp
 
 {{-- Banner view mode --}}
-@if(isset($isAdminView) && $isAdminView)
+@if(isset($isAdminView) && $isAdminView && Auth::user()->role !== 'admin')
 <div class="dark:bg-orange-950 bg-orange-50 border dark:border-orange-900 border-orange-200 px-5 py-3 mb-6 rounded-lg flex items-center justify-between">
     <div class="flex items-center gap-3">
         <span class="text-orange-400 text-xs font-semibold">👁 MODE VIEW</span>

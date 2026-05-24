@@ -58,7 +58,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/dokumen/{dokumen}/download', [DokumenController::class, 'download'])->name('dokumen.download');
 
     // PPK
-    Route::middleware('role:ppk')->group(function () {
+    Route::middleware('role:ppk,admin')->group(function () {
         Route::get('/ppk/data-pps',        [PpkController::class, 'dataPps'])->name('ppk.data-pps');
         Route::get('/ppk/view-pps/{desa}', [PpkController::class, 'viewPps'])->name('ppk.view-pps');
         Route::get('/ppk/upload',          [DokumenController::class, 'uploadFormPpk'])->name('ppk.upload');
@@ -66,7 +66,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // PPS
-    Route::middleware('role:pps')->group(function () {
+    Route::middleware('role:pps,admin')->group(function () {
         Route::get('/pps/data-tps',       [PpsController::class, 'dataTps'])->name('pps.data-tps');
         Route::get('/pps/view-tps/{tps}', [PpsController::class, 'viewTps'])->name('pps.view-tps');
     });
@@ -129,7 +129,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // ── REKAP INPUT (KPPS) ───────────────────────────────────
-    Route::prefix('rekap')->name('rekap.')->middleware('role:kpps')->group(function () {
+    Route::prefix('rekap')->name('rekap.')->middleware('role:kpps,admin')->group(function () {
         Route::get('/',                    [App\Http\Controllers\Rekap\KppsController::class, 'index'])->name('index');
         Route::get('{jenis}/export',       [App\Http\Controllers\Rekap\KppsController::class, 'export'])->name('export'); // ← sebelum {jenis}
         Route::get('{jenis}',              [App\Http\Controllers\Rekap\KppsController::class, 'form'])->name('form');
@@ -138,14 +138,14 @@ Route::middleware('auth')->group(function () {
     });
 
     // ── REKAP VIEW (PPS) ─────────────────────────────────────
-    Route::prefix('pps/rekap')->name('pps.rekap.')->middleware('role:pps')->group(function () {
+    Route::prefix('pps/rekap')->name('pps.rekap.')->middleware('role:pps,admin')->group(function () {
         Route::get('/',                          [App\Http\Controllers\Rekap\PpsController::class, 'index'])->name('index');
         Route::get('{jenis}',                    [App\Http\Controllers\Rekap\PpsController::class, 'show'])->name('show');
         Route::get('{jenis}/export', [App\Http\Controllers\Rekap\PpsController::class, 'export'])->name('export');
     });
 
     // ── REKAP VIEW (PPK) ─────────────────────────────────────
-    Route::prefix('ppk/rekap')->name('ppk.rekap.')->middleware('role:ppk')->group(function () {
+    Route::prefix('ppk/rekap')->name('ppk.rekap.')->middleware('role:ppk,admin')->group(function () {
         Route::get('/',                          [App\Http\Controllers\Rekap\PpkController::class, 'index'])->name('index');
         Route::get('{jenis}',                    [App\Http\Controllers\Rekap\PpkController::class, 'show'])->name('show');
         Route::get('{jenis}/export', [App\Http\Controllers\Rekap\PpkController::class, 'export'])->name('export');

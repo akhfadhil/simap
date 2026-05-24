@@ -7,7 +7,7 @@
 
 @section('role_content')
 @php
-    $kecamatan    = Auth::user()->kecamatan;
+    $kecamatan    = $viewKecamatan ?? Auth::user()->kecamatan;
     $desas        = $kecamatan ? $kecamatan->desas : collect();
     $tpsAll       = $desas->flatMap(fn($d) => $d->tps);
     $totalTps     = $tpsAll->count();

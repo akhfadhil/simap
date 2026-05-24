@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
+use App\Models\Desa;
 use App\Models\Tps;
 
 class PpsController extends Controller
@@ -9,10 +10,9 @@ class PpsController extends Controller
     // Menampilkan daftar TPS dalam desa PPS.
     public function dataTps()
     {
-        $user = Auth::user();
-        abort_if(!$user->desa_id, 403, 'Akun belum di-assign ke Desa.');
+        $desa = $this->activeDesa();
 
-        $tpsList = Tps::where('desa_id', $user->desa_id)
+        $tpsList = Tps::where('desa_id', $desa->id)
             ->with(['dokumens', 'users' => fn($q) => $q->where('role', 'kpps')])
             ->get();
 
@@ -22,11 +22,30 @@ class PpsController extends Controller
     // Mengaktifkan mode lihat/upload dokumen KPPS untuk TPS tertentu.
     public function viewTps(Tps $tps)
     {
+        $desa = $this->activeDesa();
+
+        abort_if($tps->desa_id !== $desa->id, 403);
+
+        session([
+            'admin_view_kecamatan_id' => $desa->kecamatan_id,
+            'admin_view_desa_id' => $tps->desa_id,
+            'admin_view_tps_id' => $tps->id,
+        ]);
+
+        return redirect()->route(Auth::user()->role === 'admin' ? 'dashboard.kpps' : 'dokumen.upload');
+    }
+
+    private function activeDesa(): Desa
+    {
         $user = Auth::user();
 
-        abort_if($tps->desa_id !== $user->desa_id, 403);
+        if ($user->role === 'admin') {
+            abort_if(!session('admin_view_desa_id'), 403, 'Pilih desa yang ingin dilihat.');
+            return Desa::findOrFail(session('admin_view_desa_id'));
+        }
 
-        session(['admin_view_tps_id' => $tps->id]);
-        return redirect()->route('dokumen.upload');
+        abort_if(!$user->desa_id, 403, 'Akun belum di-assign ke Desa.');
+
+        return Desa::findOrFail($user->desa_id);
     }
 }

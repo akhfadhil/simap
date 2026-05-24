@@ -7,7 +7,7 @@
 
 @section('role_content')
 @php
-    $tps      = Auth::user()->tps;
+    $tps      = $viewTps ?? Auth::user()->tps;
     $aktifJenis = \App\Models\PemiluSetting::aktif();
     $totalPemiluAktif = count($aktifJenis);
     $dokumenJenisAktif = array_map('strtoupper', $aktifJenis);

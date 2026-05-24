@@ -14,7 +14,7 @@
     $totalJenisAktif = $aktifDokumenJenis->count();
 @endphp
 
-@if(isset($isAdminView) && $isAdminView)
+@if(isset($isAdminView) && $isAdminView && Auth::user()->role !== 'admin')
 <div class="dark:bg-teal-950 bg-teal-50 border dark:border-teal-900 border-teal-200 px-5 py-3 mb-6 rounded-lg flex items-center justify-between">
     <div class="flex items-center gap-3">
         <span class="text-teal-400 text-xs font-semibold">👁 MODE VIEW</span>

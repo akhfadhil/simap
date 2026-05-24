@@ -8,6 +8,7 @@ use App\Models\RekapGubernurCalon;
 use App\Models\RekapBupatiCalon;
 use App\Models\RekapDpdCalon;
 use App\Models\RekapPartai;
+use App\Models\Tps;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -22,7 +23,7 @@ class KppsController extends Controller
     // Menampilkan daftar rekap milik TPS user.
     public function index()
     {
-        $tps    = Auth::user()->tps;
+        $tps    = $this->activeTps();
         $rekaps = RekapHeader::where('tps_id', $tps->id)
                              ->get()->keyBy('jenis');
         return view('rekap.kpps.index', compact('tps', 'rekaps'));
@@ -40,9 +41,9 @@ class KppsController extends Controller
     {
         $this->cekAktif($jenis);
         abort_unless(in_array($jenis, self::JENIS), 404);
-        $tps   = Auth::user()->tps;
+        $tps   = $this->activeTps();
         $rekap = RekapHeader::where('tps_id', $tps->id)->where('jenis', $jenis)->first();
-        $data  = $this->getMasterData($jenis, $rekap);
+        $data  = $this->getMasterData($jenis, $rekap, $tps);
         return view('rekap.kpps.form', compact('tps', 'jenis', 'rekap', 'data'));
     }
 
@@ -51,7 +52,7 @@ class KppsController extends Controller
     {
         $this->cekAktif($jenis);
         abort_unless(in_array($jenis, self::JENIS), 404);
-        $tps = Auth::user()->tps;
+        $tps = $this->activeTps();
 
         $existing = RekapHeader::where('tps_id', $tps->id)->where('jenis', $jenis)->first();
         if ($existing && $existing->status === 'final') {
@@ -123,7 +124,7 @@ class KppsController extends Controller
         $this->cekAktif($jenis);
         abort_unless(in_array($jenis, self::JENIS), 404);
 
-        $tps    = Auth::user()->tps;
+        $tps    = $this->activeTps();
         $relations = match ($jenis) {
             'ppwp'      => ['ppwpSuaras'],
             'gubernur'  => ['gubernurSuaras'],
@@ -137,7 +138,7 @@ class KppsController extends Controller
                             ->get();
 
         $tpsList = collect([$tps]);
-        $master  = $this->getAllMaster();
+        $master  = $this->getAllMaster($tps);
         $wilayah = $tps->nama . ' — ' . $tps->desa->nama;
         $label   = RekapHeader::JENIS_LABELS[$jenis];
         $filename = 'Rekap_' . strtoupper($jenis) . '_' . str_replace(' ', '_', $tps->nama) . '.xlsx';
@@ -156,7 +157,7 @@ class KppsController extends Controller
     }
 
     // Mengambil master data dan suara existing untuk form.
-    private function getMasterData(string $jenis, ?RekapHeader $rekap): array
+    private function getMasterData(string $jenis, ?RekapHeader $rekap, Tps $tps): array
     {
         $existingSuara  = [];
         $existingPartai = [];
@@ -222,7 +223,7 @@ class KppsController extends Controller
         }
 
         if ($jenis === 'dprd_kab') {
-            $kecamatan = Auth::user()->tps->desa->kecamatan;
+            $kecamatan = $tps->desa->kecamatan;
             $dapilId   = $kecamatan->dapil_id;
 
             return [
@@ -241,9 +242,9 @@ class KppsController extends Controller
     }
 
     // Mengambil semua master data untuk kebutuhan export.
-    private function getAllMaster(): array
+    private function getAllMaster(Tps $tps): array
     {
-        $kecamatan = Auth::user()->tps->desa->kecamatan;
+        $kecamatan = $tps->desa->kecamatan;
         return [
             'ppwp'      => ['calons'  => RekapPpwpCalon::orderBy('nomor_urut')->get()],
             'gubernur'  => ['calons'  => RekapGubernurCalon::orderBy('nomor_urut')->get()],
@@ -253,6 +254,20 @@ class KppsController extends Controller
             'dprd_prov' => ['partais' => RekapPartai::with('calegs')->where('jenis','dprd_prov')->orderBy('nomor_urut')->get()],
             'dprd_kab'  => ['partais' => RekapPartai::with('calegs')->where('jenis','dprd_kab')->where('dapil_id', $kecamatan->dapil_id)->orderBy('nomor_urut')->get()],
         ];
+    }
+
+    private function activeTps(): Tps
+    {
+        $user = Auth::user();
+
+        if ($user->role === 'admin') {
+            abort_if(!session('admin_view_tps_id'), 403, 'Pilih TPS yang ingin dilihat.');
+            return Tps::with('desa.kecamatan.dapil')->findOrFail(session('admin_view_tps_id'));
+        }
+
+        abort_if(!$user->tps_id, 403, 'Akun belum di-assign ke TPS.');
+
+        return Tps::with('desa.kecamatan.dapil')->findOrFail($user->tps_id);
     }
 
 }

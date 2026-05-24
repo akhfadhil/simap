@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\Rekap;
 
 use App\Http\Controllers\Controller;
+use App\Models\Desa;
 use App\Models\RekapHeader;
 use Illuminate\Support\Facades\Auth;
 
@@ -10,7 +11,7 @@ class PpsController extends Controller
     // Menampilkan daftar rekap TPS dalam desa PPS.
     public function index()
     {
-        $desa    = Auth::user()->desa;
+        $desa    = $this->activeDesa();
         $tpsIds  = $desa->tps->pluck('id');
         $rekaps  = RekapHeader::whereIn('tps_id', $tpsIds)->get()
                               ->groupBy('jenis');
@@ -27,7 +28,7 @@ class PpsController extends Controller
     public function show(string $jenis)
     {
         $this->cekAktif($jenis);
-        $desa   = Auth::user()->desa;
+        $desa   = $this->activeDesa();
         $tpsIds = $desa->tps->pluck('id');
         $relations = match ($jenis) {
             'ppwp'      => ['tps', 'ppwpSuaras.calon'],
@@ -41,7 +42,7 @@ class PpsController extends Controller
                              ->where('jenis', $jenis)
                              ->get()->keyBy('tps_id');
         $tpsList = $desa->tps;
-        $master  = $this->getMaster($jenis);
+        $master  = $this->getMaster($jenis, $desa);
         return view('rekap.pps.show', compact('desa', 'jenis', 'rekaps', 'tpsList', 'master'));
     }
 
@@ -49,7 +50,7 @@ class PpsController extends Controller
     public function export(string $jenis)
     {
         $this->cekAktif($jenis);
-        $desa   = Auth::user()->desa;
+        $desa   = $this->activeDesa();
         $tpsIds = $desa->tps->pluck('id');
 
         $rekaps = RekapHeader::with(['ppwpSuaras','gubernurSuaras','bupatiSuaras','dpdSuaras','partaiSuaras','calegSuaras'])
@@ -58,7 +59,7 @@ class PpsController extends Controller
                             ->get();
 
         $tpsList = $desa->tps;
-        $master  = $this->getAllMaster();
+        $master  = $this->getAllMaster($desa);
         $label   = RekapHeader::JENIS_LABELS[$jenis];
         $wilayah = $desa->nama . ' — ' . $desa->kecamatan->nama;
         $filename = 'Rekap_' . strtoupper($jenis) . '_' . str_replace(' ', '_', $desa->nama) . '.xlsx';
@@ -77,7 +78,7 @@ class PpsController extends Controller
     }
 
     // Mengambil master data sesuai jenis pemilihan.
-    private function getMaster(string $jenis): array
+    private function getMaster(string $jenis, Desa $desa): array
     {
         if ($jenis === 'ppwp')     return ['calons' => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get()];
         if ($jenis === 'gubernur') return ['calons' => \App\Models\RekapGubernurCalon::orderBy('nomor_urut')->get()];
@@ -86,14 +87,14 @@ class PpsController extends Controller
         $partais = \App\Models\RekapPartai::with('calegs')->where('jenis', $jenis);
 
         if ($jenis === 'dprd_kab') {
-            $partais->where('dapil_id', Auth::user()->desa?->kecamatan?->dapil_id);
+            $partais->where('dapil_id', $desa->kecamatan?->dapil_id);
         }
 
         return ['partais' => $partais->orderBy('nomor_urut')->get()];
     }
 
     // Mengambil semua master data untuk kebutuhan export.
-    private function getAllMaster(): array
+    private function getAllMaster(Desa $desa): array
     {
         return [
             'ppwp'      => ['calons'  => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get()],
@@ -102,7 +103,21 @@ class PpsController extends Controller
             'dpd'       => ['calons'  => \App\Models\RekapDpdCalon::orderBy('nomor_urut')->get()],
             'dpr_ri'    => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis','dpr_ri')->orderBy('nomor_urut')->get()],
             'dprd_prov' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis','dprd_prov')->orderBy('nomor_urut')->get()],
-            'dprd_kab'  => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis','dprd_kab')->where('dapil_id', Auth::user()->desa?->kecamatan?->dapil_id)->orderBy('nomor_urut')->get()],
+            'dprd_kab'  => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis','dprd_kab')->where('dapil_id', $desa->kecamatan?->dapil_id)->orderBy('nomor_urut')->get()],
         ];
+    }
+
+    private function activeDesa(): Desa
+    {
+        $user = Auth::user();
+
+        if ($user->role === 'admin') {
+            abort_if(!session('admin_view_desa_id'), 403, 'Pilih desa yang ingin dilihat.');
+            return Desa::with('kecamatan', 'tps')->findOrFail(session('admin_view_desa_id'));
+        }
+
+        abort_if(!$user->desa_id, 403, 'Akun belum di-assign ke Desa.');
+
+        return Desa::with('kecamatan', 'tps')->findOrFail($user->desa_id);
     }
 }

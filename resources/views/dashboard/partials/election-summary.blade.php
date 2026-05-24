@@ -22,9 +22,9 @@
                 @php
                     $rows = collect($section['rows'] ?? []);
                     $top = $rows->first();
-                    $headline = ($section['display'] ?? null) === 'all'
-                        ? $rows->count() . ' Paslon'
-                        : ($top ? $top['label'] . ($top['meta'] ? ' - ' . $top['meta'] : '') : 'Belum ada data');
+                    $headline = $top && (int) ($top['suara'] ?? 0) > 0
+                        ? 'Unggul sementara: ' . $top['label'] . (!empty($top['meta']) ? ' - ' . $top['meta'] : '')
+                        : 'Belum ada suara';
                 @endphp
                 <article class="admin-glass rounded-lg p-5">
                     <div class="mb-4 flex items-start justify-between gap-4">
@@ -40,15 +40,15 @@
                         @forelse($rows as $row)
                             <div class="flex items-center justify-between gap-3 rounded-md admin-surface-strong px-3 py-2.5">
                                 <div class="flex min-w-0 items-center gap-3">
-                                    <span class="admin-mono text-white text-xs font-bold w-5 shrink-0">{{ $row['rank'] }}</span>
+                                    <span class="admin-mono text-gray-950 dark:text-white text-xs font-bold w-5 shrink-0">{{ $row['rank'] }}</span>
                                     <div class="min-w-0">
                                         <p class="text-sm font-semibold admin-text truncate">{{ $row['label'] }}</p>
                                         @if(!empty($row['meta']))
-                                            <p class="admin-mono admin-muted-soft text-[10px] uppercase truncate">{{ $row['meta'] }}</p>
+                                            <p class="admin-mono text-gray-950 dark:text-gray-400 text-[10px] uppercase truncate">{{ $row['meta'] }}</p>
                                         @endif
                                     </div>
                                 </div>
-                                <p class="admin-mono text-xs font-bold text-white whitespace-nowrap">{{ number_format($row['suara']) }}</p>
+                                <p class="admin-mono text-xs font-bold text-gray-950 dark:text-white whitespace-nowrap">{{ number_format($row['suara']) }}</p>
                             </div>
                         @empty
                             <p class="admin-muted text-sm">Belum ada data suara untuk jenis ini.</p>

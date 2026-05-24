@@ -7,7 +7,7 @@
 
 @section('role_content')
 @php
-    $desa        = Auth::user()->desa;
+    $desa        = $viewDesa ?? Auth::user()->desa;
     $tpsList     = $desa ? $desa->tps : collect();
     $totalTps    = $tpsList->count();
     $tpsIds      = $tpsList->pluck('id');

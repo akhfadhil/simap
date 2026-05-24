@@ -74,6 +74,18 @@
     $roleSubtitle = trim($__env->yieldContent('role_subtitle', 'Dashboard'));
     $active = trim($__env->yieldContent('role_active', 'dashboard'));
     $accent = ['ppk' => '#f4a261', 'pps' => '#2ec4b6', 'kpps' => '#7dd3fc'][$roleKey] ?? '#e63946';
+    $adminViewActive = Auth::user()->role === 'admin' && match ($roleKey) {
+        'ppk' => session()->has('admin_view_kecamatan_id'),
+        'pps' => session()->has('admin_view_desa_id'),
+        'kpps' => session()->has('admin_view_tps_id'),
+        default => false,
+    };
+    $adminViewBackRoute = match ($roleKey) {
+        'ppk' => route('admin.kecamatan.index'),
+        'pps' => route('admin.desa.index'),
+        'kpps' => route('admin.tps.index'),
+        default => route('dashboard.admin'),
+    };
     $menus = match ($roleKey) {
         'ppk' => [
             ['key' => 'dashboard', 'label' => 'Beranda', 'icon' => 'dashboard', 'route' => route('dashboard.ppk')],
@@ -197,6 +209,21 @@
         </header>
 
         <div class="p-4 lg:p-8 overflow-y-auto">
+            @if($adminViewActive)
+                <div class="dark:bg-orange-950 bg-orange-50 border dark:border-orange-900 border-orange-200 px-5 py-3 mb-6 rounded-lg flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-orange-400 text-base">visibility</span>
+                        <span class="text-orange-400 text-xs font-semibold">MODE VIEW</span>
+                        <span class="dark:text-gray-400 text-gray-500 text-xs">Anda melihat dashboard {{ strtoupper($roleKey) }} sebagai admin</span>
+                    </div>
+                    <a href="{{ $adminViewBackRoute }}"
+                       onclick="fetch('/clear-view-session')"
+                       class="text-xs font-semibold dark:text-gray-400 text-gray-500 hover:text-red-500 transition">
+                        Kembali
+                    </a>
+                </div>
+            @endif
+
             @yield('role_content')
         </div>
     </main>

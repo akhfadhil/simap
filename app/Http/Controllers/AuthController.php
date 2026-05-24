@@ -30,8 +30,13 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials, false)) {
             $request->session()->regenerate();
+            $request->session()->forget([
+                'admin_view_kecamatan_id',
+                'admin_view_desa_id',
+                'admin_view_tps_id',
+            ]);
             $role = Auth::user()->role;
-            return redirect()->intended(route('dashboard.' . $role));
+            return redirect()->route('dashboard.' . $role);
         }
 
         return back()

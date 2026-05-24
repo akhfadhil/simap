@@ -3,9 +3,12 @@
 namespace App\Services;
 
 use App\Models\Dapil;
+use App\Models\Desa;
+use App\Models\Kecamatan;
 use App\Models\PemiluSetting;
 use App\Models\RekapHeader;
 use App\Models\RekapPartai;
+use App\Models\Tps;
 use App\Models\User;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
@@ -47,6 +50,45 @@ class DashboardElectionSummary
 
     private function scopeForUser(User $user): array
     {
+        if ($user->role === 'admin' && session('admin_view_tps_id')) {
+            $tps = Tps::with('desa.kecamatan')->find(session('admin_view_tps_id'));
+
+            if ($tps) {
+                return [
+                    'type' => 'tps',
+                    'id' => $tps->id,
+                    'label' => $tps->nama . ' - ' . ($tps->desa?->nama ?? '-'),
+                    'dapil_id' => $tps->desa?->kecamatan?->dapil_id,
+                ];
+            }
+        }
+
+        if ($user->role === 'admin' && session('admin_view_desa_id')) {
+            $desa = Desa::with('kecamatan')->find(session('admin_view_desa_id'));
+
+            if ($desa) {
+                return [
+                    'type' => 'desa',
+                    'id' => $desa->id,
+                    'label' => 'Desa ' . ($desa->nama ?? '-'),
+                    'dapil_id' => $desa->kecamatan?->dapil_id,
+                ];
+            }
+        }
+
+        if ($user->role === 'admin' && session('admin_view_kecamatan_id')) {
+            $kecamatan = Kecamatan::find(session('admin_view_kecamatan_id'));
+
+            if ($kecamatan) {
+                return [
+                    'type' => 'kecamatan',
+                    'id' => $kecamatan->id,
+                    'label' => 'Kecamatan ' . ($kecamatan->nama ?? '-'),
+                    'dapil_id' => $kecamatan->dapil_id,
+                ];
+            }
+        }
+
         if ($user->role === 'ppk') {
             return [
                 'type' => 'kecamatan',
