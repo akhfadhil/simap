@@ -121,19 +121,22 @@ class RekapTotalSheetExport implements FromArray, WithTitle, WithStyles, WithCol
         $rows[]              = array_merge(['Keterangan'], $desaNames, ['Total']);
         $this->subHeaderRows[] = count($rows);
 
-        if (in_array($this->jenis, ['ppwp', 'dpd'])) {
+        if (in_array($this->jenis, ['ppwp', 'gubernur', 'bupati', 'dpd'], true)) {
             $calons = $this->master['calons'] ?? collect();
             foreach ($calons as $calon) {
                 $rowTotal = 0;
-                $name     = $this->jenis === 'ppwp' ? $calon->nama_paslon : $calon->nama_calon;
+                $name     = in_array($this->jenis, ['ppwp', 'gubernur', 'bupati'], true) ? $calon->nama_paslon : $calon->nama_calon;
                 $cells    = [$calon->nomor_urut . '. ' . $name];
                 foreach ($desaList as $desa) {
                     $val = $desa->tps->sum(function($tps) use ($calon) {
                         $r = $this->rekaps[$tps->id] ?? null;
                         if (!$r) return 0;
-                        return $this->jenis === 'ppwp'
-                            ? ($r->ppwpSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0)
-                            : ($r->dpdSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0);
+                        return match ($this->jenis) {
+                            'ppwp' => $r->ppwpSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0,
+                            'gubernur' => $r->gubernurSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0,
+                            'bupati' => $r->bupatiSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0,
+                            default => $r->dpdSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0,
+                        };
                     });
                     $cells[]   = $val;
                     $rowTotal += $val;

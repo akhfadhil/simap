@@ -50,7 +50,7 @@ class PpsController extends Controller
         $desa   = Auth::user()->desa;
         $tpsIds = $desa->tps->pluck('id');
 
-        $rekaps = RekapHeader::with(['ppwpSuaras','dpdSuaras','partaiSuaras','calegSuaras'])
+        $rekaps = RekapHeader::with(['ppwpSuaras','gubernurSuaras','bupatiSuaras','dpdSuaras','partaiSuaras','calegSuaras'])
                             ->whereIn('tps_id', $tpsIds)
                             ->where('jenis', $jenis)  // filter jenis!
                             ->get();

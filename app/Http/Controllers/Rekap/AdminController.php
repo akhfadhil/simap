@@ -156,7 +156,7 @@ class AdminController extends Controller
 
         $tpsIds = $desas->flatMap(fn($d) => $d->tps->pluck('id'));
 
-        $rekaps  = \App\Models\RekapHeader::with(['ppwpSuaras','dpdSuaras','partaiSuaras','calegSuaras'])
+        $rekaps  = \App\Models\RekapHeader::with(['ppwpSuaras','gubernurSuaras','bupatiSuaras','dpdSuaras','partaiSuaras','calegSuaras'])
                     ->whereIn('tps_id', $tpsIds)
                     ->where('jenis', $jenis)
                     ->get();
@@ -320,7 +320,7 @@ class AdminController extends Controller
         switch ($level) {
             case 'tps':
                 $tps     = \App\Models\Tps::with('desa.kecamatan')->findOrFail($request->tps_id);
-                $rekaps  = \App\Models\RekapHeader::with(['ppwpSuaras','dpdSuaras','partaiSuaras','calegSuaras'])
+                $rekaps  = \App\Models\RekapHeader::with(['ppwpSuaras','gubernurSuaras','bupatiSuaras','dpdSuaras','partaiSuaras','calegSuaras'])
                             ->where('tps_id', $tps->id)->where('jenis', $jenis)->get();
                 $tpsList = collect([$tps]);
                 $master  = $this->getAllMaster();
@@ -332,7 +332,7 @@ class AdminController extends Controller
             case 'desa':
                 $desa    = \App\Models\Desa::with('tps', 'kecamatan')->findOrFail($request->desa_id);
                 $tpsIds  = $desa->tps->pluck('id');
-                $rekaps  = \App\Models\RekapHeader::with(['ppwpSuaras','dpdSuaras','partaiSuaras','calegSuaras'])
+                $rekaps  = \App\Models\RekapHeader::with(['ppwpSuaras','gubernurSuaras','bupatiSuaras','dpdSuaras','partaiSuaras','calegSuaras'])
                             ->whereIn('tps_id', $tpsIds)->where('jenis', $jenis)->get();
                 $tpsList = $desa->tps;
                 $master  = $this->getAllMaster();
@@ -345,7 +345,7 @@ class AdminController extends Controller
                 $kecamatan = \App\Models\Kecamatan::findOrFail($request->kecamatan_id);
                 $desas     = \App\Models\Desa::with('tps')->where('kecamatan_id', $kecamatan->id)->get();
                 $tpsIds    = $desas->flatMap(fn($d) => $d->tps->pluck('id'));
-                $rekaps    = \App\Models\RekapHeader::with(['ppwpSuaras','dpdSuaras','partaiSuaras','calegSuaras'])
+                $rekaps    = \App\Models\RekapHeader::with(['ppwpSuaras','gubernurSuaras','bupatiSuaras','dpdSuaras','partaiSuaras','calegSuaras'])
                             ->whereIn('tps_id', $tpsIds)->where('jenis', $jenis)->get();
                 $tpsList   = $desas->flatMap(fn($d) => $d->tps)->values();
                 $master    = $this->getAllMaster();
@@ -359,7 +359,7 @@ class AdminController extends Controller
             case 'kabupaten':
                 $desas   = \App\Models\Desa::with('tps')->get();
                 $tpsIds  = $desas->flatMap(fn($d) => $d->tps->pluck('id'));
-                $rekaps  = \App\Models\RekapHeader::with(['ppwpSuaras','dpdSuaras','partaiSuaras','calegSuaras'])
+                $rekaps  = \App\Models\RekapHeader::with(['ppwpSuaras','gubernurSuaras','bupatiSuaras','dpdSuaras','partaiSuaras','calegSuaras'])
                             ->whereIn('tps_id', $tpsIds)->where('jenis', $jenis)->get();
                 $tpsList = $desas->flatMap(fn($d) => $d->tps)->values();
                 $master  = $this->getAllMaster();
@@ -414,7 +414,7 @@ class AdminController extends Controller
         elseif ($dapilId) $tpsQuery->whereHas('desa.kecamatan', fn($q) => $q->where('dapil_id', $dapilId));
         $tpsIds = $tpsQuery->pluck('id');
 
-        $rekaps = \App\Models\RekapHeader::with(['ppwpSuaras.calon','dpdSuaras.calon','partaiSuaras','calegSuaras'])
+        $rekaps = \App\Models\RekapHeader::with(['ppwpSuaras.calon','gubernurSuaras.calon','bupatiSuaras.calon','dpdSuaras.calon','partaiSuaras','calegSuaras'])
                     ->whereIn('tps_id', $tpsIds)
                     ->where('jenis', $jenis)
                     ->get();

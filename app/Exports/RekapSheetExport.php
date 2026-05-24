@@ -166,17 +166,20 @@ class RekapSheetExport implements FromArray, WithTitle, WithStyles, WithColumnWi
 
         $masterJenis = $this->master[$this->jenis] ?? null;
 
-        if (in_array($this->jenis, ['ppwp', 'dpd'])) {
+        if (in_array($this->jenis, ['ppwp', 'gubernur', 'bupati', 'dpd'], true)) {
             $calons = $masterJenis['calons'] ?? collect();
             foreach ($calons as $calon) {
                 $rowTotal = 0;
-                $name     = $this->jenis === 'ppwp' ? $calon->nama_paslon : $calon->nama_calon;
+                $name     = in_array($this->jenis, ['ppwp', 'gubernur', 'bupati'], true) ? $calon->nama_paslon : $calon->nama_calon;
                 $cells    = [$calon->nomor_urut . '. ' . $name];
                 foreach ($tpsList as $tps) {
                     $r        = $rekaps[$tps->id] ?? null;
-                    $suaraMap = $r ? ($this->jenis === 'ppwp'
-                        ? $r->ppwpSuaras->pluck('suara', 'calon_id')
-                        : $r->dpdSuaras->pluck('suara', 'calon_id')) : collect();
+                    $suaraMap = $r ? match ($this->jenis) {
+                        'ppwp' => $r->ppwpSuaras->pluck('suara', 'calon_id'),
+                        'gubernur' => $r->gubernurSuaras->pluck('suara', 'calon_id'),
+                        'bupati' => $r->bupatiSuaras->pluck('suara', 'calon_id'),
+                        default => $r->dpdSuaras->pluck('suara', 'calon_id'),
+                    } : collect();
                     $s        = $suaraMap[$calon->id] ?? 0;
                     $cells[]   = $s;
                     $rowTotal += $s;

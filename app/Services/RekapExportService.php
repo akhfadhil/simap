@@ -17,40 +17,44 @@ class RekapExportService
         // 1. Export rekap TPS jenis ini
         $this->exportTps($tps, $jenis);
 
-        // 2. Cek apakah semua 5 jenis di desa ini sudah final
+        // 2. Cek apakah semua jenis aktif di desa ini sudah final
         $desa = $tps->desa;
         if ($this->isDesaFinal($desa)) {
             $this->exportDesa($desa);
         }
 
-        // 3. Cek apakah semua 5 jenis di kecamatan ini sudah final
+        // 3. Cek apakah semua jenis aktif di kecamatan ini sudah final
         $kecamatan = $desa->kecamatan;
         if ($this->isKecamatanFinal($kecamatan)) {
             $this->exportKecamatan($kecamatan);
         }
     }
 
-    // ── Cek semua TPS di desa sudah final 5 jenis ──
+    // Cek semua TPS di desa sudah final untuk semua jenis aktif.
     private function isDesaFinal(Desa $desa): bool
     {
         $tpsIds   = $desa->tps->pluck('id');
-        $required = $tpsIds->count() * 5;
+        $jenisAktif = \App\Models\PemiluSetting::aktif();
+        $required = $tpsIds->count() * count($jenisAktif);
         if ($required === 0) return false;
 
         $finalCount = RekapHeader::whereIn('tps_id', $tpsIds)
+                                 ->whereIn('jenis', $jenisAktif)
                                  ->where('status', 'final')
                                  ->count();
         return $finalCount >= $required;
     }
 
-    // ── Cek semua TPS di kecamatan sudah final 5 jenis ──
+    // Cek semua TPS di kecamatan sudah final untuk semua jenis aktif.
     private function isKecamatanFinal(Kecamatan $kecamatan): bool
     {
         $tpsIds   = $kecamatan->desas->flatMap(fn($d) => $d->tps->pluck('id'));
-        $required = $tpsIds->count() * 5;
+        $jenisAktif = \App\Models\PemiluSetting::aktif();
+        $required = $tpsIds->count() * count($jenisAktif);
         if ($required === 0) return false;
 
         $finalCount = RekapHeader::whereIn('tps_id', $tpsIds)
+                                 ->whereIn('jenis', $jenisAktif)
                                  ->where('status', 'final')
                                  ->count();
         return $finalCount >= $required;
@@ -70,7 +74,7 @@ class RekapExportService
         $filename = "{$tpsSlug}_{$jenis}_{$version}.xlsx";
         $path     = "{$dir}/{$filename}";
 
-        $rekaps  = RekapHeader::with(['ppwpSuaras','dpdSuaras','partaiSuaras','calegSuaras'])
+        $rekaps  = RekapHeader::with(['ppwpSuaras','gubernurSuaras','bupatiSuaras','dpdSuaras','partaiSuaras','calegSuaras'])
                     ->where('tps_id', $tps->id)
                     ->where('jenis', $jenis)
                     ->get();
@@ -100,7 +104,7 @@ class RekapExportService
         $path     = "{$dir}/{$filename}";
 
         $tpsIds  = $desa->tps->pluck('id');
-        $rekaps  = RekapHeader::with(['ppwpSuaras','dpdSuaras','partaiSuaras','calegSuaras'])
+        $rekaps  = RekapHeader::with(['ppwpSuaras','gubernurSuaras','bupatiSuaras','dpdSuaras','partaiSuaras','calegSuaras'])
                     ->whereIn('tps_id', $tpsIds)
                     ->get();
         $master  = $this->getAllMaster();
@@ -127,7 +131,7 @@ class RekapExportService
         $desas   = $kecamatan->desas;
         $tpsIds  = $desas->flatMap(fn($d) => $d->tps->pluck('id'));
         $tpsList = $desas->flatMap(fn($d) => $d->tps)->values();
-        $rekaps  = RekapHeader::with(['ppwpSuaras','dpdSuaras','partaiSuaras','calegSuaras'])
+        $rekaps  = RekapHeader::with(['ppwpSuaras','gubernurSuaras','bupatiSuaras','dpdSuaras','partaiSuaras','calegSuaras'])
                     ->whereIn('tps_id', $tpsIds)
                     ->get();
         $master  = $this->getAllMaster();

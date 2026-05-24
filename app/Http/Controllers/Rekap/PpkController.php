@@ -149,7 +149,7 @@ class PpkController extends Controller
         $desas     = $kecamatan->desas()->with('tps')->get();
         $tpsIds    = $desas->flatMap(fn($d) => $d->tps->pluck('id'));
 
-        $rekaps  = RekapHeader::with(['ppwpSuaras','dpdSuaras','partaiSuaras','calegSuaras'])
+        $rekaps  = RekapHeader::with(['ppwpSuaras','gubernurSuaras','bupatiSuaras','dpdSuaras','partaiSuaras','calegSuaras'])
                             ->whereIn('tps_id', $tpsIds)
                             ->where('jenis', $jenis)
                             ->get();
