@@ -16,7 +16,7 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-abstract class ImportBangorejoDprRi extends Command
+abstract class ImportBangorejoLegislative extends Command
 {
     protected const KECAMATAN = 'Bangorejo';
 
