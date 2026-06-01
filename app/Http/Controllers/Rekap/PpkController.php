@@ -1,10 +1,13 @@
 <?php
+
 namespace App\Http\Controllers\Rekap;
 
 use App\Http\Controllers\Controller;
 use App\Models\Kecamatan;
+use App\Models\RekapCellFlag;
 use App\Models\RekapHeader;
 use App\Models\Tps;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class PpkController extends Controller
@@ -13,15 +16,16 @@ class PpkController extends Controller
     public function index()
     {
         $kecamatan = $this->activeKecamatan();
-        $tpsIds    = Tps::whereHas('desa', fn($q) => $q->where('kecamatan_id', $kecamatan->id))->pluck('id');
-        $rekaps    = RekapHeader::whereIn('tps_id', $tpsIds)->get()->groupBy('jenis');
+        $tpsIds = Tps::whereHas('desa', fn ($q) => $q->where('kecamatan_id', $kecamatan->id))->pluck('id');
+        $rekaps = RekapHeader::whereIn('tps_id', $tpsIds)->get()->groupBy('jenis');
+
         return view('rekap.ppk.index', compact('kecamatan', 'rekaps'));
     }
 
     // Memastikan jenis pemilihan sedang aktif.
     private function cekAktif(string $jenis): void
     {
-        abort_if(!in_array($jenis, \App\Models\PemiluSetting::aktif()), 403, 'Jenis pemilu ini tidak aktif.');
+        abort_if(! in_array($jenis, \App\Models\PemiluSetting::aktif()), 403, 'Jenis pemilu ini tidak aktif.');
     }
 
     // Menampilkan rekap per desa dan detail TPS.
@@ -31,19 +35,19 @@ class PpkController extends Controller
         $kecamatan = $this->activeKecamatan();
         $showDetail = request()->boolean('detail');
         $detailDesaId = (int) request('detail_desa_id');
-        $tpsIds    = Tps::whereHas('desa', fn($q) => $q->where('kecamatan_id', $kecamatan->id))->pluck('id');
+        $tpsIds = Tps::whereHas('desa', fn ($q) => $q->where('kecamatan_id', $kecamatan->id))->pluck('id');
         $relations = match ($jenis) {
-            'ppwp'      => ['tps.desa', 'ppwpSuaras.calon'],
-            'gubernur'  => ['tps.desa', 'gubernurSuaras.calon'],
-            'bupati'    => ['tps.desa', 'bupatiSuaras.calon'],
-            'dpd'       => ['tps.desa', 'dpdSuaras.calon'],
-            default     => ['tps.desa', 'partaiSuaras.partai', 'calegSuaras.caleg'],
+            'ppwp' => ['tps.desa', 'ppwpSuaras.calon'],
+            'gubernur' => ['tps.desa', 'gubernurSuaras.calon'],
+            'bupati' => ['tps.desa', 'bupatiSuaras.calon'],
+            'dpd' => ['tps.desa', 'dpdSuaras.calon'],
+            default => ['tps.desa', 'partaiSuaras.partai', 'calegSuaras.caleg'],
         };
-        $rekaps    = RekapHeader::with($relations)
-                                ->whereIn('tps_id', $tpsIds)
-                                ->where('jenis', $jenis)
-                                ->get()->keyBy('tps_id');
-        $desas   = $kecamatan->desas()->with('tps')->get();
+        $rekaps = RekapHeader::with($relations)
+            ->whereIn('tps_id', $tpsIds)
+            ->where('jenis', $jenis)
+            ->get()->keyBy('tps_id');
+        $desas = $kecamatan->desas()->with('tps')->get();
         $fieldNames = [
             'dpt_lk', 'dpt_pr',
             'pengguna_dpt_lk', 'pengguna_dpt_pr',
@@ -72,7 +76,7 @@ class PpkController extends Controller
 
         foreach ($rekaps as $rekap) {
             $desaId = $tpsDesa[$rekap->tps_id] ?? null;
-            if (!$desaId) {
+            if (! $desaId) {
                 continue;
             }
 
@@ -82,10 +86,10 @@ class PpkController extends Controller
 
             if (in_array($jenis, ['ppwp', 'gubernur', 'bupati', 'dpd'], true)) {
                 $suaraRows = match ($jenis) {
-                    'ppwp'     => $rekap->ppwpSuaras,
+                    'ppwp' => $rekap->ppwpSuaras,
                     'gubernur' => $rekap->gubernurSuaras,
-                    'bupati'   => $rekap->bupatiSuaras,
-                    default    => $rekap->dpdSuaras,
+                    'bupati' => $rekap->bupatiSuaras,
+                    default => $rekap->dpdSuaras,
                 };
 
                 foreach ($suaraRows as $suara) {
@@ -124,9 +128,16 @@ class PpkController extends Controller
         $detailDesa = $desas->firstWhere('id', $detailDesaId);
         $detailDesas = $showDetail && $detailDesa ? collect([$detailDesa]) : collect();
         $detailRekaps = $showDetail
-            ? $rekaps->whereIn('tps_id', $detailDesas->flatMap(fn($desa) => $desa->tps->pluck('id'))->all())
+            ? $rekaps->whereIn('tps_id', $detailDesas->flatMap(fn ($desa) => $desa->tps->pluck('id'))->all())
             : collect();
-        $master  = $this->getMaster($jenis, $kecamatan);
+        $cellFlags = RekapCellFlag::query()
+            ->where('jenis', $jenis)
+            ->where('level', 'desa')
+            ->whereIn('entity_id', $desas->pluck('id'))
+            ->get()
+            ->keyBy(fn ($flag) => $flag->entity_id.':'.$flag->row_key);
+        $master = $this->getMaster($jenis, $kecamatan);
+
         return view('rekap.ppk.show', compact(
             'kecamatan',
             'jenis',
@@ -140,8 +151,45 @@ class PpkController extends Controller
             'desaCalonTotals',
             'desaPartaiTotals',
             'desaCalegTotals',
-            'desaPartaiGrandTotals'
+            'desaPartaiGrandTotals',
+            'cellFlags'
         ));
+    }
+
+    // Menandai/menghapus tanda merah manual pada cell agregat desa.
+    public function toggleCellFlag(Request $request, string $jenis)
+    {
+        abort_if($request->user()?->role !== 'admin', 403);
+        $this->cekAktif($jenis);
+
+        $data = $request->validate([
+            'entity_id' => ['required', 'integer', 'exists:desas,id'],
+            'row_key' => ['required', 'string', 'max:96'],
+        ]);
+
+        $kecamatan = $this->activeKecamatan();
+        $desa = $kecamatan->desas()->whereKey($data['entity_id'])->firstOrFail();
+
+        $flag = RekapCellFlag::where([
+            'jenis' => $jenis,
+            'level' => 'desa',
+            'entity_id' => $desa->id,
+            'row_key' => $data['row_key'],
+        ])->first();
+
+        if ($flag) {
+            $flag->delete();
+        } else {
+            RekapCellFlag::create([
+                'jenis' => $jenis,
+                'level' => 'desa',
+                'entity_id' => $desa->id,
+                'row_key' => $data['row_key'],
+                'flagged_by' => $request->user()->id,
+            ]);
+        }
+
+        return back();
     }
 
     // Mengekspor rekap kecamatan untuk jenis pemilihan.
@@ -149,19 +197,19 @@ class PpkController extends Controller
     {
         $this->cekAktif($jenis);
         $kecamatan = $this->activeKecamatan();
-        $desas     = $kecamatan->desas()->with('tps')->get();
-        $tpsIds    = $desas->flatMap(fn($d) => $d->tps->pluck('id'));
+        $desas = $kecamatan->desas()->with('tps')->get();
+        $tpsIds = $desas->flatMap(fn ($d) => $d->tps->pluck('id'));
 
-        $rekaps  = RekapHeader::with(['ppwpSuaras','gubernurSuaras','bupatiSuaras','dpdSuaras','partaiSuaras','calegSuaras'])
-                            ->whereIn('tps_id', $tpsIds)
-                            ->where('jenis', $jenis)
-                            ->get();
+        $rekaps = RekapHeader::with(['ppwpSuaras', 'gubernurSuaras', 'bupatiSuaras', 'dpdSuaras', 'partaiSuaras', 'calegSuaras'])
+            ->whereIn('tps_id', $tpsIds)
+            ->where('jenis', $jenis)
+            ->get();
 
-        $tpsList = $desas->flatMap(fn($d) => $d->tps)->values();
-        $master  = $this->getAllMaster($kecamatan);
-        $label   = \App\Models\RekapHeader::JENIS_LABELS[$jenis];
-        $wilayah = 'Kec. ' . $kecamatan->nama;
-        $filename = 'Rekap_' . strtoupper($jenis) . '_PPK_' . str_replace(' ', '_', $kecamatan->nama) . '.xlsx';
+        $tpsList = $desas->flatMap(fn ($d) => $d->tps)->values();
+        $master = $this->getAllMaster($kecamatan);
+        $label = \App\Models\RekapHeader::JENIS_LABELS[$jenis];
+        $wilayah = 'Kec. '.$kecamatan->nama;
+        $filename = 'Rekap_'.strtoupper($jenis).'_PPK_'.str_replace(' ', '_', $kecamatan->nama).'.xlsx';
 
         return \Maatwebsite\Excel\Facades\Excel::download(
             new \App\Exports\RekapExport($rekaps, $master, $tpsList, 'ppk', $wilayah, $desas, $jenis),
@@ -172,10 +220,18 @@ class PpkController extends Controller
     // Mengambil master data sesuai jenis pemilihan.
     private function getMaster(string $jenis, Kecamatan $kecamatan): array
     {
-        if ($jenis === 'ppwp')     return ['calons' => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get()];
-        if ($jenis === 'gubernur') return ['calons' => \App\Models\RekapGubernurCalon::orderBy('nomor_urut')->get()];
-        if ($jenis === 'bupati')   return ['calons' => \App\Models\RekapBupatiCalon::orderBy('nomor_urut')->get()];
-        if ($jenis === 'dpd')      return ['calons' => \App\Models\RekapDpdCalon::orderBy('nomor_urut')->get()];
+        if ($jenis === 'ppwp') {
+            return ['calons' => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get()];
+        }
+        if ($jenis === 'gubernur') {
+            return ['calons' => \App\Models\RekapGubernurCalon::orderBy('nomor_urut')->get()];
+        }
+        if ($jenis === 'bupati') {
+            return ['calons' => \App\Models\RekapBupatiCalon::orderBy('nomor_urut')->get()];
+        }
+        if ($jenis === 'dpd') {
+            return ['calons' => \App\Models\RekapDpdCalon::orderBy('nomor_urut')->get()];
+        }
         $partais = \App\Models\RekapPartai::with('calegs')->where('jenis', $jenis);
 
         if ($jenis === 'dprd_kab') {
@@ -189,13 +245,13 @@ class PpkController extends Controller
     private function getAllMaster(Kecamatan $kecamatan): array
     {
         return [
-            'ppwp'      => ['calons'  => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get()],
-            'gubernur'  => ['calons'  => \App\Models\RekapGubernurCalon::orderBy('nomor_urut')->get()],
-            'bupati'    => ['calons'  => \App\Models\RekapBupatiCalon::orderBy('nomor_urut')->get()],
-            'dpd'       => ['calons'  => \App\Models\RekapDpdCalon::orderBy('nomor_urut')->get()],
-            'dpr_ri'    => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis','dpr_ri')->orderBy('nomor_urut')->get()],
-            'dprd_prov' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis','dprd_prov')->orderBy('nomor_urut')->get()],
-            'dprd_kab'  => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis','dprd_kab')->where('dapil_id', $kecamatan->dapil_id)->orderBy('nomor_urut')->get()],
+            'ppwp' => ['calons' => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get()],
+            'gubernur' => ['calons' => \App\Models\RekapGubernurCalon::orderBy('nomor_urut')->get()],
+            'bupati' => ['calons' => \App\Models\RekapBupatiCalon::orderBy('nomor_urut')->get()],
+            'dpd' => ['calons' => \App\Models\RekapDpdCalon::orderBy('nomor_urut')->get()],
+            'dpr_ri' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dpr_ri')->orderBy('nomor_urut')->get()],
+            'dprd_prov' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dprd_prov')->orderBy('nomor_urut')->get()],
+            'dprd_kab' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dprd_kab')->where('dapil_id', $kecamatan->dapil_id)->orderBy('nomor_urut')->get()],
         ];
     }
 
@@ -204,11 +260,12 @@ class PpkController extends Controller
         $user = Auth::user();
 
         if ($user->role === 'admin') {
-            abort_if(!session('admin_view_kecamatan_id'), 403, 'Pilih kecamatan yang ingin dilihat.');
+            abort_if(! session('admin_view_kecamatan_id'), 403, 'Pilih kecamatan yang ingin dilihat.');
+
             return Kecamatan::findOrFail(session('admin_view_kecamatan_id'));
         }
 
-        abort_if(!$user->kecamatan_id, 403, 'Akun belum di-assign ke Kecamatan.');
+        abort_if(! $user->kecamatan_id, 403, 'Akun belum di-assign ke Kecamatan.');
 
         return Kecamatan::findOrFail($user->kecamatan_id);
     }

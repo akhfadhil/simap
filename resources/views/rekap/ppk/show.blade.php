@@ -78,6 +78,32 @@
             ? ($stats[$row['field']] ?? 0)
             : collect($row['sum'])->sum(fn($f) => $stats[$f] ?? 0);
     };
+
+    $canFlagDesaCells = Auth::user()->role === 'admin';
+    $rowKeyFor = fn($row) => isset($row['field']) ? $row['field'] : 'sum:' . implode('+', $row['sum']);
+    $renderDesaCell = function($desa, string $rowKey, $value, string $baseClass = '') use ($cellFlags, $canFlagDesaCells, $jenis) {
+        $flagged = $cellFlags->has($desa->id . ':' . $rowKey);
+        $classes = trim($baseClass . ' relative group ' . ($flagged
+            ? 'bg-red-500/20 text-red-600 dark:bg-red-500/20 dark:text-red-200 ring-1 ring-inset ring-red-400/60'
+            : ''));
+        $content = is_null($value) ? '&mdash;' : number_format($value);
+        $button = '';
+
+        if ($canFlagDesaCells) {
+            $buttonClass = $flagged
+                ? 'opacity-100 bg-red-500 text-white border-red-500'
+                : 'opacity-0 group-hover:opacity-100 bg-white dark:bg-gray-900 text-red-500 border-red-400';
+            $buttonTitle = $flagged ? 'Hapus tanda merah' : 'Tandai merah';
+            $button = '<form method="POST" action="' . e(route('ppk.rekap.cell-flag', $jenis)) . '" class="absolute top-1 right-1 transition-opacity ' . ($flagged ? 'opacity-100' : 'opacity-0 group-hover:opacity-100') . '">'
+                . csrf_field()
+                . '<input type="hidden" name="entity_id" value="' . e($desa->id) . '">'
+                . '<input type="hidden" name="row_key" value="' . e($rowKey) . '">'
+                . '<button type="submit" title="' . e($buttonTitle) . '" class="block w-4 h-4 rounded-full border text-[10px] leading-3 font-bold ' . $buttonClass . '">!</button>'
+                . '</form>';
+        }
+
+        return new \Illuminate\Support\HtmlString('<td class="' . e($classes) . '"><span>' . $content . '</span>' . $button . '</td>');
+    };
 @endphp
 
 {{-- ══════════════════════════════════════
@@ -118,7 +144,7 @@
                 <td class="px-5 py-2 text-sm {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-800' : 'dark:text-gray-300 text-gray-600' }}">{{ $row['label'] }}</td>
                 @foreach($desas as $desa)
                 @php $val = $getDesaVal($desa, $row); $rowTotal += $val; @endphp
-                <td class="px-3 py-2 text-center {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500' }}">{{ number_format($val) }}</td>
+                {!! $renderDesaCell($desa, $rowKeyFor($row), $val, 'px-3 py-2 text-center ' . ($isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500')) !!}
                 @endforeach
                 <td class="px-3 py-2 text-center font-bold text-orange-400">{{ number_format($rowTotal) }}</td>
             </tr>
@@ -158,7 +184,7 @@
                     $val = $desaCalonTotals[$desa->id][$calon->id] ?? 0;
                     $rowTotal += $val;
                 @endphp
-                <td class="px-3 py-2.5 text-center dark:text-gray-400 text-gray-500">{{ number_format($val) }}</td>
+                {!! $renderDesaCell($desa, 'calon:' . $calon->id, $val, 'px-3 py-2.5 text-center dark:text-gray-400 text-gray-500') !!}
                 @endforeach
                 <td class="px-3 py-2.5 text-center font-bold text-orange-400">{{ number_format($rowTotal) }}</td>
             </tr>
@@ -189,7 +215,7 @@
                     <td class="px-5 py-2 text-xs font-bold dark:text-gray-300 text-gray-700 uppercase">Suara Partai</td>
                     @foreach($desas as $desa)
                     @php $spDesa = $desaPartaiTotals[$desa->id][$partai->id] ?? 0; $partaiRowTotal += $spDesa; @endphp
-                    <td class="px-3 py-2 text-center dark:text-gray-400 text-gray-500">{{ number_format($spDesa) }}</td>
+                    {!! $renderDesaCell($desa, 'partai:' . $partai->id, $spDesa, 'px-3 py-2 text-center dark:text-gray-400 text-gray-500') !!}
                     @endforeach
                     <td class="px-3 py-2 text-center font-bold text-orange-400">{{ number_format($partaiRowTotal) }}</td>
                 </tr>
@@ -199,7 +225,7 @@
                     <td class="px-5 py-2"><div class="flex items-center gap-2"><span class="text-xs dark:text-gray-500 text-gray-400 w-4">{{ $caleg->nomor_urut }}.</span><span class="text-sm dark:text-gray-200 text-gray-700">{{ $caleg->nama_caleg }}</span></div></td>
                     @foreach($desas as $desa)
                     @php $scDesa = $desaCalegTotals[$desa->id][$caleg->id] ?? 0; $calegRowTotal += $scDesa; @endphp
-                    <td class="px-3 py-2 text-center dark:text-gray-400 text-gray-500">{{ number_format($scDesa) }}</td>
+                    {!! $renderDesaCell($desa, 'caleg:' . $caleg->id, $scDesa, 'px-3 py-2 text-center dark:text-gray-400 text-gray-500') !!}
                     @endforeach
                     <td class="px-3 py-2 text-center font-bold text-teal-400">{{ number_format($calegRowTotal) }}</td>
                 </tr>
@@ -209,7 +235,7 @@
                     <td class="px-5 py-2 text-xs font-bold dark:text-gray-300 text-gray-700 uppercase">Total Suara Sah</td>
                     @foreach($desas as $desa)
                     @php $colTotal = $desaPartaiGrandTotals[$desa->id][$partai->id] ?? 0; $grandTotal += $colTotal; @endphp
-                    <td class="px-3 py-2 text-center font-bold text-teal-400">{{ number_format($colTotal) }}</td>
+                    {!! $renderDesaCell($desa, 'partai_total:' . $partai->id, $colTotal, 'px-3 py-2 text-center font-bold text-teal-400') !!}
                     @endforeach
                     <td class="px-3 py-2 text-center font-bold text-teal-400">{{ number_format($grandTotal) }}</td>
                 </tr>
@@ -244,7 +270,7 @@
                 <td class="px-5 py-2 text-sm dark:text-gray-300 text-gray-600">{{ $row['label'] }}</td>
                 @foreach($desas as $desa)
                 @php $val = $getDesaVal($desa, $row); $rowTotal += $val; @endphp
-                <td class="px-3 py-2 text-center dark:text-gray-400 text-gray-500">{{ number_format($val) }}</td>
+                {!! $renderDesaCell($desa, $rowKeyFor($row), $val, 'px-3 py-2 text-center dark:text-gray-400 text-gray-500') !!}
                 @endforeach
                 <td class="px-3 py-2 text-center font-bold text-orange-400">{{ number_format($rowTotal) }}</td>
             </tr>
@@ -254,7 +280,7 @@
                 <td class="px-5 py-2 text-sm font-bold dark:text-gray-200 text-gray-800">Jumlah Seluruh Suara</td>
                 @foreach($desas as $desa)
                 @php $val = $desaStats[$desa->id]['suara_total'] ?? 0; $rowTotalAll += $val; @endphp
-                <td class="px-3 py-2 text-center font-bold dark:text-gray-200 text-gray-700">{{ number_format($val) }}</td>
+                {!! $renderDesaCell($desa, 'suara_total', $val, 'px-3 py-2 text-center font-bold dark:text-gray-200 text-gray-700') !!}
                 @endforeach
                 <td class="px-3 py-2 text-center font-bold text-orange-400">{{ number_format($rowTotalAll) }}</td>
             </tr>

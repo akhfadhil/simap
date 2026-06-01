@@ -23,15 +23,25 @@ class RoleHierarchyAccessTest extends TestCase
     use RefreshDatabase;
 
     private Kecamatan $kecamatanA;
+
     private Kecamatan $kecamatanB;
+
     private Desa $desaA;
+
     private Desa $desaB;
+
     private Tps $tpsA;
+
     private Tps $tpsB;
+
     private User $admin;
+
     private User $komisioner;
+
     private User $ppkA;
+
     private User $ppsA;
+
     private User $kppsA;
 
     protected function setUp(): void
@@ -227,6 +237,52 @@ class RoleHierarchyAccessTest extends TestCase
             'rekap_id' => $rekap->id,
             'calon_id' => $calon->id,
             'suara' => 33,
+        ]);
+    }
+
+    public function test_admin_can_toggle_manual_red_flag_on_desa_rekap_cell(): void
+    {
+        $this->actingAs($this->admin)
+            ->withSession(['admin_view_kecamatan_id' => $this->kecamatanA->id])
+            ->post(route('ppk.rekap.cell-flag', 'ppwp'), [
+                'entity_id' => $this->desaA->id,
+                'row_key' => 'pengguna_dpk_lk',
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('rekap_cell_flags', [
+            'jenis' => 'ppwp',
+            'level' => 'desa',
+            'entity_id' => $this->desaA->id,
+            'row_key' => 'pengguna_dpk_lk',
+            'flagged_by' => $this->admin->id,
+        ]);
+
+        $this->actingAs($this->ppkA)
+            ->get(route('ppk.rekap.show', 'ppwp'))
+            ->assertOk()
+            ->assertSee('bg-red-500/20', false);
+
+        $this->actingAs($this->ppkA)
+            ->post(route('ppk.rekap.cell-flag', 'ppwp'), [
+                'entity_id' => $this->desaA->id,
+                'row_key' => 'pengguna_dpk_lk',
+            ])
+            ->assertForbidden();
+
+        $this->actingAs($this->admin)
+            ->withSession(['admin_view_kecamatan_id' => $this->kecamatanA->id])
+            ->post(route('ppk.rekap.cell-flag', 'ppwp'), [
+                'entity_id' => $this->desaA->id,
+                'row_key' => 'pengguna_dpk_lk',
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseMissing('rekap_cell_flags', [
+            'jenis' => 'ppwp',
+            'level' => 'desa',
+            'entity_id' => $this->desaA->id,
+            'row_key' => 'pengguna_dpk_lk',
         ]);
     }
 
@@ -448,7 +504,7 @@ class RoleHierarchyAccessTest extends TestCase
     {
         return User::create(array_merge([
             'name' => strtoupper($role),
-            'username' => $role . '_' . uniqid(),
+            'username' => $role.'_'.uniqid(),
             'role' => $role,
             'password' => 'password',
         ], $attributes));
