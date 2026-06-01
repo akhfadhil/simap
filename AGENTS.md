@@ -19,13 +19,12 @@ This is a Laravel 12 application. Core PHP code lives in `app/`: controllers and
 Bangorejo Excel import helpers live in `app/Console/Commands`. Run them with `--dry-run` first to validate rows and review automatic corrections before writing to the database.
 
 - `php artisan import:ppwp-folder --dry-run`
-- `php artisan import:bangorejo-ppwp --dry-run`
-- `php artisan import:bangorejo-dpd --dry-run`
+- `php artisan import:dpd-folder --dry-run`
 - `php artisan import:bangorejo-dpr-ri --dry-run`
 - `php artisan import:bangorejo-dprd-prov --dry-run`
 - `php artisan import:bangorejo-dprd-kab --dry-run`
 
-`import:ppwp-folder` is a temporary historical-data helper for a folder of PPWP Excel files where each file is one kecamatan and each sheet is one desa. Each command accepts an optional path argument, for example `php artisan import:ppwp-folder "storage/import/PPWP" --dry-run` or `php artisan import:bangorejo-ppwp "storage/import/PPWP/PPWP - BANGOREJO.xlsx" --dry-run`.
+`import:ppwp-folder` and `import:dpd-folder` are temporary historical-data helpers for folders of Excel files where each file is one kecamatan and each sheet is one desa. Each command accepts an optional path argument, for example `php artisan import:ppwp-folder "storage/import/PPWP" --dry-run` or `php artisan import:dpd-folder "storage/import/DPD" --dry-run`.
 
 ## Coding Style & Naming Conventions
 
