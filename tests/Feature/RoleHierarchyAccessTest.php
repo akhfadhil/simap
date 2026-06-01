@@ -263,6 +263,11 @@ class RoleHierarchyAccessTest extends TestCase
             ->assertOk()
             ->assertSee('bg-red-500/20', false);
 
+        $this->actingAs($this->ppsA)
+            ->get(route('pps.rekap.show', 'ppwp'))
+            ->assertOk()
+            ->assertSee('bg-red-500/20', false);
+
         $this->actingAs($this->ppkA)
             ->post(route('ppk.rekap.cell-flag', 'ppwp'), [
                 'entity_id' => $this->desaA->id,

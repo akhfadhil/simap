@@ -25,7 +25,7 @@ SIMAP adalah aplikasi Laravel untuk pengelolaan arsip dokumen pemilu dan rekapit
 | `pps` | Desa/Kelurahan | Lihat rekap desa, export, verifikasi dokumen TPS, memantau KPPS di desa sendiri |
 | `kpps` | TPS | Input rekap TPS, simpan draft/final, export TPS, upload dokumen TPS |
 
-Hierarki akses: `admin` dapat mengakses semua wilayah, `ppk` dapat melihat PPS/KPPS di bawah kecamatannya, `pps` dapat melihat KPPS di bawah desanya, dan `kpps` hanya dapat mengakses TPS miliknya. Akses turun level untuk PPK/PPS bersifat lihat saja; perubahan rekapitulasi data hanya dapat dilakukan oleh KPPS.
+Hierarki akses: `admin` dapat mengakses semua wilayah, `ppk` dapat melihat PPS/KPPS di bawah kecamatannya, `pps` dapat melihat KPPS di bawah desanya, dan `kpps` hanya dapat mengakses TPS miliknya. Akses turun level untuk PPK/PPS bersifat lihat saja; perubahan rekapitulasi data normal dilakukan oleh KPPS. Admin memiliki akses koreksi rekap sementara untuk membuka form rekap TPS dari halaman rekap admin.
 
 Admin juga bisa memakai mode "view as" untuk melihat konteks PPK, PPS, atau KPPS melalui session wilayah. Mode view menampilkan info konteks dan tombol kembali pada halaman beranda serta rekap dokumen.
 
@@ -85,9 +85,11 @@ Jenis pemilihan didefinisikan di `App\Models\RekapHeader::JENIS_LABELS` dan dapa
 - KPPS mengisi rekap per TPS dan per jenis pemilihan.
 - Status rekap: `draft` dan `final`.
 - Admin bisa unlock rekap yang sudah final agar dapat diedit ulang; komisioner tidak dapat unlock.
+- Admin bisa membuka form koreksi rekap TPS dari detail rekap admin dan menyimpan perubahan langsung. Rekap final tetap berstatus final setelah dikoreksi admin.
 - Rekap PPS menampilkan agregasi desa.
 - Rekap PPK menampilkan agregasi kecamatan.
 - Rekap Admin/Komisioner menampilkan agregasi kabupaten, filter/level wilayah, summary, dan export.
+- Admin dapat memberi atau menghapus penanda koreksi manual pada cell rekap tingkat desa di halaman PPK. Cell yang ditandai tampil merah di PPK dan di halaman PPS pada kolom total desa; PPS/PPK hanya melihat tanda tersebut.
 - Export Excel tersedia untuk KPPS, PPS, PPK, Admin, dan Komisioner sesuai akses baca masing-masing.
 - `RekapExportService` membuat export bertingkat ketika rekap final memenuhi syarat.
 - `RekapAdminCache` menyimpan agregasi admin sementara selama 10 menit dan dapat di-flush saat data berubah.
@@ -118,6 +120,7 @@ Migrasi utama saat ini mencakup:
 - Setting pemilu: `pemilu_settings`.
 - Master calon/partai: `rekap_ppwp_calons`, `rekap_gubernur_calons`, `rekap_bupati_calons`, `rekap_dpd_calons`, `rekap_partais`, `rekap_calegs`.
 - Rekap: `rekap_headers`, `rekap_ppwp_suaras`, `rekap_gubernur_suaras`, `rekap_bupati_suaras`, `rekap_dpd_suaras`, `rekap_partai_suaras`, `rekap_caleg_suaras`.
+- Penanda koreksi manual rekap: `rekap_cell_flags`.
 - Infrastruktur Laravel: cache, jobs, dan tabel pendukung default.
 - Index performa rekap ditambahkan pada migrasi `2026_05_20_*`.
 
@@ -126,6 +129,12 @@ Kolom penting `rekap_headers`:
 - `tps_id`, `jenis`, `status`, `diinput_oleh`, `difinalisasi_at`.
 - DPT, pengguna hak pilih, surat suara, disabilitas, dan `suara_tidak_sah`.
 - Unique key `tps_id + jenis`.
+
+Kolom penting `rekap_cell_flags`:
+
+- `jenis`, `level`, `entity_id`, `row_key`.
+- `level=desa` dipakai untuk menandai cell agregat desa pada rekap PPK/PPS.
+- Unique key `jenis + level + entity_id + row_key`.
 
 Kolom penting `dokumens`:
 
@@ -173,9 +182,18 @@ php artisan backup:dokumen --dry-run
 
 # Restore dokumen arsip berdasarkan ID dokumen
 php artisan restore:dokumen {id}
+
+# Import data rekap Bangorejo dari Excel per TPS
+php artisan import:bangorejo-ppwp --dry-run
+php artisan import:bangorejo-dpd --dry-run
+php artisan import:bangorejo-dpr-ri --dry-run
+php artisan import:bangorejo-dprd-prov --dry-run
+php artisan import:bangorejo-dprd-kab --dry-run
 ```
 
 Scheduler menjalankan backup dokumen harian melalui `app/Console/Kernel.php`.
+
+Jalankan command import Bangorejo dengan `--dry-run` terlebih dahulu untuk memvalidasi baris yang terbaca dan melihat koreksi otomatis sebelum menulis ke database. Setiap command menerima argumen path Excel opsional, misalnya `php artisan import:bangorejo-ppwp "storage/imports/PPWP - BANGOREJO.xlsx" --dry-run`.
 
 ## Routes Penting
 
@@ -248,6 +266,7 @@ GET /pps/rekap/{jenis}/export
 GET /ppk/rekap
 GET /ppk/rekap/{jenis}
 GET /ppk/rekap/{jenis}/export
+POST /ppk/rekap/{jenis}/cell-flag  admin only
 
 // Rekap Admin/Komisioner
 GET  /admin/rekap
@@ -255,6 +274,7 @@ GET  /admin/rekap/chart
 GET  /admin/rekap/chart/data
 GET  /admin/rekap/export/download
 POST /admin/rekap/{jenis}/unlock   admin only
+GET  /admin/rekap/{jenis}/edit-tps/{tps}   admin only
 GET  /admin/rekap/{jenis}/export
 GET  /admin/rekap/{jenis}
 ```
@@ -267,6 +287,11 @@ app/
     Kernel.php
     Commands/BackupDokumen.php
     Commands/RestoreDokumen.php
+    Commands/ImportBangorejoPpwp.php
+    Commands/ImportBangorejoDpd.php
+    Commands/ImportBangorejoDprRi.php
+    Commands/ImportBangorejoDprdProv.php
+    Commands/ImportBangorejoDprdKab.php
   Http/
     Controllers/
       AuthController.php
@@ -287,6 +312,7 @@ app/
     Middleware/RoleMiddleware.php
   Models/
     RekapHeader.php
+    RekapCellFlag.php
     PemiluSetting.php
     Dokumen.php
     Dapil.php

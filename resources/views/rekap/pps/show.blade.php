@@ -26,6 +26,17 @@
     $totalDpt    = $rekaps->sum(fn($r) => $r->dpt_lk + $r->dpt_pr);
     $totalHadir  = $rekaps->sum(fn($r) => $r->total_pengguna_lk + $r->total_pengguna_pr);
     $totalTdkSah = $rekaps->sum('suara_tidak_sah');
+
+    $rowKeyFor = fn($row) => isset($row['field']) && $row['field'] ? $row['field'] : 'sum:' . implode('+', $row['sum']);
+    $renderFlaggedTotalCell = function(string $rowKey, $value, string $baseClass = '') use ($cellFlags) {
+        $flagged = $cellFlags->has($rowKey);
+        $classes = trim($baseClass . ' ' . ($flagged
+            ? 'bg-red-500/20 text-red-600 dark:bg-red-500/20 dark:text-red-200 ring-1 ring-inset ring-red-400/60'
+            : ''));
+        $content = is_null($value) ? '&mdash;' : number_format($value);
+
+        return new \Illuminate\Support\HtmlString('<td class="' . e($classes) . '">' . $content . '</td>');
+    };
 @endphp
 <div class="grid grid-cols-3 gap-4 mb-8">
     <div class="dark:bg-gray-800 bg-white rounded-xl p-5 border dark:border-gray-700 border-gray-200 shadow-sm">
@@ -103,7 +114,7 @@
                     {{ $r ? number_format($val) : '—' }}
                 </td>
                 @endforeach
-                <td class="px-3 py-2.5 text-center font-bold text-teal-400">{{ number_format($rowTotal) }}</td>
+                {!! $renderFlaggedTotalCell($rowKeyFor($row), $rowTotal, 'px-3 py-2.5 text-center font-bold text-teal-400') !!}
             </tr>
             @endforeach
             </tbody>
@@ -150,7 +161,7 @@
                     {{ $r ? number_format($val) : '—' }}
                 </td>
                 @endforeach
-                <td class="px-3 py-2.5 text-center font-bold text-teal-400">{{ number_format($rowTotal) }}</td>
+                {!! $renderFlaggedTotalCell($rowKeyFor($row), $rowTotal, 'px-3 py-2.5 text-center font-bold text-teal-400') !!}
             </tr>
             @endforeach
             </tbody>
@@ -200,7 +211,7 @@
                     {{ $r ? number_format($val) : '—' }}
                 </td>
                 @endforeach
-                <td class="px-3 py-2.5 text-center font-bold text-teal-400">{{ number_format($rowTotal) }}</td>
+                {!! $renderFlaggedTotalCell($rowKeyFor($row), $rowTotal, 'px-3 py-2.5 text-center font-bold text-teal-400') !!}
             </tr>
             @endforeach
             </tbody>
@@ -256,7 +267,7 @@
                 @endphp
                 <td class="px-3 py-3 text-center font-semibold dark:text-gray-200 text-gray-700">{{ $r ? number_format($s ?? 0) : '—' }}</td>
                 @endforeach
-                <td class="px-3 py-3 text-center font-bold text-teal-400">{{ number_format($rowTotal) }}</td>
+                {!! $renderFlaggedTotalCell('calon:' . $calon->id, $rowTotal, 'px-3 py-3 text-center font-bold text-teal-400') !!}
             </tr>
             @endforeach
             </tbody>
@@ -289,7 +300,7 @@
                     @php $r = $rekaps[$tps->id] ?? null; $sp = $r ? ($r->partaiSuaras->firstWhere('partai_id', $partai->id)?->suara ?? 0) : null; $partaiRowTotal += $sp ?? 0; @endphp
                     <td class="px-3 py-2.5 text-center font-semibold dark:text-gray-200 text-gray-700">{{ $r ? number_format($sp) : '—' }}</td>
                     @endforeach
-                    <td class="px-3 py-2.5 text-center font-bold text-orange-400">{{ number_format($partaiRowTotal) }}</td>
+                    {!! $renderFlaggedTotalCell('partai:' . $partai->id, $partaiRowTotal, 'px-3 py-2.5 text-center font-bold text-orange-400') !!}
                 </tr>
                 @foreach($partai->calegs as $caleg)
                 @php $calegRowTotal = 0; @endphp
@@ -304,7 +315,7 @@
                     @php $r = $rekaps[$tps->id] ?? null; $sc = $r ? ($r->calegSuaras->firstWhere('caleg_id', $caleg->id)?->suara ?? 0) : null; $calegRowTotal += $sc ?? 0; @endphp
                     <td class="px-3 py-2.5 text-center dark:text-gray-400 text-gray-500">{{ $r ? number_format($sc) : '—' }}</td>
                     @endforeach
-                    <td class="px-3 py-2.5 text-center font-bold text-teal-400">{{ number_format($calegRowTotal) }}</td>
+                    {!! $renderFlaggedTotalCell('caleg:' . $caleg->id, $calegRowTotal, 'px-3 py-2.5 text-center font-bold text-teal-400') !!}
                 </tr>
                 @endforeach
                 @php $grandTotal = 0; @endphp
@@ -314,7 +325,7 @@
                     @php $r = $rekaps[$tps->id] ?? null; $sp = $r ? ($r->partaiSuaras->firstWhere('partai_id', $partai->id)?->suara ?? 0) : 0; $sc_sum = $r ? $r->calegSuaras->whereIn('caleg_id', $partai->calegs->pluck('id'))->sum('suara') : 0; $colTotal = $r ? ($sp + $sc_sum) : null; $grandTotal += $colTotal ?? 0; @endphp
                     <td class="px-3 py-2.5 text-center font-bold text-teal-400">{{ $r ? number_format($colTotal) : '—' }}</td>
                     @endforeach
-                    <td class="px-3 py-2.5 text-center font-bold text-teal-400">{{ number_format($grandTotal) }}</td>
+                    {!! $renderFlaggedTotalCell('partai_total:' . $partai->id, $grandTotal, 'px-3 py-2.5 text-center font-bold text-teal-400') !!}
                 </tr>
                 </tbody>
             </table>
@@ -351,7 +362,7 @@
                 @php $r = $rekaps[$tps->id] ?? null; $sah = $r ? $r->suara_sah : null; $rowTotalSah += $sah ?? 0; @endphp
                 <td class="px-3 py-2.5 text-center dark:text-gray-400 text-gray-500">{{ $r ? number_format($sah) : '—' }}</td>
                 @endforeach
-                <td class="px-3 py-2.5 text-center font-bold text-teal-400">{{ number_format($rowTotalSah) }}</td>
+                {!! $renderFlaggedTotalCell('suara_sah', $rowTotalSah, 'px-3 py-2.5 text-center font-bold text-teal-400') !!}
             </tr>
             {{-- Suara tidak sah --}}
             @php $rowTotalTdk = 0; @endphp
@@ -361,7 +372,7 @@
                 @php $r = $rekaps[$tps->id] ?? null; $tdk = $r ? $r->suara_tidak_sah : null; $rowTotalTdk += $tdk ?? 0; @endphp
                 <td class="px-3 py-2.5 text-center dark:text-gray-400 text-gray-500">{{ $r ? number_format($tdk) : '—' }}</td>
                 @endforeach
-                <td class="px-3 py-2.5 text-center font-bold text-teal-400">{{ number_format($rowTotalTdk) }}</td>
+                {!! $renderFlaggedTotalCell('suara_tidak_sah', $rowTotalTdk, 'px-3 py-2.5 text-center font-bold text-teal-400') !!}
             </tr>
             {{-- Total --}}
             @php $rowTotalAll = 0; @endphp
@@ -371,7 +382,7 @@
                 @php $r = $rekaps[$tps->id] ?? null; $all = $r ? ($r->suara_sah + $r->suara_tidak_sah) : null; $rowTotalAll += $all ?? 0; @endphp
                 <td class="px-3 py-2.5 text-center font-bold dark:text-gray-200 text-gray-700">{{ $r ? number_format($all) : '—' }}</td>
                 @endforeach
-                <td class="px-3 py-2.5 text-center font-bold text-teal-400">{{ number_format($rowTotalAll) }}</td>
+                {!! $renderFlaggedTotalCell('suara_total', $rowTotalAll, 'px-3 py-2.5 text-center font-bold text-teal-400') !!}
             </tr>
             {{-- Status --}}
             <tr class="dark:bg-gray-700/10 bg-gray-50 border-t dark:border-gray-700 border-gray-200">
