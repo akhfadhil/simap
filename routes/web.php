@@ -165,6 +165,7 @@ Route::middleware('auth')->group(function () {
         Route::get('chart',               [App\Http\Controllers\Rekap\AdminController::class, 'chartPage'])->name('chart');      
         Route::get('chart/data',          [App\Http\Controllers\Rekap\AdminController::class, 'chartData'])->name('chart.data');
         Route::get('export/download',     [App\Http\Controllers\Rekap\AdminController::class, 'exportDownload'])->name('export.download'); // ← tambah, SEBELUM {jenis}
+        Route::get('{jenis}/edit-tps/{tps}', [App\Http\Controllers\Rekap\AdminController::class, 'editTps'])->middleware('role:admin')->name('edit-tps');
         Route::get('{jenis}/export',      [App\Http\Controllers\Rekap\AdminController::class, 'export'])->name('export');
         Route::get('{jenis}',             [App\Http\Controllers\Rekap\AdminController::class, 'show'])->name('show');
     });

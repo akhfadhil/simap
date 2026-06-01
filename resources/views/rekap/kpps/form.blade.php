@@ -2,8 +2,14 @@
 @section('title', 'Isi Rekap ' . \App\Models\RekapHeader::JENIS_LABELS[$jenis])
 
 @section('content')
+@php
+    $isAdminRekapEdit = Auth::user()->role === 'admin';
+    $backUrl = $isAdminRekapEdit
+        ? (session('admin_rekap_return_url') ?: route('admin.rekap.show', $jenis))
+        : route('rekap.index');
+@endphp
 <div class="mb-6">
-    <a href="{{ route('rekap.index') }}"
+    <a href="{{ $backUrl }}"
        class="inline-flex items-center gap-2 text-xs dark:text-gray-500 text-gray-400 hover:text-red-500 transition font-medium mb-4">
         ← Kembali
     </a>
@@ -39,12 +45,16 @@
 @endif
 
 @php
-    $canEditRekap = Auth::user()->role === 'kpps';
+    $canEditRekap = Auth::user()->role === 'kpps' || $isAdminRekapEdit;
     $isFinal = $rekap && $rekap->status === 'final';
-    $readOnly = !$canEditRekap || $isFinal;
+    $readOnly = !$canEditRekap || ($isFinal && !$isAdminRekapEdit);
 @endphp
 
-@if(!$canEditRekap)
+@if($isAdminRekapEdit)
+<div class="dark:bg-red-950 bg-red-50 border dark:border-red-900 border-red-200 px-5 py-3 mb-6 rounded-lg">
+    <p class="text-xs font-semibold text-red-500">Mode koreksi admin sementara. Perubahan langsung mengubah data suara TPS ini.</p>
+</div>
+@elseif(!$canEditRekap)
 <div class="dark:bg-orange-950 bg-orange-50 border dark:border-orange-900 border-orange-200 px-5 py-3 mb-6 rounded-lg">
     <p class="text-xs font-semibold text-orange-500">Mode lihat saja. Rekapitulasi data hanya bisa diubah oleh KPPS pemilik TPS.</p>
 </div>
@@ -301,7 +311,14 @@
 </div>
 
 {{-- Tombol Aksi --}}
-@if($canEditRekap && !$isFinal)
+@if($isAdminRekapEdit)
+<div class="flex gap-3">
+    <button type="submit"
+            class="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded-xl text-sm transition">
+        Simpan Perubahan Admin
+    </button>
+</div>
+@elseif($canEditRekap && !$isFinal)
 <div class="flex gap-3">
     <button type="submit"
             class="flex-1 bg-sky-500 hover:bg-sky-600 text-white font-semibold py-3 rounded-xl text-sm transition">

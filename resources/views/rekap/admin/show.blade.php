@@ -561,18 +561,40 @@
                     @foreach($desa->tps as $tps)
                     @php $r = $detailRekaps[$tps->id] ?? null; @endphp
                     <td class="px-3 py-1.5 text-center">
-                        @if(!$r) <span class="text-[9px] px-2 py-1 rounded font-semibold bg-gray-500/20 dark:text-gray-400 text-gray-500 border border-gray-400/30">Kosong</span>
+                        @if(!$r)
+                            <div class="flex flex-col items-center gap-1">
+                                <span class="text-[9px] px-2 py-1 rounded font-semibold bg-gray-500/20 dark:text-gray-400 text-gray-500 border border-gray-400/30">Kosong</span>
+                                @if($canUnlockRekap)
+                                    <a href="{{ route('admin.rekap.edit-tps', [$jenis, $tps]) }}"
+                                       class="text-[9px] px-2 py-0.5 rounded font-semibold border border-red-400/40 text-red-400 hover:bg-red-400/10 transition whitespace-nowrap">
+                                        Edit
+                                    </a>
+                                @endif
+                            </div>
                         @elseif($r->status === 'final')
                             <div class="flex flex-col items-center gap-1">
                                 <span class="text-[9px] px-2 py-1 rounded font-semibold bg-teal-500/20 text-teal-400 border border-teal-500/40">Final</span>
                                 @if($canUnlockRekap)
+                                    <a href="{{ route('admin.rekap.edit-tps', [$jenis, $tps]) }}"
+                                       class="text-[9px] px-2 py-0.5 rounded font-semibold border border-red-400/40 text-red-400 hover:bg-red-400/10 transition whitespace-nowrap">
+                                        Edit
+                                    </a>
                                     <button onclick="openUnlockModal({{ $r->tps_id }}, '{{ addslashes($tps->nama) }}')"
                                             class="text-[9px] px-2 py-0.5 rounded font-semibold border border-orange-400/40 text-orange-400 hover:bg-orange-400/10 transition whitespace-nowrap">
                                         ↩ Buka
                                     </button>
                                 @endif
                             </div>
-                        @else <span class="text-[9px] px-2 py-1 rounded font-semibold bg-orange-400/20 text-orange-400 border border-orange-400/40">Draft</span>
+                        @else
+                            <div class="flex flex-col items-center gap-1">
+                                <span class="text-[9px] px-2 py-1 rounded font-semibold bg-orange-400/20 text-orange-400 border border-orange-400/40">Draft</span>
+                                @if($canUnlockRekap)
+                                    <a href="{{ route('admin.rekap.edit-tps', [$jenis, $tps]) }}"
+                                       class="text-[9px] px-2 py-0.5 rounded font-semibold border border-red-400/40 text-red-400 hover:bg-red-400/10 transition whitespace-nowrap">
+                                        Edit
+                                    </a>
+                                @endif
+                            </div>
                         @endif
                     </td>
                     @endforeach

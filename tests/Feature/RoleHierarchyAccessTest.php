@@ -172,6 +172,64 @@ class RoleHierarchyAccessTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_admin_can_temporarily_edit_rekap_from_admin_detail(): void
+    {
+        $calon = RekapPpwpCalon::create(['nomor_urut' => 1, 'nama_paslon' => 'Paslon A']);
+        $rekap = RekapHeader::create([
+            'tps_id' => $this->tpsA->id,
+            'jenis' => 'ppwp',
+            'status' => 'final',
+            'dpt_lk' => 10,
+            'dpt_pr' => 10,
+            'pengguna_dpt_lk' => 8,
+            'pengguna_dpt_pr' => 7,
+            'suara_tidak_sah' => 1,
+            'diinput_oleh' => $this->kppsA->id,
+            'difinalisasi_at' => now(),
+        ]);
+        RekapPpwpSuara::create(['rekap_id' => $rekap->id, 'calon_id' => $calon->id, 'suara' => 20]);
+
+        $this->actingAs($this->admin)
+            ->get(route('admin.rekap.show', [
+                'jenis' => 'ppwp',
+                'detail' => 1,
+                'detail_kecamatan_id' => $this->kecamatanA->id,
+            ]))
+            ->assertOk()
+            ->assertSee(route('admin.rekap.edit-tps', ['ppwp', $this->tpsA]), false);
+
+        $this->actingAs($this->admin)
+            ->from(route('admin.rekap.show', ['jenis' => 'ppwp', 'detail' => 1, 'detail_kecamatan_id' => $this->kecamatanA->id]))
+            ->get(route('admin.rekap.edit-tps', ['ppwp', $this->tpsA]))
+            ->assertRedirect(route('rekap.form', 'ppwp'))
+            ->assertSessionHas('admin_view_tps_id', $this->tpsA->id);
+
+        $this->actingAs($this->admin)
+            ->withSession([
+                'admin_view_tps_id' => $this->tpsA->id,
+                'admin_rekap_return_url' => route('admin.rekap.show', 'ppwp'),
+            ])
+            ->post(route('rekap.store', 'ppwp'), [
+                'dpt_lk' => 12,
+                'suara_tidak_sah' => 2,
+                'suara' => [$calon->id => 33],
+            ])
+            ->assertRedirect(route('admin.rekap.show', 'ppwp'));
+
+        $this->assertDatabaseHas('rekap_headers', [
+            'id' => $rekap->id,
+            'status' => 'final',
+            'dpt_lk' => 12,
+            'suara_tidak_sah' => 2,
+            'diinput_oleh' => $this->admin->id,
+        ]);
+        $this->assertDatabaseHas('rekap_ppwp_suaras', [
+            'rekap_id' => $rekap->id,
+            'calon_id' => $calon->id,
+            'suara' => 33,
+        ]);
+    }
+
     public function test_kpps_cannot_access_parent_or_admin_areas(): void
     {
         $this->actingAs($this->kppsA)
