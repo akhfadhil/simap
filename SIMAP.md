@@ -189,11 +189,15 @@ php artisan import:bangorejo-dpd --dry-run
 php artisan import:bangorejo-dpr-ri --dry-run
 php artisan import:bangorejo-dprd-prov --dry-run
 php artisan import:bangorejo-dprd-kab --dry-run
+
+# Import data PPWP historis dari folder Excel semua kecamatan
+php artisan import:ppwp-folder "storage/import/PPWP" --dry-run
+php artisan import:ppwp-folder "storage/import/PPWP"
 ```
 
 Scheduler menjalankan backup dokumen harian melalui `app/Console/Kernel.php`.
 
-Jalankan command import Bangorejo dengan `--dry-run` terlebih dahulu untuk memvalidasi baris yang terbaca dan melihat koreksi otomatis sebelum menulis ke database. Setiap command menerima argumen path Excel opsional, misalnya `php artisan import:bangorejo-ppwp "storage/imports/PPWP - BANGOREJO.xlsx" --dry-run`.
+Jalankan command import dengan `--dry-run` terlebih dahulu untuk memvalidasi baris yang terbaca dan melihat koreksi otomatis sebelum menulis ke database. `import:ppwp-folder` adalah helper sementara untuk data PPWP historis: satu file Excel mewakili satu kecamatan dan setiap sheet mewakili satu desa. Command ini memakai nama sheet sebagai nama desa utama, melewati sheet pembuka tanpa TPS, dan menerima opsi `--only=NAMA_KECAMATAN` untuk membatasi import. Setiap command menerima argumen path Excel opsional, misalnya `php artisan import:bangorejo-ppwp "storage/import/PPWP/PPWP - BANGOREJO.xlsx" --dry-run`.
 
 ## Routes Penting
 
@@ -287,6 +291,7 @@ app/
     Kernel.php
     Commands/BackupDokumen.php
     Commands/RestoreDokumen.php
+    Commands/ImportPpwpFolder.php
     Commands/ImportBangorejoPpwp.php
     Commands/ImportBangorejoDpd.php
     Commands/ImportBangorejoDprRi.php
