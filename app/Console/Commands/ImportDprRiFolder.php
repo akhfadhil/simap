@@ -12,40 +12,82 @@ use App\Models\Tps;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-abstract class ImportBangorejoDprRi extends Command
+class ImportDprRiFolder extends Command
 {
-    protected const KECAMATAN = 'Bangorejo';
+    /*
+     * CARA PAKAI IMPORTER DPR RI FOLDER
+     * -------------------------------------------------------------------------
+     * Importer ini dibuat khusus untuk data historis DPR RI dari file Excel lama.
+     * Pola file yang didukung:
+     *
+     * - Satu folder berisi banyak file Excel.
+     * - Satu file Excel mewakili satu kecamatan.
+     * - Nama file mengikuti pola "DPR RI - NAMAKECAMATAN.xlsx".
+     * - Di dalam satu file, tiap sheet mewakili satu desa.
+     * - Nama sheet dipakai sebagai nama desa utama.
+     * - Sheet pembuka seperti "DPR RI" dilewati otomatis kalau tidak punya TPS.
+     *
+     * Wajib cek dulu tanpa mengubah database:
+     *
+     *   php artisan import:dpr-ri-folder "storage/import/DPR RI" --dry-run
+     *
+     * Cek satu kecamatan saja:
+     *
+     *   php artisan import:dpr-ri-folder "storage/import/DPR RI" --only=Bangorejo --dry-run
+     *
+     * Import asli setelah dry-run bersih:
+     *
+     *   php artisan import:dpr-ri-folder "storage/import/DPR RI"
+     *
+     * Hasil import:
+     *
+     * - Membuat TPS jika belum ada pada desa yang cocok.
+     * - Menyinkronkan master partai dan caleg DPR RI dari blok partai/caleg.
+     * - Menyimpan rekap_headers untuk jenis "dpr_ri".
+     * - Menyimpan suara partai dan suara caleg.
+     * - Status rekap diset "final" karena ini data historis.
+     */
+    protected $signature = 'import:dpr-ri-folder
+        {path=storage/import/DPR RI : Folder berisi file DPR RI per kecamatan atau satu file Excel DPR RI}
+        {--dry-run : Validasi dan tampilkan ringkasan tanpa menyimpan ke database}
+        {--only=* : Batasi import ke nama kecamatan tertentu}';
 
-    protected const JENIS = 'dpr_ri';
+    protected $description = 'Import rekap DPR RI dari folder Excel per kecamatan dan sheet per desa.';
 
-    protected const LABEL = 'DPR RI';
+    private const JENIS = 'dpr_ri';
+
+    private const LABEL = 'DPR RI';
+
+    private const DESA_ALIASES = [
+        'Kabat' => [
+            'Pakisataji' => 'Pakistaji',
+        ],
+        'Kalibaru' => [
+            'Kalibaru Kulon' => 'Kalibarukulon',
+            'Kalibaru Manis' => 'Kalibarumanis',
+            'Kalibaru Wetan' => 'Kalibaruwetan',
+        ],
+    ];
 
     public function handle(): int
     {
-        $path = $this->argument('file');
-        $path = is_file($path) ? $path : base_path($path);
+        $path = $this->resolvePath((string) $this->argument('path'));
 
-        if (! is_file($path)) {
-            $this->error('File tidak ditemukan: '.$path);
-
-            return self::FAILURE;
-        }
-
-        $spreadsheet = IOFactory::load($path);
-        $masterSheet = $this->firstDetailSheet($spreadsheet);
-        if (! $masterSheet) {
-            $this->error('Sheet detail '.static::LABEL.' Bangorejo tidak ditemukan.');
+        if (! is_file($path) && ! is_dir($path)) {
+            $this->error('Path tidak ditemukan: '.$path);
 
             return self::FAILURE;
         }
 
-        $partais = $this->partaisFromSheet($masterSheet);
-        if ($partais === []) {
-            $this->error('Data partai/caleg tidak terbaca dari file.');
+        $files = $this->filesFromPath($path);
+
+        if ($files === []) {
+            $this->error('Tidak ada file Excel DPR RI yang ditemukan di: '.$path);
 
             return self::FAILURE;
         }
@@ -53,53 +95,133 @@ abstract class ImportBangorejoDprRi extends Command
         $rows = [];
         $corrections = [];
         $missing = [];
+        $invalid = [];
+        $warnings = [];
+        $partais = [];
 
-        foreach ($spreadsheet->getWorksheetIterator() as $sheet) {
-            if (strtolower((string) $this->cell($sheet, 'D2')) !== strtolower(static::KECAMATAN)) {
+        foreach ($files as $file) {
+            $kecamatan = $this->kecamatanFromFile($file);
+
+            if (! $this->shouldImportKecamatan($kecamatan)) {
                 continue;
             }
 
-            $desaNama = $this->titleName((string) $this->cell($sheet, 'D9'));
-            if ($desaNama === '') {
+            $spreadsheet = IOFactory::load($file);
+            $masterSheet = $this->firstDetailSheet($spreadsheet);
+
+            if (! $masterSheet) {
+                $invalid[] = basename($file).': sheet detail '.self::LABEL.' tidak ditemukan.';
+                $spreadsheet->disconnectWorksheets();
+                unset($spreadsheet);
+
                 continue;
             }
 
-            for ($col = Coordinate::columnIndexFromString('E'); $col <= Coordinate::columnIndexFromString('AF'); $col++) {
-                $column = Coordinate::stringFromColumnIndex($col);
-                $tpsNama = trim((string) $this->cell($sheet, "{$column}13"));
-                if (! preg_match('/^TPS\s+\d{3}$/i', $tpsNama)) {
+            $filePartais = $this->partaisFromSheet($masterSheet);
+
+            if ($filePartais === []) {
+                $invalid[] = basename($file).': data partai/caleg tidak terbaca.';
+                $spreadsheet->disconnectWorksheets();
+                unset($spreadsheet);
+
+                continue;
+            }
+
+            if ($partais === []) {
+                $partais = $filePartais;
+            } elseif ($this->partaiSignature($partais) !== $this->partaiSignature($filePartais)) {
+                $invalid[] = basename($file).': daftar partai/caleg berbeda dari file sebelumnya.';
+                $spreadsheet->disconnectWorksheets();
+                unset($spreadsheet);
+
+                continue;
+            }
+
+            foreach ($spreadsheet->getWorksheetIterator() as $sheet) {
+                if (str_starts_with(strtolower($sheet->getTitle()), 'copy of ')) {
+                    $warnings[] = basename($file)." / {$sheet->getTitle()}: sheet salinan dilewati.";
+
                     continue;
                 }
 
-                $record = $this->recordFromSheet($sheet, $column, $desaNama, strtoupper($tpsNama), $partais);
-                $this->normalizeRecord($record, $corrections);
-                $rows[] = $record;
+                $tpsColumns = $this->tpsColumns($sheet);
+
+                if ($tpsColumns === []) {
+                    continue;
+                }
+
+                $sheetDesa = $this->titleName($sheet->getTitle());
+                $desaNama = $this->resolveDesaName($kecamatan, $sheetDesa);
+                $d9Desa = $this->titleName((string) $this->cell($sheet, 'D9'));
+
+                if ($d9Desa !== '' && $this->resolveDesaName($kecamatan, $d9Desa) !== $desaNama) {
+                    $warnings[] = basename($file)." / {$sheet->getTitle()}: D9 berisi {$d9Desa}; nama sheet {$sheetDesa} dipakai.";
+                }
+
+                if (! $this->findDesa($kecamatan, $desaNama)) {
+                    $missing[] = "{$kecamatan} / {$desaNama}: desa tidak ditemukan.";
+
+                    continue;
+                }
+
+                foreach ($tpsColumns as $column => $tpsNama) {
+                    $record = $this->recordFromSheet(
+                        $sheet,
+                        $column,
+                        $kecamatan,
+                        $desaNama,
+                        strtoupper($tpsNama),
+                        basename($file),
+                        $partais
+                    );
+
+                    if ($this->recordLooksIncomplete($record)) {
+                        $invalid[] = "{$record['source_file']} / {$record['desa']} / {$record['tps']}: pengguna ada, tetapi suara partai/caleg dan total suara kosong.";
+
+                        continue;
+                    }
+
+                    if ($this->recordHasImpossibleTotals($record)) {
+                        $invalid[] = "{$record['source_file']} / {$record['desa']} / {$record['tps']}: suara sah lebih besar dari surat suara digunakan/total suara.";
+
+                        continue;
+                    }
+
+                    $this->normalizeRecord($record, $corrections);
+                    $rows[] = $record;
+                }
             }
+
+            $spreadsheet->disconnectWorksheets();
+            unset($spreadsheet);
         }
 
         if ($rows === []) {
             $this->error('Tidak ada data TPS yang terbaca dari file.');
+            $this->printProblems($missing, $invalid, $warnings);
 
             return self::FAILURE;
         }
 
         if ($this->option('dry-run')) {
             $this->line('DRY RUN: database tidak diubah.');
-            $this->printReport($rows, $corrections, $missing, $partais);
+            $this->printReport($rows, $corrections, $missing, $invalid, $warnings, $partais);
 
-            return self::SUCCESS;
+            return $missing === [] && $invalid === [] ? self::SUCCESS : self::FAILURE;
         }
 
-        DB::transaction(function () use ($rows, $partais, &$missing) {
+        if ($missing !== [] || $invalid !== []) {
+            $this->error('Import dibatalkan karena masih ada data yang tidak aman untuk diimpor.');
+            $this->printReport($rows, $corrections, $missing, $invalid, $warnings, $partais);
+
+            return self::FAILURE;
+        }
+
+        DB::transaction(function () use ($rows, $partais) {
             $masterIds = $this->syncMaster($partais);
 
             foreach ($rows as $row) {
-                $desa = $this->findDesa($row['desa']);
-                if (! $desa) {
-                    $missing[] = "{$row['desa']}: desa tidak ditemukan.";
-
-                    continue;
-                }
+                $desa = $this->findDesa($row['kecamatan'], $row['desa']);
 
                 $tps = Tps::firstOrCreate([
                     'desa_id' => $desa->id,
@@ -107,7 +229,7 @@ abstract class ImportBangorejoDprRi extends Command
                 ]);
 
                 $rekap = RekapHeader::updateOrCreate(
-                    ['tps_id' => $tps->id, 'jenis' => static::JENIS],
+                    ['tps_id' => $tps->id, 'jenis' => self::JENIS],
                     [
                         'dpt_lk' => $row['dpt_lk'],
                         'dpt_pr' => $row['dpt_pr'],
@@ -156,15 +278,46 @@ abstract class ImportBangorejoDprRi extends Command
             }
         });
 
-        $this->printReport($rows, $corrections, $missing, $partais);
+        $this->printReport($rows, $corrections, $missing, $invalid, $warnings, $partais);
 
         return self::SUCCESS;
+    }
+
+    private function resolvePath(string $path): string
+    {
+        return is_file($path) || is_dir($path) ? $path : base_path($path);
+    }
+
+    private function filesFromPath(string $path): array
+    {
+        $files = is_file($path) ? [$path] : glob(rtrim($path, DIRECTORY_SEPARATOR).'/*.xlsx');
+        sort($files);
+
+        return $files;
+    }
+
+    private function kecamatanFromFile(string $file): string
+    {
+        $name = pathinfo($file, PATHINFO_FILENAME);
+        $name = preg_replace('/^DPR\s+RI\s*-\s*/i', '', $name);
+
+        return $this->titleName(str_replace('_', ' ', $name));
+    }
+
+    private function shouldImportKecamatan(string $kecamatan): bool
+    {
+        $only = array_map(
+            fn ($value) => strtolower($this->titleName((string) $value)),
+            (array) $this->option('only')
+        );
+
+        return $only === [] || in_array(strtolower($kecamatan), $only, true);
     }
 
     private function firstDetailSheet($spreadsheet): ?Worksheet
     {
         foreach ($spreadsheet->getWorksheetIterator() as $sheet) {
-            if (strtolower((string) $this->cell($sheet, 'D2')) === strtolower(static::KECAMATAN)) {
+            if ($this->tpsColumns($sheet) !== []) {
                 return $sheet;
             }
         }
@@ -217,7 +370,31 @@ abstract class ImportBangorejoDprRi extends Command
         return $partais;
     }
 
-    private function recordFromSheet(Worksheet $sheet, string $column, string $desaNama, string $tpsNama, array $partais): array
+    private function partaiSignature(array $partais): string
+    {
+        return md5(json_encode(collect($partais)->map(fn ($partai) => [
+            'nama' => $partai['nama'],
+            'calegs' => collect($partai['calegs'])->pluck('nama')->all(),
+        ])->all()));
+    }
+
+    private function tpsColumns(Worksheet $sheet): array
+    {
+        $columns = [];
+
+        for ($col = Coordinate::columnIndexFromString('E'); $col <= Coordinate::columnIndexFromString('AF'); $col++) {
+            $column = Coordinate::stringFromColumnIndex($col);
+            $tpsNama = trim((string) $this->cell($sheet, "{$column}13"));
+
+            if (preg_match('/^TPS\s+\d{3}$/i', $tpsNama)) {
+                $columns[$column] = $tpsNama;
+            }
+        }
+
+        return $columns;
+    }
+
+    private function recordFromSheet(Worksheet $sheet, string $column, string $kecamatan, string $desaNama, string $tpsNama, string $sourceFile, array $partais): array
     {
         $partaiSuara = [];
         $calegSuara = [];
@@ -233,6 +410,8 @@ abstract class ImportBangorejoDprRi extends Command
         }
 
         return [
+            'source_file' => $sourceFile,
+            'kecamatan' => $kecamatan,
             'desa' => $desaNama,
             'tps' => $tpsNama,
             'dpt_lk' => $this->intCell($sheet, "{$column}14"),
@@ -261,7 +440,7 @@ abstract class ImportBangorejoDprRi extends Command
 
     private function normalizeRecord(array &$row, array &$corrections): void
     {
-        $label = "{$row['desa']} {$row['tps']}";
+        $label = "{$row['kecamatan']} / {$row['desa']} / {$row['tps']}";
         $suaraSah = $this->sumSah($row);
 
         foreach ($row['partai_suara'] as $nomorPartai => $suaraPartai) {
@@ -318,15 +497,28 @@ abstract class ImportBangorejoDprRi extends Command
         }
     }
 
+    private function recordLooksIncomplete(array $row): bool
+    {
+        return $this->sumPengguna($row) > 0
+            && $this->sumSah($row) === 0
+            && $row['suara_total_excel'] === 0;
+    }
+
+    private function recordHasImpossibleTotals(array $row): bool
+    {
+        $authoritativeTotal = $row['ss_digunakan'] > 0 ? $row['ss_digunakan'] : $row['suara_total_excel'];
+
+        return $authoritativeTotal > 0 && $this->sumSah($row) > $authoritativeTotal;
+    }
+
     private function syncMaster(array $partais): array
     {
         $partaiIds = [];
         $calegIds = [];
-        $dapilId = $this->masterDapilId();
 
         foreach ($partais as $nomorPartai => $partaiData) {
             $partai = RekapPartai::updateOrCreate(
-                ['jenis' => static::JENIS, 'nomor_urut' => $nomorPartai, 'dapil_id' => $dapilId],
+                ['jenis' => self::JENIS, 'nomor_urut' => $nomorPartai, 'dapil_id' => null],
                 ['nama_partai' => $partaiData['nama']]
             );
             $partaiIds[$nomorPartai] = $partai->id;
@@ -345,36 +537,45 @@ abstract class ImportBangorejoDprRi extends Command
                 ->delete();
         }
 
-        $stalePartaiQuery = RekapPartai::where('jenis', static::JENIS)
-            ->whereNotIn('nomor_urut', array_keys($partais));
-
-        $dapilId === null
-            ? $stalePartaiQuery->whereNull('dapil_id')
-            : $stalePartaiQuery->where('dapil_id', $dapilId);
-
-        $stalePartaiQuery->delete();
+        RekapPartai::where('jenis', self::JENIS)
+            ->whereNull('dapil_id')
+            ->whereNotIn('nomor_urut', array_keys($partais))
+            ->delete();
 
         return ['partais' => $partaiIds, 'calegs' => $calegIds];
     }
 
-    protected function masterDapilId(): ?int
+    private function resolveDesaName(string $kecamatan, string $desa): string
     {
-        return null;
+        return self::DESA_ALIASES[$kecamatan][$desa] ?? $desa;
     }
 
-    private function printReport(array $rows, array $corrections, array $missing, array $partais): void
+    private function findDesa(string $kecamatan, string $desa): ?Desa
+    {
+        return Desa::query()
+            ->whereRaw('LOWER(nama) = ?', [strtolower($desa)])
+            ->whereHas('kecamatan', fn ($query) => $query->whereRaw('LOWER(nama) = ?', [strtolower($kecamatan)]))
+            ->first();
+    }
+
+    private function printReport(array $rows, array $corrections, array $missing, array $invalid, array $warnings, array $partais): void
     {
         $this->newLine();
-        $this->info('Import '.static::LABEL.' Bangorejo selesai.');
+        $this->info('Import folder DPR RI selesai.');
         $this->line('Partai terbaca: '.count($partais));
         $this->line('Caleg terbaca: '.collect($partais)->sum(fn ($partai) => count($partai['calegs'])));
         $this->line('TPS terbaca: '.count($rows));
+        $this->line('File terbaca: '.collect($rows)->pluck('source_file')->unique()->count());
+        $this->line('Kecamatan terbaca: '.collect($rows)->pluck('kecamatan')->unique()->count());
+        $this->line('Desa terbaca: '.collect($rows)->map(fn ($row) => $row['kecamatan'].' / '.$row['desa'])->unique()->count());
+        $this->line('TPS tidak aman diimpor: '.count($invalid));
         $this->line('Koreksi data: '.count($corrections));
 
         $summary = collect($rows)
-            ->groupBy('desa')
-            ->map(fn ($items, $desa) => [
-                'Desa' => $desa,
+            ->groupBy('kecamatan')
+            ->map(fn ($items, $kecamatan) => [
+                'Kecamatan' => $kecamatan,
+                'Desa' => $items->pluck('desa')->unique()->count(),
                 'TPS' => $items->count(),
                 'DPT' => $items->sum(fn ($row) => $row['dpt_lk'] + $row['dpt_pr']),
                 'Pengguna' => $items->sum(fn ($row) => $this->sumPengguna($row)),
@@ -384,29 +585,47 @@ abstract class ImportBangorejoDprRi extends Command
             ->values()
             ->all();
 
-        $this->table(['Desa', 'TPS', 'DPT', 'Pengguna', 'Sah', 'Tidak Sah'], $summary);
+        $this->table(['Kecamatan', 'Desa', 'TPS', 'DPT', 'Pengguna', 'Sah', 'Tidak Sah'], $summary);
+        $this->printProblems($missing, $invalid, $warnings);
 
+        if ($corrections !== []) {
+            $this->warn('Daftar koreksi (maksimal 100 ditampilkan):');
+            foreach (array_slice($corrections, 0, 100) as $message) {
+                $this->line('- '.$message);
+            }
+
+            if (count($corrections) > 100) {
+                $this->line('- ... '.(count($corrections) - 100).' koreksi lainnya tidak ditampilkan.');
+            }
+        }
+    }
+
+    private function printProblems(array $missing, array $invalid, array $warnings): void
+    {
         if ($missing !== []) {
-            $this->warn('Data tidak tersimpan:');
+            $this->warn('Data wilayah tidak cocok:');
             foreach ($missing as $message) {
                 $this->line('- '.$message);
             }
         }
 
-        if ($corrections !== []) {
-            $this->warn('Daftar koreksi:');
-            foreach ($corrections as $message) {
+        if ($invalid !== []) {
+            $this->warn('Data TPS tidak aman diimpor:');
+            foreach (array_slice($invalid, 0, 100) as $message) {
+                $this->line('- '.$message);
+            }
+
+            if (count($invalid) > 100) {
+                $this->line('- ... '.(count($invalid) - 100).' data TPS lainnya tidak ditampilkan.');
+            }
+        }
+
+        if ($warnings !== []) {
+            $this->warn('Catatan struktur Excel:');
+            foreach ($warnings as $message) {
                 $this->line('- '.$message);
             }
         }
-    }
-
-    private function findDesa(string $nama): ?Desa
-    {
-        return Desa::query()
-            ->whereRaw('LOWER(nama) = ?', [strtolower($nama)])
-            ->whereHas('kecamatan', fn ($query) => $query->whereRaw('LOWER(nama) = ?', [strtolower(static::KECAMATAN)]))
-            ->first();
     }
 
     private function sumSah(array $row): int
@@ -440,7 +659,7 @@ abstract class ImportBangorejoDprRi extends Command
 
     private function titleName(string $value): string
     {
-        return str($value)->lower()->title()->toString();
+        return Str::of($value)->lower()->title()->toString();
     }
 
     private function cleanCandidateName(string $name): string

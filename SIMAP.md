@@ -184,20 +184,21 @@ php artisan backup:dokumen --dry-run
 php artisan restore:dokumen {id}
 
 # Import data rekap Bangorejo dari Excel per TPS
-php artisan import:bangorejo-dpr-ri --dry-run
 php artisan import:bangorejo-dprd-prov --dry-run
 php artisan import:bangorejo-dprd-kab --dry-run
 
-# Import data PPWP/DPD historis dari folder Excel semua kecamatan
+# Import data PPWP/DPD/DPR RI historis dari folder Excel semua kecamatan
 php artisan import:ppwp-folder "storage/import/PPWP" --dry-run
 php artisan import:ppwp-folder "storage/import/PPWP"
 php artisan import:dpd-folder "storage/import/DPD" --dry-run
 php artisan import:dpd-folder "storage/import/DPD"
+php artisan import:dpr-ri-folder "storage/import/DPR RI" --dry-run
+php artisan import:dpr-ri-folder "storage/import/DPR RI"
 ```
 
 Scheduler menjalankan backup dokumen harian melalui `app/Console/Kernel.php`.
 
-Jalankan command import dengan `--dry-run` terlebih dahulu untuk memvalidasi baris yang terbaca dan melihat koreksi otomatis sebelum menulis ke database. `import:ppwp-folder` dan `import:dpd-folder` adalah helper sementara untuk data historis: satu file Excel mewakili satu kecamatan dan setiap sheet mewakili satu desa. Command ini memakai nama sheet sebagai nama desa utama, melewati sheet pembuka tanpa TPS, dan menerima opsi `--only=NAMA_KECAMATAN` untuk membatasi import.
+Jalankan command import dengan `--dry-run` terlebih dahulu untuk memvalidasi baris yang terbaca dan melihat koreksi otomatis sebelum menulis ke database. `import:ppwp-folder`, `import:dpd-folder`, dan `import:dpr-ri-folder` adalah helper sementara untuk data historis: satu file Excel mewakili satu kecamatan dan setiap sheet mewakili satu desa. Command ini memakai nama sheet sebagai nama desa utama, melewati sheet pembuka tanpa TPS, dan menerima opsi `--only=NAMA_KECAMATAN` untuk membatasi import.
 
 ## Routes Penting
 
@@ -293,7 +294,7 @@ app/
     Commands/RestoreDokumen.php
     Commands/ImportPpwpFolder.php
     Commands/ImportDpdFolder.php
-    Commands/ImportBangorejoDprRi.php
+    Commands/ImportDprRiFolder.php
     Commands/ImportBangorejoDprdProv.php
     Commands/ImportBangorejoDprdKab.php
   Http/

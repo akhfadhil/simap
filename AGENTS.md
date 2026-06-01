@@ -20,11 +20,11 @@ Bangorejo Excel import helpers live in `app/Console/Commands`. Run them with `--
 
 - `php artisan import:ppwp-folder --dry-run`
 - `php artisan import:dpd-folder --dry-run`
-- `php artisan import:bangorejo-dpr-ri --dry-run`
+- `php artisan import:dpr-ri-folder --dry-run`
 - `php artisan import:bangorejo-dprd-prov --dry-run`
 - `php artisan import:bangorejo-dprd-kab --dry-run`
 
-`import:ppwp-folder` and `import:dpd-folder` are temporary historical-data helpers for folders of Excel files where each file is one kecamatan and each sheet is one desa. Each command accepts an optional path argument, for example `php artisan import:ppwp-folder "storage/import/PPWP" --dry-run` or `php artisan import:dpd-folder "storage/import/DPD" --dry-run`.
+`import:ppwp-folder`, `import:dpd-folder`, and `import:dpr-ri-folder` are temporary historical-data helpers for folders of Excel files where each file is one kecamatan and each sheet is one desa. Each command accepts an optional path argument, for example `php artisan import:ppwp-folder "storage/import/PPWP" --dry-run`, `php artisan import:dpd-folder "storage/import/DPD" --dry-run`, or `php artisan import:dpr-ri-folder "storage/import/DPR RI" --dry-run`.
 
 ## Coding Style & Naming Conventions
 
