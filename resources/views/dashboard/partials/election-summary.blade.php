@@ -48,7 +48,10 @@
                                         @endif
                                     </div>
                                 </div>
-                                <p class="admin-mono text-xs font-bold text-gray-950 dark:text-white whitespace-nowrap">{{ number_format($row['suara']) }}</p>
+                                <div class="text-right shrink-0">
+                                    <p class="admin-mono text-xs font-bold text-gray-950 dark:text-white whitespace-nowrap">{{ number_format($row['suara']) }}</p>
+                                    <p class="admin-mono text-[10px] font-semibold role-accent whitespace-nowrap">{{ number_format($row['persentase'] ?? 0, 2) }}%</p>
+                                </div>
                             </div>
                         @empty
                             <p class="admin-muted text-sm">Belum ada data suara untuk jenis ini.</p>

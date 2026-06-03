@@ -144,7 +144,7 @@ class DashboardElectionSummary
             ->groupBy('s.calon_id')
             ->pluck('total_suara', 'calon_id');
 
-        $rows = $masters
+        $allRows = $masters
             ->map(fn($calon) => [
                 'rank' => 0,
                 'label' => $calon->label,
@@ -152,11 +152,14 @@ class DashboardElectionSummary
                 'suara' => (int) ($totals[$calon->id] ?? 0),
             ])
             ->sortByDesc('suara')
-            ->values()
+            ->values();
+        $totalSuara = $allRows->sum('suara');
+        $rows = $allRows
             ->take($jenis === 'dpd' ? 5 : $masters->count())
             ->values()
-            ->map(function ($row, $index) {
+            ->map(function ($row, $index) use ($totalSuara) {
                 $row['rank'] = $index + 1;
+                $row['persentase'] = $totalSuara > 0 ? round(($row['suara'] / $totalSuara) * 100, 2) : 0;
                 return $row;
             })
             ->toArray();
@@ -167,6 +170,7 @@ class DashboardElectionSummary
             'subtitle' => $jenis === 'dpd' ? '5 calon teratas' : 'Semua paslon',
             'display' => $jenis === 'dpd' ? 'top' : 'all',
             'scope' => $scope['label'],
+            'total_suara' => $totalSuara,
             'rows' => $rows,
         ];
     }
@@ -259,7 +263,7 @@ class DashboardElectionSummary
             $totals[(int) $row->partai_id] += (int) $row->total_suara;
         }
 
-        $rows = $partais
+        $allRows = $partais
             ->map(fn($partai) => [
                 'rank' => 0,
                 'label' => $partai->nama_partai,
@@ -267,11 +271,14 @@ class DashboardElectionSummary
                 'suara' => (int) ($totals[(int) $partai->id] ?? 0),
             ])
             ->sortByDesc('suara')
-            ->values()
+            ->values();
+        $totalSuara = $allRows->sum('suara');
+        $rows = $allRows
             ->take(5)
             ->values()
-            ->map(function ($row, $index) {
+            ->map(function ($row, $index) use ($totalSuara) {
                 $row['rank'] = $index + 1;
+                $row['persentase'] = $totalSuara > 0 ? round(($row['suara'] / $totalSuara) * 100, 2) : 0;
                 return $row;
             })
             ->toArray();
@@ -281,6 +288,7 @@ class DashboardElectionSummary
             'title' => $this->partyTitle($jenis, $dapilName),
             'subtitle' => '5 partai teratas',
             'scope' => $scope['label'],
+            'total_suara' => $totalSuara,
             'rows' => $rows,
         ];
     }
@@ -336,7 +344,7 @@ class DashboardElectionSummary
             ->groupBy('s.caleg_id')
             ->pluck('total_suara', 'caleg_id');
 
-        $rows = $calegs
+        $allRows = $calegs
             ->map(fn($caleg) => [
                 'rank' => 0,
                 'label' => $caleg['label'],
@@ -344,11 +352,14 @@ class DashboardElectionSummary
                 'suara' => (int) ($totals[$caleg['id']] ?? 0),
             ])
             ->sortByDesc('suara')
-            ->values()
+            ->values();
+        $totalSuara = $allRows->sum('suara');
+        $rows = $allRows
             ->take(5)
             ->values()
-            ->map(function ($row, $index) {
+            ->map(function ($row, $index) use ($totalSuara) {
                 $row['rank'] = $index + 1;
+                $row['persentase'] = $totalSuara > 0 ? round(($row['suara'] / $totalSuara) * 100, 2) : 0;
                 return $row;
             })
             ->toArray();
@@ -358,6 +369,7 @@ class DashboardElectionSummary
             'title' => $this->partyTitle($jenis, $dapilName),
             'subtitle' => '5 caleg teratas',
             'scope' => $scope['label'],
+            'total_suara' => $totalSuara,
             'rows' => $rows,
         ];
     }
@@ -394,7 +406,7 @@ class DashboardElectionSummary
     private function cacheParts(User $user, array $scope, array $activeJenis): array
     {
         return [
-            'version' => 3,
+            'version' => 4,
             'user_role' => $user->role,
             'scope' => $scope,
             'active' => $activeJenis,
