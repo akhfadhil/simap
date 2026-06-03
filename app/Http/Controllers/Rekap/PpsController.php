@@ -57,14 +57,24 @@ class PpsController extends Controller
                 });
             })
             ->get();
+        $tpsCellFlags = collect();
         $cellFlags = collect();
 
         foreach ($flagRows as $flag) {
-            $cellFlags->put($flag->row_key, true);
+            if ($flag->level === 'tps') {
+                $tpsCellFlags->put($flag->entity_id.':'.$flag->row_key, true);
+                $cellFlags->put($flag->row_key, true);
+
+                continue;
+            }
+
+            if ($flag->level === 'desa') {
+                $cellFlags->put($flag->row_key, true);
+            }
         }
         $master = $this->getMaster($jenis, $desa);
 
-        return view('rekap.pps.show', compact('desa', 'jenis', 'rekaps', 'tpsList', 'master', 'cellFlags'));
+        return view('rekap.pps.show', compact('desa', 'jenis', 'rekaps', 'tpsList', 'master', 'tpsCellFlags', 'cellFlags'));
     }
 
     // Mengekspor rekap desa untuk jenis pemilihan.

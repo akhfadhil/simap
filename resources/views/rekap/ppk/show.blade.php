@@ -80,14 +80,23 @@
     };
 
     $rowKeyFor = fn($row) => isset($row['field']) ? $row['field'] : 'sum:' . implode('+', $row['sum']);
-    $renderDesaCell = function($desa, string $rowKey, $value, string $baseClass = '') use ($cellFlags) {
-        $flagged = $cellFlags->has($desa->id . ':' . $rowKey);
-        $classes = trim($baseClass . ' ' . ($flagged
-            ? 'bg-red-500/20 text-red-600 dark:bg-red-500/20 dark:text-red-200 ring-1 ring-inset ring-red-400/60'
-            : ''));
+    $flaggedClasses = 'bg-red-500/20 text-red-600 dark:bg-red-500/20 dark:text-red-200 ring-1 ring-inset ring-red-400/60';
+    $renderFlaggedCell = function(bool $flagged, $value, string $baseClass = '') use ($flaggedClasses) {
+        $classes = trim($baseClass . ' ' . ($flagged ? $flaggedClasses : ''));
         $content = is_null($value) ? '&mdash;' : number_format($value);
 
         return new \Illuminate\Support\HtmlString('<td class="' . e($classes) . '"><span>' . $content . '</span></td>');
+    };
+    $renderDesaCell = function($desa, string $rowKey, $value, string $baseClass = '') use ($cellFlags, $renderFlaggedCell) {
+        $flagged = $cellFlags->has($desa->id . ':' . $rowKey);
+
+        return $renderFlaggedCell($flagged, $value, $baseClass);
+    };
+    $renderDetailTpsCell = function($tps, string $rowKey, $value, string $baseClass = '') use ($tpsCellFlags, $renderFlaggedCell) {
+        return $renderFlaggedCell($tpsCellFlags->has($tps->id . ':' . $rowKey), $value, $baseClass);
+    };
+    $renderDetailTotalCell = function($desa, string $rowKey, $value, string $baseClass = '') use ($cellFlags, $renderFlaggedCell) {
+        return $renderFlaggedCell($cellFlags->has($desa->id . ':' . $rowKey), $value, $baseClass);
     };
 @endphp
 
@@ -360,9 +369,9 @@
                     <td class="px-5 py-2 text-sm {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-800' : 'dark:text-gray-300 text-gray-600' }}">{{ $row['label'] }}</td>
                     @foreach($desa->tps as $tps)
                     @php $r = $detailRekaps[$tps->id] ?? null; $val = $r ? (isset($row['field']) ? ($r->{$row['field']} ?? 0) : collect($row['sum'])->sum(fn($f) => $r->$f ?? 0)) : null; $rowTotal += $val ?? 0; @endphp
-                    <td class="px-3 py-2 text-center {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500' }}">{{ $r ? number_format($val) : '—' }}</td>
+                    {!! $renderDetailTpsCell($tps, $rowKeyFor($row), $r ? $val : null, 'px-3 py-2 text-center ' . ($isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500')) !!}
                     @endforeach
-                    <td class="px-3 py-2 text-center font-bold text-orange-400">{{ number_format($rowTotal) }}</td>
+                    {!! $renderDetailTotalCell($desa, $rowKeyFor($row), $rowTotal, 'px-3 py-2 text-center font-bold text-orange-400') !!}
                 </tr>
                 @endforeach
                 </tbody>
@@ -391,9 +400,9 @@
                     <td class="px-5 py-2 text-sm {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-800' : 'dark:text-gray-300 text-gray-600' }}">{{ $row['label'] }}</td>
                     @foreach($desa->tps as $tps)
                     @php $r = $detailRekaps[$tps->id] ?? null; $val = $r ? ($r->{$row['field']} ?? 0) : null; $rowTotal += $val ?? 0; @endphp
-                    <td class="px-3 py-2 text-center {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500' }}">{{ $r ? number_format($val) : '—' }}</td>
+                    {!! $renderDetailTpsCell($tps, $rowKeyFor($row), $r ? $val : null, 'px-3 py-2 text-center ' . ($isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500')) !!}
                     @endforeach
-                    <td class="px-3 py-2 text-center font-bold text-orange-400">{{ number_format($rowTotal) }}</td>
+                    {!! $renderDetailTotalCell($desa, $rowKeyFor($row), $rowTotal, 'px-3 py-2 text-center font-bold text-orange-400') !!}
                 </tr>
                 @endforeach
                 </tbody>
@@ -422,9 +431,9 @@
                     <td class="px-5 py-2 text-sm {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-800' : 'dark:text-gray-300 text-gray-600' }}">{{ $row['label'] }}</td>
                     @foreach($desa->tps as $tps)
                     @php $r = $detailRekaps[$tps->id] ?? null; $val = $r ? (isset($row['field']) ? ($r->{$row['field']} ?? 0) : collect($row['sum'])->sum(fn($f) => $r->$f ?? 0)) : null; $rowTotal += $val ?? 0; @endphp
-                    <td class="px-3 py-2 text-center {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500' }}">{{ $r ? number_format($val) : '—' }}</td>
+                    {!! $renderDetailTpsCell($tps, $rowKeyFor($row), $r ? $val : null, 'px-3 py-2 text-center ' . ($isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500')) !!}
                     @endforeach
-                    <td class="px-3 py-2 text-center font-bold text-orange-400">{{ number_format($rowTotal) }}</td>
+                    {!! $renderDetailTotalCell($desa, $rowKeyFor($row), $rowTotal, 'px-3 py-2 text-center font-bold text-orange-400') !!}
                 </tr>
                 @endforeach
                 </tbody>
@@ -463,9 +472,9 @@
                         } : null;
                         $rowTotal += $s ?? 0;
                     @endphp
-                    <td class="px-3 py-2.5 text-center dark:text-gray-400 text-gray-500">{{ $r ? number_format($s) : '—' }}</td>
+                    {!! $renderDetailTpsCell($tps, 'calon:' . $calon->id, $r ? $s : null, 'px-3 py-2.5 text-center dark:text-gray-400 text-gray-500') !!}
                     @endforeach
-                    <td class="px-3 py-2.5 text-center font-bold text-orange-400">{{ number_format($rowTotal) }}</td>
+                    {!! $renderDetailTotalCell($desa, 'calon:' . $calon->id, $rowTotal, 'px-3 py-2.5 text-center font-bold text-orange-400') !!}
                 </tr>
                 @endforeach
                 </tbody>
@@ -497,9 +506,9 @@
                         <td class="px-5 py-2 text-xs font-bold dark:text-gray-300 text-gray-700 uppercase">Suara Partai</td>
                         @foreach($desa->tps as $tps)
                         @php $r = $detailRekaps[$tps->id] ?? null; $sp = $r ? ($r->partaiSuaras->firstWhere('partai_id', $partai->id)?->suara ?? 0) : null; $partaiRowTotal += $sp ?? 0; @endphp
-                        <td class="px-3 py-2 text-center dark:text-gray-400 text-gray-500">{{ $r ? number_format($sp) : '—' }}</td>
+                        {!! $renderDetailTpsCell($tps, 'partai:' . $partai->id, $r ? $sp : null, 'px-3 py-2 text-center dark:text-gray-400 text-gray-500') !!}
                         @endforeach
-                        <td class="px-3 py-2 text-center font-bold text-orange-400">{{ number_format($partaiRowTotal) }}</td>
+                        {!! $renderDetailTotalCell($desa, 'partai:' . $partai->id, $partaiRowTotal, 'px-3 py-2 text-center font-bold text-orange-400') !!}
                     </tr>
                     @foreach($partai->calegs as $caleg)
                     @php $calegRowTotal = 0; @endphp
@@ -507,9 +516,9 @@
                         <td class="px-5 py-2"><div class="flex items-center gap-2"><span class="text-xs dark:text-gray-500 text-gray-400 w-4">{{ $caleg->nomor_urut }}.</span><span class="text-sm dark:text-gray-200 text-gray-700">{{ $caleg->nama_caleg }}</span></div></td>
                         @foreach($desa->tps as $tps)
                         @php $r = $detailRekaps[$tps->id] ?? null; $sc = $r ? ($r->calegSuaras->firstWhere('caleg_id', $caleg->id)?->suara ?? 0) : null; $calegRowTotal += $sc ?? 0; @endphp
-                        <td class="px-3 py-2 text-center dark:text-gray-400 text-gray-500">{{ $r ? number_format($sc) : '—' }}</td>
+                        {!! $renderDetailTpsCell($tps, 'caleg:' . $caleg->id, $r ? $sc : null, 'px-3 py-2 text-center dark:text-gray-400 text-gray-500') !!}
                         @endforeach
-                        <td class="px-3 py-2 text-center font-bold text-teal-400">{{ number_format($calegRowTotal) }}</td>
+                        {!! $renderDetailTotalCell($desa, 'caleg:' . $caleg->id, $calegRowTotal, 'px-3 py-2 text-center font-bold text-teal-400') !!}
                     </tr>
                     @endforeach
                     @php $grandTotal = 0; @endphp
@@ -517,9 +526,9 @@
                         <td class="px-5 py-2 text-xs font-bold dark:text-gray-300 text-gray-700 uppercase">Total Suara Sah</td>
                         @foreach($desa->tps as $tps)
                         @php $r = $detailRekaps[$tps->id] ?? null; $sp = $r ? ($r->partaiSuaras->firstWhere('partai_id', $partai->id)?->suara ?? 0) : 0; $sc_sum = $r ? $r->calegSuaras->whereIn('caleg_id', $partai->calegs->pluck('id'))->sum('suara') : 0; $colTotal = $r ? ($sp + $sc_sum) : null; $grandTotal += $colTotal ?? 0; @endphp
-                        <td class="px-3 py-2 text-center font-bold text-teal-400">{{ $r ? number_format($colTotal) : '—' }}</td>
+                        {!! $renderDetailTpsCell($tps, 'partai_total:' . $partai->id, $r ? $colTotal : null, 'px-3 py-2 text-center font-bold text-teal-400') !!}
                         @endforeach
-                        <td class="px-3 py-2 text-center font-bold text-teal-400">{{ number_format($grandTotal) }}</td>
+                        {!! $renderDetailTotalCell($desa, 'partai_total:' . $partai->id, $grandTotal, 'px-3 py-2 text-center font-bold text-teal-400') !!}
                     </tr>
                     </tbody>
                 </table>
@@ -549,27 +558,27 @@
                     <td class="px-5 py-2 text-sm dark:text-gray-300 text-gray-600">Jumlah Suara Sah</td>
                     @foreach($desa->tps as $tps)
                     @php $r = $detailRekaps[$tps->id] ?? null; $sah = $r ? $r->suara_sah : null; $rowTotalSah += $sah ?? 0; @endphp
-                    <td class="px-3 py-2 text-center dark:text-gray-400 text-gray-500">{{ $r ? number_format($sah) : '—' }}</td>
+                    {!! $renderDetailTpsCell($tps, 'suara_sah', $r ? $sah : null, 'px-3 py-2 text-center dark:text-gray-400 text-gray-500') !!}
                     @endforeach
-                    <td class="px-3 py-2 text-center font-bold text-orange-400">{{ number_format($rowTotalSah) }}</td>
+                    {!! $renderDetailTotalCell($desa, 'suara_sah', $rowTotalSah, 'px-3 py-2 text-center font-bold text-orange-400') !!}
                 </tr>
                 @php $rowTotalTdk = 0; @endphp
                 <tr class="border-b dark:border-gray-700 border-gray-100 dark:hover:bg-gray-750 hover:bg-gray-50">
                     <td class="px-5 py-2 text-sm dark:text-gray-300 text-gray-600">Jumlah Suara Tidak Sah</td>
                     @foreach($desa->tps as $tps)
                     @php $r = $detailRekaps[$tps->id] ?? null; $tdk = $r ? $r->suara_tidak_sah : null; $rowTotalTdk += $tdk ?? 0; @endphp
-                    <td class="px-3 py-2 text-center dark:text-gray-400 text-gray-500">{{ $r ? number_format($tdk) : '—' }}</td>
+                    {!! $renderDetailTpsCell($tps, 'suara_tidak_sah', $r ? $tdk : null, 'px-3 py-2 text-center dark:text-gray-400 text-gray-500') !!}
                     @endforeach
-                    <td class="px-3 py-2 text-center font-bold text-orange-400">{{ number_format($rowTotalTdk) }}</td>
+                    {!! $renderDetailTotalCell($desa, 'suara_tidak_sah', $rowTotalTdk, 'px-3 py-2 text-center font-bold text-orange-400') !!}
                 </tr>
                 @php $rowTotalAll = 0; @endphp
                 <tr class="dark:bg-gray-700/20 bg-gray-50">
                     <td class="px-5 py-2 text-sm font-bold dark:text-gray-200 text-gray-800">Jumlah Seluruh Suara</td>
                     @foreach($desa->tps as $tps)
                     @php $r = $detailRekaps[$tps->id] ?? null; $all = $r ? ($r->suara_sah + $r->suara_tidak_sah) : null; $rowTotalAll += $all ?? 0; @endphp
-                    <td class="px-3 py-2 text-center font-bold dark:text-gray-200 text-gray-700">{{ $r ? number_format($all) : '—' }}</td>
+                    {!! $renderDetailTpsCell($tps, 'suara_total', $r ? $all : null, 'px-3 py-2 text-center font-bold dark:text-gray-200 text-gray-700') !!}
                     @endforeach
-                    <td class="px-3 py-2 text-center font-bold text-orange-400">{{ number_format($rowTotalAll) }}</td>
+                    {!! $renderDetailTotalCell($desa, 'suara_total', $rowTotalAll, 'px-3 py-2 text-center font-bold text-orange-400') !!}
                 </tr>
                 <tr class="dark:bg-gray-700/10 bg-gray-50 border-t dark:border-gray-700 border-gray-200">
                     <td class="px-5 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold tracking-wider">Status</td>

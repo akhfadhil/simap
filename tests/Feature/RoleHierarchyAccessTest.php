@@ -278,10 +278,20 @@ class RoleHierarchyAccessTest extends TestCase
             ->assertOk()
             ->assertSee('bg-red-500/20', false);
 
-        $this->actingAs($this->ppsA)
+        $ppkDetailResponse = $this->actingAs($this->ppkA)
+            ->get(route('ppk.rekap.show', [
+                'jenis' => 'ppwp',
+                'detail' => 1,
+                'detail_desa_id' => $this->desaA->id,
+            ]))
+            ->assertOk();
+        $this->assertGreaterThanOrEqual(3, substr_count($ppkDetailResponse->getContent(), 'ring-red-400/60'));
+
+        $ppsResponse = $this->actingAs($this->ppsA)
             ->get(route('pps.rekap.show', 'ppwp'))
             ->assertOk()
             ->assertSee('bg-red-500/20', false);
+        $this->assertGreaterThanOrEqual(2, substr_count($ppsResponse->getContent(), 'ring-red-400/60'));
 
         $this->actingAs($this->ppkA)
             ->postJson(route('admin.rekap.cell-flag', 'ppwp'), [

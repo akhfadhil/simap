@@ -28,14 +28,18 @@
     $totalTdkSah = $rekaps->sum('suara_tidak_sah');
 
     $rowKeyFor = fn($row) => isset($row['field']) && $row['field'] ? $row['field'] : 'sum:' . implode('+', $row['sum']);
-    $renderFlaggedTotalCell = function(string $rowKey, $value, string $baseClass = '') use ($cellFlags) {
-        $flagged = $cellFlags->has($rowKey);
-        $classes = trim($baseClass . ' ' . ($flagged
-            ? 'bg-red-500/20 text-red-600 dark:bg-red-500/20 dark:text-red-200 ring-1 ring-inset ring-red-400/60'
-            : ''));
+    $flaggedClasses = 'bg-red-500/20 text-red-600 dark:bg-red-500/20 dark:text-red-200 ring-1 ring-inset ring-red-400/60';
+    $renderFlaggedCell = function(bool $flagged, $value, string $baseClass = '') use ($flaggedClasses) {
+        $classes = trim($baseClass . ' ' . ($flagged ? $flaggedClasses : ''));
         $content = is_null($value) ? '&mdash;' : number_format($value);
 
         return new \Illuminate\Support\HtmlString('<td class="' . e($classes) . '">' . $content . '</td>');
+    };
+    $renderFlaggedTpsCell = function($tps, string $rowKey, $value, string $baseClass = '') use ($tpsCellFlags, $renderFlaggedCell) {
+        return $renderFlaggedCell($tpsCellFlags->has($tps->id . ':' . $rowKey), $value, $baseClass);
+    };
+    $renderFlaggedTotalCell = function(string $rowKey, $value, string $baseClass = '') use ($cellFlags, $renderFlaggedCell) {
+        return $renderFlaggedCell($cellFlags->has($rowKey), $value, $baseClass);
     };
 @endphp
 <div class="grid grid-cols-3 gap-4 mb-8">
@@ -110,9 +114,7 @@
                     }
                     $rowTotal += $val ?? 0;
                 @endphp
-                <td class="px-3 py-2.5 text-center {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500' }}">
-                    {{ $r ? number_format($val) : '—' }}
-                </td>
+                {!! $renderFlaggedTpsCell($tps, $rowKeyFor($row), $r ? $val : null, 'px-3 py-2.5 text-center ' . ($isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500')) !!}
                 @endforeach
                 {!! $renderFlaggedTotalCell($rowKeyFor($row), $rowTotal, 'px-3 py-2.5 text-center font-bold text-teal-400') !!}
             </tr>
@@ -157,9 +159,7 @@
                     $val = $r ? ($r->{$row['field']} ?? 0) : null;
                     $rowTotal += $val ?? 0;
                 @endphp
-                <td class="px-3 py-2.5 text-center {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500' }}">
-                    {{ $r ? number_format($val) : '—' }}
-                </td>
+                {!! $renderFlaggedTpsCell($tps, $rowKeyFor($row), $r ? $val : null, 'px-3 py-2.5 text-center ' . ($isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500')) !!}
                 @endforeach
                 {!! $renderFlaggedTotalCell($rowKeyFor($row), $rowTotal, 'px-3 py-2.5 text-center font-bold text-teal-400') !!}
             </tr>
@@ -207,9 +207,7 @@
                     }
                     $rowTotal += $val ?? 0;
                 @endphp
-                <td class="px-3 py-2.5 text-center {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500' }}">
-                    {{ $r ? number_format($val) : '—' }}
-                </td>
+                {!! $renderFlaggedTpsCell($tps, $rowKeyFor($row), $r ? $val : null, 'px-3 py-2.5 text-center ' . ($isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500')) !!}
                 @endforeach
                 {!! $renderFlaggedTotalCell($rowKeyFor($row), $rowTotal, 'px-3 py-2.5 text-center font-bold text-teal-400') !!}
             </tr>
@@ -265,7 +263,7 @@
                     $s = $suaraMap[$calon->id] ?? null;
                     $rowTotal += $s ?? 0;
                 @endphp
-                <td class="px-3 py-3 text-center font-semibold dark:text-gray-200 text-gray-700">{{ $r ? number_format($s ?? 0) : '—' }}</td>
+                {!! $renderFlaggedTpsCell($tps, 'calon:' . $calon->id, $r ? ($s ?? 0) : null, 'px-3 py-3 text-center font-semibold dark:text-gray-200 text-gray-700') !!}
                 @endforeach
                 {!! $renderFlaggedTotalCell('calon:' . $calon->id, $rowTotal, 'px-3 py-3 text-center font-bold text-teal-400') !!}
             </tr>
@@ -298,7 +296,7 @@
                     <td class="px-5 py-2.5 text-xs font-bold dark:text-gray-300 text-gray-700 uppercase">Suara Partai</td>
                     @foreach($tpsList as $tps)
                     @php $r = $rekaps[$tps->id] ?? null; $sp = $r ? ($r->partaiSuaras->firstWhere('partai_id', $partai->id)?->suara ?? 0) : null; $partaiRowTotal += $sp ?? 0; @endphp
-                    <td class="px-3 py-2.5 text-center font-semibold dark:text-gray-200 text-gray-700">{{ $r ? number_format($sp) : '—' }}</td>
+                    {!! $renderFlaggedTpsCell($tps, 'partai:' . $partai->id, $r ? $sp : null, 'px-3 py-2.5 text-center font-semibold dark:text-gray-200 text-gray-700') !!}
                     @endforeach
                     {!! $renderFlaggedTotalCell('partai:' . $partai->id, $partaiRowTotal, 'px-3 py-2.5 text-center font-bold text-orange-400') !!}
                 </tr>
@@ -313,7 +311,7 @@
                     </td>
                     @foreach($tpsList as $tps)
                     @php $r = $rekaps[$tps->id] ?? null; $sc = $r ? ($r->calegSuaras->firstWhere('caleg_id', $caleg->id)?->suara ?? 0) : null; $calegRowTotal += $sc ?? 0; @endphp
-                    <td class="px-3 py-2.5 text-center dark:text-gray-400 text-gray-500">{{ $r ? number_format($sc) : '—' }}</td>
+                    {!! $renderFlaggedTpsCell($tps, 'caleg:' . $caleg->id, $r ? $sc : null, 'px-3 py-2.5 text-center dark:text-gray-400 text-gray-500') !!}
                     @endforeach
                     {!! $renderFlaggedTotalCell('caleg:' . $caleg->id, $calegRowTotal, 'px-3 py-2.5 text-center font-bold text-teal-400') !!}
                 </tr>
@@ -323,7 +321,7 @@
                     <td class="px-5 py-2.5 text-xs font-bold dark:text-gray-300 text-gray-700 uppercase">Total Suara Sah</td>
                     @foreach($tpsList as $tps)
                     @php $r = $rekaps[$tps->id] ?? null; $sp = $r ? ($r->partaiSuaras->firstWhere('partai_id', $partai->id)?->suara ?? 0) : 0; $sc_sum = $r ? $r->calegSuaras->whereIn('caleg_id', $partai->calegs->pluck('id'))->sum('suara') : 0; $colTotal = $r ? ($sp + $sc_sum) : null; $grandTotal += $colTotal ?? 0; @endphp
-                    <td class="px-3 py-2.5 text-center font-bold text-teal-400">{{ $r ? number_format($colTotal) : '—' }}</td>
+                    {!! $renderFlaggedTpsCell($tps, 'partai_total:' . $partai->id, $r ? $colTotal : null, 'px-3 py-2.5 text-center font-bold text-teal-400') !!}
                     @endforeach
                     {!! $renderFlaggedTotalCell('partai_total:' . $partai->id, $grandTotal, 'px-3 py-2.5 text-center font-bold text-teal-400') !!}
                 </tr>
@@ -360,7 +358,7 @@
                 <td class="px-5 py-2.5 text-sm dark:text-gray-300 text-gray-600">Jumlah Suara Sah</td>
                 @foreach($tpsList as $tps)
                 @php $r = $rekaps[$tps->id] ?? null; $sah = $r ? $r->suara_sah : null; $rowTotalSah += $sah ?? 0; @endphp
-                <td class="px-3 py-2.5 text-center dark:text-gray-400 text-gray-500">{{ $r ? number_format($sah) : '—' }}</td>
+                {!! $renderFlaggedTpsCell($tps, 'suara_sah', $r ? $sah : null, 'px-3 py-2.5 text-center dark:text-gray-400 text-gray-500') !!}
                 @endforeach
                 {!! $renderFlaggedTotalCell('suara_sah', $rowTotalSah, 'px-3 py-2.5 text-center font-bold text-teal-400') !!}
             </tr>
@@ -370,7 +368,7 @@
                 <td class="px-5 py-2.5 text-sm dark:text-gray-300 text-gray-600">Jumlah Suara Tidak Sah</td>
                 @foreach($tpsList as $tps)
                 @php $r = $rekaps[$tps->id] ?? null; $tdk = $r ? $r->suara_tidak_sah : null; $rowTotalTdk += $tdk ?? 0; @endphp
-                <td class="px-3 py-2.5 text-center dark:text-gray-400 text-gray-500">{{ $r ? number_format($tdk) : '—' }}</td>
+                {!! $renderFlaggedTpsCell($tps, 'suara_tidak_sah', $r ? $tdk : null, 'px-3 py-2.5 text-center dark:text-gray-400 text-gray-500') !!}
                 @endforeach
                 {!! $renderFlaggedTotalCell('suara_tidak_sah', $rowTotalTdk, 'px-3 py-2.5 text-center font-bold text-teal-400') !!}
             </tr>
@@ -380,7 +378,7 @@
                 <td class="px-5 py-2.5 text-sm font-bold dark:text-gray-200 text-gray-800">Jumlah Seluruh Suara</td>
                 @foreach($tpsList as $tps)
                 @php $r = $rekaps[$tps->id] ?? null; $all = $r ? ($r->suara_sah + $r->suara_tidak_sah) : null; $rowTotalAll += $all ?? 0; @endphp
-                <td class="px-3 py-2.5 text-center font-bold dark:text-gray-200 text-gray-700">{{ $r ? number_format($all) : '—' }}</td>
+                {!! $renderFlaggedTpsCell($tps, 'suara_total', $r ? $all : null, 'px-3 py-2.5 text-center font-bold dark:text-gray-200 text-gray-700') !!}
                 @endforeach
                 {!! $renderFlaggedTotalCell('suara_total', $rowTotalAll, 'px-3 py-2.5 text-center font-bold text-teal-400') !!}
             </tr>

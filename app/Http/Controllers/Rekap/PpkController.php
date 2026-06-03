@@ -149,10 +149,13 @@ class PpkController extends Controller
                 });
             })
             ->get();
+        $tpsCellFlags = collect();
         $cellFlags = collect();
 
         foreach ($flagRows as $flag) {
             if ($flag->level === 'tps') {
+                $tpsCellFlags->put($flag->entity_id.':'.$flag->row_key, true);
+
                 $desaId = $tpsDesa[$flag->entity_id] ?? null;
                 if ($desaId) {
                     $cellFlags->put($desaId.':'.$flag->row_key, true);
@@ -181,6 +184,7 @@ class PpkController extends Controller
             'desaPartaiTotals',
             'desaCalegTotals',
             'desaPartaiGrandTotals',
+            'tpsCellFlags',
             'cellFlags'
         ));
     }
