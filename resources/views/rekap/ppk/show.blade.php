@@ -107,103 +107,65 @@
     <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold mb-3">// Rekap Total Kecamatan</p>
 </div>
 
-@php
-    $sectionsMacro = [
-        ['title' => 'Section I — DPT & Pengguna Hak Pilih', 'rows' => $rows1],
-        ['title' => 'Section II — Surat Suara',              'rows' => $rows2],
-        ['title' => 'Section III — Pemilih Disabilitas',     'rows' => $rows3],
-    ];
-@endphp
-
-@foreach($sectionsMacro as $sec)
-<div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm overflow-hidden mb-4">
-    <div class="px-5 py-2.5 border-b dark:border-gray-700 border-gray-200 dark:bg-gray-700/50 bg-gray-50">
-        <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold">// {{ $sec['title'] }}</p>
-    </div>
+<div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm overflow-hidden mb-8">
     <div class="overflow-x-auto">
-        <table class="w-full text-sm">
+        <table class="w-full text-sm table-fixed">
+            <colgroup>
+                <col style="width:220px">
+                @foreach($desas as $__desa) <col style="width:110px"> @endforeach
+                <col style="width:110px">
+            </colgroup>
             <thead>
-                <tr class="border-b dark:border-gray-700 border-gray-200">
-                    <th class="text-left px-5 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold min-w-56">Keterangan</th>
+                <tr class="border-b dark:border-gray-700 border-gray-200 sticky top-0 dark:bg-gray-800 bg-white z-10">
+                    <th class="text-left px-5 py-3 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold truncate">Keterangan</th>
                     @foreach($desas as $desa)
-                    <th class="text-center px-3 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold whitespace-nowrap">{{ $desa->nama }}</th>
+                    <th class="text-center px-3 py-3 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold whitespace-nowrap">{{ $desa->nama }}</th>
                     @endforeach
-                    <th class="text-center px-3 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Total</th>
+                    <th class="text-center px-3 py-3 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Total</th>
                 </tr>
             </thead>
             <tbody>
-            @foreach($sec['rows'] as $row)
-            @php $rowTotal = 0; $isBold = $row['bold'] ?? false; @endphp
-            <tr class="border-b dark:border-gray-700 border-gray-100 last:border-0 {{ $isBold ? 'dark:bg-gray-700/20 bg-gray-50' : 'dark:hover:bg-gray-750 hover:bg-gray-50' }}">
-                <td class="px-5 py-2 text-sm {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-800' : 'dark:text-gray-300 text-gray-600' }}">{{ $row['label'] }}</td>
-                @foreach($desas as $desa)
-                @php $val = $getDesaVal($desa, $row); $rowTotal += $val; @endphp
-                {!! $renderDesaCell($desa, $rowKeyFor($row), $val, 'px-3 py-2 text-center ' . ($isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500')) !!}
-                @endforeach
-                <td class="px-3 py-2 text-center font-bold text-orange-400">{{ number_format($rowTotal) }}</td>
-            </tr>
-            @endforeach
-            </tbody>
-        </table>
-    </div>
-</div>
-@endforeach
-
-{{-- Section IV Total — Perolehan Suara per Desa --}}
-<div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm overflow-hidden mb-4">
-    <div class="px-5 py-2.5 border-b dark:border-gray-700 border-gray-200 dark:bg-gray-700/50 bg-gray-50">
-        <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold">// Section IV — Perolehan Suara</p>
-    </div>
-    @if(in_array($jenis, ['ppwp','gubernur','bupati','dpd']))
-    <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-            <thead>
-                <tr class="border-b dark:border-gray-700 border-gray-200">
-                    <th class="text-left px-5 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold min-w-48">Calon</th>
-                    @foreach($desas as $desa)
-                    <th class="text-center px-3 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold whitespace-nowrap">{{ $desa->nama }}</th>
-                    @endforeach
-                    <th class="text-center px-3 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Total</th>
+            @foreach([
+                ['title' => 'Section I - DPT & Pengguna Hak Pilih', 'rows' => $rows1],
+                ['title' => 'Section II - Surat Suara', 'rows' => $rows2],
+                ['title' => 'Section III - Pemilih Disabilitas', 'rows' => $rows3],
+            ] as $sec)
+                <tr class="dark:bg-gray-900/60 bg-gray-100 border-b dark:border-gray-700 border-gray-200">
+                    <td colspan="{{ $desas->count() + 2 }}" class="px-5 py-1.5 text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase font-semibold">{{ $sec['title'] }}</td>
                 </tr>
-            </thead>
-            <tbody>
-            @foreach($master['calons'] as $calon)
-            @php $rowTotal = 0; $name = in_array($jenis, ['ppwp','gubernur','bupati']) ? $calon->nama_paslon : $calon->nama_calon; @endphp
-            <tr class="border-b dark:border-gray-700 border-gray-100 last:border-0 dark:hover:bg-gray-750 hover:bg-gray-50">
-                <td class="px-5 py-2.5 text-sm dark:text-gray-200 text-gray-700">
-                    <span class="text-xs dark:text-gray-500 text-gray-400 mr-1">{{ $calon->nomor_urut }}.</span>{{ $name }}
-                </td>
-                @foreach($desas as $desa)
-                @php
-                    $val = $desaCalonTotals[$desa->id][$calon->id] ?? 0;
-                    $rowTotal += $val;
-                @endphp
-                {!! $renderDesaCell($desa, 'calon:' . $calon->id, $val, 'px-3 py-2.5 text-center dark:text-gray-400 text-gray-500') !!}
+                @foreach($sec['rows'] as $row)
+                @php $rowTotal = 0; $isBold = $row['bold'] ?? false; @endphp
+                <tr class="border-b dark:border-gray-700 border-gray-100 {{ $isBold ? 'dark:bg-gray-700/20 bg-gray-50' : 'dark:hover:bg-gray-750 hover:bg-gray-50' }}">
+                    <td class="px-5 py-2 text-sm {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-800' : 'dark:text-gray-300 text-gray-600' }}">{{ $row['label'] }}</td>
+                    @foreach($desas as $desa)
+                    @php $val = $getDesaVal($desa, $row); $rowTotal += $val; @endphp
+                    {!! $renderDesaCell($desa, $rowKeyFor($row), $val, 'px-3 py-2 text-center ' . ($isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500')) !!}
+                    @endforeach
+                    <td class="px-3 py-2 text-center font-bold text-orange-400">{{ number_format($rowTotal) }}</td>
+                </tr>
                 @endforeach
-                <td class="px-3 py-2.5 text-center font-bold text-orange-400">{{ number_format($rowTotal) }}</td>
-            </tr>
             @endforeach
-            </tbody>
-        </table>
-    </div>
-    @else
-    @foreach($master['partais'] as $partai)
-    <div class="border-b dark:border-gray-700 border-gray-200 last:border-0">
-        <div class="px-5 py-2 dark:bg-gray-700/30 bg-gray-50">
-            <p class="text-xs font-bold dark:text-gray-300 text-gray-700">{{ $partai->nomor_urut }}. {{ $partai->nama_partai }}</p>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead>
-                    <tr class="border-b dark:border-gray-700 border-gray-100">
-                        <th class="text-left px-5 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold min-w-48">Caleg</th>
-                        @foreach($desas as $desa)
-                        <th class="text-center px-3 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold whitespace-nowrap">{{ $desa->nama }}</th>
-                        @endforeach
-                        <th class="text-center px-3 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Total</th>
-                    </tr>
-                </thead>
-                <tbody>
+
+            <tr class="dark:bg-gray-900/60 bg-gray-100 border-b dark:border-gray-700 border-gray-200">
+                <td colspan="{{ $desas->count() + 2 }}" class="px-5 py-1.5 text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Section IV - Perolehan Suara</td>
+            </tr>
+            @if(in_array($jenis, ['ppwp','gubernur','bupati','dpd']))
+                @foreach($master['calons'] as $calon)
+                @php $rowTotal = 0; $name = in_array($jenis, ['ppwp','gubernur','bupati']) ? $calon->nama_paslon : $calon->nama_calon; @endphp
+                <tr class="border-b dark:border-gray-700 border-gray-100 dark:hover:bg-gray-750 hover:bg-gray-50">
+                    <td class="px-5 py-2.5 text-sm dark:text-gray-200 text-gray-700"><span class="text-xs dark:text-gray-500 text-gray-400 mr-1">{{ $calon->nomor_urut }}.</span>{{ $name }}</td>
+                    @foreach($desas as $desa)
+                    @php $val = $desaCalonTotals[$desa->id][$calon->id] ?? 0; $rowTotal += $val; @endphp
+                    {!! $renderDesaCell($desa, 'calon:' . $calon->id, $val, 'px-3 py-2.5 text-center dark:text-gray-400 text-gray-500') !!}
+                    @endforeach
+                    <td class="px-3 py-2.5 text-center font-bold text-orange-400">{{ number_format($rowTotal) }}</td>
+                </tr>
+                @endforeach
+            @else
+                @foreach($master['partais'] as $partai)
+                <tr class="dark:bg-gray-700/30 bg-gray-50 border-b dark:border-gray-700 border-gray-200">
+                    <td colspan="{{ $desas->count() + 2 }}" class="px-5 py-1.5 text-xs font-bold dark:text-gray-300 text-gray-700">{{ $partai->nomor_urut }}. {{ $partai->nama_partai }}</td>
+                </tr>
                 @php $partaiRowTotal = 0; @endphp
                 <tr class="border-b dark:border-gray-700 border-gray-100 dark:bg-gray-700/20 bg-gray-50">
                     <td class="px-5 py-2 text-xs font-bold dark:text-gray-300 text-gray-700 uppercase">Suara Partai</td>
@@ -215,7 +177,7 @@
                 </tr>
                 @foreach($partai->calegs as $caleg)
                 @php $calegRowTotal = 0; @endphp
-                <tr class="border-b dark:border-gray-700 border-gray-100 last:border-0 dark:hover:bg-gray-750 hover:bg-gray-50">
+                <tr class="border-b dark:border-gray-700 border-gray-100 dark:hover:bg-gray-750 hover:bg-gray-50">
                     <td class="px-5 py-2"><div class="flex items-center gap-2"><span class="text-xs dark:text-gray-500 text-gray-400 w-4">{{ $caleg->nomor_urut }}.</span><span class="text-sm dark:text-gray-200 text-gray-700">{{ $caleg->nama_caleg }}</span></div></td>
                     @foreach($desas as $desa)
                     @php $scDesa = $desaCalegTotals[$desa->id][$caleg->id] ?? 0; $calegRowTotal += $scDesa; @endphp
@@ -233,31 +195,12 @@
                     @endforeach
                     <td class="px-3 py-2 text-center font-bold text-teal-400">{{ number_format($grandTotal) }}</td>
                 </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-    @endforeach
-    @endif
-</div>
+                @endforeach
+            @endif
 
-{{-- Section V Total --}}
-<div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm overflow-hidden mb-8">
-    <div class="px-5 py-2.5 border-b dark:border-gray-700 border-gray-200 dark:bg-gray-700/50 bg-gray-50">
-        <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold">// Section V — Suara Sah, Tidak Sah & Total</p>
-    </div>
-    <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-            <thead>
-                <tr class="border-b dark:border-gray-700 border-gray-200">
-                    <th class="text-left px-5 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold min-w-56">Keterangan</th>
-                    @foreach($desas as $desa)
-                    <th class="text-center px-3 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold whitespace-nowrap">{{ $desa->nama }}</th>
-                    @endforeach
-                    <th class="text-center px-3 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Total</th>
-                </tr>
-            </thead>
-            <tbody>
+            <tr class="dark:bg-gray-900/60 bg-gray-100 border-b dark:border-gray-700 border-gray-200">
+                <td colspan="{{ $desas->count() + 2 }}" class="px-5 py-1.5 text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Section V - Suara Sah, Tidak Sah & Total</td>
+            </tr>
             @foreach([['label'=>'Jumlah Suara Sah','field'=>'suara_sah'],['label'=>'Jumlah Suara Tidak Sah','field'=>'suara_tidak_sah']] as $row)
             @php $rowTotal = 0; @endphp
             <tr class="border-b dark:border-gray-700 border-gray-100 dark:hover:bg-gray-750 hover:bg-gray-50">
@@ -283,9 +226,6 @@
     </div>
 </div>
 
-{{-- ══════════════════════════════════════
-     DETAIL PER DESA (accordion)
-══════════════════════════════════════ --}}
 <div class="mb-2">
     <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold mb-3">// Detail Per Desa</p>
 </div>
@@ -347,15 +287,16 @@
 
     <div id="desa-{{ $desa->id }}" class="hidden">
 
-        {{-- Section I --}}
-        <div class="px-5 py-2.5 border-b dark:border-gray-700 border-gray-200 dark:bg-gray-700/50 bg-gray-50">
-            <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold">// Section I — DPT & Pengguna Hak Pilih</p>
-        </div>
         <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+            <table class="w-full text-sm table-fixed">
+                <colgroup>
+                    <col style="width:220px">
+                    @foreach($desa->tps as $__tps) <col style="width:110px"> @endforeach
+                    <col style="width:110px">
+                </colgroup>
                 <thead>
-                    <tr class="border-b dark:border-gray-700 border-gray-200">
-                        <th class="text-left px-5 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold min-w-56">Keterangan</th>
+                    <tr class="border-b dark:border-gray-700 border-gray-200 sticky top-0 dark:bg-gray-800 bg-white z-10">
+                        <th class="text-left px-5 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold truncate">Keterangan</th>
                         @foreach($desa->tps as $tps)
                         <th class="text-center px-3 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold whitespace-nowrap">{{ $tps->nama }}</th>
                         @endforeach
@@ -363,144 +304,55 @@
                     </tr>
                 </thead>
                 <tbody>
-                @foreach($rows1 as $row)
-                @php $rowTotal = 0; $isBold = $row['bold'] ?? false; @endphp
-                <tr class="border-b dark:border-gray-700 border-gray-100 last:border-0 {{ $isBold ? 'dark:bg-gray-700/20 bg-gray-50' : 'dark:hover:bg-gray-750 hover:bg-gray-50' }}">
-                    <td class="px-5 py-2 text-sm {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-800' : 'dark:text-gray-300 text-gray-600' }}">{{ $row['label'] }}</td>
-                    @foreach($desa->tps as $tps)
-                    @php $r = $detailRekaps[$tps->id] ?? null; $val = $r ? (isset($row['field']) ? ($r->{$row['field']} ?? 0) : collect($row['sum'])->sum(fn($f) => $r->$f ?? 0)) : null; $rowTotal += $val ?? 0; @endphp
-                    {!! $renderDetailTpsCell($tps, $rowKeyFor($row), $r ? $val : null, 'px-3 py-2 text-center ' . ($isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500')) !!}
-                    @endforeach
-                    {!! $renderDetailTotalCell($desa, $rowKeyFor($row), $rowTotal, 'px-3 py-2 text-center font-bold text-orange-400') !!}
-                </tr>
-                @endforeach
-                </tbody>
-            </table>
-        </div>
-
-        {{-- Section II --}}
-        <div class="px-5 py-2.5 border-t border-b dark:border-gray-700 border-gray-200 dark:bg-gray-700/50 bg-gray-50">
-            <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold">// Section II — Surat Suara</p>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead>
-                    <tr class="border-b dark:border-gray-700 border-gray-200">
-                        <th class="text-left px-5 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold min-w-56">Keterangan</th>
-                        @foreach($desa->tps as $tps)
-                        <th class="text-center px-3 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold whitespace-nowrap">{{ $tps->nama }}</th>
-                        @endforeach
-                        <th class="text-center px-3 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Total</th>
+                @foreach([
+                    ['title' => 'Section I - DPT & Pengguna Hak Pilih', 'rows' => $rows1],
+                    ['title' => 'Section II - Surat Suara', 'rows' => $rows2],
+                    ['title' => 'Section III - Pemilih Disabilitas', 'rows' => $rows3],
+                ] as $sec)
+                    <tr class="dark:bg-gray-900/60 bg-gray-100 border-b dark:border-gray-700 border-gray-200">
+                        <td colspan="{{ $desa->tps->count() + 2 }}" class="px-5 py-1.5 text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase font-semibold">{{ $sec['title'] }}</td>
                     </tr>
-                </thead>
-                <tbody>
-                @foreach($rows2 as $row)
-                @php $rowTotal = 0; $isBold = $row['bold'] ?? false; @endphp
-                <tr class="border-b dark:border-gray-700 border-gray-100 last:border-0 {{ $isBold ? 'dark:bg-gray-700/20 bg-gray-50' : 'dark:hover:bg-gray-750 hover:bg-gray-50' }}">
-                    <td class="px-5 py-2 text-sm {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-800' : 'dark:text-gray-300 text-gray-600' }}">{{ $row['label'] }}</td>
-                    @foreach($desa->tps as $tps)
-                    @php $r = $detailRekaps[$tps->id] ?? null; $val = $r ? ($r->{$row['field']} ?? 0) : null; $rowTotal += $val ?? 0; @endphp
-                    {!! $renderDetailTpsCell($tps, $rowKeyFor($row), $r ? $val : null, 'px-3 py-2 text-center ' . ($isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500')) !!}
-                    @endforeach
-                    {!! $renderDetailTotalCell($desa, $rowKeyFor($row), $rowTotal, 'px-3 py-2 text-center font-bold text-orange-400') !!}
-                </tr>
-                @endforeach
-                </tbody>
-            </table>
-        </div>
-
-        {{-- Section III --}}
-        <div class="px-5 py-2.5 border-t border-b dark:border-gray-700 border-gray-200 dark:bg-gray-700/50 bg-gray-50">
-            <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold">// Section III — Pemilih Disabilitas</p>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead>
-                    <tr class="border-b dark:border-gray-700 border-gray-200">
-                        <th class="text-left px-5 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold min-w-56">Keterangan</th>
+                    @foreach($sec['rows'] as $row)
+                    @php $rowTotal = 0; $isBold = $row['bold'] ?? false; @endphp
+                    <tr class="border-b dark:border-gray-700 border-gray-100 {{ $isBold ? 'dark:bg-gray-700/20 bg-gray-50' : 'dark:hover:bg-gray-750 hover:bg-gray-50' }}">
+                        <td class="px-5 py-2 text-sm {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-800' : 'dark:text-gray-300 text-gray-600' }}">{{ $row['label'] }}</td>
                         @foreach($desa->tps as $tps)
-                        <th class="text-center px-3 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold whitespace-nowrap">{{ $tps->nama }}</th>
+                        @php $r = $detailRekaps[$tps->id] ?? null; $val = $r ? (isset($row['field']) ? ($r->{$row['field']} ?? 0) : collect($row['sum'])->sum(fn($f) => $r->$f ?? 0)) : null; $rowTotal += $val ?? 0; @endphp
+                        {!! $renderDetailTpsCell($tps, $rowKeyFor($row), $r ? $val : null, 'px-3 py-2 text-center ' . ($isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500')) !!}
                         @endforeach
-                        <th class="text-center px-3 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Total</th>
+                        {!! $renderDetailTotalCell($desa, $rowKeyFor($row), $rowTotal, 'px-3 py-2 text-center font-bold text-orange-400') !!}
                     </tr>
-                </thead>
-                <tbody>
-                @foreach($rows3 as $row)
-                @php $rowTotal = 0; $isBold = $row['bold'] ?? false; @endphp
-                <tr class="border-b dark:border-gray-700 border-gray-100 last:border-0 {{ $isBold ? 'dark:bg-gray-700/20 bg-gray-50' : 'dark:hover:bg-gray-750 hover:bg-gray-50' }}">
-                    <td class="px-5 py-2 text-sm {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-800' : 'dark:text-gray-300 text-gray-600' }}">{{ $row['label'] }}</td>
-                    @foreach($desa->tps as $tps)
-                    @php $r = $detailRekaps[$tps->id] ?? null; $val = $r ? (isset($row['field']) ? ($r->{$row['field']} ?? 0) : collect($row['sum'])->sum(fn($f) => $r->$f ?? 0)) : null; $rowTotal += $val ?? 0; @endphp
-                    {!! $renderDetailTpsCell($tps, $rowKeyFor($row), $r ? $val : null, 'px-3 py-2 text-center ' . ($isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500')) !!}
                     @endforeach
-                    {!! $renderDetailTotalCell($desa, $rowKeyFor($row), $rowTotal, 'px-3 py-2 text-center font-bold text-orange-400') !!}
-                </tr>
                 @endforeach
-                </tbody>
-            </table>
-        </div>
-
-        {{-- Section IV per desa --}}
-        <div class="px-5 py-2.5 border-t border-b dark:border-gray-700 border-gray-200 dark:bg-gray-700/50 bg-gray-50">
-            <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold">// Section IV — Perolehan Suara</p>
-        </div>
-        @if(in_array($jenis, ['ppwp','gubernur','bupati','dpd']))
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead>
-                    <tr class="border-b dark:border-gray-700 border-gray-200">
-                        <th class="text-left px-5 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold min-w-48">Calon</th>
+                <tr class="dark:bg-gray-900/60 bg-gray-100 border-b dark:border-gray-700 border-gray-200">
+                    <td colspan="{{ $desa->tps->count() + 2 }}" class="px-5 py-1.5 text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Section IV - Perolehan Suara</td>
+                </tr>
+                @if(in_array($jenis, ['ppwp','gubernur','bupati','dpd']))
+                    @foreach($master['calons'] as $calon)
+                    @php $rowTotal = 0; $name = in_array($jenis, ['ppwp','gubernur','bupati']) ? $calon->nama_paslon : $calon->nama_calon; @endphp
+                    <tr class="border-b dark:border-gray-700 border-gray-100 dark:hover:bg-gray-750 hover:bg-gray-50">
+                        <td class="px-5 py-2.5 text-sm dark:text-gray-200 text-gray-700"><span class="text-xs dark:text-gray-500 text-gray-400 mr-1">{{ $calon->nomor_urut }}.</span>{{ $name }}</td>
                         @foreach($desa->tps as $tps)
-                        <th class="text-center px-3 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold whitespace-nowrap">{{ $tps->nama }}</th>
+                        @php
+                            $r = $detailRekaps[$tps->id] ?? null;
+                            $s = $r ? match($jenis) {
+                                'ppwp' => $r->ppwpSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0,
+                                'gubernur' => $r->gubernurSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0,
+                                'bupati' => $r->bupatiSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0,
+                                default => $r->dpdSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0,
+                            } : null;
+                            $rowTotal += $s ?? 0;
+                        @endphp
+                        {!! $renderDetailTpsCell($tps, 'calon:' . $calon->id, $r ? $s : null, 'px-3 py-2.5 text-center dark:text-gray-400 text-gray-500') !!}
                         @endforeach
-                        <th class="text-center px-3 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Total</th>
+                        {!! $renderDetailTotalCell($desa, 'calon:' . $calon->id, $rowTotal, 'px-3 py-2.5 text-center font-bold text-orange-400') !!}
                     </tr>
-                </thead>
-                <tbody>
-                @foreach($master['calons'] as $calon)
-                @php $rowTotal = 0; $name = in_array($jenis, ['ppwp','gubernur','bupati']) ? $calon->nama_paslon : $calon->nama_calon; @endphp
-                <tr class="border-b dark:border-gray-700 border-gray-100 last:border-0 dark:hover:bg-gray-750 hover:bg-gray-50">
-                    <td class="px-5 py-2.5 text-sm dark:text-gray-200 text-gray-700"><span class="text-xs dark:text-gray-500 text-gray-400 mr-1">{{ $calon->nomor_urut }}.</span>{{ $name }}</td>
-                    @foreach($desa->tps as $tps)
-                    @php
-                        $r = $detailRekaps[$tps->id] ?? null;
-                        $s = $r ? match($jenis) {
-                            'ppwp'     => $r->ppwpSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0,
-                            'gubernur' => $r->gubernurSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0,
-                            'bupati'   => $r->bupatiSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0,
-                            default    => $r->dpdSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0,
-                        } : null;
-                        $rowTotal += $s ?? 0;
-                    @endphp
-                    {!! $renderDetailTpsCell($tps, 'calon:' . $calon->id, $r ? $s : null, 'px-3 py-2.5 text-center dark:text-gray-400 text-gray-500') !!}
                     @endforeach
-                    {!! $renderDetailTotalCell($desa, 'calon:' . $calon->id, $rowTotal, 'px-3 py-2.5 text-center font-bold text-orange-400') !!}
-                </tr>
-                @endforeach
-                </tbody>
-            </table>
-        </div>
-        @else
-        @foreach($master['partais'] as $partai)
-        <div class="border-b dark:border-gray-700 border-gray-200 last:border-0">
-            <div class="px-5 py-2 dark:bg-gray-700/30 bg-gray-50">
-                <p class="text-xs font-bold dark:text-gray-300 text-gray-700">{{ $partai->nomor_urut }}. {{ $partai->nama_partai }}</p>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                    <thead>
-                        <tr class="border-b dark:border-gray-700 border-gray-100">
-                            <th class="text-left px-5 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold min-w-48">Caleg</th>
-                            @foreach($desa->tps as $tps)
-                            <th class="text-center px-3 py-2 text-[10px] uppercase font-semibold whitespace-nowrap
-    {{ ($detailRekaps[$tps->id] ?? null)?->status === 'final'
-        ? 'dark:text-gray-500 text-gray-400'
-        : 'text-red-400' }}">{{ $tps->nama }}</th>
-                            @endforeach
-                            <th class="text-center px-3 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+                @else
+                    @foreach($master['partais'] as $partai)
+                    <tr class="dark:bg-gray-700/30 bg-gray-50 border-b dark:border-gray-700 border-gray-200">
+                        <td colspan="{{ $desa->tps->count() + 2 }}" class="px-5 py-1.5 text-xs font-bold dark:text-gray-300 text-gray-700">{{ $partai->nomor_urut }}. {{ $partai->nama_partai }}</td>
+                    </tr>
                     @php $partaiRowTotal = 0; @endphp
                     <tr class="border-b dark:border-gray-700 border-gray-100 dark:bg-gray-700/20 bg-gray-50">
                         <td class="px-5 py-2 text-xs font-bold dark:text-gray-300 text-gray-700 uppercase">Suara Partai</td>
@@ -512,7 +364,7 @@
                     </tr>
                     @foreach($partai->calegs as $caleg)
                     @php $calegRowTotal = 0; @endphp
-                    <tr class="border-b dark:border-gray-700 border-gray-100 last:border-0 dark:hover:bg-gray-750 hover:bg-gray-50">
+                    <tr class="border-b dark:border-gray-700 border-gray-100 dark:hover:bg-gray-750 hover:bg-gray-50">
                         <td class="px-5 py-2"><div class="flex items-center gap-2"><span class="text-xs dark:text-gray-500 text-gray-400 w-4">{{ $caleg->nomor_urut }}.</span><span class="text-sm dark:text-gray-200 text-gray-700">{{ $caleg->nama_caleg }}</span></div></td>
                         @foreach($desa->tps as $tps)
                         @php $r = $detailRekaps[$tps->id] ?? null; $sc = $r ? ($r->calegSuaras->firstWhere('caleg_id', $caleg->id)?->suara ?? 0) : null; $calegRowTotal += $sc ?? 0; @endphp
@@ -530,29 +382,11 @@
                         @endforeach
                         {!! $renderDetailTotalCell($desa, 'partai_total:' . $partai->id, $grandTotal, 'px-3 py-2 text-center font-bold text-teal-400') !!}
                     </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        @endforeach
-        @endif
-
-        {{-- Section V per desa --}}
-        <div class="px-5 py-2.5 border-t border-b dark:border-gray-700 border-gray-200 dark:bg-gray-700/50 bg-gray-50">
-            <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold">// Section V — Suara Sah, Tidak Sah & Total</p>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead>
-                    <tr class="border-b dark:border-gray-700 border-gray-200">
-                        <th class="text-left px-5 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold min-w-56">Keterangan</th>
-                        @foreach($desa->tps as $tps)
-                        <th class="text-center px-3 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold whitespace-nowrap">{{ $tps->nama }}</th>
-                        @endforeach
-                        <th class="text-center px-3 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Total</th>
-                    </tr>
-                </thead>
-                <tbody>
+                    @endforeach
+                @endif
+                <tr class="dark:bg-gray-900/60 bg-gray-100 border-b dark:border-gray-700 border-gray-200">
+                    <td colspan="{{ $desa->tps->count() + 2 }}" class="px-5 py-1.5 text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Section V - Suara Sah, Tidak Sah & Total</td>
+                </tr>
                 @php $rowTotalSah = 0; @endphp
                 <tr class="border-b dark:border-gray-700 border-gray-100 dark:hover:bg-gray-750 hover:bg-gray-50">
                     <td class="px-5 py-2 text-sm dark:text-gray-300 text-gray-600">Jumlah Suara Sah</td>
@@ -597,6 +431,7 @@
             </table>
         </div>
 
+        
     </div>{{-- end accordion --}}
 </div>
 @endforeach
