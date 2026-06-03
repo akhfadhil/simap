@@ -232,6 +232,11 @@
 
         <div class="p-4 lg:p-8 overflow-y-auto">
             @yield('admin_content')
+            <footer class="pt-8 pb-2">
+                <p class="text-center admin-muted-soft text-[11px]">
+                    &copy; 2026 KPU Kabupaten Banyuwangi
+                </p>
+            </footer>
         </div>
     </main>
 </div>

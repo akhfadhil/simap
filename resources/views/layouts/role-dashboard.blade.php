@@ -228,6 +228,11 @@
             @endif
 
             @yield('role_content')
+            <footer class="pt-8 pb-2">
+                <p class="text-center admin-muted-soft text-[11px]">
+                    &copy; 2026 KPU Kabupaten Banyuwangi
+                </p>
+            </footer>
         </div>
     </main>
 </div>

@@ -128,6 +128,11 @@
 <main class="max-w-7xl mx-auto px-4 lg:px-8 py-6">
     @yield('content')
 </main>
+<footer class="max-w-7xl mx-auto px-4 lg:px-8 pb-6">
+    <p class="text-center text-[11px] dark:text-gray-600 text-gray-500">
+        &copy; 2026 KPU Kabupaten Banyuwangi
+    </p>
+</footer>
 @endif
 
 {{-- Modal Preview PDF --}}
