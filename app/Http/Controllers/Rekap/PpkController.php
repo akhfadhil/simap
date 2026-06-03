@@ -7,7 +7,6 @@ use App\Models\Kecamatan;
 use App\Models\RekapCellFlag;
 use App\Models\RekapHeader;
 use App\Models\Tps;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class PpkController extends Controller
@@ -130,12 +129,42 @@ class PpkController extends Controller
         $detailRekaps = $showDetail
             ? $rekaps->whereIn('tps_id', $detailDesas->flatMap(fn ($desa) => $desa->tps->pluck('id'))->all())
             : collect();
-        $cellFlags = RekapCellFlag::query()
+        $desaIds = $desas->pluck('id');
+        $allTpsIds = $desas->flatMap(fn ($desa) => $desa->tps->pluck('id'));
+        $tpsDesa = [];
+        foreach ($desas as $desa) {
+            foreach ($desa->tps as $tps) {
+                $tpsDesa[$tps->id] = $desa->id;
+            }
+        }
+        $flagRows = RekapCellFlag::query()
             ->where('jenis', $jenis)
-            ->where('level', 'desa')
-            ->whereIn('entity_id', $desas->pluck('id'))
-            ->get()
-            ->keyBy(fn ($flag) => $flag->entity_id.':'.$flag->row_key);
+            ->where(function ($query) use ($allTpsIds, $desaIds) {
+                $query->where(function ($query) use ($allTpsIds) {
+                    $query->where('level', 'tps')
+                        ->whereIn('entity_id', $allTpsIds);
+                })->orWhere(function ($query) use ($desaIds) {
+                    $query->where('level', 'desa')
+                        ->whereIn('entity_id', $desaIds);
+                });
+            })
+            ->get();
+        $cellFlags = collect();
+
+        foreach ($flagRows as $flag) {
+            if ($flag->level === 'tps') {
+                $desaId = $tpsDesa[$flag->entity_id] ?? null;
+                if ($desaId) {
+                    $cellFlags->put($desaId.':'.$flag->row_key, true);
+                }
+
+                continue;
+            }
+
+            if ($flag->level === 'desa') {
+                $cellFlags->put($flag->entity_id.':'.$flag->row_key, true);
+            }
+        }
         $master = $this->getMaster($jenis, $kecamatan);
 
         return view('rekap.ppk.show', compact(
@@ -154,42 +183,6 @@ class PpkController extends Controller
             'desaPartaiGrandTotals',
             'cellFlags'
         ));
-    }
-
-    // Menandai/menghapus tanda merah manual pada cell agregat desa.
-    public function toggleCellFlag(Request $request, string $jenis)
-    {
-        abort_if($request->user()?->role !== 'admin', 403);
-        $this->cekAktif($jenis);
-
-        $data = $request->validate([
-            'entity_id' => ['required', 'integer', 'exists:desas,id'],
-            'row_key' => ['required', 'string', 'max:96'],
-        ]);
-
-        $kecamatan = $this->activeKecamatan();
-        $desa = $kecamatan->desas()->whereKey($data['entity_id'])->firstOrFail();
-
-        $flag = RekapCellFlag::where([
-            'jenis' => $jenis,
-            'level' => 'desa',
-            'entity_id' => $desa->id,
-            'row_key' => $data['row_key'],
-        ])->first();
-
-        if ($flag) {
-            $flag->delete();
-        } else {
-            RekapCellFlag::create([
-                'jenis' => $jenis,
-                'level' => 'desa',
-                'entity_id' => $desa->id,
-                'row_key' => $data['row_key'],
-                'flagged_by' => $request->user()->id,
-            ]);
-        }
-
-        return back();
     }
 
     // Mengekspor rekap kecamatan untuk jenis pemilihan.

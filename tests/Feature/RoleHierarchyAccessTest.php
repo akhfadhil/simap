@@ -240,23 +240,38 @@ class RoleHierarchyAccessTest extends TestCase
         ]);
     }
 
-    public function test_admin_can_toggle_manual_red_flag_on_desa_rekap_cell(): void
+    public function test_admin_can_toggle_manual_red_flag_on_tps_rekap_cell_and_roll_it_up(): void
     {
         $this->actingAs($this->admin)
-            ->withSession(['admin_view_kecamatan_id' => $this->kecamatanA->id])
-            ->post(route('ppk.rekap.cell-flag', 'ppwp'), [
-                'entity_id' => $this->desaA->id,
+            ->postJson(route('admin.rekap.cell-flag', 'ppwp'), [
+                'entity_id' => $this->tpsA->id,
                 'row_key' => 'pengguna_dpk_lk',
             ])
-            ->assertRedirect();
+            ->assertOk()
+            ->assertJson([
+                'flagged' => true,
+                'tps_id' => $this->tpsA->id,
+                'desa_id' => $this->desaA->id,
+                'row_key' => 'pengguna_dpk_lk',
+            ]);
 
         $this->assertDatabaseHas('rekap_cell_flags', [
             'jenis' => 'ppwp',
-            'level' => 'desa',
-            'entity_id' => $this->desaA->id,
+            'level' => 'tps',
+            'entity_id' => $this->tpsA->id,
             'row_key' => 'pengguna_dpk_lk',
             'flagged_by' => $this->admin->id,
         ]);
+
+        $this->actingAs($this->admin)
+            ->get(route('admin.rekap.show', [
+                'jenis' => 'ppwp',
+                'detail' => 1,
+                'detail_kecamatan_id' => $this->kecamatanA->id,
+                'detail_desa_id' => $this->desaA->id,
+            ]))
+            ->assertOk()
+            ->assertSee('bg-red-500/20', false);
 
         $this->actingAs($this->ppkA)
             ->get(route('ppk.rekap.show', 'ppwp'))
@@ -269,24 +284,29 @@ class RoleHierarchyAccessTest extends TestCase
             ->assertSee('bg-red-500/20', false);
 
         $this->actingAs($this->ppkA)
-            ->post(route('ppk.rekap.cell-flag', 'ppwp'), [
-                'entity_id' => $this->desaA->id,
+            ->postJson(route('admin.rekap.cell-flag', 'ppwp'), [
+                'entity_id' => $this->tpsA->id,
                 'row_key' => 'pengguna_dpk_lk',
             ])
             ->assertForbidden();
 
         $this->actingAs($this->admin)
-            ->withSession(['admin_view_kecamatan_id' => $this->kecamatanA->id])
-            ->post(route('ppk.rekap.cell-flag', 'ppwp'), [
-                'entity_id' => $this->desaA->id,
+            ->postJson(route('admin.rekap.cell-flag', 'ppwp'), [
+                'entity_id' => $this->tpsA->id,
                 'row_key' => 'pengguna_dpk_lk',
             ])
-            ->assertRedirect();
+            ->assertOk()
+            ->assertJson([
+                'flagged' => false,
+                'tps_id' => $this->tpsA->id,
+                'desa_id' => $this->desaA->id,
+                'row_key' => 'pengguna_dpk_lk',
+            ]);
 
         $this->assertDatabaseMissing('rekap_cell_flags', [
             'jenis' => 'ppwp',
-            'level' => 'desa',
-            'entity_id' => $this->desaA->id,
+            'level' => 'tps',
+            'entity_id' => $this->tpsA->id,
             'row_key' => 'pengguna_dpk_lk',
         ]);
     }

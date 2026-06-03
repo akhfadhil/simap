@@ -89,7 +89,7 @@ Jenis pemilihan didefinisikan di `App\Models\RekapHeader::JENIS_LABELS` dan dapa
 - Rekap PPS menampilkan agregasi desa.
 - Rekap PPK menampilkan agregasi kecamatan.
 - Rekap Admin/Komisioner menampilkan agregasi kabupaten, filter/level wilayah, summary, dan export.
-- Admin dapat memberi atau menghapus penanda koreksi manual pada cell rekap tingkat desa di halaman PPK. Cell yang ditandai tampil merah di PPK dan di halaman PPS pada kolom total desa; PPS/PPK hanya melihat tanda tersebut.
+- Admin dapat memberi atau menghapus penanda koreksi manual pada cell TPS dari halaman Rekapitulasi Data admin setelah memilih jenis pemilu, kecamatan, dan desa. Jika sebuah cell TPS ditandai, cell total desa untuk baris yang sama ikut merah, rekap PPK pada kolom desa ikut merah, dan rekap kabupaten pada kolom kecamatan ikut merah; PPS/PPK hanya melihat tanda tersebut.
 - Export Excel tersedia untuk KPPS, PPS, PPK, Admin, dan Komisioner sesuai akses baca masing-masing.
 - `RekapExportService` membuat export bertingkat ketika rekap final memenuhi syarat.
 - `RekapAdminCache` menyimpan agregasi admin sementara selama 10 menit dan dapat di-flush saat data berubah.
@@ -133,7 +133,7 @@ Kolom penting `rekap_headers`:
 Kolom penting `rekap_cell_flags`:
 
 - `jenis`, `level`, `entity_id`, `row_key`.
-- `level=desa` dipakai untuk menandai cell agregat desa pada rekap PPK/PPS.
+- `level=tps` dipakai untuk menandai cell TPS spesifik. Tampilan agregat desa dan kecamatan diberi warna merah jika ada TPS turunannya yang ditandai pada `row_key` yang sama. `level=desa` masih dibaca sebagai kompatibilitas untuk tanda lama.
 - Unique key `jenis + level + entity_id + row_key`.
 
 Kolom penting `dokumens`:
@@ -271,7 +271,7 @@ GET /pps/rekap/{jenis}/export
 GET /ppk/rekap
 GET /ppk/rekap/{jenis}
 GET /ppk/rekap/{jenis}/export
-POST /ppk/rekap/{jenis}/cell-flag  admin only
+POST /admin/rekap/{jenis}/cell-flag  admin only
 
 // Rekap Admin/Komisioner
 GET  /admin/rekap

@@ -79,30 +79,15 @@
             : collect($row['sum'])->sum(fn($f) => $stats[$f] ?? 0);
     };
 
-    $canFlagDesaCells = Auth::user()->role === 'admin';
     $rowKeyFor = fn($row) => isset($row['field']) ? $row['field'] : 'sum:' . implode('+', $row['sum']);
-    $renderDesaCell = function($desa, string $rowKey, $value, string $baseClass = '') use ($cellFlags, $canFlagDesaCells, $jenis) {
+    $renderDesaCell = function($desa, string $rowKey, $value, string $baseClass = '') use ($cellFlags) {
         $flagged = $cellFlags->has($desa->id . ':' . $rowKey);
-        $classes = trim($baseClass . ' relative group ' . ($flagged
+        $classes = trim($baseClass . ' ' . ($flagged
             ? 'bg-red-500/20 text-red-600 dark:bg-red-500/20 dark:text-red-200 ring-1 ring-inset ring-red-400/60'
             : ''));
         $content = is_null($value) ? '&mdash;' : number_format($value);
-        $button = '';
 
-        if ($canFlagDesaCells) {
-            $buttonClass = $flagged
-                ? 'opacity-100 bg-red-500 text-white border-red-500'
-                : 'opacity-0 group-hover:opacity-100 bg-white dark:bg-gray-900 text-red-500 border-red-400';
-            $buttonTitle = $flagged ? 'Hapus tanda merah' : 'Tandai merah';
-            $button = '<form method="POST" action="' . e(route('ppk.rekap.cell-flag', $jenis)) . '" class="absolute top-1 right-1 transition-opacity ' . ($flagged ? 'opacity-100' : 'opacity-0 group-hover:opacity-100') . '">'
-                . csrf_field()
-                . '<input type="hidden" name="entity_id" value="' . e($desa->id) . '">'
-                . '<input type="hidden" name="row_key" value="' . e($rowKey) . '">'
-                . '<button type="submit" title="' . e($buttonTitle) . '" class="block w-4 h-4 rounded-full border text-[10px] leading-3 font-bold ' . $buttonClass . '">!</button>'
-                . '</form>';
-        }
-
-        return new \Illuminate\Support\HtmlString('<td class="' . e($classes) . '"><span>' . $content . '</span>' . $button . '</td>');
+        return new \Illuminate\Support\HtmlString('<td class="' . e($classes) . '"><span>' . $content . '</span></td>');
     };
 @endphp
 

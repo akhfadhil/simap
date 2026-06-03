@@ -156,7 +156,6 @@ Route::middleware('auth')->group(function () {
     // ── REKAP VIEW (PPK) ─────────────────────────────────────
     Route::prefix('ppk/rekap')->name('ppk.rekap.')->middleware('role:ppk,admin')->group(function () {
         Route::get('/', [App\Http\Controllers\Rekap\PpkController::class, 'index'])->name('index');
-        Route::post('{jenis}/cell-flag', [App\Http\Controllers\Rekap\PpkController::class, 'toggleCellFlag'])->middleware('role:admin')->name('cell-flag');
         Route::get('{jenis}', [App\Http\Controllers\Rekap\PpkController::class, 'show'])->name('show');
         Route::get('{jenis}/export', [App\Http\Controllers\Rekap\PpkController::class, 'export'])->name('export');
     });
@@ -167,6 +166,7 @@ Route::middleware('auth')->group(function () {
         Route::get('chart', [App\Http\Controllers\Rekap\AdminController::class, 'chartPage'])->name('chart');
         Route::get('chart/data', [App\Http\Controllers\Rekap\AdminController::class, 'chartData'])->name('chart.data');
         Route::get('export/download', [App\Http\Controllers\Rekap\AdminController::class, 'exportDownload'])->name('export.download'); // ← tambah, SEBELUM {jenis}
+        Route::post('{jenis}/cell-flag', [App\Http\Controllers\Rekap\AdminController::class, 'toggleCellFlag'])->middleware('role:admin')->name('cell-flag');
         Route::get('{jenis}/edit-tps/{tps}', [App\Http\Controllers\Rekap\AdminController::class, 'editTps'])->middleware('role:admin')->name('edit-tps');
         Route::get('{jenis}/export', [App\Http\Controllers\Rekap\AdminController::class, 'export'])->name('export');
         Route::get('{jenis}', [App\Http\Controllers\Rekap\AdminController::class, 'show'])->name('show');

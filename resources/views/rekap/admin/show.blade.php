@@ -47,7 +47,7 @@
     $totalRekap  = $rekaps->count();
     $showDetail  = request()->boolean('detail');
     $canUnlockRekap = Auth::user()->role === 'admin';
-    $detailBaseQuery = request()->except(['detail', 'detail_kecamatan_id']);
+    $detailBaseQuery = request()->except(['detail', 'detail_kecamatan_id', 'detail_desa_id']);
     $detailBaseUrl = route('admin.rekap.show', $jenis) . (count($detailBaseQuery) ? '?' . http_build_query($detailBaseQuery) : '');
 
     $rows1 = [
@@ -80,6 +80,43 @@
         return isset($row['field'])
             ? ($stats[$row['field']] ?? 0)
             : collect($row['sum'])->sum(fn($f) => $stats[$f] ?? 0);
+    };
+
+    $canFlagDesaCells = Auth::user()->role === 'admin';
+    $rowKeyFor = fn($row) => isset($row['field']) && $row['field'] ? $row['field'] : 'sum:' . implode('+', $row['sum']);
+    $flaggedClasses = 'bg-red-500/20 text-red-600 dark:bg-red-500/20 dark:text-red-200 ring-1 ring-inset ring-red-400/60';
+    $renderKecFlaggedCell = function($kecamatan, string $rowKey, $value, string $baseClass = '') use ($kecCellFlags, $flaggedClasses) {
+        $classes = trim($baseClass . ' ' . ($kecCellFlags->has($kecamatan->id . ':' . $rowKey) ? $flaggedClasses : ''));
+        $content = is_null($value) ? '&mdash;' : number_format($value);
+
+        return new \Illuminate\Support\HtmlString('<td class="' . e($classes) . '" data-flag-scope="kec" data-kec-id="' . e($kecamatan->id) . '" data-row-key="' . e($rowKey) . '">' . $content . '</td>');
+    };
+    $renderAdminTpsCell = function($tps, string $rowKey, $value, string $baseClass = '') use ($tpsCellFlags, $canFlagDesaCells, $jenis, $flaggedClasses) {
+        $flagged = $tpsCellFlags->has($tps->id . ':' . $rowKey);
+        $classes = trim($baseClass . ' relative group ' . ($flagged ? $flaggedClasses : ''));
+        $content = is_null($value) ? '&mdash;' : number_format($value);
+        $button = '';
+
+        if ($canFlagDesaCells) {
+            $buttonClass = $flagged
+                ? 'opacity-100 bg-red-500 text-white border-red-500'
+                : 'opacity-0 group-hover:opacity-100 bg-white dark:bg-gray-900 text-red-500 border-red-400';
+            $buttonTitle = $flagged ? 'Hapus tanda merah' : 'Tandai merah';
+            $button = '<form method="POST" action="' . e(route('admin.rekap.cell-flag', $jenis)) . '" data-flag-form class="absolute top-1 right-1 transition-opacity ' . ($flagged ? 'opacity-100' : 'opacity-0 group-hover:opacity-100') . '">'
+                . csrf_field()
+                . '<input type="hidden" name="entity_id" value="' . e($tps->id) . '">'
+                . '<input type="hidden" name="row_key" value="' . e($rowKey) . '">'
+                . '<button type="submit" title="' . e($buttonTitle) . '" class="js-flag-button block w-4 h-4 rounded-full border text-[10px] leading-3 font-bold ' . $buttonClass . '">!</button>'
+                . '</form>';
+        }
+
+        return new \Illuminate\Support\HtmlString('<td class="' . e($classes) . '" data-flag-scope="tps" data-tps-id="' . e($tps->id) . '" data-desa-id="' . e($tps->desa_id) . '" data-row-key="' . e($rowKey) . '"><span>' . $content . '</span>' . $button . '</td>');
+    };
+    $renderAdminFlaggedTotalCell = function($desa, string $rowKey, $value, string $baseClass = '') use ($desaCellFlags, $flaggedClasses) {
+        $classes = trim($baseClass . ' ' . ($desaCellFlags->has($desa->id . ':' . $rowKey) ? $flaggedClasses : ''));
+        $content = is_null($value) ? '&mdash;' : number_format($value);
+
+        return new \Illuminate\Support\HtmlString('<td class="' . e($classes) . '" data-flag-scope="desa" data-desa-id="' . e($desa->id) . '" data-row-key="' . e($rowKey) . '"><span>' . $content . '</span></td>');
     };
 @endphp
 
@@ -147,7 +184,7 @@
                 <td class="px-5 py-2 text-sm {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-800' : 'dark:text-gray-300 text-gray-600' }}">{{ $row['label'] }}</td>
                 @foreach($kecamatans as $kec)
                 @php $val = $getKecVal($kec, $row); $rowTotal += $val; @endphp
-                <td class="px-3 py-2 text-center {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500' }}">{{ number_format($val) }}</td>
+                {!! $renderKecFlaggedCell($kec, $rowKeyFor($row), $val, 'px-3 py-2 text-center ' . ($isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500')) !!}
                 @endforeach
                 <td class="px-3 py-2 text-center font-bold text-red-500">{{ number_format($rowTotal) }}</td>
             </tr>
@@ -165,7 +202,7 @@
                 <td class="px-5 py-2 text-sm {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-800' : 'dark:text-gray-300 text-gray-600' }}">{{ $row['label'] }}</td>
                 @foreach($kecamatans as $kec)
                 @php $val = $getKecVal($kec, $row); $rowTotal += $val; @endphp
-                <td class="px-3 py-2 text-center {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500' }}">{{ number_format($val) }}</td>
+                {!! $renderKecFlaggedCell($kec, $rowKeyFor($row), $val, 'px-3 py-2 text-center ' . ($isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500')) !!}
                 @endforeach
                 <td class="px-3 py-2 text-center font-bold text-red-500">{{ number_format($rowTotal) }}</td>
             </tr>
@@ -183,7 +220,7 @@
                 <td class="px-5 py-2 text-sm {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-800' : 'dark:text-gray-300 text-gray-600' }}">{{ $row['label'] }}</td>
                 @foreach($kecamatans as $kec)
                 @php $val = $getKecVal($kec, $row); $rowTotal += $val; @endphp
-                <td class="px-3 py-2 text-center {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500' }}">{{ number_format($val) }}</td>
+                {!! $renderKecFlaggedCell($kec, $rowKeyFor($row), $val, 'px-3 py-2 text-center ' . ($isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500')) !!}
                 @endforeach
                 <td class="px-3 py-2 text-center font-bold text-red-500">{{ number_format($rowTotal) }}</td>
             </tr>
@@ -207,7 +244,7 @@
                     $val = $kecCalonTotals[$kec->id][$calon->id] ?? 0;
                     $rowTotal += $val;
                 @endphp
-                <td class="px-3 py-2.5 text-center dark:text-gray-400 text-gray-500">{{ number_format($val) }}</td>
+                {!! $renderKecFlaggedCell($kec, 'calon:' . $calon->id, $val, 'px-3 py-2.5 text-center dark:text-gray-400 text-gray-500') !!}
                 @endforeach
                 <td class="px-3 py-2.5 text-center font-bold text-red-500">{{ number_format($rowTotal) }}</td>
             </tr>
@@ -224,7 +261,7 @@
                     <td class="px-5 py-2 text-xs font-bold dark:text-gray-300 text-gray-700 uppercase">Suara Partai</td>
                     @foreach($kecamatans as $kec)
                     @php $spKec = $kecPartaiTotals[$kec->id][$partai->id] ?? 0; $partaiRowTotal += $spKec; @endphp
-                    <td class="px-3 py-2 text-center dark:text-gray-400 text-gray-500">{{ number_format($spKec) }}</td>
+                    {!! $renderKecFlaggedCell($kec, 'partai:' . $partai->id, $spKec, 'px-3 py-2 text-center dark:text-gray-400 text-gray-500') !!}
                     @endforeach
                     <td class="px-3 py-2 text-center font-bold text-red-500">{{ number_format($partaiRowTotal) }}</td>
                 </tr>
@@ -234,7 +271,7 @@
                     <td class="px-5 py-2"><div class="flex items-center gap-2"><span class="text-xs dark:text-gray-500 text-gray-400 w-4">{{ $caleg->nomor_urut }}.</span><span class="text-sm dark:text-gray-200 text-gray-700">{{ $caleg->nama_caleg }}</span></div></td>
                     @foreach($kecamatans as $kec)
                     @php $scKec = $kecCalegTotals[$kec->id][$caleg->id] ?? 0; $calegRowTotal += $scKec; @endphp
-                    <td class="px-3 py-2 text-center dark:text-gray-400 text-gray-500">{{ number_format($scKec) }}</td>
+                    {!! $renderKecFlaggedCell($kec, 'caleg:' . $caleg->id, $scKec, 'px-3 py-2 text-center dark:text-gray-400 text-gray-500') !!}
                     @endforeach
                     <td class="px-3 py-2 text-center font-bold text-teal-400">{{ number_format($calegRowTotal) }}</td>
                 </tr>
@@ -244,7 +281,7 @@
                     <td class="px-5 py-2 text-xs font-bold dark:text-gray-300 text-gray-700 uppercase">Total Suara Sah</td>
                     @foreach($kecamatans as $kec)
                     @php $colTotal = $kecPartaiGrandTotals[$kec->id][$partai->id] ?? 0; $grandTotal += $colTotal; @endphp
-                    <td class="px-3 py-2 text-center font-bold text-teal-400">{{ number_format($colTotal) }}</td>
+                    {!! $renderKecFlaggedCell($kec, 'partai_total:' . $partai->id, $colTotal, 'px-3 py-2 text-center font-bold text-teal-400') !!}
                     @endforeach
                     <td class="px-3 py-2 text-center font-bold text-teal-400">{{ number_format($grandTotal) }}</td>
                 </tr>
@@ -263,7 +300,7 @@
                 <td class="px-5 py-2 text-sm dark:text-gray-300 text-gray-600">{{ $row['label'] }}</td>
                 @foreach($kecamatans as $kec)
                 @php $val = $getKecVal($kec, $row); $rowTotal += $val; @endphp
-                <td class="px-3 py-2 text-center dark:text-gray-400 text-gray-500">{{ number_format($val) }}</td>
+                {!! $renderKecFlaggedCell($kec, $row['field'], $val, 'px-3 py-2 text-center dark:text-gray-400 text-gray-500') !!}
                 @endforeach
                 <td class="px-3 py-2 text-center font-bold text-red-500">{{ number_format($rowTotal) }}</td>
             </tr>
@@ -273,7 +310,7 @@
                 <td class="px-5 py-2 text-sm font-bold dark:text-gray-200 text-gray-800">Jumlah Seluruh Suara</td>
                 @foreach($kecamatans as $kec)
                 @php $val = $kecStats[$kec->id]['suara_total'] ?? 0; $rowTotalAll += $val; @endphp
-                <td class="px-3 py-2 text-center font-bold dark:text-gray-200 text-gray-700">{{ number_format($val) }}</td>
+                {!! $renderKecFlaggedCell($kec, 'suara_total', $val, 'px-3 py-2 text-center font-bold dark:text-gray-200 text-gray-700') !!}
                 @endforeach
                 <td class="px-3 py-2 text-center font-bold text-red-500">{{ number_format($rowTotalAll) }}</td>
             </tr>
@@ -301,12 +338,28 @@
             <label for="detail_kecamatan_id" class="block text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-2 font-semibold">
                 Pilih Kecamatan
             </label>
-            <select id="detail_kecamatan_id" name="detail_kecamatan_id"
+            <select id="detail_kecamatan_id" name="detail_kecamatan_id" onchange="loadDetailDesa(this.value)"
                     class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-300 text-gray-600 px-4 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
                 <option value="">— Pilih Kecamatan —</option>
                 @foreach($kecamatans as $kec)
                 <option value="{{ $kec->id }}" {{ (int) $detailKecamatanId === (int) $kec->id ? 'selected' : '' }}>
                     {{ $kec->nama }}
+                </option>
+                @endforeach
+            </select>
+        </div>
+
+        <div class="flex-1">
+            <label for="detail_desa_id" class="block text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-2 font-semibold">
+                Pilih Desa
+            </label>
+            <select id="detail_desa_id" name="detail_desa_id"
+                    class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-300 text-gray-600 px-4 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none"
+                    {{ $detailDesaOptions->isEmpty() ? 'disabled' : '' }}>
+                <option value="">Semua Desa</option>
+                @foreach($detailDesaOptions as $desaOption)
+                <option value="{{ $desaOption->id }}" {{ (int) $detailDesaId === (int) $desaOption->id ? 'selected' : '' }}>
+                    {{ $desaOption->nama }}
                 </option>
                 @endforeach
             </select>
@@ -410,9 +463,9 @@
                     <td class="px-5 py-1.5 text-sm {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-800' : 'dark:text-gray-300 text-gray-600' }}">{{ $row['label'] }}</td>
                     @foreach($desa->tps as $tps)
                     @php $r = $detailRekaps[$tps->id] ?? null; $val = $r ? (isset($row['field']) ? ($r->{$row['field']} ?? 0) : collect($row['sum'])->sum(fn($f) => $r->$f ?? 0)) : null; $rowTotal += $val ?? 0; @endphp
-                    <td class="px-3 py-1.5 text-center {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500' }}">{{ $r ? number_format($val) : '—' }}</td>
+                    {!! $renderAdminTpsCell($tps, $rowKeyFor($row), $r ? $val : null, 'px-3 py-1.5 text-center ' . ($isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500')) !!}
                     @endforeach
-                    <td class="px-3 py-1.5 text-center font-bold text-red-500">{{ number_format($rowTotal) }}</td>
+                    {!! $renderAdminFlaggedTotalCell($desa, $rowKeyFor($row), $rowTotal, 'px-3 py-1.5 text-center font-bold text-red-500') !!}
                 </tr>
                 @endforeach
 
@@ -428,9 +481,9 @@
                     <td class="px-5 py-1.5 text-sm {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-800' : 'dark:text-gray-300 text-gray-600' }}">{{ $row['label'] }}</td>
                     @foreach($desa->tps as $tps)
                     @php $r = $detailRekaps[$tps->id] ?? null; $val = $r ? ($r->{$row['field']} ?? 0) : null; $rowTotal += $val ?? 0; @endphp
-                    <td class="px-3 py-1.5 text-center {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500' }}">{{ $r ? number_format($val) : '—' }}</td>
+                    {!! $renderAdminTpsCell($tps, $rowKeyFor($row), $r ? $val : null, 'px-3 py-1.5 text-center ' . ($isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500')) !!}
                     @endforeach
-                    <td class="px-3 py-1.5 text-center font-bold text-red-500">{{ number_format($rowTotal) }}</td>
+                    {!! $renderAdminFlaggedTotalCell($desa, $rowKeyFor($row), $rowTotal, 'px-3 py-1.5 text-center font-bold text-red-500') !!}
                 </tr>
                 @endforeach
 
@@ -446,9 +499,9 @@
                     <td class="px-5 py-1.5 text-sm {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-800' : 'dark:text-gray-300 text-gray-600' }}">{{ $row['label'] }}</td>
                     @foreach($desa->tps as $tps)
                     @php $r = $detailRekaps[$tps->id] ?? null; $val = $r ? (isset($row['field']) ? ($r->{$row['field']} ?? 0) : collect($row['sum'])->sum(fn($f) => $r->$f ?? 0)) : null; $rowTotal += $val ?? 0; @endphp
-                    <td class="px-3 py-1.5 text-center {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500' }}">{{ $r ? number_format($val) : '—' }}</td>
+                    {!! $renderAdminTpsCell($tps, $rowKeyFor($row), $r ? $val : null, 'px-3 py-1.5 text-center ' . ($isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500')) !!}
                     @endforeach
-                    <td class="px-3 py-1.5 text-center font-bold text-red-500">{{ number_format($rowTotal) }}</td>
+                    {!! $renderAdminFlaggedTotalCell($desa, $rowKeyFor($row), $rowTotal, 'px-3 py-1.5 text-center font-bold text-red-500') !!}
                 </tr>
                 @endforeach
 
@@ -479,9 +532,9 @@
                             : 0;
                         $rowTotal += $suara;
                     @endphp
-                    <td class="px-3 py-1.5 text-center dark:text-gray-400 text-gray-500">{{ $r ? number_format($suara) : '—' }}</td>
+                    {!! $renderAdminTpsCell($tps, 'calon:' . $calon->id, $r ? $suara : null, 'px-3 py-1.5 text-center dark:text-gray-400 text-gray-500') !!}
                     @endforeach
-                    <td class="px-3 py-1.5 text-center font-bold text-red-500">{{ number_format($rowTotal) }}</td>
+                    {!! $renderAdminFlaggedTotalCell($desa, 'calon:' . $calon->id, $rowTotal, 'px-3 py-1.5 text-center font-bold text-red-500') !!}
                 </tr>
                 @endforeach
                 @else
@@ -496,9 +549,9 @@
                     <td class="px-5 py-1.5 text-xs font-bold dark:text-gray-300 text-gray-700 uppercase">Suara Partai</td>
                     @foreach($desa->tps as $tps)
                     @php $r = $detailRekaps[$tps->id] ?? null; $sp = $r ? ($r->partaiSuaras->firstWhere('partai_id', $partai->id)?->suara ?? 0) : null; $partaiRowTotal += $sp ?? 0; @endphp
-                    <td class="px-3 py-1.5 text-center dark:text-gray-400 text-gray-500">{{ $r ? number_format($sp) : '—' }}</td>
+                    {!! $renderAdminTpsCell($tps, 'partai:' . $partai->id, $r ? $sp : null, 'px-3 py-1.5 text-center dark:text-gray-400 text-gray-500') !!}
                     @endforeach
-                    <td class="px-3 py-1.5 text-center font-bold text-red-500">{{ number_format($partaiRowTotal) }}</td>
+                    {!! $renderAdminFlaggedTotalCell($desa, 'partai:' . $partai->id, $partaiRowTotal, 'px-3 py-1.5 text-center font-bold text-red-500') !!}
                 </tr>
                 @foreach($partai->calegs as $caleg)
                 @php $calegRowTotal = 0; @endphp
@@ -506,9 +559,9 @@
                     <td class="px-5 py-1.5"><div class="flex items-center gap-2"><span class="text-xs dark:text-gray-500 text-gray-400 w-4">{{ $caleg->nomor_urut }}.</span><span class="text-sm dark:text-gray-200 text-gray-700">{{ $caleg->nama_caleg }}</span></div></td>
                     @foreach($desa->tps as $tps)
                     @php $r = $detailRekaps[$tps->id] ?? null; $sc = $r ? ($r->calegSuaras->firstWhere('caleg_id', $caleg->id)?->suara ?? 0) : null; $calegRowTotal += $sc ?? 0; @endphp
-                    <td class="px-3 py-1.5 text-center dark:text-gray-400 text-gray-500">{{ $r ? number_format($sc) : '—' }}</td>
+                    {!! $renderAdminTpsCell($tps, 'caleg:' . $caleg->id, $r ? $sc : null, 'px-3 py-1.5 text-center dark:text-gray-400 text-gray-500') !!}
                     @endforeach
-                    <td class="px-3 py-1.5 text-center font-bold text-teal-400">{{ number_format($calegRowTotal) }}</td>
+                    {!! $renderAdminFlaggedTotalCell($desa, 'caleg:' . $caleg->id, $calegRowTotal, 'px-3 py-1.5 text-center font-bold text-teal-400') !!}
                 </tr>
                 @endforeach
                 @php $grandTotal = 0; @endphp
@@ -516,9 +569,9 @@
                     <td class="px-5 py-1.5 text-xs font-bold dark:text-gray-300 text-gray-700 uppercase">Total Suara Sah</td>
                     @foreach($desa->tps as $tps)
                     @php $r = $detailRekaps[$tps->id] ?? null; $sp = $r ? ($r->partaiSuaras->firstWhere('partai_id', $partai->id)?->suara ?? 0) : 0; $sc_sum = $r ? $r->calegSuaras->whereIn('caleg_id', $partai->calegs->pluck('id'))->sum('suara') : 0; $colTotal = $r ? ($sp + $sc_sum) : null; $grandTotal += $colTotal ?? 0; @endphp
-                    <td class="px-3 py-1.5 text-center font-bold text-teal-400">{{ $r ? number_format($colTotal) : '—' }}</td>
+                    {!! $renderAdminTpsCell($tps, 'partai_total:' . $partai->id, $r ? $colTotal : null, 'px-3 py-1.5 text-center font-bold text-teal-400') !!}
                     @endforeach
-                    <td class="px-3 py-1.5 text-center font-bold text-teal-400">{{ number_format($grandTotal) }}</td>
+                    {!! $renderAdminFlaggedTotalCell($desa, 'partai_total:' . $partai->id, $grandTotal, 'px-3 py-1.5 text-center font-bold text-teal-400') !!}
                 </tr>
                 @endforeach
                 @endif
@@ -534,27 +587,27 @@
                     <td class="px-5 py-1.5 text-sm dark:text-gray-300 text-gray-600">Jumlah Suara Sah</td>
                     @foreach($desa->tps as $tps)
                     @php $r = $detailRekaps[$tps->id] ?? null; $sah = $r ? $r->suara_sah : null; $rowTotalSah += $sah ?? 0; @endphp
-                    <td class="px-3 py-1.5 text-center dark:text-gray-400 text-gray-500">{{ $r ? number_format($sah) : '—' }}</td>
+                    {!! $renderAdminTpsCell($tps, 'suara_sah', $r ? $sah : null, 'px-3 py-1.5 text-center dark:text-gray-400 text-gray-500') !!}
                     @endforeach
-                    <td class="px-3 py-1.5 text-center font-bold text-red-500">{{ number_format($rowTotalSah) }}</td>
+                    {!! $renderAdminFlaggedTotalCell($desa, 'suara_sah', $rowTotalSah, 'px-3 py-1.5 text-center font-bold text-red-500') !!}
                 </tr>
                 @php $rowTotalTdk = 0; @endphp
                 <tr class="border-b dark:border-gray-700 border-gray-100 dark:hover:bg-gray-750 hover:bg-gray-50">
                     <td class="px-5 py-1.5 text-sm dark:text-gray-300 text-gray-600">Jumlah Suara Tidak Sah</td>
                     @foreach($desa->tps as $tps)
                     @php $r = $detailRekaps[$tps->id] ?? null; $tdk = $r ? $r->suara_tidak_sah : null; $rowTotalTdk += $tdk ?? 0; @endphp
-                    <td class="px-3 py-1.5 text-center dark:text-gray-400 text-gray-500">{{ $r ? number_format($tdk) : '—' }}</td>
+                    {!! $renderAdminTpsCell($tps, 'suara_tidak_sah', $r ? $tdk : null, 'px-3 py-1.5 text-center dark:text-gray-400 text-gray-500') !!}
                     @endforeach
-                    <td class="px-3 py-1.5 text-center font-bold text-red-500">{{ number_format($rowTotalTdk) }}</td>
+                    {!! $renderAdminFlaggedTotalCell($desa, 'suara_tidak_sah', $rowTotalTdk, 'px-3 py-1.5 text-center font-bold text-red-500') !!}
                 </tr>
                 @php $rowTotalAll = 0; @endphp
                 <tr class="dark:bg-gray-700/20 bg-gray-50">
                     <td class="px-5 py-1.5 text-sm font-bold dark:text-gray-200 text-gray-800">Jumlah Seluruh Suara</td>
                     @foreach($desa->tps as $tps)
                     @php $r = $detailRekaps[$tps->id] ?? null; $all = $r ? ($r->suara_sah + $r->suara_tidak_sah) : null; $rowTotalAll += $all ?? 0; @endphp
-                    <td class="px-3 py-1.5 text-center font-bold dark:text-gray-200 text-gray-700">{{ $r ? number_format($all) : '—' }}</td>
+                    {!! $renderAdminTpsCell($tps, 'suara_total', $r ? $all : null, 'px-3 py-1.5 text-center font-bold dark:text-gray-200 text-gray-700') !!}
                     @endforeach
-                    <td class="px-3 py-1.5 text-center font-bold text-red-500">{{ number_format($rowTotalAll) }}</td>
+                    {!! $renderAdminFlaggedTotalCell($desa, 'suara_total', $rowTotalAll, 'px-3 py-1.5 text-center font-bold text-red-500') !!}
                 </tr>
                 <tr class="dark:bg-gray-700/10 bg-gray-50 border-t dark:border-gray-700 border-gray-200">
                     <td class="px-5 py-1.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold tracking-wider">Status</td>
@@ -714,6 +767,93 @@
     const allTps   = @json(\App\Models\Tps::orderBy('nama')->get(['id','nama','desa_id']));
     const baseUrl  = '{{ route('admin.rekap.export', $jenis) }}';
     const exportDownloadBase = '{{ url('admin/rekap/export/download') }}';
+    const flagClasses = ['bg-red-500/20', 'text-red-600', 'dark:bg-red-500/20', 'dark:text-red-200', 'ring-1', 'ring-inset', 'ring-red-400/60'];
+
+    function isFlaggedCell(cell) {
+        return cell?.classList.contains('bg-red-500/20');
+    }
+    function setFlaggedCell(cell, flagged) {
+        if (!cell) return;
+        flagClasses.forEach(cls => cell.classList.toggle(cls, flagged));
+    }
+    function setFlagButtonState(cell, flagged) {
+        const form = cell.querySelector('[data-flag-form]');
+        const button = cell.querySelector('.js-flag-button');
+        if (!form || !button) return;
+
+        form.classList.toggle('opacity-100', flagged);
+        form.classList.toggle('opacity-0', !flagged);
+        form.classList.toggle('group-hover:opacity-100', !flagged);
+
+        ['bg-red-500', 'text-white', 'border-red-500', 'opacity-100'].forEach(cls => button.classList.toggle(cls, flagged));
+        ['opacity-0', 'group-hover:opacity-100', 'bg-white', 'dark:bg-gray-900', 'text-red-500', 'border-red-400'].forEach(cls => button.classList.toggle(cls, !flagged));
+        button.title = flagged ? 'Hapus tanda merah' : 'Tandai merah';
+    }
+    function tpsCellsFor(desaId, rowKey) {
+        return Array.from(document.querySelectorAll('[data-flag-scope="tps"]'))
+            .filter(cell => cell.dataset.desaId == desaId && cell.dataset.rowKey === rowKey);
+    }
+    function desaCellsFor(desaId, rowKey) {
+        return Array.from(document.querySelectorAll('[data-flag-scope="desa"]'))
+            .filter(cell => cell.dataset.desaId == desaId && cell.dataset.rowKey === rowKey);
+    }
+    function kecCellsFor(kecId, rowKey) {
+        return Array.from(document.querySelectorAll('[data-flag-scope="kec"]'))
+            .filter(cell => cell.dataset.kecId == kecId && cell.dataset.rowKey === rowKey);
+    }
+    function refreshDesaFlag(desaId, rowKey) {
+        const hasFlag = tpsCellsFor(desaId, rowKey).some(isFlaggedCell);
+        desaCellsFor(desaId, rowKey).forEach(cell => setFlaggedCell(cell, hasFlag));
+    }
+    function refreshKecFlag(kecId, rowKey) {
+        const desaIds = allDesas.filter(desa => desa.kecamatan_id == kecId).map(desa => String(desa.id));
+        const hasFlag = Array.from(document.querySelectorAll('[data-flag-scope="tps"]'))
+            .some(cell => desaIds.includes(String(cell.dataset.desaId)) && cell.dataset.rowKey === rowKey && isFlaggedCell(cell));
+        kecCellsFor(kecId, rowKey).forEach(cell => setFlaggedCell(cell, hasFlag));
+    }
+    function refreshRollupFlags(desaId, rowKey) {
+        refreshDesaFlag(desaId, rowKey);
+        const desa = allDesas.find(item => item.id == desaId);
+        if (desa) refreshKecFlag(desa.kecamatan_id, rowKey);
+    }
+
+    document.addEventListener('submit', async function(event) {
+        const form = event.target.closest('[data-flag-form]');
+        if (!form) return;
+
+        event.preventDefault();
+
+        const cell = form.closest('[data-flag-scope="tps"]');
+        const button = form.querySelector('.js-flag-button');
+        if (!cell || !button || button.disabled) return;
+
+        button.disabled = true;
+
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Gagal mengubah tanda.');
+            }
+
+            const payload = await response.json();
+            const flagged = Boolean(payload.flagged);
+            setFlaggedCell(cell, flagged);
+            setFlagButtonState(cell, flagged);
+            refreshRollupFlags(cell.dataset.desaId, cell.dataset.rowKey);
+        } catch (error) {
+            window.alert(error.message || 'Gagal mengubah tanda.');
+        } finally {
+            button.disabled = false;
+        }
+    });
 
     function toggleKec(id) {
         const el    = document.getElementById('kec-' + id);
@@ -726,6 +866,21 @@
         const arrow = document.getElementById('arrow-desa-' + id);
         el.classList.toggle('hidden');
         arrow.textContent = el.classList.contains('hidden') ? '▸' : '▾';
+    }
+    function loadDetailDesa(kecId) {
+        const sel = document.getElementById('detail_desa_id');
+        if (!sel) return;
+
+        sel.innerHTML = '<option value="">Semua Desa</option>';
+        if (!kecId) {
+            sel.disabled = true;
+            return;
+        }
+
+        allDesas
+            .filter(d => d.kecamatan_id == kecId)
+            .forEach(d => sel.innerHTML += `<option value="${d.id}">${d.nama}</option>`);
+        sel.disabled = false;
     }
     function openExportModal() {
         document.getElementById('export-modal').classList.remove('hidden');

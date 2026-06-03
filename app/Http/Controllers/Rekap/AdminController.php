@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Rekap;
 use App\Http\Controllers\Controller;
 use App\Models\Dapil;
 use App\Models\Kecamatan;
+use App\Models\RekapCellFlag;
 use App\Models\RekapHeader;
 use App\Models\Tps;
 use App\Services\RekapAdminCache;
@@ -32,6 +33,7 @@ class AdminController extends Controller
         $selectedDapilId = null;
         $showDetail = request()->boolean('detail');
         $detailKecamatanId = (int) request('detail_kecamatan_id');
+        $detailDesaId = (int) request('detail_desa_id');
 
         if ($jenis === 'dprd_kab') {
             $dapils = Dapil::orderBy('nama')->get();
@@ -48,7 +50,20 @@ class AdminController extends Controller
         }
 
         $detailKecamatan = $kecamatans->firstWhere('id', $detailKecamatanId);
-        $detailKecamatans = $showDetail && $detailKecamatan ? collect([$detailKecamatan]) : collect();
+        $detailDesaOptions = $detailKecamatan ? $detailKecamatan->desas->values() : collect();
+        $detailKecamatans = collect();
+        if ($showDetail && $detailKecamatan) {
+            $detailKecamatanForDetail = clone $detailKecamatan;
+
+            if ($detailDesaId) {
+                $detailKecamatanForDetail->setRelation(
+                    'desas',
+                    $detailKecamatan->desas->where('id', $detailDesaId)->values()
+                );
+            }
+
+            $detailKecamatans = collect([$detailKecamatanForDetail]);
+        }
 
         $tpsIds = $kecamatans->flatMap(fn ($kecamatan) => $kecamatan->desas->flatMap(fn ($desa) => $desa->tps->pluck('id')));
         $detailTpsIds = $detailKecamatans->flatMap(fn ($kecamatan) => $kecamatan->desas->flatMap(fn ($desa) => $desa->tps->pluck('id')));
@@ -86,6 +101,8 @@ class AdminController extends Controller
         $kecCalegTotals = [];
         $kecPartaiGrandTotals = [];
         $tpsKecamatan = [];
+        $tpsDesa = [];
+        $desaKecamatan = [];
 
         foreach ($kecamatans as $kecamatan) {
             $kecStats[$kecamatan->id] = array_fill_keys($fieldNames, 0);
@@ -95,8 +112,11 @@ class AdminController extends Controller
             $kecStats[$kecamatan->id]['tps_count'] = 0;
 
             foreach ($kecamatan->desas as $desa) {
+                $desaKecamatan[$desa->id] = $kecamatan->id;
+
                 foreach ($desa->tps as $tps) {
                     $tpsKecamatan[$tps->id] = $kecamatan->id;
+                    $tpsDesa[$tps->id] = $desa->id;
                     $kecStats[$kecamatan->id]['tps_count']++;
                 }
             }
@@ -132,6 +152,49 @@ class AdminController extends Controller
         }
 
         $master = $this->getMaster($jenis, $selectedDapilId);
+        $desaIds = collect(array_keys($desaKecamatan));
+        $flagRows = RekapCellFlag::query()
+            ->where('jenis', $jenis)
+            ->where(function ($query) use ($tpsIds, $desaIds) {
+                $query->where(function ($query) use ($tpsIds) {
+                    $query->where('level', 'tps')
+                        ->whereIn('entity_id', $tpsIds);
+                })->orWhere(function ($query) use ($desaIds) {
+                    $query->where('level', 'desa')
+                        ->whereIn('entity_id', $desaIds);
+                });
+            })
+            ->get();
+        $tpsCellFlags = collect();
+        $desaCellFlags = collect();
+        $kecCellFlags = collect();
+
+        foreach ($flagRows as $flag) {
+            if ($flag->level === 'tps') {
+                $tpsCellFlags->put($flag->entity_id.':'.$flag->row_key, true);
+
+                $desaId = $tpsDesa[$flag->entity_id] ?? null;
+                $kecamatanId = $tpsKecamatan[$flag->entity_id] ?? null;
+
+                if ($desaId) {
+                    $desaCellFlags->put($desaId.':'.$flag->row_key, true);
+                }
+                if ($kecamatanId) {
+                    $kecCellFlags->put($kecamatanId.':'.$flag->row_key, true);
+                }
+
+                continue;
+            }
+
+            if ($flag->level === 'desa') {
+                $desaCellFlags->put($flag->entity_id.':'.$flag->row_key, true);
+
+                $kecamatanId = $desaKecamatan[$flag->entity_id] ?? null;
+                if ($kecamatanId) {
+                    $kecCellFlags->put($kecamatanId.':'.$flag->row_key, true);
+                }
+            }
+        }
 
         return view('rekap.admin.show', compact(
             'kecamatans',
@@ -140,6 +203,8 @@ class AdminController extends Controller
             'detailRekaps',
             'detailKecamatans',
             'detailKecamatanId',
+            'detailDesaId',
+            'detailDesaOptions',
             'master',
             'dapils',
             'selectedDapilId',
@@ -147,8 +212,58 @@ class AdminController extends Controller
             'kecCalonTotals',
             'kecPartaiTotals',
             'kecCalegTotals',
-            'kecPartaiGrandTotals'
+            'kecPartaiGrandTotals',
+            'tpsCellFlags',
+            'desaCellFlags',
+            'kecCellFlags'
         ));
+    }
+
+    // Menandai/menghapus tanda merah manual pada cell TPS dari halaman rekap admin.
+    public function toggleCellFlag(Request $request, string $jenis)
+    {
+        abort_if($request->user()?->role !== 'admin', 403);
+        abort_unless(array_key_exists($jenis, RekapHeader::JENIS_LABELS), 404);
+
+        $data = $request->validate([
+            'entity_id' => ['required', 'integer', 'exists:tps,id'],
+            'row_key' => ['required', 'string', 'max:96'],
+        ]);
+
+        $tps = Tps::findOrFail($data['entity_id']);
+
+        $flag = RekapCellFlag::where([
+            'jenis' => $jenis,
+            'level' => 'tps',
+            'entity_id' => $tps->id,
+            'row_key' => $data['row_key'],
+        ])->first();
+
+        $flagged = false;
+
+        if ($flag) {
+            $flag->delete();
+        } else {
+            RekapCellFlag::create([
+                'jenis' => $jenis,
+                'level' => 'tps',
+                'entity_id' => $tps->id,
+                'row_key' => $data['row_key'],
+                'flagged_by' => $request->user()->id,
+            ]);
+            $flagged = true;
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'flagged' => $flagged,
+                'tps_id' => $tps->id,
+                'desa_id' => $tps->desa_id,
+                'row_key' => $data['row_key'],
+            ]);
+        }
+
+        return back();
     }
 
     // Mengekspor rekap admin untuk jenis pemilihan.

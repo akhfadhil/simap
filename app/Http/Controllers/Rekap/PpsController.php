@@ -45,12 +45,23 @@ class PpsController extends Controller
             ->where('jenis', $jenis)
             ->get()->keyBy('tps_id');
         $tpsList = $desa->tps;
-        $cellFlags = RekapCellFlag::query()
+        $flagRows = RekapCellFlag::query()
             ->where('jenis', $jenis)
-            ->where('level', 'desa')
-            ->where('entity_id', $desa->id)
-            ->get()
-            ->keyBy('row_key');
+            ->where(function ($query) use ($tpsIds, $desa) {
+                $query->where(function ($query) use ($tpsIds) {
+                    $query->where('level', 'tps')
+                        ->whereIn('entity_id', $tpsIds);
+                })->orWhere(function ($query) use ($desa) {
+                    $query->where('level', 'desa')
+                        ->where('entity_id', $desa->id);
+                });
+            })
+            ->get();
+        $cellFlags = collect();
+
+        foreach ($flagRows as $flag) {
+            $cellFlags->put($flag->row_key, true);
+        }
         $master = $this->getMaster($jenis, $desa);
 
         return view('rekap.pps.show', compact('desa', 'jenis', 'rekaps', 'tpsList', 'master', 'cellFlags'));
