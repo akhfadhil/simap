@@ -119,16 +119,19 @@ function renderSearchSuggestions() {
     const input = document.getElementById('f-search');
     const term = normalizeText(input?.value || '');
     const items = searchSuggestionItems()
-        .filter((item) => !term || normalizeText(`${item.label} ${item.meta}`).includes(term))
-        .slice(0, 8);
+        .filter((item) => !term || normalizeText(`${item.label} ${item.meta}`).includes(term));
+    const directCandidateTypes = ['ppwp', 'dpd', 'gubernur', 'bupati'];
+    const visibleItems = directCandidateTypes.includes(currentChartJson?.jenis)
+        ? items
+        : items.slice(0, term ? 30 : 12);
 
-    if (!currentChartJson || !items.length) {
+    if (!currentChartJson || !visibleItems.length) {
         box.classList.add('hidden');
         box.innerHTML = '';
         return;
     }
 
-    box.innerHTML = items.map((item) => `
+    box.innerHTML = visibleItems.map((item) => `
         <button type="button"
                 onclick="selectSearchSuggestion('${escapeJs(item.value)}')"
                 class="block w-full px-4 py-3 text-left hover:bg-slate-50">
