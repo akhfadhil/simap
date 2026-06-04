@@ -1210,6 +1210,7 @@ class AdminController extends Controller
             'disabilitas_lk', 'disabilitas_pr',
             'suara_tidak_sah',
         ];
+        $editableBaseFields = array_values(array_diff($baseFields, ['ss_sisa']));
 
         $rekap = RekapHeader::firstOrCreate(
             ['tps_id' => $tpsId, 'jenis' => $jenis],
@@ -1221,8 +1222,16 @@ class AdminController extends Controller
 
         $rekap->forceFill(['diinput_oleh' => Auth::id()])->save();
 
-        if (in_array($rowKey, $baseFields, true)) {
+        if (in_array($rowKey, $editableBaseFields, true)) {
             $rekap->update([$rowKey => $value]);
+
+            if (in_array($rowKey, ['ss_diterima', 'ss_digunakan', 'ss_rusak'], true)) {
+                $rekap->refresh();
+                $rekap->update([
+                    'ss_sisa' => max(0, (int) $rekap->ss_diterima - (int) $rekap->ss_digunakan - (int) $rekap->ss_rusak),
+                ]);
+            }
+
             return;
         }
 

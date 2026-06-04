@@ -64,7 +64,12 @@ abstract class ImportBangorejoLegislative extends Command
                 continue;
             }
 
-            for ($col = Coordinate::columnIndexFromString('E'); $col <= Coordinate::columnIndexFromString('AF'); $col++) {
+            if (! $this->shouldImportDesa($desaNama)) {
+                continue;
+            }
+
+            $lastColumn = Coordinate::columnIndexFromString($sheet->getHighestColumn(13));
+            for ($col = Coordinate::columnIndexFromString('E'); $col <= $lastColumn; $col++) {
                 $column = Coordinate::stringFromColumnIndex($col);
                 $tpsNama = trim((string) $this->cell($sheet, "{$column}13"));
                 if (! preg_match('/^TPS\s+\d{3}$/i', $tpsNama)) {
@@ -441,6 +446,16 @@ abstract class ImportBangorejoLegislative extends Command
     private function titleName(string $value): string
     {
         return str($value)->lower()->title()->toString();
+    }
+
+    private function shouldImportDesa(string $desa): bool
+    {
+        $only = array_map(
+            fn ($value) => strtolower($this->titleName((string) $value)),
+            (array) $this->option('desa')
+        );
+
+        return $only === [] || in_array(strtolower($desa), $only, true);
     }
 
     private function cleanCandidateName(string $name): string

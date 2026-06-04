@@ -102,7 +102,7 @@
             'pengguna_dpt_lk', 'pengguna_dpt_pr',
             'pengguna_dptb_lk', 'pengguna_dptb_pr',
             'pengguna_dpk_lk', 'pengguna_dpk_pr',
-            'ss_diterima', 'ss_digunakan', 'ss_rusak', 'ss_sisa',
+            'ss_diterima', 'ss_digunakan', 'ss_rusak',
             'disabilitas_lk', 'disabilitas_pr',
             'suara_tidak_sah',
         ];
@@ -801,6 +801,18 @@
     const inlineUpdateUrl = '{{ route('admin.rekap.inline-update', $jenis) }}';
     const csrfToken = '{{ csrf_token() }}';
     const flagClasses = ['bg-red-500/20', 'text-red-600', 'dark:bg-red-500/20', 'dark:text-red-200', 'ring-1', 'ring-inset', 'ring-red-400/60'];
+    const inlineSumFormulas = {
+        'sum:dpt_lk+dpt_pr': ['dpt_lk', 'dpt_pr'],
+        'sum:pengguna_dpt_lk+pengguna_dpt_pr': ['pengguna_dpt_lk', 'pengguna_dpt_pr'],
+        'sum:pengguna_dptb_lk+pengguna_dptb_pr': ['pengguna_dptb_lk', 'pengguna_dptb_pr'],
+        'sum:pengguna_dpk_lk+pengguna_dpk_pr': ['pengguna_dpk_lk', 'pengguna_dpk_pr'],
+        'sum:pengguna_dpt_lk+pengguna_dptb_lk+pengguna_dpk_lk': ['pengguna_dpt_lk', 'pengguna_dptb_lk', 'pengguna_dpk_lk'],
+        'sum:pengguna_dpt_pr+pengguna_dptb_pr+pengguna_dpk_pr': ['pengguna_dpt_pr', 'pengguna_dptb_pr', 'pengguna_dpk_pr'],
+        'sum:pengguna_dpt_lk+pengguna_dpt_pr+pengguna_dptb_lk+pengguna_dptb_pr+pengguna_dpk_lk+pengguna_dpk_pr': ['pengguna_dpt_lk', 'pengguna_dpt_pr', 'pengguna_dptb_lk', 'pengguna_dptb_pr', 'pengguna_dpk_lk', 'pengguna_dpk_pr'],
+        'ss_sisa': ['ss_diterima', 'ss_digunakan', 'ss_rusak'],
+        'sum:disabilitas_lk+disabilitas_pr': ['disabilitas_lk', 'disabilitas_pr'],
+        'suara_total': ['suara_sah', 'suara_tidak_sah'],
+    };
     const numberFormatter = new Intl.NumberFormat('en-US');
     let inlineEditMode = false;
 
@@ -855,11 +867,25 @@
     function inlineEditableCells() {
         return Array.from(document.querySelectorAll('[data-inline-editable="1"]'));
     }
+    function inlineTpsCells() {
+        return Array.from(document.querySelectorAll('[data-flag-scope="tps"]'));
+    }
     function inlineValue(cell) {
         const input = cell.querySelector('.js-inline-input');
         const raw = input ? input.value : cell.dataset.editValue;
-        const value = parseInt(raw || '0', 10);
+        const span = cell.querySelector('.js-cell-value');
+        const value = parseInt((raw || span?.textContent || '0').replace(/,/g, ''), 10);
         return Number.isNaN(value) || value < 0 ? 0 : value;
+    }
+    function setInlineCellValue(cell, value) {
+        const safeValue = Number.isFinite(value) && value > 0 ? value : 0;
+        const span = cell.querySelector('.js-cell-value');
+
+        cell.dataset.editValue = String(safeValue);
+        if (span) span.textContent = numberFormatter.format(safeValue);
+    }
+    function tpsCellFor(tpsId, rowKey) {
+        return inlineTpsCells().find(cell => cell.dataset.tpsId == tpsId && cell.dataset.rowKey === rowKey);
     }
     function setInlineStatus(message, isError = false) {
         const target = document.getElementById('inline-edit-status');
@@ -870,7 +896,7 @@
         target.classList.toggle('text-gray-400', !isError);
     }
     function refreshInlineRowTotal(desaId, rowKey) {
-        const total = inlineEditableCells()
+        const total = inlineTpsCells()
             .filter(cell => cell.dataset.desaId == desaId && cell.dataset.rowKey === rowKey)
             .reduce((sum, cell) => sum + inlineValue(cell), 0);
 
@@ -878,6 +904,31 @@
             const span = cell.querySelector('span');
             if (span) span.textContent = numberFormatter.format(total);
         });
+    }
+    function refreshInlineTpsSum(tpsId, rowKey) {
+        const fields = inlineSumFormulas[rowKey];
+        if (!fields) return;
+
+        const target = tpsCellFor(tpsId, rowKey);
+        if (!target) return;
+
+        const values = Object.fromEntries(fields.map(field => {
+            const source = tpsCellFor(tpsId, field);
+            return [field, source ? inlineValue(source) : 0];
+        }));
+        const total = rowKey === 'ss_sisa'
+            ? Math.max(0, values.ss_diterima - values.ss_digunakan - values.ss_rusak)
+            : fields.reduce((sum, field) => sum + values[field], 0);
+
+        setInlineCellValue(target, total);
+        refreshInlineRowTotal(target.dataset.desaId, rowKey);
+    }
+    function refreshInlineDerivedRows(cell) {
+        refreshInlineRowTotal(cell.dataset.desaId, cell.dataset.rowKey);
+
+        Object.entries(inlineSumFormulas)
+            .filter(([, fields]) => fields.includes(cell.dataset.rowKey))
+            .forEach(([rowKey]) => refreshInlineTpsSum(cell.dataset.tpsId, rowKey));
     }
     function setInlineControls(editing) {
         document.getElementById('inline-edit-toggle')?.classList.toggle('hidden', editing);
@@ -909,7 +960,7 @@
             input.className = 'js-inline-input w-24 rounded border border-red-300 bg-white px-2 py-1 text-center text-xs font-semibold text-gray-800 outline-none focus:ring-2 focus:ring-red-300/40 dark:border-red-500/50 dark:bg-gray-900 dark:text-gray-100';
             input.addEventListener('input', () => {
                 cell.dataset.editValue = String(inlineValue(cell));
-                refreshInlineRowTotal(cell.dataset.desaId, cell.dataset.rowKey);
+                refreshInlineDerivedRows(cell);
             });
 
             span.classList.add('hidden');
@@ -927,7 +978,7 @@
             span.textContent = numberFormatter.format(value);
             span.classList.remove('hidden');
             input?.remove();
-            refreshInlineRowTotal(cell.dataset.desaId, cell.dataset.rowKey);
+            refreshInlineDerivedRows(cell);
         });
 
         inlineEditMode = false;

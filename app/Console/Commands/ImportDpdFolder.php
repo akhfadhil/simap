@@ -59,7 +59,8 @@ class ImportDpdFolder extends Command
     protected $signature = 'import:dpd-folder
         {path=storage/import/DPD : Folder berisi file DPD per kecamatan atau satu file Excel DPD}
         {--dry-run : Validasi dan tampilkan ringkasan tanpa menyimpan ke database}
-        {--only=* : Batasi import ke nama kecamatan tertentu}';
+        {--only=* : Batasi import ke nama kecamatan tertentu}
+        {--desa=* : Batasi import ke nama desa/sheet tertentu}';
 
     protected $description = 'Import rekap DPD dari folder Excel per kecamatan dan sheet per desa.';
 
@@ -143,6 +144,10 @@ class ImportDpdFolder extends Command
                 $sheetDesa = $this->titleName($sheet->getTitle());
                 $desaNama = $this->resolveDesaName($kecamatan, $sheetDesa);
                 $d9Desa = $this->titleName((string) $this->cell($sheet, 'D9'));
+
+                if (! $this->shouldImportDesa($kecamatan, $desaNama)) {
+                    continue;
+                }
 
                 if ($d9Desa !== '' && $this->resolveDesaName($kecamatan, $d9Desa) !== $desaNama) {
                     $warnings[] = basename($file)." / {$sheet->getTitle()}: D9 berisi {$d9Desa}; nama sheet {$sheetDesa} dipakai.";
@@ -284,6 +289,16 @@ class ImportDpdFolder extends Command
         return $only === [] || in_array(strtolower($kecamatan), $only, true);
     }
 
+    private function shouldImportDesa(string $kecamatan, string $desa): bool
+    {
+        $only = array_map(
+            fn ($value) => strtolower($this->resolveDesaName($kecamatan, $this->titleName((string) $value))),
+            (array) $this->option('desa')
+        );
+
+        return $only === [] || in_array(strtolower($desa), $only, true);
+    }
+
     private function calonsFromWorkbook($spreadsheet): array
     {
         foreach ($spreadsheet->getWorksheetIterator() as $sheet) {
@@ -324,7 +339,8 @@ class ImportDpdFolder extends Command
     {
         $columns = [];
 
-        for ($col = Coordinate::columnIndexFromString('E'); $col <= Coordinate::columnIndexFromString('AF'); $col++) {
+        $lastColumn = Coordinate::columnIndexFromString($sheet->getHighestColumn(13));
+        for ($col = Coordinate::columnIndexFromString('E'); $col <= $lastColumn; $col++) {
             $column = Coordinate::stringFromColumnIndex($col);
             $tpsNama = trim((string) $this->cell($sheet, "{$column}13"));
 

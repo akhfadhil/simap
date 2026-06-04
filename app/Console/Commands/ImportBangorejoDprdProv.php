@@ -6,7 +6,8 @@ class ImportBangorejoDprdProv extends ImportBangorejoLegislative
 {
     protected $signature = 'import:bangorejo-dprd-prov
         {file=DPRD PROV - BANGOREJO.xlsx : Path file Excel}
-        {--dry-run : Validasi dan tampilkan koreksi tanpa menyimpan ke database}';
+        {--dry-run : Validasi dan tampilkan koreksi tanpa menyimpan ke database}
+        {--desa=* : Batasi import ke nama desa/sheet tertentu}';
 
     protected $description = 'Import rekap DPRD Provinsi Kecamatan Bangorejo dari file Excel per TPS.';
 
