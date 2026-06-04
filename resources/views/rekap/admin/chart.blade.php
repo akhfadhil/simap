@@ -672,7 +672,6 @@
                         <option value="dapil" class="hidden">Dapil</option>
                         <option value="kecamatan">Kecamatan</option>
                         <option value="desa">Desa</option>
-                        <option value="tps">TPS</option>
                     </select>
                     <span class="material-symbols-outlined pointer-events-none absolute right-3 top-2.5 text-slate-500">expand_more</span>
                 </div>
@@ -702,13 +701,6 @@
                 <label class="block text-xs text-slate-600 mb-2 font-semibold">Desa</label>
                 <select id="f-desa" onchange="onDesaChange()" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-800 outline-none focus:border-red-300">
                     <option value="">Pilih Desa</option>
-                </select>
-            </div>
-
-            <div id="wrap-tps" class="hidden">
-                <label class="block text-xs text-slate-600 mb-2 font-semibold">TPS</label>
-                <select id="f-tps" onchange="loadChart()" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-800 outline-none focus:border-red-300">
-                    <option value="">Pilih TPS</option>
                 </select>
             </div>
 
@@ -910,7 +902,6 @@
         )),
         kecamatans: @json($kecamatans->map(fn($k) => ['id' => $k->id, 'nama' => $k->nama])->values()),
         desas: @json($kecamatans->flatMap(fn($k) => $k->desas->map(fn($d) => ['id' => $d->id, 'nama' => $d->nama, 'kecamatan_id' => $k->id]))->values()),
-        tps: @json($kecamatans->flatMap(fn($k) => $k->desas->flatMap(fn($d) => $d->tps->map(fn($t) => ['id' => $t->id, 'nama' => $t->nama, 'desa_id' => $d->id])))->values()),
     };
 </script>
 <script src="{{ asset('js/rekap-admin-chart.js') }}?v={{ filemtime(public_path('js/rekap-admin-chart.js')) }}"></script>

@@ -1,7 +1,6 @@
 const chartConfig = window.SIMAP_CHART_CONFIG || {};
 const allKecamatans = chartConfig.kecamatans || [];
 const allDesas = chartConfig.desas || [];
-const allTps = chartConfig.tps || [];
 const geojsonVersion = chartConfig.geojsonVersion || Date.now();
 
 // State utama halaman grafik admin.
@@ -14,6 +13,7 @@ let kecamatanGeojson = null;
 let desaGeojson = null;
 let currentMapMode = 'kecamatan';
 let currentMapLabels = [];
+let mapDataRequestId = 0;
 
 const WINNER_MAP_TYPES = ['ppwp', 'gubernur', 'bupati'];
 const WINNER_COLORS = ['#c81924', '#002147', '#f59e0b', '#10b981', '#7c3aed', '#0891b2', '#db2777', '#ea580c'];
@@ -230,7 +230,8 @@ function applyChartSearch() {
         updateStats([]);
         updateRanking([]);
         updateDetailTable(null);
-        updateMapColors(null);
+        if (currentMapMode === 'desa') geojsonLayer?.setStyle(styleFeature);
+        else updateMapColors(null);
         return;
     }
 
@@ -282,7 +283,7 @@ function styleFeature(feature) {
         fillColor: winnerMode && item.winnerIndex !== null
             ? WINNER_COLORS[item.winnerIndex % WINNER_COLORS.length]
             : getColor(item.total, max),
-        fillOpacity: item.total > 0 ? 0.78 : 0.38,
+        fillOpacity: sel ? 0.86 : (item.total > 0 ? 0.78 : 0.38),
         color: sel ? '#f59e0b' : '#94a3b8',
         weight: sel ? 3 : 1,
         opacity: 1,
@@ -325,6 +326,42 @@ function resetFeatureStyle(layer) {
     }
 
     geojsonLayer.resetStyle(layer);
+}
+
+function zoomToMapFeature(nama, mode = currentMapMode) {
+    if (!geojsonLayer || !nama) return false;
+
+    let targetLayer = null;
+    geojsonLayer.eachLayer((layer) => {
+        if (targetLayer || !layer.feature) return;
+        if (normalizeMapKey(featureName(layer.feature)) === normalizeMapKey(nama)) {
+            targetLayer = layer;
+        }
+    });
+
+    if (!targetLayer) return false;
+
+    const bounds = targetLayer.getBounds?.();
+    if (bounds?.isValid()) {
+        map.fitBounds(bounds, { maxZoom: mode === 'desa' ? 13 : 11 });
+        return true;
+    }
+
+    const center = targetLayer.getLatLng?.();
+    if (center) {
+        map.setView(center, mode === 'desa' ? 13 : 11);
+        return true;
+    }
+
+    return false;
+}
+
+function zoomToSelectedDesa() {
+    if (!selectedDesa) return;
+    if (currentMapMode !== 'desa' && selectedKec) {
+        renderMapLayer('desa');
+    }
+    zoomToMapFeature(selectedDesa, 'desa');
 }
 
 function mapTooltipContent(feature) {
@@ -415,13 +452,11 @@ function selectKecamatan(namaKec) {
         document.getElementById('wrap-dapil').classList.add('hidden');
         document.getElementById('wrap-kec').classList.remove('hidden');
         document.getElementById('wrap-desa').classList.add('hidden');
-        document.getElementById('wrap-tps').classList.add('hidden');
     }
 
     document.getElementById('f-kec').value = kec.id;
     document.getElementById('wrap-kec').classList.remove('hidden');
     document.getElementById('f-desa').innerHTML = '<option value="">Pilih Desa</option>';
-    document.getElementById('f-tps').innerHTML = '<option value="">Pilih TPS</option>';
 
     if (levelSelect.value === 'kecamatan') {
         loadChart();
@@ -454,7 +489,6 @@ function selectDesa(namaDesa, namaKec = selectedKec) {
     document.getElementById('f-kec').value = desaKec.id;
     document.getElementById('wrap-kec').classList.remove('hidden');
     document.getElementById('wrap-desa').classList.remove('hidden');
-    document.getElementById('wrap-tps').classList.add('hidden');
     document.getElementById('wrap-dapil').classList.add('hidden');
     document.getElementById('wrap-reset-kec').classList.remove('hidden');
     document.getElementById('map-reset-btn').classList.remove('hidden');
@@ -466,9 +500,9 @@ function selectDesa(namaDesa, namaKec = selectedKec) {
         desaSelect.innerHTML += `<option value="${item.id}">${item.nama}</option>`;
     });
     desaSelect.value = desa.id;
-    document.getElementById('f-tps').innerHTML = '<option value="">Pilih TPS</option>';
 
     geojsonLayer?.setStyle(styleFeature);
+    zoomToSelectedDesa();
     loadChart();
 }
 
@@ -481,11 +515,9 @@ function resetKecFilter() {
     document.getElementById('f-kec').value = '';
     document.getElementById('f-dapil').value = '';
     document.getElementById('f-desa').innerHTML = '<option value="">Pilih Desa</option>';
-    document.getElementById('f-tps').innerHTML = '<option value="">Pilih TPS</option>';
     document.getElementById('wrap-dapil').classList.toggle('hidden', jenis !== 'dprd_kab');
     document.getElementById('wrap-kec').classList.add('hidden');
     document.getElementById('wrap-desa').classList.add('hidden');
-    document.getElementById('wrap-tps').classList.add('hidden');
     document.getElementById('map-selected-label').textContent = 'Klik kecamatan untuk filter';
     document.getElementById('wrap-reset-kec').classList.add('hidden');
     document.getElementById('map-reset-btn').classList.add('hidden');
@@ -594,13 +626,11 @@ function onLevelChange(shouldLoad = true) {
 
     document.getElementById('wrap-dapil').classList.toggle('hidden', !(level === 'dapil' || jenis === 'dprd_kab'));
     document.getElementById('wrap-kec').classList.toggle('hidden', level === 'kabupaten' || level === 'dapil');
-    document.getElementById('wrap-desa').classList.toggle('hidden', !['desa', 'tps'].includes(level));
-    document.getElementById('wrap-tps').classList.toggle('hidden', level !== 'tps');
+    document.getElementById('wrap-desa').classList.toggle('hidden', level !== 'desa');
 
     document.getElementById('f-kec').value = '';
     document.getElementById('f-dapil').value = '';
     document.getElementById('f-desa').innerHTML = '<option value="">Pilih Desa</option>';
-    document.getElementById('f-tps').innerHTML = '<option value="">Pilih TPS</option>';
     selectedDesa = null;
     hideCharts();
 
@@ -613,11 +643,9 @@ function resetDependentFilters() {
     document.getElementById('wrap-dapil').classList.toggle('hidden', document.getElementById('f-jenis').value !== 'dprd_kab');
     document.getElementById('wrap-kec').classList.add('hidden');
     document.getElementById('wrap-desa').classList.add('hidden');
-    document.getElementById('wrap-tps').classList.add('hidden');
     document.getElementById('f-kec').value = '';
     document.getElementById('f-dapil').value = '';
     document.getElementById('f-desa').innerHTML = '<option value="">Pilih Desa</option>';
-    document.getElementById('f-tps').innerHTML = '<option value="">Pilih TPS</option>';
 }
 
 function onDapilChange() {
@@ -629,10 +657,12 @@ function onKecChange() {
     const level = document.getElementById('f-level').value;
     const kecId = document.getElementById('f-kec').value;
     document.getElementById('f-desa').innerHTML = '<option value="">Pilih Desa</option>';
-    document.getElementById('f-tps').innerHTML = '<option value="">Pilih TPS</option>';
-    hideCharts();
 
-    if (!kecId) return;
+    if (!kecId) {
+        hideCharts();
+        return;
+    }
+
     const kec = allKecamatans.find((item) => item.id == kecId);
     selectedKec = kec?.nama || null;
     selectedDesa = null;
@@ -641,8 +671,15 @@ function onKecChange() {
     document.getElementById('map-reset-btn').classList.toggle('hidden', !kec);
 
     if (level === 'kecamatan') {
+        hideCharts();
         loadChart();
         return;
+    }
+
+    if (level === 'desa' && selectedKec) {
+        renderMapLayer('desa');
+        hideCharts(true);
+        loadSelectedKecamatanMapData();
     }
 
     allDesas.filter((desa) => desa.kecamatan_id == kecId).forEach((desa) => {
@@ -654,28 +691,25 @@ function onKecChange() {
 function onDesaChange() {
     const level = document.getElementById('f-level').value;
     const desaId = document.getElementById('f-desa').value;
-    document.getElementById('f-tps').innerHTML = '<option value="">Pilih TPS</option>';
     selectedDesa = null;
-    hideCharts();
 
-    if (!desaId) return;
-    const desa = allDesas.find((item) => item.id == desaId);
-    selectedDesa = desa?.nama || null;
-    document.getElementById('map-selected-label').textContent = desa ? `Desa ${desa.nama}` : 'Klik kecamatan untuk filter';
-    geojsonLayer?.setStyle(styleFeature);
-
-    if (level === 'desa') {
-        loadChart();
+    if (!desaId) {
+        hideCharts(true);
         return;
     }
 
-    allTps.filter((tps) => tps.desa_id == desaId).forEach((tps) => {
-        document.getElementById('f-tps').innerHTML += `<option value="${tps.id}">${tps.nama}</option>`;
-    });
-    document.getElementById('wrap-tps').classList.remove('hidden');
+    const desa = allDesas.find((item) => item.id == desaId);
+    selectedDesa = desa?.nama || null;
+    document.getElementById('map-selected-label').textContent = desa ? `Desa ${desa.nama}` : 'Klik kecamatan untuk filter';
+    hideCharts(true);
+    geojsonLayer?.setStyle(styleFeature);
+    zoomToSelectedDesa();
+
+    loadSelectedKecamatanMapData();
+    if (level === 'desa') loadChart();
 }
 
-function hideCharts() {
+function hideCharts(preserveMap = false) {
     currentChartJson = null;
     document.getElementById('chart-placeholder').classList.remove('hidden');
     document.getElementById('chart-loading').classList.add('hidden');
@@ -687,7 +721,7 @@ function hideCharts() {
     updateQuickStats([]);
     updateDemographics([]);
     updateDetailTable(null);
-    updateMapColors(null);
+    if (!preserveMap) updateMapColors(null);
 }
 
 function showError(message) {
@@ -700,9 +734,40 @@ function showError(message) {
     updateQuickStats([]);
     updateDemographics([]);
     updateDetailTable(null);
-    updateMapColors(null);
+    if (currentMapMode === 'desa') geojsonLayer?.setStyle(styleFeature);
+    else updateMapColors(null);
     document.getElementById('chart-error').textContent = message;
     document.getElementById('chart-error').classList.remove('hidden');
+}
+
+async function loadSelectedKecamatanMapData() {
+    const jenis = document.getElementById('f-jenis').value;
+    const kecId = document.getElementById('f-kec').value;
+    if (!jenis || !kecId || !selectedKec) return;
+
+    const requestId = ++mapDataRequestId;
+    const params = new URLSearchParams({
+        jenis,
+        level: 'kecamatan',
+        kecamatan_id: kecId,
+    });
+    const dapilId = document.getElementById('f-dapil').value;
+    if (dapilId) params.set('dapil_id', dapilId);
+
+    try {
+        const res = await fetch(`${chartConfig.dataUrl}?${params}`);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const json = await res.json();
+
+        if (requestId !== mapDataRequestId || document.getElementById('f-kec').value !== String(kecId)) {
+            return;
+        }
+
+        updateMapColors(json);
+        if (selectedDesa) zoomToSelectedDesa();
+    } catch (error) {
+        console.error(error);
+    }
 }
 
 async function loadChart() {
@@ -712,13 +777,11 @@ async function loadChart() {
     const level = document.getElementById('f-level').value;
     const kecId = document.getElementById('f-kec').value;
     const desaId = document.getElementById('f-desa').value;
-    const tpsId = document.getElementById('f-tps').value;
     const dapilId = document.getElementById('f-dapil').value;
 
     if (level === 'dapil' && !dapilId) return;
     if (level === 'kecamatan' && !kecId) return;
     if (level === 'desa' && !desaId) return;
-    if (level === 'tps' && !tpsId) return;
 
     document.getElementById('chart-placeholder').classList.add('hidden');
     document.getElementById('chart-error').classList.add('hidden');
@@ -731,7 +794,6 @@ async function loadChart() {
     if (dapilId) params.set('dapil_id', dapilId);
     if (kecId) params.set('kecamatan_id', kecId);
     if (desaId) params.set('desa_id', desaId);
-    if (tpsId) params.set('tps_id', tpsId);
 
     try {
         const res = await fetch(`${chartConfig.dataUrl}?${params}`);
@@ -855,7 +917,6 @@ function updateDetailTable(json) {
         dapil: 'Tabel Detail Kecamatan',
         kecamatan: 'Tabel Detail Desa',
         desa: 'Tabel Detail TPS',
-        tps: 'Tabel Detail TPS',
     };
 
     if (title) {
@@ -874,7 +935,6 @@ function updateDetailTable(json) {
         dapil: 'Kecamatan',
         kecamatan: 'Desa',
         desa: 'TPS',
-        tps: 'TPS',
     };
     const candidateMode = json.search_mode === 'candidate';
     subtitle.textContent = candidateMode
@@ -903,7 +963,7 @@ function updateDetailTable(json) {
                 <td class="px-5 py-4 text-slate-600">
                     <div class="min-w-0">
                         <p class="font-semibold text-slate-700">${escapeHtml(pemenang)}</p>
-                        <p class="mt-1 font-mono-data text-xs font-bold text-[var(--red)]">${formatPercent(winnerPercent)}</p>
+                        <p class="mt-1 font-mono-data text-xs font-bold text-[var(--red)]">${formatPercent(winnerPercent)} &bull; ${formatNumber(winnerSuara)} suara</p>
                     </div>
                 </td>
                 <td class="px-5 py-4 text-right font-mono-data font-bold text-[var(--primary)]">${formatNumber(totalSuara)}</td>
