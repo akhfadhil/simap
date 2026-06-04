@@ -189,6 +189,7 @@ function filterChartJson(json) {
             candidate_rank: candidateRank,
             data: json.data.map((item, groupIndex) => ({
                 ...item,
+                total_suara_basis: item.suara.reduce((sum, value) => sum + (Number(value) || 0), 0),
                 suara: candidateMatches.map((candidate) => candidate.suara?.[groupIndex] ?? 0),
             })),
         };
@@ -205,12 +206,14 @@ function filterChartJson(json) {
     return {
         ...json,
         search_mode: partyIndexes.length ? 'party' : null,
+        search_label_indexes: indexes,
         labels: indexes.map((index) => json.labels[index]),
         candidate_rank: partyIndexes.length
             ? json.candidate_rank?.filter((item) => selectedParties.has(normalizeText(item.meta || ''))) || []
             : json.candidate_rank?.filter((item) => normalizeText(`${item.label} ${item.meta || ''}`).includes(term)) || [],
         data: json.data.map((item) => ({
             ...item,
+            total_suara_basis: item.suara.reduce((sum, value) => sum + (Number(value) || 0), 0),
             suara: indexes.map((index) => item.suara[index] ?? 0),
         })),
     };
@@ -271,9 +274,9 @@ function featureDistrict(feature) {
 function styleFeature(feature) {
     const nama = featureName(feature);
     const key = normalizeMapKey(nama);
-    const values = Object.values(kecamatanData).map((item) => item.total || 0);
+    const values = Object.values(kecamatanData).map((item) => item.metricTotal ?? item.total ?? 0);
     const max = values.length ? Math.max(...values) : 0;
-    const item = kecamatanData[key] || { total: 0, winnerIndex: null };
+    const item = kecamatanData[key] || { total: 0, metricTotal: 0, winnerIndex: null };
     const sel = currentMapMode === 'desa'
         ? selectedDesa && normalizeMapKey(selectedDesa) === key
         : selectedKec && normalizeMapKey(selectedKec) === key;
@@ -282,8 +285,8 @@ function styleFeature(feature) {
     return {
         fillColor: winnerMode && item.winnerIndex !== null
             ? WINNER_COLORS[item.winnerIndex % WINNER_COLORS.length]
-            : getColor(item.total, max),
-        fillOpacity: sel ? 0.86 : (item.total > 0 ? 0.78 : 0.38),
+            : getColor(item.metricTotal ?? item.total, max),
+        fillOpacity: sel ? 0.86 : ((item.metricTotal ?? item.total) > 0 ? 0.78 : 0.38),
         color: sel ? '#f59e0b' : '#94a3b8',
         weight: sel ? 3 : 1,
         opacity: 1,
@@ -540,12 +543,16 @@ function updateMapColors(payload) {
     currentMapLabels = json?.labels || [];
     kecamatanData = {};
     data.forEach((item) => {
-        const total = item.suara.reduce((sum, value) => sum + value, 0);
-        const winnerIndex = isWinnerMapType(json?.jenis) && total > 0
+        const metricTotal = item.suara.reduce((sum, value) => sum + value, 0);
+        const total = Number(item.total_suara_basis) || metricTotal;
+        const filteredWinnerIndex = metricTotal > 0
             ? item.suara.reduce((bestIndex, value, index, values) => value > values[bestIndex] ? index : bestIndex, 0)
             : null;
+        const winnerIndex = isWinnerMapType(json?.jenis) && filteredWinnerIndex !== null
+            ? (json.search_label_indexes?.[filteredWinnerIndex] ?? filteredWinnerIndex)
+            : null;
 
-        kecamatanData[normalizeMapKey(item.label)] = { total, winnerIndex, suara: item.suara };
+        kecamatanData[normalizeMapKey(item.label)] = { total, metricTotal, winnerIndex, suara: item.suara };
     });
 
     geojsonLayer?.setStyle(styleFeature);
@@ -567,7 +574,7 @@ function updateMapLegend(json) {
             <div class="space-y-2">
                 ${(json.labels || []).map((label, index) => `
                     <div class="flex items-center gap-3">
-                        <span class="w-4 h-4 rounded" style="background:${WINNER_COLORS[index % WINNER_COLORS.length]}"></span>
+                        <span class="w-4 h-4 rounded" style="background:${WINNER_COLORS[(json.search_label_indexes?.[index] ?? index) % WINNER_COLORS.length]}"></span>
                         <span class="text-xs text-slate-600">${escapeHtml(label)}</span>
                     </div>
                 `).join('')}
@@ -763,7 +770,8 @@ async function loadSelectedKecamatanMapData() {
             return;
         }
 
-        updateMapColors(json);
+        const filtered = filterChartJson(json);
+        if (filtered?.labels?.length) updateMapColors(filtered);
         if (selectedDesa) zoomToSelectedDesa();
     } catch (error) {
         console.error(error);
@@ -943,7 +951,8 @@ function updateDetailTable(json) {
     subjectHeader.textContent = candidateMode ? 'Caleg' : 'Pemenang';
 
     target.innerHTML = json.data.map((item) => {
-        const totalSuara = item.suara.reduce((sum, value) => sum + value, 0);
+        const filteredTotalSuara = item.suara.reduce((sum, value) => sum + value, 0);
+        const totalSuara = Number(item.total_suara_basis) || filteredTotalSuara;
         const winnerIndex = item.suara.reduce((bestIndex, value, index, values) => value > values[bestIndex] ? index : bestIndex, 0);
         const winnerSuara = item.suara[winnerIndex] || 0;
         const winnerPercent = totalSuara > 0 ? (winnerSuara / totalSuara) * 100 : 0;
