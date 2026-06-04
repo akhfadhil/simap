@@ -138,7 +138,8 @@
         }
 
         .map-tooltip {
-            min-width: 190px;
+            min-width: 230px;
+            max-width: 300px;
             padding: 10px 12px;
         }
 
@@ -158,9 +159,17 @@
             line-height: 1.45;
         }
 
+        .map-tooltip-row span {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
         .map-tooltip-row b {
             color: #ffffff;
             font-weight: 800;
+            white-space: nowrap;
+            text-align: right;
         }
 
         .leaflet-container {
@@ -216,7 +225,123 @@
             overflow-y: auto;
         }
 
-        @media (max-width: 1280px) {
+        main.chart-shell {
+            display: grid;
+            grid-template-columns: 16rem minmax(17rem, 20.625rem) minmax(0, 1fr) minmax(20rem, 25.625rem);
+            overflow: hidden;
+        }
+
+        .chart-nav,
+        .chart-filter,
+        .chart-main,
+        .chart-summary {
+            min-height: 0;
+        }
+
+        .chart-filter,
+        .chart-summary {
+            width: auto !important;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .chart-main {
+            min-width: 0;
+            height: 100%;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        .map-panel {
+            height: min(660px, calc(100vh - 9rem));
+            min-height: 500px;
+        }
+
+        .kpi-card {
+            min-width: 0;
+            padding: 0.75rem;
+        }
+
+        .kpi-grid {
+            left: 1rem;
+            right: 1rem;
+            top: 1rem;
+            gap: 0.5rem;
+        }
+
+        .kpi-card p:nth-child(2) {
+            font-size: 1.125rem;
+            line-height: 1.5rem;
+            margin-top: 0.25rem;
+        }
+
+        .kpi-card p:first-child,
+        .map-info p:first-child,
+        #map-legend p:first-child {
+            font-size: 0.5625rem;
+            letter-spacing: 0.12em;
+        }
+
+        .kpi-card p:last-child {
+            font-size: 0.6875rem;
+            line-height: 1rem;
+            margin-top: 0.125rem;
+        }
+
+        .map-info {
+            left: 1rem;
+            top: 6.25rem;
+            max-width: 17rem;
+            padding: 0.625rem 0.75rem;
+        }
+
+        .map-info p.text-sm {
+            font-size: 0.75rem;
+            line-height: 1rem;
+        }
+
+        #map-legend {
+            left: 1rem;
+            bottom: 1rem;
+            min-width: 12.5rem;
+            padding: 0.75rem;
+        }
+
+        #map-legend .space-y-2 {
+            display: grid;
+            gap: 0.375rem;
+        }
+
+        #map-legend .space-y-2 > :not([hidden]) ~ :not([hidden]) {
+            margin-top: 0;
+        }
+
+        #map-legend .flex {
+            gap: 0.5rem;
+        }
+
+        #map-legend span.w-4 {
+            width: 0.75rem;
+            height: 0.75rem;
+        }
+
+        #map-legend span.text-xs {
+            font-size: 0.6875rem;
+            line-height: 0.875rem;
+        }
+
+        @media (min-width: 1536px) {
+            .chart-main {
+                padding: 1.25rem;
+            }
+
+            .map-panel {
+                height: min(700px, calc(100vh - 9.5rem));
+                min-height: 540px;
+            }
+        }
+
+        @media (max-width: 1535px) {
             body {
                 overflow: auto;
             }
@@ -224,54 +349,67 @@
             main.chart-shell {
                 height: auto;
                 min-height: 100vh;
-                display: grid;
-                grid-template-columns: 300px minmax(0, 1fr);
+                grid-template-columns: 16rem minmax(17rem, 19rem) minmax(0, 1fr);
+                overflow: visible;
             }
 
-            main.chart-shell > aside:first-child {
+            .chart-nav,
+            .chart-filter {
                 height: calc(100vh - 4rem);
                 position: sticky;
                 top: 4rem;
             }
 
-            main.chart-shell > section {
-                min-width: 0;
+            .chart-main {
+                height: auto;
+                overflow: visible;
+                padding: 1rem;
             }
 
-            main.chart-shell > aside:last-child {
-                grid-column: 1 / -1;
-                width: auto;
+            .chart-summary {
+                grid-column: 2 / -1;
                 height: auto;
                 border-left: 0;
                 border-top: 1px solid var(--line);
             }
+
+            .map-panel {
+                height: 560px;
+                min-height: 500px;
+            }
         }
 
-        @media (max-width: 1024px) {
+        @media (max-width: 1179px) {
             main.chart-shell {
-                display: block;
-                padding-top: 4rem;
+                grid-template-columns: 16rem minmax(0, 1fr);
             }
 
-            header {
-                height: auto;
-                min-height: 4rem;
+            .chart-nav {
+                grid-row: 1 / span 3;
             }
 
-            main.chart-shell > aside:first-child,
-            main.chart-shell > aside:last-child {
-                width: auto;
+            .chart-filter,
+            .chart-main,
+            .chart-summary {
+                grid-column: 2;
+            }
+
+            .chart-filter {
                 height: auto;
                 position: static;
+                border-right: 0;
+                border-bottom: 1px solid var(--line);
+                padding: 1rem;
             }
 
-            main.chart-shell > section {
+            .chart-summary {
                 height: auto;
+                padding: 1rem;
             }
 
             .map-panel {
-                height: 620px;
-                min-height: 520px;
+                height: 540px;
+                min-height: 480px;
             }
 
             .kpi-grid {
@@ -279,62 +417,90 @@
             }
 
             .map-info {
-                top: 13.5rem;
+                top: 9.5rem;
             }
         }
 
-        @media (max-width: 640px) {
+        @media (max-width: 767px) {
+            body {
+                overflow: auto;
+            }
+
+            header {
+                height: auto;
+                min-height: 4rem;
+            }
+
             header .h-full {
                 padding: 0.75rem 1rem;
             }
 
             main.chart-shell {
+                display: block;
                 padding-top: 5rem;
             }
 
-            main.chart-shell > aside:first-child,
-            main.chart-shell > aside:last-child {
+            .chart-filter,
+            .chart-summary {
+                height: auto;
+                width: auto !important;
+                border-left: 0;
+                border-right: 0;
                 padding: 1rem;
             }
 
-            main.chart-shell > section {
+            .chart-main {
+                height: auto;
+                overflow: visible;
                 padding: 0.75rem;
             }
 
             .map-panel {
-                height: 720px;
-                min-height: 640px;
+                height: auto;
+                min-height: 0;
+                overflow: visible;
+                padding: 0;
+            }
+
+            #map {
+                position: relative !important;
+                inset: auto !important;
+                height: 430px;
+                min-height: 360px;
+            }
+
+            .kpi-grid,
+            .map-info,
+            #map-legend {
+                position: relative;
+                left: auto;
+                right: auto;
+                top: auto;
+                bottom: auto;
+                z-index: 1;
+                margin: 0.75rem;
             }
 
             .kpi-grid {
-                left: 0.75rem;
-                right: 0.75rem;
-                top: 0.75rem;
                 grid-template-columns: 1fr;
                 gap: 0.5rem;
             }
 
             .kpi-card {
-                padding: 0.75rem;
+                padding: 0.625rem 0.75rem;
             }
 
             .kpi-card p:nth-child(2) {
-                font-size: 1.25rem;
-                line-height: 1.5rem;
+                font-size: 1rem;
+                line-height: 1.25rem;
                 margin-top: 0.25rem;
             }
 
             .map-info {
-                left: 0.75rem;
-                right: 0.75rem;
-                top: 21rem;
                 max-width: none;
             }
 
             #map-legend {
-                left: 0.75rem;
-                right: 0.75rem;
-                bottom: 0.75rem;
                 min-width: 0;
                 max-height: 190px;
                 overflow-y: auto;
@@ -342,6 +508,12 @@
 
             .detail-table-scroll {
                 max-height: 310px;
+            }
+        }
+
+        @media (max-width: 420px) {
+            #map {
+                height: 380px;
             }
         }
     </style>
@@ -434,7 +606,7 @@
 </header>
 
 <main class="chart-shell pt-16 h-screen flex">
-    <aside class="admin-nav-sidebar hidden md:flex flex-col w-64 border-r h-full overflow-y-auto shrink-0 z-40">
+    <aside class="chart-nav admin-nav-sidebar hidden md:flex flex-col w-64 border-r h-full overflow-y-auto shrink-0 z-40">
         <div class="p-6 border-b border-slate-200">
             <div class="flex items-center gap-3 mb-3">
                 <div class="w-9 h-9 rounded-lg bg-red-50 border border-red-100 flex items-center justify-center overflow-hidden">
@@ -454,7 +626,7 @@
         </nav>
     </aside>
 
-    <aside class="w-[330px] bg-white text-slate-800 border-r border-slate-200 h-full overflow-y-auto flex flex-col p-6 shadow-xl z-40">
+    <aside class="chart-filter w-[330px] bg-white text-slate-800 border-r border-slate-200 h-full overflow-y-auto flex flex-col p-6 shadow-xl z-40">
         <div class="mb-7">
             <p class="text-[10px] uppercase tracking-[0.24em] text-slate-500 font-bold mb-2">Filter Utama</p>
             <label class="block text-xs text-slate-600 mb-2 font-semibold">Jenis Pemilihan</label>
@@ -555,7 +727,7 @@
         </div>
     </aside>
 
-    <section class="flex-1 h-full overflow-y-auto bg-[var(--surface-low)] p-5">
+    <section class="chart-main flex-1 h-full overflow-y-auto bg-[var(--surface-low)] p-5">
         <div class="map-panel relative h-[640px] min-h-[520px] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm map-grid">
             <div id="map" class="absolute inset-0"></div>
 
@@ -608,7 +780,7 @@
 
         <section class="mt-5 rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
             <div class="border-b border-slate-200 px-5 py-4">
-                <p class="text-[10px] uppercase tracking-[0.18em] text-slate-500 font-bold">Tabel Detail Kecamatan</p>
+                <p id="detail-table-title" class="text-[10px] uppercase tracking-[0.18em] text-slate-500 font-bold">Tabel Detail Wilayah</p>
                 <p id="detail-table-subtitle" class="text-sm text-slate-600 mt-1">Data mengikuti filter aktif.</p>
             </div>
             <div class="detail-table-scroll overflow-x-auto">
@@ -632,7 +804,7 @@
         </section>
     </section>
 
-    <aside class="w-[410px] bg-white border-l border-slate-200 h-full overflow-y-auto z-40 p-6">
+    <aside class="chart-summary w-[410px] bg-white border-l border-slate-200 h-full overflow-y-auto z-40 p-6">
         <div class="flex items-start justify-between gap-4 mb-6">
             <div>
                 <p class="text-[10px] uppercase tracking-[0.22em] text-slate-500 font-bold">Visualisasi</p>
@@ -732,12 +904,16 @@
     // Data awal dari Laravel untuk filter wilayah dan endpoint grafik.
     window.SIMAP_CHART_CONFIG = {
         dataUrl: @json(route('admin.rekap.chart.data')),
+        geojsonVersion: @json(max(
+            filemtime(public_path('geojson/banyuwangi_kecamatan.geojson')),
+            filemtime(public_path('geojson/banyuwangi_desa_full.geojson'))
+        )),
         kecamatans: @json($kecamatans->map(fn($k) => ['id' => $k->id, 'nama' => $k->nama])->values()),
         desas: @json($kecamatans->flatMap(fn($k) => $k->desas->map(fn($d) => ['id' => $d->id, 'nama' => $d->nama, 'kecamatan_id' => $k->id]))->values()),
         tps: @json($kecamatans->flatMap(fn($k) => $k->desas->flatMap(fn($d) => $d->tps->map(fn($t) => ['id' => $t->id, 'nama' => $t->nama, 'desa_id' => $d->id])))->values()),
     };
 </script>
-<script src="{{ asset('js/rekap-admin-chart.js') }}"></script>
+<script src="{{ asset('js/rekap-admin-chart.js') }}?v={{ filemtime(public_path('js/rekap-admin-chart.js')) }}"></script>
 </body>
 </html>
 

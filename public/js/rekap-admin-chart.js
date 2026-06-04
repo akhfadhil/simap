@@ -2,11 +2,13 @@ const chartConfig = window.SIMAP_CHART_CONFIG || {};
 const allKecamatans = chartConfig.kecamatans || [];
 const allDesas = chartConfig.desas || [];
 const allTps = chartConfig.tps || [];
+const geojsonVersion = chartConfig.geojsonVersion || Date.now();
 
 // State utama halaman grafik admin.
 let geojsonLayer = null;
 let kecamatanData = {};
 let selectedKec = null;
+let selectedDesa = null;
 let currentChartJson = null;
 let kecamatanGeojson = null;
 let desaGeojson = null;
@@ -29,6 +31,11 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
 
 function formatNumber(value) {
     return (Number(value) || 0).toLocaleString('id-ID');
+}
+
+function formatPercent(value) {
+    const number = Number(value) || 0;
+    return `${Math.round(number * 10) / 10}%`;
 }
 
 function escapeHtml(value) {
@@ -54,6 +61,10 @@ function normalizeText(value) {
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
         .trim();
+}
+
+function normalizeMapKey(value) {
+    return normalizeText(value).replace(/[^a-z0-9]/g, '');
 }
 
 function updateJenisButtons() {
@@ -226,7 +237,8 @@ function applyChartSearch() {
     renderCharts(filtered);
     const level = document.getElementById('f-level').value;
     if (['kabupaten', 'dapil', 'kecamatan'].includes(level)) updateMapColors(filtered);
-    else updateMapColors(null);
+    else if (currentMapMode !== 'desa') updateMapColors(null);
+    else geojsonLayer?.setStyle(styleFeature);
 }
 
 function getColor(val, max) {
@@ -257,11 +269,13 @@ function featureDistrict(feature) {
 
 function styleFeature(feature) {
     const nama = featureName(feature);
-    const key = normalizeText(nama);
+    const key = normalizeMapKey(nama);
     const values = Object.values(kecamatanData).map((item) => item.total || 0);
     const max = values.length ? Math.max(...values) : 0;
     const item = kecamatanData[key] || { total: 0, winnerIndex: null };
-    const sel = currentMapMode === 'kecamatan' && selectedKec && normalizeText(selectedKec) === key;
+    const sel = currentMapMode === 'desa'
+        ? selectedDesa && normalizeMapKey(selectedDesa) === key
+        : selectedKec && normalizeMapKey(selectedKec) === key;
     const winnerMode = isWinnerMapType();
 
     return {
@@ -285,20 +299,37 @@ function onEachFeature(feature, layer) {
     layer.on({
         mouseover: (e) => {
             e.target.setTooltipContent(mapTooltipContent(feature));
-            if (currentMapMode !== 'kecamatan' || selectedKec !== nama) e.target.setStyle({ fillOpacity: 0.92, weight: 2 });
+            if (!isSelectedMapFeature(nama)) e.target.setStyle({ fillOpacity: 0.92, weight: 2 });
         },
         mouseout: (e) => {
-            if (currentMapMode !== 'kecamatan' || selectedKec !== nama) geojsonLayer?.resetStyle(e.target);
+            if (!isSelectedMapFeature(nama)) {
+                resetFeatureStyle(e.target);
+            }
         },
         click: () => {
             if (currentMapMode === 'kecamatan') selectKecamatan(nama);
+            if (currentMapMode === 'desa') selectDesa(nama, featureDistrict(feature));
         },
     });
 }
 
+function isSelectedMapFeature(nama) {
+    return currentMapMode === 'desa'
+        ? selectedDesa && normalizeMapKey(selectedDesa) === normalizeMapKey(nama)
+        : selectedKec && normalizeMapKey(selectedKec) === normalizeMapKey(nama);
+}
+
+function resetFeatureStyle(layer) {
+    if (!geojsonLayer || !layer || !geojsonLayer.hasLayer(layer)) {
+        return;
+    }
+
+    geojsonLayer.resetStyle(layer);
+}
+
 function mapTooltipContent(feature) {
     const nama = featureName(feature);
-    const item = kecamatanData[normalizeText(nama)];
+    const item = kecamatanData[normalizeMapKey(nama)];
 
     if (!item || !item.total) {
         return `<div class="map-tooltip"><span class="map-tooltip-title">${escapeHtml(nama)}</span><div class="map-tooltip-row"><span>Belum ada data</span><b>0</b></div></div>`;
@@ -308,6 +339,7 @@ function mapTooltipContent(feature) {
         .map((suara, index) => ({ label: currentMapLabels[index] || `Calon ${index + 1}`, suara }))
         .sort((a, b) => b.suara - a.suara)
         .slice(0, 5);
+    const total = item.total || rows.reduce((sum, row) => sum + row.suara, 0);
 
     return `
         <div class="map-tooltip">
@@ -315,14 +347,14 @@ function mapTooltipContent(feature) {
             ${rows.map((row) => `
                 <div class="map-tooltip-row">
                     <span>${escapeHtml(row.label)}</span>
-                    <b>${formatNumber(row.suara)}</b>
+                    <b>${formatNumber(row.suara)} (${formatPercent(total > 0 ? (row.suara / total) * 100 : 0)})</b>
                 </div>
             `).join('')}
         </div>
     `;
 }
 
-fetch('/geojson/banyuwangi_kecamatan.geojson')
+fetch(`/geojson/banyuwangi_kecamatan.geojson?v=${geojsonVersion}`)
     .then((response) => response.json())
     .then((data) => {
         kecamatanGeojson = data;
@@ -330,7 +362,7 @@ fetch('/geojson/banyuwangi_kecamatan.geojson')
     })
     .catch(() => showError('Peta kecamatan gagal dimuat.'));
 
-fetch('/geojson/banyuwangi_desa_full.geojson')
+fetch(`/geojson/banyuwangi_desa_full.geojson?v=${geojsonVersion}`)
     .then((response) => response.json())
     .then((data) => {
         desaGeojson = data;
@@ -351,24 +383,28 @@ function renderMapLayer(mode) {
     geojsonLayer = L.geoJSON(source, {
         filter: (feature) => {
             if (mode !== 'desa') return true;
-            return selectedKec && normalizeText(featureDistrict(feature)) === normalizeText(selectedKec);
+            return selectedKec && normalizeMapKey(featureDistrict(feature)) === normalizeMapKey(selectedKec);
         },
         style: styleFeature,
         onEachFeature,
     }).addTo(map);
 
     if (geojsonLayer.getLayers().length) {
-        map.fitBounds(geojsonLayer.getBounds());
+        const bounds = geojsonLayer.getBounds();
+        if (bounds.isValid()) {
+            map.fitBounds(bounds);
+        }
     }
 
     setTimeout(() => map.invalidateSize(), 0);
 }
 
 function selectKecamatan(namaKec) {
-    const kec = allKecamatans.find((item) => normalizeText(item.nama) === normalizeText(namaKec));
+    const kec = allKecamatans.find((item) => normalizeMapKey(item.nama) === normalizeMapKey(namaKec));
     if (!kec) return;
 
     selectedKec = namaKec;
+    selectedDesa = null;
     document.getElementById('map-selected-label').textContent = `Kecamatan ${kec.nama}`;
     document.getElementById('wrap-reset-kec').classList.remove('hidden');
     document.getElementById('map-reset-btn').classList.remove('hidden');
@@ -376,7 +412,10 @@ function selectKecamatan(namaKec) {
     const levelSelect = document.getElementById('f-level');
     if (levelSelect.value === 'kabupaten' || levelSelect.value === 'dapil') {
         levelSelect.value = 'kecamatan';
-        onLevelChange(false);
+        document.getElementById('wrap-dapil').classList.add('hidden');
+        document.getElementById('wrap-kec').classList.remove('hidden');
+        document.getElementById('wrap-desa').classList.add('hidden');
+        document.getElementById('wrap-tps').classList.add('hidden');
     }
 
     document.getElementById('f-kec').value = kec.id;
@@ -385,7 +424,6 @@ function selectKecamatan(namaKec) {
     document.getElementById('f-tps').innerHTML = '<option value="">Pilih TPS</option>';
 
     if (levelSelect.value === 'kecamatan') {
-        renderMapLayer('desa');
         loadChart();
         return;
     }
@@ -396,8 +434,47 @@ function selectKecamatan(namaKec) {
     document.getElementById('wrap-desa').classList.remove('hidden');
 }
 
+function selectDesa(namaDesa, namaKec = selectedKec) {
+    const kec = allKecamatans.find((item) => normalizeMapKey(item.nama) === normalizeMapKey(namaKec || selectedKec));
+    const desa = allDesas.find((item) => (
+        (!kec || item.kecamatan_id == kec.id)
+        && normalizeMapKey(item.nama) === normalizeMapKey(namaDesa)
+    ));
+
+    if (!desa) return;
+
+    const desaKec = kec || allKecamatans.find((item) => item.id == desa.kecamatan_id);
+    if (!desaKec) return;
+
+    selectedKec = desaKec.nama;
+    selectedDesa = desa.nama;
+
+    const levelSelect = document.getElementById('f-level');
+    levelSelect.value = 'desa';
+    document.getElementById('f-kec').value = desaKec.id;
+    document.getElementById('wrap-kec').classList.remove('hidden');
+    document.getElementById('wrap-desa').classList.remove('hidden');
+    document.getElementById('wrap-tps').classList.add('hidden');
+    document.getElementById('wrap-dapil').classList.add('hidden');
+    document.getElementById('wrap-reset-kec').classList.remove('hidden');
+    document.getElementById('map-reset-btn').classList.remove('hidden');
+    document.getElementById('map-selected-label').textContent = `Desa ${desa.nama}`;
+
+    const desaSelect = document.getElementById('f-desa');
+    desaSelect.innerHTML = '<option value="">Pilih Desa</option>';
+    allDesas.filter((item) => item.kecamatan_id == desaKec.id).forEach((item) => {
+        desaSelect.innerHTML += `<option value="${item.id}">${item.nama}</option>`;
+    });
+    desaSelect.value = desa.id;
+    document.getElementById('f-tps').innerHTML = '<option value="">Pilih TPS</option>';
+
+    geojsonLayer?.setStyle(styleFeature);
+    loadChart();
+}
+
 function resetKecFilter() {
     selectedKec = null;
+    selectedDesa = null;
     const jenis = document.getElementById('f-jenis').value;
     const levelSelect = document.getElementById('f-level');
     levelSelect.value = jenis === 'dprd_kab' ? 'dapil' : 'kabupaten';
@@ -422,7 +499,7 @@ function updateMapColors(payload) {
     const json = Array.isArray(payload) ? { data: payload, labels: [], jenis: document.getElementById('f-jenis').value } : payload;
     const data = json?.data || [];
     const level = document.getElementById('f-level').value;
-    const mode = level === 'kecamatan' && selectedKec ? 'desa' : 'kecamatan';
+    const mode = ['kecamatan', 'desa'].includes(level) && selectedKec ? 'desa' : 'kecamatan';
 
     if (currentMapMode !== mode) {
         renderMapLayer(mode);
@@ -436,7 +513,7 @@ function updateMapColors(payload) {
             ? item.suara.reduce((bestIndex, value, index, values) => value > values[bestIndex] ? index : bestIndex, 0)
             : null;
 
-        kecamatanData[normalizeText(item.label)] = { total, winnerIndex, suara: item.suara };
+        kecamatanData[normalizeMapKey(item.label)] = { total, winnerIndex, suara: item.suara };
     });
 
     geojsonLayer?.setStyle(styleFeature);
@@ -508,6 +585,7 @@ function onLevelChange(shouldLoad = true) {
 
     if (level === 'kabupaten' || level === 'dapil') {
         selectedKec = null;
+        selectedDesa = null;
         document.getElementById('map-selected-label').textContent = 'Klik kecamatan untuk filter';
         document.getElementById('wrap-reset-kec').classList.add('hidden');
         document.getElementById('map-reset-btn').classList.add('hidden');
@@ -523,12 +601,15 @@ function onLevelChange(shouldLoad = true) {
     document.getElementById('f-dapil').value = '';
     document.getElementById('f-desa').innerHTML = '<option value="">Pilih Desa</option>';
     document.getElementById('f-tps').innerHTML = '<option value="">Pilih TPS</option>';
+    selectedDesa = null;
     hideCharts();
 
     if (shouldLoad && level === 'kabupaten') loadChart();
 }
 
 function resetDependentFilters() {
+    selectedKec = null;
+    selectedDesa = null;
     document.getElementById('wrap-dapil').classList.toggle('hidden', document.getElementById('f-jenis').value !== 'dprd_kab');
     document.getElementById('wrap-kec').classList.add('hidden');
     document.getElementById('wrap-desa').classList.add('hidden');
@@ -554,12 +635,12 @@ function onKecChange() {
     if (!kecId) return;
     const kec = allKecamatans.find((item) => item.id == kecId);
     selectedKec = kec?.nama || null;
+    selectedDesa = null;
     document.getElementById('map-selected-label').textContent = kec ? `Kecamatan ${kec.nama}` : 'Klik kecamatan untuk filter';
     document.getElementById('wrap-reset-kec').classList.toggle('hidden', !kec);
     document.getElementById('map-reset-btn').classList.toggle('hidden', !kec);
 
     if (level === 'kecamatan') {
-        renderMapLayer('desa');
         loadChart();
         return;
     }
@@ -574,9 +655,15 @@ function onDesaChange() {
     const level = document.getElementById('f-level').value;
     const desaId = document.getElementById('f-desa').value;
     document.getElementById('f-tps').innerHTML = '<option value="">Pilih TPS</option>';
+    selectedDesa = null;
     hideCharts();
 
     if (!desaId) return;
+    const desa = allDesas.find((item) => item.id == desaId);
+    selectedDesa = desa?.nama || null;
+    document.getElementById('map-selected-label').textContent = desa ? `Desa ${desa.nama}` : 'Klik kecamatan untuk filter';
+    geojsonLayer?.setStyle(styleFeature);
+
     if (level === 'desa') {
         loadChart();
         return;
@@ -759,8 +846,21 @@ function updateStats(payload) {
 
 function updateDetailTable(json) {
     const target = document.getElementById('detail-table-body');
+    const title = document.getElementById('detail-table-title');
     const subtitle = document.getElementById('detail-table-subtitle');
     const subjectHeader = document.getElementById('detail-subject-header');
+    const level = document.getElementById('f-level').value;
+    const detailTitles = {
+        kabupaten: 'Tabel Detail Kecamatan',
+        dapil: 'Tabel Detail Kecamatan',
+        kecamatan: 'Tabel Detail Desa',
+        desa: 'Tabel Detail TPS',
+        tps: 'Tabel Detail TPS',
+    };
+
+    if (title) {
+        title.textContent = detailTitles[level] || 'Tabel Detail Wilayah';
+    }
 
     if (!json?.data?.length) {
         target.innerHTML = '<tr><td colspan="5" class="px-5 py-5 text-center text-sm text-slate-500">Belum ada data ditampilkan.</td></tr>';
@@ -776,7 +876,6 @@ function updateDetailTable(json) {
         desa: 'TPS',
         tps: 'TPS',
     };
-    const level = document.getElementById('f-level').value;
     const candidateMode = json.search_mode === 'candidate';
     subtitle.textContent = candidateMode
         ? `Perolehan suara caleg per ${levelLabels[level] || 'wilayah'} pada filter aktif.`
@@ -786,6 +885,8 @@ function updateDetailTable(json) {
     target.innerHTML = json.data.map((item) => {
         const totalSuara = item.suara.reduce((sum, value) => sum + value, 0);
         const winnerIndex = item.suara.reduce((bestIndex, value, index, values) => value > values[bestIndex] ? index : bestIndex, 0);
+        const winnerSuara = item.suara[winnerIndex] || 0;
+        const winnerPercent = totalSuara > 0 ? (winnerSuara / totalSuara) * 100 : 0;
         const pemenang = candidateMode
             ? (json.labels.length === 1 ? json.labels[0] : (json.labels[winnerIndex] || '-'))
             : (totalSuara > 0 ? (json.labels[winnerIndex] || '-') : '-');
@@ -799,7 +900,12 @@ function updateDetailTable(json) {
         return `
             <tr class="hover:bg-slate-50">
                 <td class="px-5 py-4 font-bold text-slate-800">${escapeHtml(item.label)}</td>
-                <td class="px-5 py-4 text-slate-600">${escapeHtml(pemenang)}</td>
+                <td class="px-5 py-4 text-slate-600">
+                    <div class="min-w-0">
+                        <p class="font-semibold text-slate-700">${escapeHtml(pemenang)}</p>
+                        <p class="mt-1 font-mono-data text-xs font-bold text-[var(--red)]">${formatPercent(winnerPercent)}</p>
+                    </div>
+                </td>
                 <td class="px-5 py-4 text-right font-mono-data font-bold text-[var(--primary)]">${formatNumber(totalSuara)}</td>
                 <td class="px-5 py-4 text-right font-mono-data text-slate-700">${partisipasi}%</td>
                 <td class="px-5 py-4 text-right font-mono-data text-slate-700">${tpsPersen}%</td>
@@ -913,5 +1019,17 @@ document.addEventListener('click', (event) => {
 
 document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') hideSearchSuggestions();
+});
+
+let mapResizeTimer = null;
+window.addEventListener('resize', () => {
+    clearTimeout(mapResizeTimer);
+    mapResizeTimer = setTimeout(() => {
+        map.invalidateSize();
+    }, 120);
+});
+
+window.addEventListener('orientationchange', () => {
+    setTimeout(() => map.invalidateSize(), 250);
 });
 
