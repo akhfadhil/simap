@@ -75,10 +75,15 @@ class RekapSheetExport implements FromArray, WithTitle, WithStyles, WithColumnWi
             ['label' => 'DPT Jumlah',               'sum'   => ['dpt_lk', 'dpt_pr'], 'bold' => true],
             ['label' => 'Pengguna DPT LK',          'field' => 'pengguna_dpt_lk'],
             ['label' => 'Pengguna DPT PR',          'field' => 'pengguna_dpt_pr'],
+            ['label' => 'Pengguna DPT Jumlah',      'sum'   => ['pengguna_dpt_lk', 'pengguna_dpt_pr'], 'bold' => true],
             ['label' => 'Pengguna DPTB LK',         'field' => 'pengguna_dptb_lk'],
             ['label' => 'Pengguna DPTB PR',         'field' => 'pengguna_dptb_pr'],
+            ['label' => 'Pengguna DPTB Jumlah',     'sum'   => ['pengguna_dptb_lk', 'pengguna_dptb_pr'], 'bold' => true],
             ['label' => 'Pengguna DPK LK',          'field' => 'pengguna_dpk_lk'],
             ['label' => 'Pengguna DPK PR',          'field' => 'pengguna_dpk_pr'],
+            ['label' => 'Pengguna DPK Jumlah',      'sum'   => ['pengguna_dpk_lk', 'pengguna_dpk_pr'], 'bold' => true],
+            ['label' => 'Total Pengguna Hak Pilih LK', 'sum' => ['pengguna_dpt_lk','pengguna_dptb_lk','pengguna_dpk_lk'], 'bold' => true],
+            ['label' => 'Total Pengguna Hak Pilih PR', 'sum' => ['pengguna_dpt_pr','pengguna_dptb_pr','pengguna_dpk_pr'], 'bold' => true],
             ['label' => 'Total Pengguna Hak Pilih', 'sum'   => ['pengguna_dpt_lk','pengguna_dpt_pr','pengguna_dptb_lk','pengguna_dptb_pr','pengguna_dpk_lk','pengguna_dpk_pr'], 'bold' => true],
         ];
         foreach ($rows1 as $row) {

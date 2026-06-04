@@ -1164,6 +1164,95 @@ class AdminController extends Controller
         return redirect()->route('rekap.form', $jenis);
     }
 
+    // Menyimpan perubahan cell TPS dari tabel detail admin tanpa membuka form KPPS.
+    public function inlineUpdate(Request $request, string $jenis)
+    {
+        abort_if($request->user()?->role !== 'admin', 403);
+        abort_unless(array_key_exists($jenis, RekapHeader::JENIS_LABELS), 404);
+
+        $data = $request->validate([
+            'changes' => ['required', 'array', 'min:1'],
+            'changes.*.tps_id' => ['required', 'integer', 'exists:tps,id'],
+            'changes.*.row_key' => ['required', 'string', 'max:96'],
+            'changes.*.value' => ['required', 'integer', 'min:0'],
+        ]);
+
+        $updated = 0;
+
+        DB::transaction(function () use ($data, $jenis, &$updated) {
+            foreach ($data['changes'] as $change) {
+                $this->applyInlineRekapChange(
+                    $jenis,
+                    (int) $change['tps_id'],
+                    (string) $change['row_key'],
+                    (int) $change['value']
+                );
+                $updated++;
+            }
+        });
+
+        RekapAdminCache::flushAggregate();
+
+        return response()->json([
+            'message' => $updated.' perubahan berhasil disimpan.',
+            'updated' => $updated,
+        ]);
+    }
+
+    private function applyInlineRekapChange(string $jenis, int $tpsId, string $rowKey, int $value): void
+    {
+        $baseFields = [
+            'dpt_lk', 'dpt_pr',
+            'pengguna_dpt_lk', 'pengguna_dpt_pr',
+            'pengguna_dptb_lk', 'pengguna_dptb_pr',
+            'pengguna_dpk_lk', 'pengguna_dpk_pr',
+            'ss_diterima', 'ss_digunakan', 'ss_rusak', 'ss_sisa',
+            'disabilitas_lk', 'disabilitas_pr',
+            'suara_tidak_sah',
+        ];
+
+        $rekap = RekapHeader::firstOrCreate(
+            ['tps_id' => $tpsId, 'jenis' => $jenis],
+            array_fill_keys($baseFields, 0) + [
+                'diinput_oleh' => Auth::id(),
+                'status' => 'draft',
+            ]
+        );
+
+        $rekap->forceFill(['diinput_oleh' => Auth::id()])->save();
+
+        if (in_array($rowKey, $baseFields, true)) {
+            $rekap->update([$rowKey => $value]);
+            return;
+        }
+
+        if (str_starts_with($rowKey, 'calon:')) {
+            $calonId = (int) substr($rowKey, strlen('calon:'));
+            match ($jenis) {
+                'ppwp' => $rekap->ppwpSuaras()->updateOrCreate(['calon_id' => $calonId], ['suara' => $value]),
+                'gubernur' => $rekap->gubernurSuaras()->updateOrCreate(['calon_id' => $calonId], ['suara' => $value]),
+                'bupati' => $rekap->bupatiSuaras()->updateOrCreate(['calon_id' => $calonId], ['suara' => $value]),
+                'dpd' => $rekap->dpdSuaras()->updateOrCreate(['calon_id' => $calonId], ['suara' => $value]),
+                default => abort(422, 'Baris calon tidak valid untuk jenis pemilihan ini.'),
+            };
+            return;
+        }
+
+        if (str_starts_with($rowKey, 'partai:') && in_array($jenis, ['dpr_ri', 'dprd_prov', 'dprd_kab'], true)) {
+            $partaiId = (int) substr($rowKey, strlen('partai:'));
+            $rekap->partaiSuaras()->updateOrCreate(['partai_id' => $partaiId], ['suara' => $value]);
+            return;
+        }
+
+        if (str_starts_with($rowKey, 'caleg:') && in_array($jenis, ['dpr_ri', 'dprd_prov', 'dprd_kab'], true)) {
+            $calegId = (int) substr($rowKey, strlen('caleg:'));
+            $rekap->calegSuaras()->updateOrCreate(['caleg_id' => $calegId], ['suara' => $value]);
+            return;
+        }
+
+        abort(422, 'Baris tidak bisa diedit inline.');
+    }
+
     // Membuka rekap final agar bisa diedit ulang.
     public function unlock(Request $request, string $jenis)
     {

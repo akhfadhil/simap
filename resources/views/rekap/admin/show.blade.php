@@ -56,10 +56,15 @@
         ['label'=>'DPT Jumlah',                'sum'=>['dpt_lk','dpt_pr'], 'bold'=>true],
         ['label'=>'Pengguna DPT LK',           'field'=>'pengguna_dpt_lk'],
         ['label'=>'Pengguna DPT PR',           'field'=>'pengguna_dpt_pr'],
+        ['label'=>'Pengguna DPT Jumlah',       'sum'=>['pengguna_dpt_lk','pengguna_dpt_pr'], 'bold'=>true],
         ['label'=>'Pengguna DPTB LK',          'field'=>'pengguna_dptb_lk'],
         ['label'=>'Pengguna DPTB PR',          'field'=>'pengguna_dptb_pr'],
+        ['label'=>'Pengguna DPTB Jumlah',      'sum'=>['pengguna_dptb_lk','pengguna_dptb_pr'], 'bold'=>true],
         ['label'=>'Pengguna DPK LK',           'field'=>'pengguna_dpk_lk'],
         ['label'=>'Pengguna DPK PR',           'field'=>'pengguna_dpk_pr'],
+        ['label'=>'Pengguna DPK Jumlah',       'sum'=>['pengguna_dpk_lk','pengguna_dpk_pr'], 'bold'=>true],
+        ['label'=>'Total Pengguna Hak Pilih LK', 'sum'=>['pengguna_dpt_lk','pengguna_dptb_lk','pengguna_dpk_lk'], 'bold'=>true],
+        ['label'=>'Total Pengguna Hak Pilih PR', 'sum'=>['pengguna_dpt_pr','pengguna_dptb_pr','pengguna_dpk_pr'], 'bold'=>true],
         ['label'=>'Total Pengguna Hak Pilih',  'sum'=>['pengguna_dpt_lk','pengguna_dpt_pr','pengguna_dptb_lk','pengguna_dptb_pr','pengguna_dpk_lk','pengguna_dpk_pr'], 'bold'=>true],
     ];
     $rows2 = [
@@ -91,10 +96,30 @@
 
         return new \Illuminate\Support\HtmlString('<td class="' . e($classes) . '" data-flag-scope="kec" data-kec-id="' . e($kecamatan->id) . '" data-row-key="' . e($rowKey) . '">' . $content . '</td>');
     };
-    $renderAdminTpsCell = function($tps, string $rowKey, $value, string $baseClass = '') use ($tpsCellFlags, $canFlagDesaCells, $jenis, $flaggedClasses) {
+    $isInlineEditableRow = function(string $rowKey) {
+        $baseEditable = [
+            'dpt_lk', 'dpt_pr',
+            'pengguna_dpt_lk', 'pengguna_dpt_pr',
+            'pengguna_dptb_lk', 'pengguna_dptb_pr',
+            'pengguna_dpk_lk', 'pengguna_dpk_pr',
+            'ss_diterima', 'ss_digunakan', 'ss_rusak', 'ss_sisa',
+            'disabilitas_lk', 'disabilitas_pr',
+            'suara_tidak_sah',
+        ];
+
+        return in_array($rowKey, $baseEditable, true)
+            || str_starts_with($rowKey, 'calon:')
+            || str_starts_with($rowKey, 'partai:')
+            || str_starts_with($rowKey, 'caleg:');
+    };
+    $renderAdminTpsCell = function($tps, string $rowKey, $value, string $baseClass = '') use ($tpsCellFlags, $canFlagDesaCells, $jenis, $flaggedClasses, $isInlineEditableRow) {
         $flagged = $tpsCellFlags->has($tps->id . ':' . $rowKey);
         $classes = trim($baseClass . ' relative group ' . ($flagged ? $flaggedClasses : ''));
+        $rawValue = is_null($value) ? 0 : (int) $value;
         $content = is_null($value) ? '&mdash;' : number_format($value);
+        $editableAttrs = $isInlineEditableRow($rowKey)
+            ? ' data-inline-editable="1" data-edit-original="' . e($rawValue) . '" data-edit-value="' . e($rawValue) . '"'
+            : '';
         $button = '';
 
         if ($canFlagDesaCells) {
@@ -110,7 +135,7 @@
                 . '</form>';
         }
 
-        return new \Illuminate\Support\HtmlString('<td class="' . e($classes) . '" data-flag-scope="tps" data-tps-id="' . e($tps->id) . '" data-desa-id="' . e($tps->desa_id) . '" data-row-key="' . e($rowKey) . '"><span>' . $content . '</span>' . $button . '</td>');
+        return new \Illuminate\Support\HtmlString('<td class="' . e($classes) . '" data-flag-scope="tps" data-tps-id="' . e($tps->id) . '" data-desa-id="' . e($tps->desa_id) . '" data-row-key="' . e($rowKey) . '"' . $editableAttrs . '><span class="js-cell-value">' . $content . '</span>' . $button . '</td>');
     };
     $renderAdminFlaggedTotalCell = function($desa, string $rowKey, $value, string $baseClass = '') use ($desaCellFlags, $flaggedClasses) {
         $classes = trim($baseClass . ' ' . ($desaCellFlags->has($desa->id . ':' . $rowKey) ? $flaggedClasses : ''));
@@ -376,6 +401,28 @@
     </a>
         @endif
     </form>
+
+    @if($showDetail && $canUnlockRekap)
+    <div class="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-t dark:border-gray-700 border-gray-200 pt-4">
+        <p id="inline-edit-status" class="text-xs dark:text-gray-500 text-gray-400">
+            Edit inline aktif untuk cell TPS pada detail yang sedang ditampilkan.
+        </p>
+        <div class="flex flex-wrap gap-2">
+            <button type="button" id="inline-edit-toggle"
+                    class="inline-flex items-center justify-center px-4 py-2 rounded-lg text-xs font-semibold bg-red-500 hover:bg-red-600 text-white transition">
+                Edit Semua
+            </button>
+            <button type="button" id="inline-edit-save"
+                    class="hidden inline-flex items-center justify-center px-4 py-2 rounded-lg text-xs font-semibold bg-teal-500 hover:bg-teal-600 text-white transition">
+                Simpan Perubahan
+            </button>
+            <button type="button" id="inline-edit-cancel"
+                    class="hidden inline-flex items-center justify-center px-4 py-2 rounded-lg text-xs font-semibold border dark:border-gray-700 border-gray-300 dark:text-gray-300 text-gray-600 dark:hover:bg-gray-700 hover:bg-gray-100 transition">
+                Batal
+            </button>
+        </div>
+    </div>
+    @endif
 </div>
 
 @if(!$showDetail || $detailKecamatans->isEmpty())
@@ -617,21 +664,11 @@
                         @if(!$r)
                             <div class="flex flex-col items-center gap-1">
                                 <span class="text-[9px] px-2 py-1 rounded font-semibold bg-gray-500/20 dark:text-gray-400 text-gray-500 border border-gray-400/30">Kosong</span>
-                                @if($canUnlockRekap)
-                                    <a href="{{ route('admin.rekap.edit-tps', [$jenis, $tps]) }}"
-                                       class="text-[9px] px-2 py-0.5 rounded font-semibold border border-red-400/40 text-red-400 hover:bg-red-400/10 transition whitespace-nowrap">
-                                        Edit
-                                    </a>
-                                @endif
                             </div>
                         @elseif($r->status === 'final')
                             <div class="flex flex-col items-center gap-1">
                                 <span class="text-[9px] px-2 py-1 rounded font-semibold bg-teal-500/20 text-teal-400 border border-teal-500/40">Final</span>
                                 @if($canUnlockRekap)
-                                    <a href="{{ route('admin.rekap.edit-tps', [$jenis, $tps]) }}"
-                                       class="text-[9px] px-2 py-0.5 rounded font-semibold border border-red-400/40 text-red-400 hover:bg-red-400/10 transition whitespace-nowrap">
-                                        Edit
-                                    </a>
                                     <button onclick="openUnlockModal({{ $r->tps_id }}, '{{ addslashes($tps->nama) }}')"
                                             class="text-[9px] px-2 py-0.5 rounded font-semibold border border-orange-400/40 text-orange-400 hover:bg-orange-400/10 transition whitespace-nowrap">
                                         ↩ Buka
@@ -641,12 +678,6 @@
                         @else
                             <div class="flex flex-col items-center gap-1">
                                 <span class="text-[9px] px-2 py-1 rounded font-semibold bg-orange-400/20 text-orange-400 border border-orange-400/40">Draft</span>
-                                @if($canUnlockRekap)
-                                    <a href="{{ route('admin.rekap.edit-tps', [$jenis, $tps]) }}"
-                                       class="text-[9px] px-2 py-0.5 rounded font-semibold border border-red-400/40 text-red-400 hover:bg-red-400/10 transition whitespace-nowrap">
-                                        Edit
-                                    </a>
-                                @endif
                             </div>
                         @endif
                     </td>
@@ -767,7 +798,11 @@
     const allTps   = @json(\App\Models\Tps::orderBy('nama')->get(['id','nama','desa_id']));
     const baseUrl  = '{{ route('admin.rekap.export', $jenis) }}';
     const exportDownloadBase = '{{ url('admin/rekap/export/download') }}';
+    const inlineUpdateUrl = '{{ route('admin.rekap.inline-update', $jenis) }}';
+    const csrfToken = '{{ csrf_token() }}';
     const flagClasses = ['bg-red-500/20', 'text-red-600', 'dark:bg-red-500/20', 'dark:text-red-200', 'ring-1', 'ring-inset', 'ring-red-400/60'];
+    const numberFormatter = new Intl.NumberFormat('en-US');
+    let inlineEditMode = false;
 
     function isFlaggedCell(cell) {
         return cell?.classList.contains('bg-red-500/20');
@@ -816,6 +851,142 @@
         const desa = allDesas.find(item => item.id == desaId);
         if (desa) refreshKecFlag(desa.kecamatan_id, rowKey);
     }
+
+    function inlineEditableCells() {
+        return Array.from(document.querySelectorAll('[data-inline-editable="1"]'));
+    }
+    function inlineValue(cell) {
+        const input = cell.querySelector('.js-inline-input');
+        const raw = input ? input.value : cell.dataset.editValue;
+        const value = parseInt(raw || '0', 10);
+        return Number.isNaN(value) || value < 0 ? 0 : value;
+    }
+    function setInlineStatus(message, isError = false) {
+        const target = document.getElementById('inline-edit-status');
+        if (!target) return;
+        target.textContent = message;
+        target.classList.toggle('text-red-500', isError);
+        target.classList.toggle('dark:text-gray-500', !isError);
+        target.classList.toggle('text-gray-400', !isError);
+    }
+    function refreshInlineRowTotal(desaId, rowKey) {
+        const total = inlineEditableCells()
+            .filter(cell => cell.dataset.desaId == desaId && cell.dataset.rowKey === rowKey)
+            .reduce((sum, cell) => sum + inlineValue(cell), 0);
+
+        desaCellsFor(desaId, rowKey).forEach(cell => {
+            const span = cell.querySelector('span');
+            if (span) span.textContent = numberFormatter.format(total);
+        });
+    }
+    function setInlineControls(editing) {
+        document.getElementById('inline-edit-toggle')?.classList.toggle('hidden', editing);
+        document.getElementById('inline-edit-save')?.classList.toggle('hidden', !editing);
+        document.getElementById('inline-edit-cancel')?.classList.toggle('hidden', !editing);
+    }
+    function enterInlineEditMode() {
+        if (inlineEditMode) return;
+        const cells = inlineEditableCells();
+        if (!cells.length) {
+            setInlineStatus('Tidak ada cell TPS yang bisa diedit pada detail ini.', true);
+            return;
+        }
+
+        inlineEditMode = true;
+        setInlineControls(true);
+        setInlineStatus('Mode edit aktif. Ubah angka pada cell TPS, lalu simpan perubahan.');
+
+        cells.forEach(cell => {
+            const span = cell.querySelector('.js-cell-value');
+            if (!span || cell.querySelector('.js-inline-input')) return;
+
+            const value = cell.dataset.editValue || '0';
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.min = '0';
+            input.step = '1';
+            input.value = value;
+            input.className = 'js-inline-input w-24 rounded border border-red-300 bg-white px-2 py-1 text-center text-xs font-semibold text-gray-800 outline-none focus:ring-2 focus:ring-red-300/40 dark:border-red-500/50 dark:bg-gray-900 dark:text-gray-100';
+            input.addEventListener('input', () => {
+                cell.dataset.editValue = String(inlineValue(cell));
+                refreshInlineRowTotal(cell.dataset.desaId, cell.dataset.rowKey);
+            });
+
+            span.classList.add('hidden');
+            cell.insertBefore(input, cell.querySelector('[data-flag-form]') || null);
+        });
+    }
+    function leaveInlineEditMode(reset = false) {
+        inlineEditableCells().forEach(cell => {
+            const input = cell.querySelector('.js-inline-input');
+            const span = cell.querySelector('.js-cell-value');
+            if (!span) return;
+
+            const value = reset ? parseInt(cell.dataset.editOriginal || '0', 10) : inlineValue(cell);
+            cell.dataset.editValue = String(value);
+            span.textContent = numberFormatter.format(value);
+            span.classList.remove('hidden');
+            input?.remove();
+            refreshInlineRowTotal(cell.dataset.desaId, cell.dataset.rowKey);
+        });
+
+        inlineEditMode = false;
+        setInlineControls(false);
+        setInlineStatus(reset ? 'Perubahan dibatalkan.' : 'Perubahan tersimpan.');
+    }
+    async function saveInlineChanges() {
+        const saveButton = document.getElementById('inline-edit-save');
+        const changes = inlineEditableCells()
+            .map(cell => ({
+                cell,
+                tps_id: parseInt(cell.dataset.tpsId || '0', 10),
+                row_key: cell.dataset.rowKey,
+                value: inlineValue(cell),
+                original: parseInt(cell.dataset.editOriginal || '0', 10),
+            }))
+            .filter(item => item.value !== item.original)
+            .map(({ tps_id, row_key, value }) => ({ tps_id, row_key, value }));
+
+        if (!changes.length) {
+            leaveInlineEditMode(true);
+            setInlineStatus('Tidak ada perubahan untuk disimpan.');
+            return;
+        }
+
+        saveButton.disabled = true;
+        setInlineStatus('Menyimpan perubahan...');
+
+        try {
+            const response = await fetch(inlineUpdateUrl, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                body: JSON.stringify({ changes }),
+            });
+
+            if (!response.ok) {
+                const payload = await response.json().catch(() => ({}));
+                throw new Error(payload.message || 'Gagal menyimpan perubahan.');
+            }
+
+            inlineEditableCells().forEach(cell => {
+                cell.dataset.editOriginal = String(inlineValue(cell));
+            });
+            leaveInlineEditMode(false);
+        } catch (error) {
+            setInlineStatus(error.message || 'Gagal menyimpan perubahan.', true);
+        } finally {
+            saveButton.disabled = false;
+        }
+    }
+
+    document.getElementById('inline-edit-toggle')?.addEventListener('click', enterInlineEditMode);
+    document.getElementById('inline-edit-save')?.addEventListener('click', saveInlineChanges);
+    document.getElementById('inline-edit-cancel')?.addEventListener('click', () => leaveInlineEditMode(true));
 
     document.addEventListener('submit', async function(event) {
         const form = event.target.closest('[data-flag-form]');
