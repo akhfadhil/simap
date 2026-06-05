@@ -44,6 +44,10 @@ class ImportDpdFolder extends Command
      *
      *   php artisan import:dpd-folder "storage/import/DPD" --only=Bangorejo --dry-run
      *
+     * Cek satu desa/sheet saja di dalam kecamatan:
+     *
+     *   php artisan import:dpd-folder "storage/import/DPD" --only=Bangorejo --desa=Sambirejo --dry-run
+     *
      * Import asli ke database setelah dry-run bersih:
      *
      *   php artisan import:dpd-folder "storage/import/DPD"

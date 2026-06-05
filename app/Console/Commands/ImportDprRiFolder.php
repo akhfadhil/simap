@@ -40,6 +40,10 @@ class ImportDprRiFolder extends Command
      *
      *   php artisan import:dpr-ri-folder "storage/import/DPR RI" --only=Bangorejo --dry-run
      *
+     * Cek satu desa/sheet saja di dalam kecamatan:
+     *
+     *   php artisan import:dpr-ri-folder "storage/import/DPR RI" --only=Bangorejo --desa=Sambirejo --dry-run
+     *
      * Import asli setelah dry-run bersih:
      *
      *   php artisan import:dpr-ri-folder "storage/import/DPR RI"
@@ -60,11 +64,13 @@ class ImportDprRiFolder extends Command
 
     protected $description = 'Import rekap DPR RI dari folder Excel per kecamatan dan sheet per desa.';
 
-    private const JENIS = 'dpr_ri';
+    protected const JENIS = 'dpr_ri';
 
-    private const LABEL = 'DPR RI';
+    protected const LABEL = 'DPR RI';
 
-    private const DESA_ALIASES = [
+    protected const FILE_PREFIX_REGEX = '/^DPR\s+RI\s*-\s*/i';
+
+    protected const DESA_ALIASES = [
         'Kabat' => [
             'Pakisataji' => 'Pakistaji',
         ],
@@ -88,7 +94,7 @@ class ImportDprRiFolder extends Command
         $files = $this->filesFromPath($path);
 
         if ($files === []) {
-            $this->error('Tidak ada file Excel DPR RI yang ditemukan di: '.$path);
+            $this->error('Tidak ada file Excel '.static::LABEL.' yang ditemukan di: '.$path);
 
             return self::FAILURE;
         }
@@ -98,7 +104,7 @@ class ImportDprRiFolder extends Command
         $missing = [];
         $invalid = [];
         $warnings = [];
-        $partais = [];
+        $partaisByScope = [];
 
         foreach ($files as $file) {
             $kecamatan = $this->kecamatanFromFile($file);
@@ -107,11 +113,20 @@ class ImportDprRiFolder extends Command
                 continue;
             }
 
+            $dapilId = $this->dapilIdForKecamatan($kecamatan);
+            if ($this->requiresDapil() && ! $dapilId) {
+                $missing[] = "{$kecamatan}: kecamatan belum punya dapil.";
+
+                continue;
+            }
+
+            $masterScope = $this->masterScopeKey($kecamatan, $dapilId);
+
             $spreadsheet = IOFactory::load($file);
             $masterSheet = $this->firstDetailSheet($spreadsheet);
 
             if (! $masterSheet) {
-                $invalid[] = basename($file).': sheet detail '.self::LABEL.' tidak ditemukan.';
+                $invalid[] = basename($file).': sheet detail '.static::LABEL.' tidak ditemukan.';
                 $spreadsheet->disconnectWorksheets();
                 unset($spreadsheet);
 
@@ -128,10 +143,10 @@ class ImportDprRiFolder extends Command
                 continue;
             }
 
-            if ($partais === []) {
-                $partais = $filePartais;
-            } elseif ($this->partaiSignature($partais) !== $this->partaiSignature($filePartais)) {
-                $invalid[] = basename($file).': daftar partai/caleg berbeda dari file sebelumnya.';
+            if (! isset($partaisByScope[$masterScope])) {
+                $partaisByScope[$masterScope] = $filePartais;
+            } elseif ($this->partaiSignature($partaisByScope[$masterScope]) !== $this->partaiSignature($filePartais)) {
+                $invalid[] = basename($file).': daftar partai/caleg berbeda dari file lain dalam scope master yang sama.';
                 $spreadsheet->disconnectWorksheets();
                 unset($spreadsheet);
 
@@ -177,7 +192,9 @@ class ImportDprRiFolder extends Command
                         $desaNama,
                         strtoupper($tpsNama),
                         basename($file),
-                        $partais
+                        $filePartais,
+                        $masterScope,
+                        $dapilId
                     );
 
                     if ($this->recordLooksIncomplete($record)) {
@@ -210,22 +227,23 @@ class ImportDprRiFolder extends Command
 
         if ($this->option('dry-run')) {
             $this->line('DRY RUN: database tidak diubah.');
-            $this->printReport($rows, $corrections, $missing, $invalid, $warnings, $partais);
+            $this->printReport($rows, $corrections, $missing, $invalid, $warnings, $partaisByScope);
 
             return $missing === [] && $invalid === [] ? self::SUCCESS : self::FAILURE;
         }
 
         if ($missing !== [] || $invalid !== []) {
             $this->error('Import dibatalkan karena masih ada data yang tidak aman untuk diimpor.');
-            $this->printReport($rows, $corrections, $missing, $invalid, $warnings, $partais);
+            $this->printReport($rows, $corrections, $missing, $invalid, $warnings, $partaisByScope);
 
             return self::FAILURE;
         }
 
-        DB::transaction(function () use ($rows, $partais) {
-            $masterIds = $this->syncMaster($partais);
+        DB::transaction(function () use ($rows, $partaisByScope) {
+            $masterIds = $this->syncMaster($partaisByScope, $rows);
 
             foreach ($rows as $row) {
+                $rowMasterIds = $this->masterIdsForRow($masterIds, $row);
                 $desa = $this->findDesa($row['kecamatan'], $row['desa']);
 
                 $tps = Tps::firstOrCreate([
@@ -234,7 +252,7 @@ class ImportDprRiFolder extends Command
                 ]);
 
                 $rekap = RekapHeader::updateOrCreate(
-                    ['tps_id' => $tps->id, 'jenis' => self::JENIS],
+                    ['tps_id' => $tps->id, 'jenis' => static::JENIS],
                     [
                         'dpt_lk' => $row['dpt_lk'],
                         'dpt_pr' => $row['dpt_pr'],
@@ -258,7 +276,7 @@ class ImportDprRiFolder extends Command
 
                 foreach ($row['partai_suara'] as $nomorPartai => $suara) {
                     RekapPartaiSuara::updateOrCreate(
-                        ['rekap_id' => $rekap->id, 'partai_id' => $masterIds['partais'][$nomorPartai]],
+                        ['rekap_id' => $rekap->id, 'partai_id' => $rowMasterIds['partais'][$nomorPartai]],
                         ['suara' => $suara]
                     );
                 }
@@ -266,24 +284,24 @@ class ImportDprRiFolder extends Command
                 foreach ($row['caleg_suara'] as $nomorPartai => $calegSuaras) {
                     foreach ($calegSuaras as $nomorCaleg => $suara) {
                         RekapCalegSuara::updateOrCreate(
-                            ['rekap_id' => $rekap->id, 'caleg_id' => $masterIds['calegs'][$nomorPartai][$nomorCaleg]],
+                            ['rekap_id' => $rekap->id, 'caleg_id' => $rowMasterIds['calegs'][$nomorPartai][$nomorCaleg]],
                             ['suara' => $suara]
                         );
                     }
                 }
 
                 RekapPartaiSuara::where('rekap_id', $rekap->id)
-                    ->whereNotIn('partai_id', array_values($masterIds['partais']))
+                    ->whereNotIn('partai_id', array_values($rowMasterIds['partais']))
                     ->delete();
 
-                $calegIds = collect($masterIds['calegs'])->flatten()->values()->all();
+                $calegIds = collect($rowMasterIds['calegs'])->flatten()->values()->all();
                 RekapCalegSuara::where('rekap_id', $rekap->id)
                     ->whereNotIn('caleg_id', $calegIds)
                     ->delete();
             }
         });
 
-        $this->printReport($rows, $corrections, $missing, $invalid, $warnings, $partais);
+        $this->printReport($rows, $corrections, $missing, $invalid, $warnings, $partaisByScope);
 
         return self::SUCCESS;
     }
@@ -304,7 +322,7 @@ class ImportDprRiFolder extends Command
     private function kecamatanFromFile(string $file): string
     {
         $name = pathinfo($file, PATHINFO_FILENAME);
-        $name = preg_replace('/^DPR\s+RI\s*-\s*/i', '', $name);
+        $name = preg_replace(static::FILE_PREFIX_REGEX, '', $name);
 
         return $this->titleName(str_replace('_', ' ', $name));
     }
@@ -410,7 +428,7 @@ class ImportDprRiFolder extends Command
         return $columns;
     }
 
-    private function recordFromSheet(Worksheet $sheet, string $column, string $kecamatan, string $desaNama, string $tpsNama, string $sourceFile, array $partais): array
+    private function recordFromSheet(Worksheet $sheet, string $column, string $kecamatan, string $desaNama, string $tpsNama, string $sourceFile, array $partais, string $masterScope, ?int $dapilId): array
     {
         $partaiSuara = [];
         $calegSuara = [];
@@ -427,6 +445,8 @@ class ImportDprRiFolder extends Command
 
         return [
             'source_file' => $sourceFile,
+            'master_scope' => $masterScope,
+            'dapil_id' => $dapilId,
             'kecamatan' => $kecamatan,
             'desa' => $desaNama,
             'tps' => $tpsNama,
@@ -527,14 +547,15 @@ class ImportDprRiFolder extends Command
         return $authoritativeTotal > 0 && $this->sumSah($row) > $authoritativeTotal;
     }
 
-    private function syncMaster(array $partais): array
+    protected function syncMaster(array $partaisByScope, array $rows = []): array
     {
+        $partais = $partaisByScope[$this->defaultMasterScopeKey()] ?? reset($partaisByScope) ?: [];
         $partaiIds = [];
         $calegIds = [];
 
         foreach ($partais as $nomorPartai => $partaiData) {
             $partai = RekapPartai::updateOrCreate(
-                ['jenis' => self::JENIS, 'nomor_urut' => $nomorPartai, 'dapil_id' => null],
+                ['jenis' => static::JENIS, 'nomor_urut' => $nomorPartai, 'dapil_id' => null],
                 ['nama_partai' => $partaiData['nama']]
             );
             $partaiIds[$nomorPartai] = $partai->id;
@@ -553,7 +574,7 @@ class ImportDprRiFolder extends Command
                 ->delete();
         }
 
-        RekapPartai::where('jenis', self::JENIS)
+        RekapPartai::where('jenis', static::JENIS)
             ->whereNull('dapil_id')
             ->whereNotIn('nomor_urut', array_keys($partais))
             ->delete();
@@ -561,9 +582,34 @@ class ImportDprRiFolder extends Command
         return ['partais' => $partaiIds, 'calegs' => $calegIds];
     }
 
+    protected function masterIdsForRow(array $masterIds, array $row): array
+    {
+        return $masterIds;
+    }
+
+    protected function requiresDapil(): bool
+    {
+        return false;
+    }
+
+    protected function dapilIdForKecamatan(string $kecamatan): ?int
+    {
+        return null;
+    }
+
+    protected function defaultMasterScopeKey(): string
+    {
+        return 'global';
+    }
+
+    protected function masterScopeKey(string $kecamatan, ?int $dapilId): string
+    {
+        return $this->defaultMasterScopeKey();
+    }
+
     private function resolveDesaName(string $kecamatan, string $desa): string
     {
-        return self::DESA_ALIASES[$kecamatan][$desa] ?? $desa;
+        return static::DESA_ALIASES[$kecamatan][$desa] ?? $desa;
     }
 
     private function findDesa(string $kecamatan, string $desa): ?Desa
@@ -574,12 +620,17 @@ class ImportDprRiFolder extends Command
             ->first();
     }
 
-    private function printReport(array $rows, array $corrections, array $missing, array $invalid, array $warnings, array $partais): void
+    private function printReport(array $rows, array $corrections, array $missing, array $invalid, array $warnings, array $partaisByScope): void
     {
+        $partaiCount = collect($partaisByScope)->sum(fn ($partais) => count($partais));
+        $calegCount = collect($partaisByScope)
+            ->sum(fn ($partais) => collect($partais)->sum(fn ($partai) => count($partai['calegs'])));
+
         $this->newLine();
-        $this->info('Import folder DPR RI selesai.');
-        $this->line('Partai terbaca: '.count($partais));
-        $this->line('Caleg terbaca: '.collect($partais)->sum(fn ($partai) => count($partai['calegs'])));
+        $this->info('Import folder '.static::LABEL.' selesai.');
+        $this->line('Scope master terbaca: '.count($partaisByScope));
+        $this->line('Partai terbaca: '.$partaiCount);
+        $this->line('Caleg terbaca: '.$calegCount);
         $this->line('TPS terbaca: '.count($rows));
         $this->line('File terbaca: '.collect($rows)->pluck('source_file')->unique()->count());
         $this->line('Kecamatan terbaca: '.collect($rows)->pluck('kecamatan')->unique()->count());
