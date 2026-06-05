@@ -87,14 +87,31 @@
             : collect($row['sum'])->sum(fn($f) => $stats[$f] ?? 0);
     };
 
-    $canFlagDesaCells = Auth::user()->role === 'admin';
+    $canFlagCells = Auth::user()->role === 'admin';
     $rowKeyFor = fn($row) => isset($row['field']) && $row['field'] ? $row['field'] : 'sum:' . implode('+', $row['sum']);
     $flaggedClasses = 'bg-red-500/20 text-red-600 dark:bg-red-500/20 dark:text-red-200 ring-1 ring-inset ring-red-400/60';
-    $renderKecFlaggedCell = function($kecamatan, string $rowKey, $value, string $baseClass = '') use ($kecCellFlags, $flaggedClasses) {
-        $classes = trim($baseClass . ' ' . ($kecCellFlags->has($kecamatan->id . ':' . $rowKey) ? $flaggedClasses : ''));
+    $renderKecFlaggedCell = function($kecamatan, string $rowKey, $value, string $baseClass = '') use ($kecCellFlags, $kecDirectCellFlags, $canFlagCells, $jenis, $flaggedClasses) {
+        $flagged = $kecCellFlags->has($kecamatan->id . ':' . $rowKey);
+        $directFlagged = $kecDirectCellFlags->has($kecamatan->id . ':' . $rowKey);
+        $classes = trim($baseClass . ' relative group ' . ($flagged ? $flaggedClasses : ''));
         $content = is_null($value) ? '&mdash;' : number_format($value);
+        $button = '';
 
-        return new \Illuminate\Support\HtmlString('<td class="' . e($classes) . '" data-flag-scope="kec" data-kec-id="' . e($kecamatan->id) . '" data-row-key="' . e($rowKey) . '">' . $content . '</td>');
+        if ($canFlagCells) {
+            $buttonClass = $directFlagged
+                ? 'opacity-100 bg-red-500 text-white border-red-500'
+                : 'opacity-0 group-hover:opacity-100 bg-white dark:bg-gray-900 text-red-500 border-red-400';
+            $buttonTitle = $directFlagged ? 'Hapus tanda merah dari kabupaten' : 'Tandai merah dari kabupaten';
+            $button = '<form method="POST" action="' . e(route('admin.rekap.cell-flag', $jenis)) . '" data-flag-form class="absolute top-1 right-1 transition-opacity ' . ($directFlagged ? 'opacity-100' : 'opacity-0 group-hover:opacity-100') . '">'
+                . csrf_field()
+                . '<input type="hidden" name="level" value="kecamatan">'
+                . '<input type="hidden" name="entity_id" value="' . e($kecamatan->id) . '">'
+                . '<input type="hidden" name="row_key" value="' . e($rowKey) . '">'
+                . '<button type="submit" title="' . e($buttonTitle) . '" class="js-flag-button block w-4 h-4 rounded-full border text-[10px] leading-3 font-bold ' . $buttonClass . '">!</button>'
+                . '</form>';
+        }
+
+        return new \Illuminate\Support\HtmlString('<td class="' . e($classes) . '" data-flag-scope="kec" data-kec-id="' . e($kecamatan->id) . '" data-row-key="' . e($rowKey) . '" data-direct-flagged="' . ($directFlagged ? '1' : '0') . '"><span>' . $content . '</span>' . $button . '</td>');
     };
     $isInlineEditableRow = function(string $rowKey) {
         $baseEditable = [
@@ -112,7 +129,7 @@
             || str_starts_with($rowKey, 'partai:')
             || str_starts_with($rowKey, 'caleg:');
     };
-    $renderAdminTpsCell = function($tps, string $rowKey, $value, string $baseClass = '') use ($tpsCellFlags, $canFlagDesaCells, $jenis, $flaggedClasses, $isInlineEditableRow) {
+    $renderAdminTpsCell = function($tps, string $rowKey, $value, string $baseClass = '') use ($tpsCellFlags, $canFlagCells, $jenis, $flaggedClasses, $isInlineEditableRow) {
         $flagged = $tpsCellFlags->has($tps->id . ':' . $rowKey);
         $classes = trim($baseClass . ' relative group ' . ($flagged ? $flaggedClasses : ''));
         $rawValue = is_null($value) ? 0 : (int) $value;
@@ -122,13 +139,14 @@
             : '';
         $button = '';
 
-        if ($canFlagDesaCells) {
+        if ($canFlagCells) {
             $buttonClass = $flagged
                 ? 'opacity-100 bg-red-500 text-white border-red-500'
                 : 'opacity-0 group-hover:opacity-100 bg-white dark:bg-gray-900 text-red-500 border-red-400';
             $buttonTitle = $flagged ? 'Hapus tanda merah' : 'Tandai merah';
             $button = '<form method="POST" action="' . e(route('admin.rekap.cell-flag', $jenis)) . '" data-flag-form class="absolute top-1 right-1 transition-opacity ' . ($flagged ? 'opacity-100' : 'opacity-0 group-hover:opacity-100') . '">'
                 . csrf_field()
+                . '<input type="hidden" name="level" value="tps">'
                 . '<input type="hidden" name="entity_id" value="' . e($tps->id) . '">'
                 . '<input type="hidden" name="row_key" value="' . e($rowKey) . '">'
                 . '<button type="submit" title="' . e($buttonTitle) . '" class="js-flag-button block w-4 h-4 rounded-full border text-[10px] leading-3 font-bold ' . $buttonClass . '">!</button>'
@@ -137,11 +155,12 @@
 
         return new \Illuminate\Support\HtmlString('<td class="' . e($classes) . '" data-flag-scope="tps" data-tps-id="' . e($tps->id) . '" data-desa-id="' . e($tps->desa_id) . '" data-row-key="' . e($rowKey) . '"' . $editableAttrs . '><span class="js-cell-value">' . $content . '</span>' . $button . '</td>');
     };
-    $renderAdminFlaggedTotalCell = function($desa, string $rowKey, $value, string $baseClass = '') use ($desaCellFlags, $flaggedClasses) {
+    $renderAdminFlaggedTotalCell = function($desa, string $rowKey, $value, string $baseClass = '') use ($desaCellFlags, $kecDirectCellFlags, $flaggedClasses) {
+        $parentFlagged = $kecDirectCellFlags->has($desa->kecamatan_id . ':' . $rowKey);
         $classes = trim($baseClass . ' ' . ($desaCellFlags->has($desa->id . ':' . $rowKey) ? $flaggedClasses : ''));
         $content = is_null($value) ? '&mdash;' : number_format($value);
 
-        return new \Illuminate\Support\HtmlString('<td class="' . e($classes) . '" data-flag-scope="desa" data-desa-id="' . e($desa->id) . '" data-row-key="' . e($rowKey) . '"><span>' . $content . '</span></td>');
+        return new \Illuminate\Support\HtmlString('<td class="' . e($classes) . '" data-flag-scope="desa" data-desa-id="' . e($desa->id) . '" data-row-key="' . e($rowKey) . '" data-parent-flagged="' . ($parentFlagged ? '1' : '0') . '"><span>' . $content . '</span></td>');
     };
 @endphp
 
@@ -175,15 +194,15 @@
 
 {{-- ══ SATU TABEL BESAR REKAP TOTAL KABUPATEN ══ --}}
 <div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm overflow-hidden mb-4">
-    <div class="overflow-x-auto">
-        <table class="w-full text-sm table-fixed">
+    <div class="overflow-x-auto rekap-table-scroll">
+        <table class="w-full text-sm table-fixed rekap-sticky-header">
             <colgroup>
                 <col style="width:220px">
                 @foreach($kecamatans as $__kec) <col style="width:110px"> @endforeach
                 <col style="width:110px">
             </colgroup>
             <thead>
-                <tr class="border-b dark:border-gray-700 border-gray-200 sticky top-0 dark:bg-gray-800 bg-white z-10">
+                <tr class="border-b dark:border-gray-700 border-gray-200 dark:bg-gray-800 bg-white">
                     <th class="text-left px-5 py-3 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold truncate">Keterangan</th>
                     @foreach($kecamatans as $kec)
                     <th class="text-center px-3 py-3 text-[10px] uppercase font-semibold whitespace-nowrap
@@ -438,6 +457,7 @@
     $kecTpsIds = $kecamatan->desas->flatMap(fn($d) => $d->tps->pluck('id'))->toArray();
     $kecRekaps = $detailRekaps->whereIn('tps_id', $kecTpsIds);
     $kecFinal  = $kecRekaps->where('status','final')->count();
+    $kecHasFlag = $kecCellFlags->keys()->contains(fn($key) => str_starts_with($key, $kecamatan->id . ':'));
 @endphp
 <div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm mb-4 overflow-hidden">
 
@@ -449,6 +469,10 @@
             <p class="text-[11px] dark:text-gray-500 text-gray-400 mt-0.5">{{ $kecFinal }}/{{ count($kecTpsIds) }} TPS difinalisasi</p>
         </div>
         <div class="flex items-center gap-3">
+            <span title="Ada data yang perlu diperbaiki"
+                  data-progress-alert="kec"
+                  data-kec-id="{{ $kecamatan->id }}"
+                  class="{{ $kecHasFlag ? 'inline-flex' : 'hidden' }} h-5 w-5 items-center justify-center rounded-full border border-red-400 bg-red-500 text-[10px] font-bold leading-none text-white shadow-sm">!</span>
             <div class="w-24 h-1.5 dark:bg-gray-700 bg-gray-200 rounded-full">
                 <div class="h-1.5 rounded-full bg-red-500" style="width:{{ count($kecTpsIds) > 0 ? round(($kecFinal/count($kecTpsIds))*100) : 0 }}%"></div>
             </div>
@@ -462,6 +486,7 @@
     @php
         $desaTpsIds = $desa->tps->pluck('id')->toArray();
         $desaFinal  = $detailRekaps->whereIn('tps_id', $desaTpsIds)->where('status','final')->count();
+        $desaHasFlag = $desaCellFlags->keys()->contains(fn($key) => str_starts_with($key, $desa->id . ':'));
     @endphp
 
     {{-- Sub-header desa --}}
@@ -471,21 +496,30 @@
             <p class="text-xs font-semibold dark:text-gray-300 text-gray-600">{{ $desa->nama }}</p>
             <p class="text-[10px] dark:text-gray-500 text-gray-400">{{ $desaFinal }}/{{ $desa->tps->count() }} TPS difinalisasi</p>
         </div>
+        <div class="flex items-center gap-3">
+            <span title="Ada data yang perlu diperbaiki"
+                  data-progress-alert="desa"
+                  data-desa-id="{{ $desa->id }}"
+                  class="{{ $desaHasFlag ? 'inline-flex' : 'hidden' }} h-5 w-5 items-center justify-center rounded-full border border-red-400 bg-red-500 text-[10px] font-bold leading-none text-white shadow-sm">!</span>
+            <div class="w-24 h-1.5 dark:bg-gray-700 bg-gray-200 rounded-full">
+                <div class="h-1.5 rounded-full bg-red-500" style="width:{{ $desa->tps->count() > 0 ? round(($desaFinal/$desa->tps->count())*100) : 0 }}%"></div>
+            </div>
+        </div>
         <span id="arrow-desa-{{ $desa->id }}" class="dark:text-gray-500 text-gray-400 text-xs">▸</span>
     </div>
 
     <div id="desa-{{ $desa->id }}" class="hidden">
 
         {{-- ══ SATU TABEL BESAR PER DESA ══ --}}
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm table-fixed">
+        <div class="overflow-x-auto rekap-table-scroll">
+            <table class="w-full text-sm table-fixed rekap-sticky-header">
                 <colgroup>
                     <col style="width:220px">
                     @foreach($desa->tps as $__tps) <col style="width:110px"> @endforeach
                     <col style="width:110px">
                 </colgroup>
                 <thead>
-                    <tr class="border-b dark:border-gray-700 border-gray-200 sticky top-0 dark:bg-gray-800 bg-white z-10">
+                    <tr class="border-b dark:border-gray-700 border-gray-200 dark:bg-gray-800 bg-white">
                         <th class="text-left px-5 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Keterangan</th>
                         @foreach($desa->tps as $tps)
                         <th class="text-center px-3 py-2 text-[10px] uppercase font-semibold whitespace-nowrap
@@ -669,6 +703,10 @@
                             <div class="flex flex-col items-center gap-1">
                                 <span class="text-[9px] px-2 py-1 rounded font-semibold bg-teal-500/20 text-teal-400 border border-teal-500/40">Final</span>
                                 @if($canUnlockRekap)
+                                    <a href="{{ route('admin.rekap.edit-tps', [$jenis, $tps]) }}"
+                                       class="text-[9px] px-2 py-0.5 rounded font-semibold border border-red-400/40 text-red-400 hover:bg-red-400/10 transition whitespace-nowrap">
+                                        Edit
+                                    </a>
                                     <button onclick="openUnlockModal({{ $r->tps_id }}, '{{ addslashes($tps->nama) }}')"
                                             class="text-[9px] px-2 py-0.5 rounded font-semibold border border-orange-400/40 text-orange-400 hover:bg-orange-400/10 transition whitespace-nowrap">
                                         ↩ Buka
@@ -678,6 +716,12 @@
                         @else
                             <div class="flex flex-col items-center gap-1">
                                 <span class="text-[9px] px-2 py-1 rounded font-semibold bg-orange-400/20 text-orange-400 border border-orange-400/40">Draft</span>
+                                @if($canUnlockRekap)
+                                    <a href="{{ route('admin.rekap.edit-tps', [$jenis, $tps]) }}"
+                                       class="text-[9px] px-2 py-0.5 rounded font-semibold border border-red-400/40 text-red-400 hover:bg-red-400/10 transition whitespace-nowrap">
+                                        Edit
+                                    </a>
+                                @endif
                             </div>
                         @endif
                     </td>
@@ -848,15 +892,59 @@
         return Array.from(document.querySelectorAll('[data-flag-scope="kec"]'))
             .filter(cell => cell.dataset.kecId == kecId && cell.dataset.rowKey === rowKey);
     }
+    function setProgressAlert(scope, id, flagged) {
+        document.querySelectorAll(`[data-progress-alert="${scope}"]`).forEach(item => {
+            const matches = scope === 'desa'
+                ? item.dataset.desaId == id
+                : item.dataset.kecId == id;
+            if (!matches) return;
+
+            item.classList.toggle('hidden', !flagged);
+            item.classList.toggle('inline-flex', flagged);
+        });
+    }
+    function refreshDesaProgressAlert(desaId) {
+        const hasFlag = Array.from(document.querySelectorAll('[data-flag-scope="tps"]'))
+            .some(cell => cell.dataset.desaId == desaId && isFlaggedCell(cell))
+            || Array.from(document.querySelectorAll('[data-flag-scope="desa"]'))
+                .some(cell => cell.dataset.desaId == desaId && (isFlaggedCell(cell) || cell.dataset.parentFlagged === '1'));
+
+        setProgressAlert('desa', desaId, hasFlag);
+    }
+    function refreshKecProgressAlert(kecId) {
+        const desaIds = allDesas.filter(desa => desa.kecamatan_id == kecId).map(desa => String(desa.id));
+        const hasFlag = Array.from(document.querySelectorAll('[data-flag-scope="kec"]'))
+            .some(cell => cell.dataset.kecId == kecId && (isFlaggedCell(cell) || cell.dataset.directFlagged === '1'))
+            || Array.from(document.querySelectorAll('[data-flag-scope="tps"]'))
+                .some(cell => desaIds.includes(String(cell.dataset.desaId)) && isFlaggedCell(cell));
+
+        setProgressAlert('kec', kecId, hasFlag);
+    }
     function refreshDesaFlag(desaId, rowKey) {
-        const hasFlag = tpsCellsFor(desaId, rowKey).some(isFlaggedCell);
+        const hasParentFlag = desaCellsFor(desaId, rowKey).some(cell => cell.dataset.parentFlagged === '1');
+        const hasFlag = hasParentFlag || tpsCellsFor(desaId, rowKey).some(isFlaggedCell);
         desaCellsFor(desaId, rowKey).forEach(cell => setFlaggedCell(cell, hasFlag));
+        refreshDesaProgressAlert(desaId);
     }
     function refreshKecFlag(kecId, rowKey) {
         const desaIds = allDesas.filter(desa => desa.kecamatan_id == kecId).map(desa => String(desa.id));
-        const hasFlag = Array.from(document.querySelectorAll('[data-flag-scope="tps"]'))
+        const hasDirectFlag = kecCellsFor(kecId, rowKey).some(cell => cell.dataset.directFlagged === '1');
+        const hasFlag = hasDirectFlag || Array.from(document.querySelectorAll('[data-flag-scope="tps"]'))
             .some(cell => desaIds.includes(String(cell.dataset.desaId)) && cell.dataset.rowKey === rowKey && isFlaggedCell(cell));
         kecCellsFor(kecId, rowKey).forEach(cell => setFlaggedCell(cell, hasFlag));
+        refreshKecProgressAlert(kecId);
+    }
+    function refreshKecDownlineFlags(kecId, rowKey, flagged) {
+        allDesas
+            .filter(desa => desa.kecamatan_id == kecId)
+            .forEach(desa => {
+                desaCellsFor(desa.id, rowKey).forEach(cell => {
+                    cell.dataset.parentFlagged = flagged ? '1' : '0';
+                });
+                refreshDesaFlag(desa.id, rowKey);
+            });
+
+        refreshKecFlag(kecId, rowKey);
     }
     function refreshRollupFlags(desaId, rowKey) {
         refreshDesaFlag(desaId, rowKey);
@@ -1045,7 +1133,7 @@
 
         event.preventDefault();
 
-        const cell = form.closest('[data-flag-scope="tps"]');
+        const cell = form.closest('[data-flag-scope]');
         const button = form.querySelector('.js-flag-button');
         if (!cell || !button || button.disabled) return;
 
@@ -1067,9 +1155,19 @@
 
             const payload = await response.json();
             const flagged = Boolean(payload.flagged);
+            if (cell.dataset.flagScope === 'kec') {
+                cell.dataset.directFlagged = flagged ? '1' : '0';
+            }
             setFlaggedCell(cell, flagged);
             setFlagButtonState(cell, flagged);
-            refreshRollupFlags(cell.dataset.desaId, cell.dataset.rowKey);
+
+            if (cell.dataset.flagScope === 'tps') {
+                refreshRollupFlags(cell.dataset.desaId, cell.dataset.rowKey);
+            }
+
+            if (cell.dataset.flagScope === 'kec') {
+                refreshKecDownlineFlags(cell.dataset.kecId, cell.dataset.rowKey, flagged);
+            }
         } catch (error) {
             window.alert(error.message || 'Gagal mengubah tanda.');
         } finally {

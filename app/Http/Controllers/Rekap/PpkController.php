@@ -17,8 +17,25 @@ class PpkController extends Controller
         $kecamatan = $this->activeKecamatan();
         $tpsIds = Tps::whereHas('desa', fn ($q) => $q->where('kecamatan_id', $kecamatan->id))->pluck('id');
         $rekaps = RekapHeader::whereIn('tps_id', $tpsIds)->get()->groupBy('jenis');
+        $desaIds = $kecamatan->desas()->pluck('id');
+        $flaggedJenis = RekapCellFlag::query()
+            ->where(function ($query) use ($tpsIds, $desaIds, $kecamatan) {
+                $query->where(function ($query) use ($tpsIds) {
+                    $query->where('level', 'tps')
+                        ->whereIn('entity_id', $tpsIds);
+                })->orWhere(function ($query) use ($desaIds) {
+                    $query->where('level', 'desa')
+                        ->whereIn('entity_id', $desaIds);
+                })->orWhere(function ($query) use ($kecamatan) {
+                    $query->where('level', 'kecamatan')
+                        ->where('entity_id', $kecamatan->id);
+                });
+            })
+            ->pluck('jenis')
+            ->unique()
+            ->flip();
 
-        return view('rekap.ppk.index', compact('kecamatan', 'rekaps'));
+        return view('rekap.ppk.index', compact('kecamatan', 'rekaps', 'flaggedJenis'));
     }
 
     // Memastikan jenis pemilihan sedang aktif.
@@ -139,13 +156,16 @@ class PpkController extends Controller
         }
         $flagRows = RekapCellFlag::query()
             ->where('jenis', $jenis)
-            ->where(function ($query) use ($allTpsIds, $desaIds) {
+            ->where(function ($query) use ($allTpsIds, $desaIds, $kecamatan) {
                 $query->where(function ($query) use ($allTpsIds) {
                     $query->where('level', 'tps')
                         ->whereIn('entity_id', $allTpsIds);
                 })->orWhere(function ($query) use ($desaIds) {
                     $query->where('level', 'desa')
                         ->whereIn('entity_id', $desaIds);
+                })->orWhere(function ($query) use ($kecamatan) {
+                    $query->where('level', 'kecamatan')
+                        ->where('entity_id', $kecamatan->id);
                 });
             })
             ->get();
@@ -166,6 +186,12 @@ class PpkController extends Controller
 
             if ($flag->level === 'desa') {
                 $cellFlags->put($flag->entity_id.':'.$flag->row_key, true);
+            }
+
+            if ($flag->level === 'kecamatan') {
+                foreach ($desaIds as $desaId) {
+                    $cellFlags->put($desaId.':'.$flag->row_key, true);
+                }
             }
         }
         $master = $this->getMaster($jenis, $kecamatan);

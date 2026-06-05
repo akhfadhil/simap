@@ -108,15 +108,15 @@
 </div>
 
 <div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm overflow-hidden mb-8">
-    <div class="overflow-x-auto">
-        <table class="w-full text-sm table-fixed">
+    <div class="overflow-x-auto rekap-table-scroll">
+        <table class="w-full text-sm table-fixed rekap-sticky-header">
             <colgroup>
                 <col style="width:220px">
                 @foreach($desas as $__desa) <col style="width:110px"> @endforeach
                 <col style="width:110px">
             </colgroup>
             <thead>
-                <tr class="border-b dark:border-gray-700 border-gray-200 sticky top-0 dark:bg-gray-800 bg-white z-10">
+                <tr class="border-b dark:border-gray-700 border-gray-200 dark:bg-gray-800 bg-white">
                     <th class="text-left px-5 py-3 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold truncate">Keterangan</th>
                     @foreach($desas as $desa)
                     <th class="text-center px-3 py-3 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold whitespace-nowrap">{{ $desa->nama }}</th>
@@ -268,7 +268,7 @@
 </div>
 @else
 @foreach($detailDesas as $desa)
-@php $tpsIds = $desa->tps->pluck('id'); $desaRekaps = $detailRekaps->whereIn('tps_id', $tpsIds->toArray()); $desaFinal = $desaRekaps->where('status','final')->count(); $desaTotalTps = $desa->tps->count(); @endphp
+@php $tpsIds = $desa->tps->pluck('id'); $desaRekaps = $detailRekaps->whereIn('tps_id', $tpsIds->toArray()); $desaFinal = $desaRekaps->where('status','final')->count(); $desaTotalTps = $desa->tps->count(); $desaHasFlag = $cellFlags->keys()->contains(fn($key) => str_starts_with($key, $desa->id . ':')); @endphp
 
 <div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm mb-4 overflow-hidden">
     <div class="flex items-center justify-between px-6 py-4 border-b dark:border-gray-700 border-gray-200 cursor-pointer dark:hover:bg-gray-750 hover:bg-gray-50 transition"
@@ -278,6 +278,9 @@
             <p class="text-[11px] dark:text-gray-500 text-gray-400 mt-0.5">{{ $desaFinal }}/{{ $desaTotalTps }} TPS difinalisasi</p>
         </div>
         <div class="flex items-center gap-3">
+            @if($desaHasFlag)
+            <span title="Ada data yang perlu diperbaiki" class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-red-400 bg-red-500 text-[10px] font-bold leading-none text-white shadow-sm">!</span>
+            @endif
             <div class="w-24 h-1.5 dark:bg-gray-700 bg-gray-200 rounded-full">
                 <div class="h-1.5 rounded-full bg-orange-400" style="width:{{ $desaTotalTps > 0 ? round(($desaFinal/$desaTotalTps)*100) : 0 }}%"></div>
             </div>
@@ -287,15 +290,15 @@
 
     <div id="desa-{{ $desa->id }}" class="hidden">
 
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm table-fixed">
+        <div class="overflow-x-auto rekap-table-scroll">
+            <table class="w-full text-sm table-fixed rekap-sticky-header">
                 <colgroup>
                     <col style="width:220px">
                     @foreach($desa->tps as $__tps) <col style="width:110px"> @endforeach
                     <col style="width:110px">
                 </colgroup>
                 <thead>
-                    <tr class="border-b dark:border-gray-700 border-gray-200 sticky top-0 dark:bg-gray-800 bg-white z-10">
+                    <tr class="border-b dark:border-gray-700 border-gray-200 dark:bg-gray-800 bg-white">
                         <th class="text-left px-5 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold truncate">Keterangan</th>
                         @foreach($desa->tps as $tps)
                         <th class="text-center px-3 py-2.5 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold whitespace-nowrap">{{ $tps->nama }}</th>

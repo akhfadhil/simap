@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('jenis', 32);
             $table->string('level', 32);
             $table->unsignedBigInteger('entity_id');
-            $table->string('row_key', 96);
+            $table->string('row_key', 191);
             $table->foreignId('flagged_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
 

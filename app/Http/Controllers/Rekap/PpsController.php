@@ -17,8 +17,24 @@ class PpsController extends Controller
         $tpsIds = $desa->tps->pluck('id');
         $rekaps = RekapHeader::whereIn('tps_id', $tpsIds)->get()
             ->groupBy('jenis');
+        $flaggedJenis = RekapCellFlag::query()
+            ->where(function ($query) use ($tpsIds, $desa) {
+                $query->where(function ($query) use ($tpsIds) {
+                    $query->where('level', 'tps')
+                        ->whereIn('entity_id', $tpsIds);
+                })->orWhere(function ($query) use ($desa) {
+                    $query->where('level', 'desa')
+                        ->where('entity_id', $desa->id);
+                })->orWhere(function ($query) use ($desa) {
+                    $query->where('level', 'kecamatan')
+                        ->where('entity_id', $desa->kecamatan_id);
+                });
+            })
+            ->pluck('jenis')
+            ->unique()
+            ->flip();
 
-        return view('rekap.pps.index', compact('desa', 'rekaps'));
+        return view('rekap.pps.index', compact('desa', 'rekaps', 'flaggedJenis'));
     }
 
     // Memastikan jenis pemilihan sedang aktif.
@@ -54,6 +70,9 @@ class PpsController extends Controller
                 })->orWhere(function ($query) use ($desa) {
                     $query->where('level', 'desa')
                         ->where('entity_id', $desa->id);
+                })->orWhere(function ($query) use ($desa) {
+                    $query->where('level', 'kecamatan')
+                        ->where('entity_id', $desa->kecamatan_id);
                 });
             })
             ->get();
@@ -69,6 +88,10 @@ class PpsController extends Controller
             }
 
             if ($flag->level === 'desa') {
+                $cellFlags->put($flag->row_key, true);
+            }
+
+            if ($flag->level === 'kecamatan') {
                 $cellFlags->put($flag->row_key, true);
             }
         }

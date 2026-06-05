@@ -32,6 +32,19 @@
         .role-admin { background: rgba(220,38,38,0.15); color: #DC2626; border: 1px solid rgba(220,38,38,0.35); }
         .role-komisioner { background: rgba(37,99,235,0.15); color: #2563EB; border: 1px solid rgba(37,99,235,0.35); }
         .role-partai { background: rgba(124,58,237,0.15); color: #7C3AED; border: 1px solid rgba(124,58,237,0.35); }
+        .rekap-table-scroll {
+            max-height: calc(100vh - 5rem);
+            overflow: auto;
+        }
+        .rekap-sticky-header thead th {
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            background: #fff;
+        }
+        .dark .rekap-sticky-header thead th {
+            background: #1f2937;
+        }
     </style>
 </head>
 

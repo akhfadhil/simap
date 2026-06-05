@@ -22,8 +22,28 @@ class AdminController extends Controller
         $kecId = request('kecamatan_id');
         $tpsIds = Tps::when($kecId, fn ($q) => $q->whereHas('desa', fn ($q2) => $q2->where('kecamatan_id', $kecId)))->pluck('id');
         $rekaps = RekapHeader::whereIn('tps_id', $tpsIds)->get()->groupBy('jenis');
+        $desaIds = \App\Models\Desa::when($kecId, fn ($q) => $q->where('kecamatan_id', $kecId))->pluck('id');
+        $kecamatanIds = $kecId ? collect([(int) $kecId]) : $kecamatans->pluck('id');
+        $flaggedJenis = RekapCellFlag::query()
+            ->when($kecId, function ($query) use ($tpsIds, $desaIds, $kecamatanIds) {
+                $query->where(function ($query) use ($tpsIds, $desaIds, $kecamatanIds) {
+                    $query->where(function ($query) use ($tpsIds) {
+                        $query->where('level', 'tps')
+                            ->whereIn('entity_id', $tpsIds);
+                    })->orWhere(function ($query) use ($desaIds) {
+                        $query->where('level', 'desa')
+                            ->whereIn('entity_id', $desaIds);
+                    })->orWhere(function ($query) use ($kecamatanIds) {
+                        $query->where('level', 'kecamatan')
+                            ->whereIn('entity_id', $kecamatanIds);
+                    });
+                });
+            })
+            ->pluck('jenis')
+            ->unique()
+            ->flip();
 
-        return view('rekap.admin.index', compact('kecamatans', 'rekaps'));
+        return view('rekap.admin.index', compact('kecamatans', 'rekaps', 'flaggedJenis'));
     }
 
     // Menampilkan rekap agregat kabupaten untuk jenis pemilihan.
@@ -152,22 +172,27 @@ class AdminController extends Controller
         }
 
         $master = $this->getMaster($jenis, $selectedDapilId);
+        $kecamatanIds = $kecamatans->pluck('id');
         $desaIds = collect(array_keys($desaKecamatan));
         $flagRows = RekapCellFlag::query()
             ->where('jenis', $jenis)
-            ->where(function ($query) use ($tpsIds, $desaIds) {
+            ->where(function ($query) use ($tpsIds, $desaIds, $kecamatanIds) {
                 $query->where(function ($query) use ($tpsIds) {
                     $query->where('level', 'tps')
                         ->whereIn('entity_id', $tpsIds);
                 })->orWhere(function ($query) use ($desaIds) {
                     $query->where('level', 'desa')
                         ->whereIn('entity_id', $desaIds);
+                })->orWhere(function ($query) use ($kecamatanIds) {
+                    $query->where('level', 'kecamatan')
+                        ->whereIn('entity_id', $kecamatanIds);
                 });
             })
             ->get();
         $tpsCellFlags = collect();
         $desaCellFlags = collect();
         $kecCellFlags = collect();
+        $kecDirectCellFlags = collect();
 
         foreach ($flagRows as $flag) {
             if ($flag->level === 'tps') {
@@ -194,6 +219,17 @@ class AdminController extends Controller
                     $kecCellFlags->put($kecamatanId.':'.$flag->row_key, true);
                 }
             }
+
+            if ($flag->level === 'kecamatan') {
+                $kecCellFlags->put($flag->entity_id.':'.$flag->row_key, true);
+                $kecDirectCellFlags->put($flag->entity_id.':'.$flag->row_key, true);
+
+                foreach ($desaKecamatan as $desaId => $kecamatanId) {
+                    if ((int) $kecamatanId === (int) $flag->entity_id) {
+                        $desaCellFlags->put($desaId.':'.$flag->row_key, true);
+                    }
+                }
+            }
         }
 
         return view('rekap.admin.show', compact(
@@ -215,27 +251,34 @@ class AdminController extends Controller
             'kecPartaiGrandTotals',
             'tpsCellFlags',
             'desaCellFlags',
-            'kecCellFlags'
+            'kecCellFlags',
+            'kecDirectCellFlags'
         ));
     }
 
-    // Menandai/menghapus tanda merah manual pada cell TPS dari halaman rekap admin.
+    // Menandai/menghapus tanda merah manual pada cell rekap dari halaman admin.
     public function toggleCellFlag(Request $request, string $jenis)
     {
         abort_if($request->user()?->role !== 'admin', 403);
         abort_unless(array_key_exists($jenis, RekapHeader::JENIS_LABELS), 404);
 
         $data = $request->validate([
-            'entity_id' => ['required', 'integer', 'exists:tps,id'],
-            'row_key' => ['required', 'string', 'max:96'],
+            'level' => ['nullable', 'string', 'in:tps,kecamatan'],
+            'entity_id' => ['required', 'integer'],
+            'row_key' => ['required', 'string', 'max:191'],
         ]);
+        $level = $data['level'] ?? 'tps';
 
-        $tps = Tps::findOrFail($data['entity_id']);
+        if ($level === 'tps') {
+            $entity = Tps::findOrFail($data['entity_id']);
+        } else {
+            $entity = Kecamatan::findOrFail($data['entity_id']);
+        }
 
         $flag = RekapCellFlag::where([
             'jenis' => $jenis,
-            'level' => 'tps',
-            'entity_id' => $tps->id,
+            'level' => $level,
+            'entity_id' => $entity->id,
             'row_key' => $data['row_key'],
         ])->first();
 
@@ -246,8 +289,8 @@ class AdminController extends Controller
         } else {
             RekapCellFlag::create([
                 'jenis' => $jenis,
-                'level' => 'tps',
-                'entity_id' => $tps->id,
+                'level' => $level,
+                'entity_id' => $entity->id,
                 'row_key' => $data['row_key'],
                 'flagged_by' => $request->user()->id,
             ]);
@@ -257,8 +300,11 @@ class AdminController extends Controller
         if ($request->expectsJson()) {
             return response()->json([
                 'flagged' => $flagged,
-                'tps_id' => $tps->id,
-                'desa_id' => $tps->desa_id,
+                'level' => $level,
+                'entity_id' => $entity->id,
+                'tps_id' => $level === 'tps' ? $entity->id : null,
+                'desa_id' => $level === 'tps' ? $entity->desa_id : null,
+                'kecamatan_id' => $level === 'kecamatan' ? $entity->id : null,
                 'row_key' => $data['row_key'],
             ]);
         }
@@ -1173,7 +1219,7 @@ class AdminController extends Controller
         $data = $request->validate([
             'changes' => ['required', 'array', 'min:1'],
             'changes.*.tps_id' => ['required', 'integer', 'exists:tps,id'],
-            'changes.*.row_key' => ['required', 'string', 'max:96'],
+            'changes.*.row_key' => ['required', 'string', 'max:191'],
             'changes.*.value' => ['required', 'integer', 'min:0'],
         ]);
 

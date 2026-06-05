@@ -87,15 +87,15 @@
 @endphp
 
 <div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm overflow-hidden mb-4">
-    <div class="overflow-x-auto">
-        <table class="w-full text-sm table-fixed">
+    <div class="overflow-x-auto rekap-table-scroll">
+        <table class="w-full text-sm table-fixed rekap-sticky-header">
             <colgroup>
                 <col style="width:220px">
                 @foreach($tpsList as $__tps) <col style="width:110px"> @endforeach
                 <col style="width:110px">
             </colgroup>
             <thead>
-                <tr class="border-b dark:border-gray-700 border-gray-200 sticky top-0 dark:bg-gray-800 bg-white z-10">
+                <tr class="border-b dark:border-gray-700 border-gray-200 dark:bg-gray-800 bg-white">
                     <th class="text-left px-5 py-3 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold truncate">Keterangan</th>
                     @foreach($tpsList as $tps)
                     <th class="text-center px-3 py-3 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold whitespace-nowrap">{{ $tps->nama }}</th>
