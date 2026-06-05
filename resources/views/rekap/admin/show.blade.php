@@ -993,7 +993,21 @@
             if (span) span.textContent = numberFormatter.format(total);
         });
     }
-    function refreshInlineTpsSum(tpsId, rowKey) {
+    function refreshAllInlineRowTotals() {
+        const totals = {};
+
+        inlineTpsCells().forEach(cell => {
+            const key = `${cell.dataset.desaId}:${cell.dataset.rowKey}`;
+            totals[key] = (totals[key] || 0) + inlineValue(cell);
+        });
+
+        document.querySelectorAll('[data-flag-scope="desa"]').forEach(cell => {
+            const span = cell.querySelector('span');
+            const key = `${cell.dataset.desaId}:${cell.dataset.rowKey}`;
+            if (span) span.textContent = numberFormatter.format(totals[key] || 0);
+        });
+    }
+    function refreshInlineTpsSum(tpsId, rowKey, refreshRowTotal = true) {
         const fields = inlineSumFormulas[rowKey];
         if (!fields) return;
 
@@ -1009,7 +1023,19 @@
             : fields.reduce((sum, field) => sum + values[field], 0);
 
         setInlineCellValue(target, total);
-        refreshInlineRowTotal(target.dataset.desaId, rowKey);
+        if (refreshRowTotal) {
+            refreshInlineRowTotal(target.dataset.desaId, rowKey);
+        }
+    }
+    function refreshAllInlineComputedRows() {
+        const tpsIds = [...new Set(inlineTpsCells().map(cell => cell.dataset.tpsId))];
+        const formulaKeys = Object.keys(inlineSumFormulas);
+
+        tpsIds.forEach(tpsId => {
+            formulaKeys.forEach(rowKey => refreshInlineTpsSum(tpsId, rowKey, false));
+        });
+
+        refreshAllInlineRowTotals();
     }
     function refreshInlineDerivedRows(cell) {
         refreshInlineRowTotal(cell.dataset.desaId, cell.dataset.rowKey);
@@ -1066,8 +1092,11 @@
             span.textContent = numberFormatter.format(value);
             span.classList.remove('hidden');
             input?.remove();
-            refreshInlineDerivedRows(cell);
         });
+
+        if (reset) {
+            refreshAllInlineComputedRows();
+        }
 
         inlineEditMode = false;
         setInlineControls(false);
