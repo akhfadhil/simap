@@ -1,0 +1,614 @@
+Import folder PPWP
+Dibuat: 2026-06-06 03:30:52
+
+Ringkasan:
+- TPS terbaca: 5104
+- File terbaca: 25
+- Kecamatan terbaca: 25
+- Desa terbaca: 217
+- TPS tidak aman diimpor: 31
+- Koreksi data: 562
+
+Data wilayah tidak cocok (0):
+- Tidak ada.
+
+Data TPS tidak aman diimpor (31):
+- PPWP - KALIBARU.xlsx / Kebonrejo / TPS 001: pengguna ada, tetapi suara paslon/total suara kosong.
+- PPWP - KALIBARU.xlsx / Kebonrejo / TPS 002: pengguna ada, tetapi suara paslon/total suara kosong.
+- PPWP - KALIBARU.xlsx / Kebonrejo / TPS 003: pengguna ada, tetapi suara paslon/total suara kosong.
+- PPWP - KALIBARU.xlsx / Kebonrejo / TPS 004: pengguna ada, tetapi suara paslon/total suara kosong.
+- PPWP - KALIBARU.xlsx / Kebonrejo / TPS 005: pengguna ada, tetapi suara paslon/total suara kosong.
+- PPWP - KALIBARU.xlsx / Kebonrejo / TPS 006: pengguna ada, tetapi suara paslon/total suara kosong.
+- PPWP - KALIBARU.xlsx / Kebonrejo / TPS 007: pengguna ada, tetapi suara paslon/total suara kosong.
+- PPWP - KALIBARU.xlsx / Kebonrejo / TPS 008: pengguna ada, tetapi suara paslon/total suara kosong.
+- PPWP - KALIBARU.xlsx / Kebonrejo / TPS 009: pengguna ada, tetapi suara paslon/total suara kosong.
+- PPWP - KALIBARU.xlsx / Kebonrejo / TPS 010: pengguna ada, tetapi suara paslon/total suara kosong.
+- PPWP - KALIBARU.xlsx / Kebonrejo / TPS 011: pengguna ada, tetapi suara paslon/total suara kosong.
+- PPWP - KALIBARU.xlsx / Kebonrejo / TPS 012: pengguna ada, tetapi suara paslon/total suara kosong.
+- PPWP - KALIBARU.xlsx / Kebonrejo / TPS 013: pengguna ada, tetapi suara paslon/total suara kosong.
+- PPWP - KALIBARU.xlsx / Kebonrejo / TPS 014: pengguna ada, tetapi suara paslon/total suara kosong.
+- PPWP - KALIBARU.xlsx / Kebonrejo / TPS 015: pengguna ada, tetapi suara paslon/total suara kosong.
+- PPWP - KALIBARU.xlsx / Kebonrejo / TPS 031: pengguna ada, tetapi suara paslon/total suara kosong.
+- PPWP - TEGALSARI.xlsx / Tegalsari / TPS 001: pengguna ada, tetapi suara paslon/total suara kosong.
+- PPWP - TEGALSARI.xlsx / Tegalsari / TPS 002: pengguna ada, tetapi suara paslon/total suara kosong.
+- PPWP - TEGALSARI.xlsx / Tegalsari / TPS 003: pengguna ada, tetapi suara paslon/total suara kosong.
+- PPWP - TEGALSARI.xlsx / Tegalsari / TPS 004: pengguna ada, tetapi suara paslon/total suara kosong.
+- PPWP - TEGALSARI.xlsx / Tegalsari / TPS 005: pengguna ada, tetapi suara paslon/total suara kosong.
+- PPWP - TEGALSARI.xlsx / Tegalsari / TPS 006: pengguna ada, tetapi suara paslon/total suara kosong.
+- PPWP - TEGALSARI.xlsx / Tegalsari / TPS 007: pengguna ada, tetapi suara paslon/total suara kosong.
+- PPWP - TEGALSARI.xlsx / Tegalsari / TPS 008: pengguna ada, tetapi suara paslon/total suara kosong.
+- PPWP - TEGALSARI.xlsx / Tegalsari / TPS 009: pengguna ada, tetapi suara paslon/total suara kosong.
+- PPWP - TEGALSARI.xlsx / Tegalsari / TPS 010: pengguna ada, tetapi suara paslon/total suara kosong.
+- PPWP - TEGALSARI.xlsx / Tegalsari / TPS 011: pengguna ada, tetapi suara paslon/total suara kosong.
+- PPWP - TEGALSARI.xlsx / Tegalsari / TPS 012: pengguna ada, tetapi suara paslon/total suara kosong.
+- PPWP - TEGALSARI.xlsx / Tegalsari / TPS 013: pengguna ada, tetapi suara paslon/total suara kosong.
+- PPWP - TEGALSARI.xlsx / Tegalsari / TPS 014: pengguna ada, tetapi suara paslon/total suara kosong.
+- PPWP - TEGALSARI.xlsx / Tegalsari / TPS 015: pengguna ada, tetapi suara paslon/total suara kosong.
+
+Catatan struktur Excel (2):
+- PPWP - GAMBIRAN.xlsx / WRINGINREJO: D9 berisi Kaligung; nama sheet Wringinrejo dipakai.
+- PPWP - PURWOHARJO.xlsx / SUMBERASRI: D9 berisi Sumbersari; nama sheet Sumberasri dipakai.
+
+Daftar koreksi (562):
+- Bangorejo / Bangorejo / TPS 001: pengguna hak pilih 223 tidak sama dengan sah+tidak sah 224; pengguna_dpt_pr disesuaikan 118 -> 119.
+- Bangorejo / Bangorejo / TPS 001: surat suara digunakan 223 disesuaikan ke sah+tidak sah 224.
+- Bangorejo / Bangorejo / TPS 001: surat suara sisa 47 disesuaikan ke diterima-digunakan-rusak 46.
+- Bangorejo / Bangorejo / TPS 006: pengguna hak pilih 238 tidak sama dengan sah+tidak sah 239; pengguna_dpt_pr disesuaikan 121 -> 122.
+- Bangorejo / Bangorejo / TPS 006: surat suara digunakan 238 disesuaikan ke sah+tidak sah 239.
+- Bangorejo / Bangorejo / TPS 006: surat suara sisa 29 disesuaikan ke diterima-digunakan-rusak 28.
+- Bangorejo / Sambirejo / TPS 001: pengguna hak pilih 130 tidak sama dengan sah+tidak sah 242; pengguna_dpt_pr disesuaikan 0 -> 112.
+- Bangorejo / Sambirejo / TPS 002: pengguna hak pilih 127 tidak sama dengan sah+tidak sah 243; pengguna_dpt_pr disesuaikan 0 -> 116.
+- Bangorejo / Sambirejo / TPS 003: pengguna hak pilih 99 tidak sama dengan sah+tidak sah 218; pengguna_dpt_pr disesuaikan 0 -> 119.
+- Bangorejo / Sambirejo / TPS 004: pengguna hak pilih 92 tidak sama dengan sah+tidak sah 187; pengguna_dpt_pr disesuaikan 0 -> 95.
+- Bangorejo / Sambirejo / TPS 005: pengguna hak pilih 98 tidak sama dengan sah+tidak sah 187; pengguna_dpt_pr disesuaikan 0 -> 89.
+- Bangorejo / Sambirejo / TPS 006: pengguna hak pilih 107 tidak sama dengan sah+tidak sah 215; pengguna_dpt_pr disesuaikan 0 -> 108.
+- Bangorejo / Sambirejo / TPS 007: pengguna hak pilih 89 tidak sama dengan sah+tidak sah 192; pengguna_dpt_pr disesuaikan 0 -> 103.
+- Bangorejo / Sambirejo / TPS 008: pengguna hak pilih 92 tidak sama dengan sah+tidak sah 215; pengguna_dpt_pr disesuaikan 0 -> 123.
+- Bangorejo / Sambirejo / TPS 009: pengguna hak pilih 94 tidak sama dengan sah+tidak sah 215; pengguna_dpt_pr disesuaikan 0 -> 121.
+- Bangorejo / Sambirejo / TPS 010: pengguna hak pilih 79 tidak sama dengan sah+tidak sah 172; pengguna_dpt_pr disesuaikan 0 -> 93.
+- Bangorejo / Sambirejo / TPS 011: pengguna hak pilih 104 tidak sama dengan sah+tidak sah 202; pengguna_dpt_pr disesuaikan 0 -> 98.
+- Bangorejo / Sambirejo / TPS 012: pengguna hak pilih 95 tidak sama dengan sah+tidak sah 191; pengguna_dpt_pr disesuaikan 0 -> 96.
+- Bangorejo / Sambirejo / TPS 013: pengguna hak pilih 110 tidak sama dengan sah+tidak sah 221; pengguna_dpt_pr disesuaikan 0 -> 111.
+- Bangorejo / Sambirejo / TPS 014: pengguna hak pilih 105 tidak sama dengan sah+tidak sah 205; pengguna_dpt_pr disesuaikan 0 -> 100.
+- Bangorejo / Sambirejo / TPS 015: pengguna hak pilih 99 tidak sama dengan sah+tidak sah 202; pengguna_dpt_pr disesuaikan 0 -> 103.
+- Bangorejo / Sambirejo / TPS 016: pengguna hak pilih 83 tidak sama dengan sah+tidak sah 167; pengguna_dpt_pr disesuaikan 0 -> 84.
+- Bangorejo / Sambirejo / TPS 017: pengguna hak pilih 98 tidak sama dengan sah+tidak sah 200; pengguna_dpt_pr disesuaikan 0 -> 102.
+- Bangorejo / Sambirejo / TPS 018: pengguna hak pilih 102 tidak sama dengan sah+tidak sah 197; pengguna_dpt_pr disesuaikan 0 -> 95.
+- Bangorejo / Sambirejo / TPS 019: pengguna hak pilih 102 tidak sama dengan sah+tidak sah 200; pengguna_dpt_pr disesuaikan 0 -> 98.
+- Bangorejo / Sambirejo / TPS 020: pengguna hak pilih 88 tidak sama dengan sah+tidak sah 185; pengguna_dpt_pr disesuaikan 0 -> 97.
+- Bangorejo / Sambirejo / TPS 021: pengguna hak pilih 103 tidak sama dengan sah+tidak sah 215; pengguna_dpt_pr disesuaikan 0 -> 112.
+- Bangorejo / Sambirejo / TPS 022: pengguna hak pilih 102 tidak sama dengan sah+tidak sah 207; pengguna_dpt_pr disesuaikan 0 -> 105.
+- Bangorejo / Sambirejo / TPS 023: pengguna hak pilih 114 tidak sama dengan sah+tidak sah 236; pengguna_dpt_pr disesuaikan 0 -> 122.
+- Bangorejo / Sambirejo / TPS 024: pengguna hak pilih 104 tidak sama dengan sah+tidak sah 212; pengguna_dpt_pr disesuaikan 0 -> 108.
+- Bangorejo / Sambirejo / TPS 025: pengguna hak pilih 103 tidak sama dengan sah+tidak sah 224; pengguna_dpt_pr disesuaikan 0 -> 121.
+- Bangorejo / Sambirejo / TPS 026: pengguna hak pilih 109 tidak sama dengan sah+tidak sah 217; pengguna_dpt_pr disesuaikan 0 -> 108.
+- Bangorejo / Sambirejo / TPS 027: pengguna hak pilih 105 tidak sama dengan sah+tidak sah 214; pengguna_dpt_pr disesuaikan 0 -> 109.
+- Bangorejo / Temurejo / TPS 013: pengguna hak pilih 204 tidak sama dengan sah+tidak sah 203; pengguna_dpt_pr disesuaikan 99 -> 98.
+- Bangorejo / Temurejo / TPS 014: pengguna hak pilih 238 tidak sama dengan sah+tidak sah 236; pengguna_dpt_pr disesuaikan 115 -> 113.
+- Bangorejo / Temurejo / TPS 017: pengguna hak pilih 227 tidak sama dengan sah+tidak sah 229; pengguna_dpt_pr disesuaikan 106 -> 108.
+- Bangorejo / Temurejo / TPS 019: pengguna hak pilih 236 tidak sama dengan sah+tidak sah 237; pengguna_dpt_pr disesuaikan 122 -> 123.
+- Banyuwangi / Kampungmandar / TPS 008: pengguna hak pilih 173 tidak sama dengan sah+tidak sah 172; pengguna_dpt_pr disesuaikan 80 -> 79.
+- Banyuwangi / Kampungmandar / TPS 008: surat suara digunakan 173 disesuaikan ke sah+tidak sah 172.
+- Banyuwangi / Kampungmandar / TPS 008: surat suara sisa 56 disesuaikan ke diterima-digunakan-rusak 57.
+- Banyuwangi / Kampungmandar / TPS 009: pengguna hak pilih 180 tidak sama dengan sah+tidak sah 181; pengguna_dpt_pr disesuaikan 95 -> 96.
+- Banyuwangi / Kampungmandar / TPS 009: surat suara digunakan 180 disesuaikan ke sah+tidak sah 181.
+- Banyuwangi / Kampungmandar / TPS 009: surat suara sisa 43 disesuaikan ke diterima-digunakan-rusak 42.
+- Gambiran / Gambiran / TPS 031: pengguna hak pilih 202 tidak sama dengan sah+tidak sah 182; pengguna_dpt_pr disesuaikan 104 -> 84.
+- Gambiran / Gambiran / TPS 031: surat suara digunakan 202 disesuaikan ke sah+tidak sah 182.
+- Gambiran / Gambiran / TPS 031: surat suara sisa 72 disesuaikan ke diterima-digunakan-rusak 92.
+- Gambiran / Gambiran / TPS 033: pengguna hak pilih 224 tidak sama dengan sah+tidak sah 244; pengguna_dpt_pr disesuaikan 118 -> 138.
+- Gambiran / Gambiran / TPS 033: surat suara digunakan 224 disesuaikan ke sah+tidak sah 244.
+- Gambiran / Gambiran / TPS 033: surat suara sisa 72 disesuaikan ke diterima-digunakan-rusak 52.
+- Gambiran / Wringinrejo / TPS 016: pengguna hak pilih 0 tidak sama dengan sah+tidak sah 207; pengguna_dpt_pr disesuaikan 0 -> 207.
+- Gambiran / Wringinrejo / TPS 016: surat suara digunakan 0 disesuaikan ke sah+tidak sah 207.
+- Gambiran / Wringinrejo / TPS 017: pengguna hak pilih 0 tidak sama dengan sah+tidak sah 198; pengguna_dpt_pr disesuaikan 0 -> 198.
+- Gambiran / Wringinrejo / TPS 017: surat suara digunakan 0 disesuaikan ke sah+tidak sah 198.
+- Gambiran / Wringinrejo / TPS 018: pengguna hak pilih 0 tidak sama dengan sah+tidak sah 181; pengguna_dpt_pr disesuaikan 0 -> 181.
+- Gambiran / Wringinrejo / TPS 018: surat suara digunakan 0 disesuaikan ke sah+tidak sah 181.
+- Gambiran / Wringinrejo / TPS 019: pengguna hak pilih 0 tidak sama dengan sah+tidak sah 186; pengguna_dpt_pr disesuaikan 0 -> 186.
+- Gambiran / Wringinrejo / TPS 019: surat suara digunakan 0 disesuaikan ke sah+tidak sah 186.
+- Gambiran / Yosomulyo / TPS 002: pengguna hak pilih 207 tidak sama dengan sah+tidak sah 205; pengguna_dpt_pr disesuaikan 107 -> 105.
+- Gambiran / Yosomulyo / TPS 002: surat suara digunakan 207 disesuaikan ke sah+tidak sah 205.
+- Gambiran / Yosomulyo / TPS 002: surat suara sisa 81 disesuaikan ke diterima-digunakan-rusak 83.
+- Gambiran / Yosomulyo / TPS 013: pengguna hak pilih 222 tidak sama dengan sah+tidak sah 224; pengguna_dpt_pr disesuaikan 113 -> 115.
+- Gambiran / Yosomulyo / TPS 013: surat suara digunakan 222 disesuaikan ke sah+tidak sah 224.
+- Gambiran / Yosomulyo / TPS 013: surat suara sisa 60 disesuaikan ke diterima-digunakan-rusak 58.
+- Gambiran / Yosomulyo / TPS 016: pengguna hak pilih 182 tidak sama dengan sah+tidak sah 160; pengguna_dpt_pr disesuaikan 94 -> 72.
+- Gambiran / Yosomulyo / TPS 016: surat suara digunakan 182 disesuaikan ke sah+tidak sah 160.
+- Gambiran / Yosomulyo / TPS 016: surat suara sisa 65 disesuaikan ke diterima-digunakan-rusak 87.
+- Gambiran / Yosomulyo / TPS 020: pengguna hak pilih 226 tidak sama dengan sah+tidak sah 246; pengguna_dpt_pr disesuaikan 113 -> 133.
+- Gambiran / Yosomulyo / TPS 020: surat suara digunakan 226 disesuaikan ke sah+tidak sah 246.
+- Gambiran / Yosomulyo / TPS 020: surat suara sisa 70 disesuaikan ke diterima-digunakan-rusak 50.
+- Gambiran / Yosomulyo / TPS 030: pengguna hak pilih 211 tidak sama dengan sah+tidak sah 213; pengguna_dpt_pr disesuaikan 112 -> 114.
+- Gambiran / Yosomulyo / TPS 030: surat suara digunakan 211 disesuaikan ke sah+tidak sah 213.
+- Gambiran / Yosomulyo / TPS 030: surat suara sisa 70 disesuaikan ke diterima-digunakan-rusak 68.
+- Genteng / Kaligondo / TPS 043: pengguna hak pilih 165 tidak sama dengan sah+tidak sah 164; pengguna_dpt_pr disesuaikan 84 -> 83.
+- Genteng / Kaligondo / TPS 043: surat suara digunakan 165 disesuaikan ke sah+tidak sah 164.
+- Genteng / Kaligondo / TPS 043: surat suara sisa 53 disesuaikan ke diterima-digunakan-rusak 54.
+- Genteng / Kaligondo / TPS 046: pengguna hak pilih 177 tidak sama dengan sah+tidak sah 178; pengguna_dpt_pr disesuaikan 90 -> 91.
+- Genteng / Kaligondo / TPS 046: surat suara digunakan 177 disesuaikan ke sah+tidak sah 178.
+- Genteng / Kaligondo / TPS 046: surat suara sisa 65 disesuaikan ke diterima-digunakan-rusak 64.
+- Genteng / Setail / TPS 034: surat suara digunakan 226 disesuaikan ke sah+tidak sah 227.
+- Genteng / Setail / TPS 034: surat suara sisa 59 disesuaikan ke diterima-digunakan-rusak 58.
+- Genteng / Setail / TPS 036: surat suara digunakan 231 disesuaikan ke sah+tidak sah 230.
+- Genteng / Setail / TPS 036: surat suara sisa 62 disesuaikan ke diterima-digunakan-rusak 63.
+- Kalibaru / Banyuanyar / TPS 014: pengguna hak pilih 247 tidak sama dengan sah+tidak sah 245; pengguna_dpt_pr disesuaikan 129 -> 127.
+- Kalibaru / Banyuanyar / TPS 014: surat suara digunakan 247 disesuaikan ke sah+tidak sah 245.
+- Kalibaru / Banyuanyar / TPS 014: surat suara sisa 49 disesuaikan ke diterima-digunakan-rusak 51.
+- Kalibaru / Banyuanyar / TPS 016: pengguna hak pilih 0 tidak sama dengan sah+tidak sah 231; pengguna_dpt_pr disesuaikan 0 -> 231.
+- Kalibaru / Banyuanyar / TPS 016: surat suara digunakan 0 disesuaikan ke sah+tidak sah 231.
+- Kalibaru / Banyuanyar / TPS 017: pengguna hak pilih 0 tidak sama dengan sah+tidak sah 166; pengguna_dpt_pr disesuaikan 0 -> 166.
+- Kalibaru / Banyuanyar / TPS 017: surat suara digunakan 0 disesuaikan ke sah+tidak sah 166.
+- Kalibaru / Banyuanyar / TPS 018: pengguna hak pilih 0 tidak sama dengan sah+tidak sah 96; pengguna_dpt_pr disesuaikan 0 -> 96.
+- Kalibaru / Banyuanyar / TPS 018: surat suara digunakan 0 disesuaikan ke sah+tidak sah 96.
+- Kalibaru / Banyuanyar / TPS 019: pengguna hak pilih 0 tidak sama dengan sah+tidak sah 211; pengguna_dpt_pr disesuaikan 0 -> 211.
+- Kalibaru / Banyuanyar / TPS 019: surat suara digunakan 0 disesuaikan ke sah+tidak sah 211.
+- Kalibaru / Banyuanyar / TPS 020: pengguna hak pilih 0 tidak sama dengan sah+tidak sah 133; pengguna_dpt_pr disesuaikan 0 -> 133.
+- Kalibaru / Banyuanyar / TPS 020: surat suara digunakan 0 disesuaikan ke sah+tidak sah 133.
+- Kalibaru / Banyuanyar / TPS 021: pengguna hak pilih 0 tidak sama dengan sah+tidak sah 110; pengguna_dpt_pr disesuaikan 0 -> 110.
+- Kalibaru / Banyuanyar / TPS 021: surat suara digunakan 0 disesuaikan ke sah+tidak sah 110.
+- Kalibaru / Banyuanyar / TPS 022: pengguna hak pilih 0 tidak sama dengan sah+tidak sah 183; pengguna_dpt_pr disesuaikan 0 -> 183.
+- Kalibaru / Banyuanyar / TPS 022: surat suara digunakan 0 disesuaikan ke sah+tidak sah 183.
+- Kalibaru / Banyuanyar / TPS 023: pengguna hak pilih 0 tidak sama dengan sah+tidak sah 147; pengguna_dpt_pr disesuaikan 0 -> 147.
+- Kalibaru / Banyuanyar / TPS 023: surat suara digunakan 0 disesuaikan ke sah+tidak sah 147.
+- Kalibaru / Banyuanyar / TPS 024: pengguna hak pilih 0 tidak sama dengan sah+tidak sah 186; pengguna_dpt_pr disesuaikan 0 -> 186.
+- Kalibaru / Banyuanyar / TPS 024: surat suara digunakan 0 disesuaikan ke sah+tidak sah 186.
+- Kalibaru / Banyuanyar / TPS 025: pengguna hak pilih 0 tidak sama dengan sah+tidak sah 200; pengguna_dpt_pr disesuaikan 0 -> 200.
+- Kalibaru / Banyuanyar / TPS 025: surat suara digunakan 0 disesuaikan ke sah+tidak sah 200.
+- Kalibaru / Banyuanyar / TPS 026: pengguna hak pilih 0 tidak sama dengan sah+tidak sah 168; pengguna_dpt_pr disesuaikan 0 -> 168.
+- Kalibaru / Banyuanyar / TPS 026: surat suara digunakan 0 disesuaikan ke sah+tidak sah 168.
+- Kalibaru / Banyuanyar / TPS 027: pengguna hak pilih 0 tidak sama dengan sah+tidak sah 143; pengguna_dpt_pr disesuaikan 0 -> 143.
+- Kalibaru / Banyuanyar / TPS 027: surat suara digunakan 0 disesuaikan ke sah+tidak sah 143.
+- Kalibaru / Kajarharjo / TPS 029: suara sah Excel 139 disesuaikan ke jumlah paslon 131.
+- Kalibaru / Kajarharjo / TPS 029: total suara Excel 140 tidak sama dengan paslon+tidak sah 132; suara tidak sah disesuaikan 1 -> 9.
+- Kalibaru / Kajarharjo / TPS 040: pengguna hak pilih 175 tidak sama dengan sah+tidak sah 188; pengguna_dpt_pr disesuaikan 102 -> 115.
+- Kalibaru / Kajarharjo / TPS 040: surat suara digunakan 175 disesuaikan ke sah+tidak sah 188.
+- Kalibaru / Kajarharjo / TPS 040: surat suara sisa 48 disesuaikan ke diterima-digunakan-rusak 35.
+- Kalibaru / Kajarharjo / TPS 044: pengguna hak pilih 193 tidak sama dengan sah+tidak sah 195; pengguna_dpt_pr disesuaikan 103 -> 105.
+- Kalibaru / Kajarharjo / TPS 044: surat suara digunakan 193 disesuaikan ke sah+tidak sah 195.
+- Kalibaru / Kajarharjo / TPS 044: surat suara sisa 77 disesuaikan ke diterima-digunakan-rusak 75.
+- Kalibaru / Kajarharjo / TPS 046: pengguna hak pilih 168 tidak sama dengan sah+tidak sah 165; pengguna_dpt_pr disesuaikan 70 -> 67.
+- Kalibaru / Kajarharjo / TPS 046: surat suara digunakan 168 disesuaikan ke sah+tidak sah 165.
+- Kalibaru / Kajarharjo / TPS 046: surat suara sisa 12 disesuaikan ke diterima-digunakan-rusak 15.
+- Kalibaru / Kalibarukulon / TPS 019: suara sah Excel 176 disesuaikan ke jumlah paslon 186.
+- Kalibaru / Kalibarukulon / TPS 019: total suara Excel 183 tidak sama dengan paslon+tidak sah 193; suara tidak sah disesuaikan 7 -> 0.
+- Kalibaru / Kalibarukulon / TPS 019: pengguna hak pilih 183 tidak sama dengan sah+tidak sah 186; pengguna_dpt_pr disesuaikan 91 -> 94.
+- Kalibaru / Kalibarukulon / TPS 019: surat suara digunakan 183 disesuaikan ke sah+tidak sah 186.
+- Kalibaru / Kalibarukulon / TPS 019: surat suara sisa 41 disesuaikan ke diterima-digunakan-rusak 38.
+- Muncar / Kedungrejo / TPS 076: pengguna hak pilih 0 tidak sama dengan sah+tidak sah 213; pengguna_dpt_pr disesuaikan 0 -> 213.
+- Muncar / Kedungrejo / TPS 076: surat suara digunakan 0 disesuaikan ke sah+tidak sah 213.
+- Muncar / Kedungrejo / TPS 077: pengguna hak pilih 0 tidak sama dengan sah+tidak sah 225; pengguna_dpt_pr disesuaikan 0 -> 225.
+- Muncar / Kedungrejo / TPS 077: surat suara digunakan 0 disesuaikan ke sah+tidak sah 225.
+- Muncar / Tapanrejo / TPS 001: pengguna hak pilih 271 tidak sama dengan sah+tidak sah 189; pengguna_dpt_pr disesuaikan 137 -> 55.
+- Muncar / Tapanrejo / TPS 002: pengguna hak pilih 287 tidak sama dengan sah+tidak sah 199; pengguna_dpt_pr disesuaikan 144 -> 56.
+- Muncar / Tapanrejo / TPS 003: pengguna hak pilih 283 tidak sama dengan sah+tidak sah 206; pengguna_dpt_pr disesuaikan 133 -> 56.
+- Muncar / Tapanrejo / TPS 004: pengguna hak pilih 259 tidak sama dengan sah+tidak sah 210; pengguna_dpt_pr disesuaikan 133 -> 84.
+- Muncar / Tapanrejo / TPS 005: pengguna hak pilih 286 tidak sama dengan sah+tidak sah 212; pengguna_dpt_pr disesuaikan 144 -> 70.
+- Muncar / Tapanrejo / TPS 006: pengguna hak pilih 287 tidak sama dengan sah+tidak sah 225; pengguna_dpt_pr disesuaikan 135 -> 73.
+- Muncar / Tapanrejo / TPS 007: pengguna hak pilih 294 tidak sama dengan sah+tidak sah 227; pengguna_dpt_pr disesuaikan 146 -> 79.
+- Muncar / Tapanrejo / TPS 008: pengguna hak pilih 286 tidak sama dengan sah+tidak sah 229; pengguna_dpt_pr disesuaikan 142 -> 85.
+- Muncar / Tapanrejo / TPS 009: pengguna hak pilih 280 tidak sama dengan sah+tidak sah 195; pengguna_dpt_pr disesuaikan 142 -> 57.
+- Muncar / Tapanrejo / TPS 010: pengguna hak pilih 298 tidak sama dengan sah+tidak sah 238; pengguna_dpt_pr disesuaikan 144 -> 84.
+- Muncar / Tapanrejo / TPS 011: pengguna hak pilih 289 tidak sama dengan sah+tidak sah 225; pengguna_dpt_pr disesuaikan 150 -> 86.
+- Muncar / Tapanrejo / TPS 012: pengguna hak pilih 207 tidak sama dengan sah+tidak sah 162; pengguna_dpt_pr disesuaikan 107 -> 62.
+- Muncar / Tapanrejo / TPS 013: pengguna hak pilih 218 tidak sama dengan sah+tidak sah 182; pengguna_dpt_pr disesuaikan 106 -> 70.
+- Muncar / Tapanrejo / TPS 014: pengguna hak pilih 219 tidak sama dengan sah+tidak sah 174; pengguna_dpt_pr disesuaikan 110 -> 65.
+- Muncar / Tapanrejo / TPS 015: pengguna hak pilih 240 tidak sama dengan sah+tidak sah 195; pengguna_dpt_pr disesuaikan 116 -> 71.
+- Muncar / Wringinputih / TPS 018: pengguna hak pilih 220 tidak sama dengan sah+tidak sah 219; pengguna_dpt_pr disesuaikan 120 -> 119.
+- Muncar / Wringinputih / TPS 019: pengguna hak pilih 205 tidak sama dengan sah+tidak sah 206; pengguna_dpt_pr disesuaikan 101 -> 102.
+- Muncar / Wringinputih / TPS 020: pengguna hak pilih 212 tidak sama dengan sah+tidak sah 211; pengguna_dpt_pr disesuaikan 106 -> 105.
+- Muncar / Wringinputih / TPS 021: pengguna hak pilih 209 tidak sama dengan sah+tidak sah 210; pengguna_dpt_pr disesuaikan 109 -> 110.
+- Pesanggaran / Pesanggaran / TPS 004: pengguna hak pilih 205 tidak sama dengan sah+tidak sah 206; pengguna_dpt_pr disesuaikan 111 -> 112.
+- Pesanggaran / Sumberagung / TPS 005: pengguna hak pilih 230 tidak sama dengan sah+tidak sah 233; pengguna_dpt_pr disesuaikan 115 -> 118.
+- Pesanggaran / Sumbermulyo / TPS 022: pengguna hak pilih 226 tidak sama dengan sah+tidak sah 223; pengguna_dpt_pr disesuaikan 108 -> 105.
+- Pesanggaran / Sumbermulyo / TPS 022: surat suara digunakan 226 disesuaikan ke sah+tidak sah 223.
+- Pesanggaran / Sumbermulyo / TPS 022: surat suara sisa 44 disesuaikan ke diterima-digunakan-rusak 47.
+- Siliragung / Kesilir / TPS 018: pengguna hak pilih 204 tidak sama dengan sah+tidak sah 205; pengguna_dpt_pr disesuaikan 101 -> 102.
+- Siliragung / Kesilir / TPS 019: pengguna hak pilih 204 tidak sama dengan sah+tidak sah 203; pengguna_dpt_pr disesuaikan 91 -> 90.
+- Siliragung / Kesilir / TPS 022: pengguna hak pilih 211 tidak sama dengan sah+tidak sah 212; pengguna_dpt_pr disesuaikan 111 -> 112.
+- Siliragung / Kesilir / TPS 023: pengguna hak pilih 233 tidak sama dengan sah+tidak sah 232; pengguna_dpt_pr disesuaikan 114 -> 113.
+- Siliragung / Kesilir / TPS 024: pengguna hak pilih 189 tidak sama dengan sah+tidak sah 190; pengguna_dpt_pr disesuaikan 90 -> 91.
+- Siliragung / Kesilir / TPS 025: pengguna hak pilih 220 tidak sama dengan sah+tidak sah 219; pengguna_dpt_pr disesuaikan 109 -> 108.
+- Siliragung / Siliragung / TPS 016: pengguna hak pilih 216 tidak sama dengan sah+tidak sah 218; pengguna_dpt_pr disesuaikan 98 -> 100.
+- Siliragung / Siliragung / TPS 017: pengguna hak pilih 234 tidak sama dengan sah+tidak sah 236; pengguna_dpt_pr disesuaikan 120 -> 122.
+- Siliragung / Siliragung / TPS 018: pengguna hak pilih 190 tidak sama dengan sah+tidak sah 188; pengguna_dpt_pr disesuaikan 94 -> 92.
+- Siliragung / Siliragung / TPS 019: pengguna hak pilih 232 tidak sama dengan sah+tidak sah 230; pengguna_dpt_pr disesuaikan 119 -> 117.
+- Singojuruh / Alasmalang / TPS 001: pengguna hak pilih 216 tidak sama dengan sah+tidak sah 213; pengguna_dpt_pr disesuaikan 94 -> 91.
+- Singojuruh / Alasmalang / TPS 001: surat suara digunakan 216 disesuaikan ke sah+tidak sah 213.
+- Singojuruh / Alasmalang / TPS 001: surat suara sisa 32 disesuaikan ke diterima-digunakan-rusak 35.
+- Singojuruh / Alasmalang / TPS 004: pengguna hak pilih 184 tidak sama dengan sah+tidak sah 190; pengguna_dpt_pr disesuaikan 95 -> 101.
+- Singojuruh / Alasmalang / TPS 004: surat suara digunakan 184 disesuaikan ke sah+tidak sah 190.
+- Singojuruh / Alasmalang / TPS 004: surat suara sisa 54 disesuaikan ke diterima-digunakan-rusak 48.
+- Singojuruh / Alasmalang / TPS 007: pengguna hak pilih 137 tidak sama dengan sah+tidak sah 131; pengguna_dpt_pr disesuaikan 74 -> 68.
+- Singojuruh / Alasmalang / TPS 007: surat suara digunakan 137 disesuaikan ke sah+tidak sah 131.
+- Singojuruh / Alasmalang / TPS 007: surat suara sisa 48 disesuaikan ke diterima-digunakan-rusak 54.
+- Singojuruh / Alasmalang / TPS 012: pengguna hak pilih 172 tidak sama dengan sah+tidak sah 182; pengguna_dpt_pr disesuaikan 86 -> 96.
+- Singojuruh / Alasmalang / TPS 012: surat suara digunakan 172 disesuaikan ke sah+tidak sah 182.
+- Singojuruh / Alasmalang / TPS 012: surat suara sisa 36 disesuaikan ke diterima-digunakan-rusak 26.
+- Singojuruh / Alasmalang / TPS 013: pengguna hak pilih 181 tidak sama dengan sah+tidak sah 183; pengguna_dpt_pr disesuaikan 96 -> 98.
+- Singojuruh / Alasmalang / TPS 013: surat suara digunakan 181 disesuaikan ke sah+tidak sah 183.
+- Singojuruh / Alasmalang / TPS 013: surat suara sisa 73 disesuaikan ke diterima-digunakan-rusak 71.
+- Singojuruh / Alasmalang / TPS 015: pengguna hak pilih 180 tidak sama dengan sah+tidak sah 173; pengguna_dpt_pr disesuaikan 95 -> 88.
+- Singojuruh / Alasmalang / TPS 015: surat suara digunakan 180 disesuaikan ke sah+tidak sah 173.
+- Singojuruh / Alasmalang / TPS 015: surat suara sisa 32 disesuaikan ke diterima-digunakan-rusak 39.
+- Singojuruh / Alasmalang / TPS 016: pengguna hak pilih 189 tidak sama dengan sah+tidak sah 185; pengguna_dpt_pr disesuaikan 102 -> 98.
+- Singojuruh / Alasmalang / TPS 016: surat suara digunakan 189 disesuaikan ke sah+tidak sah 185.
+- Singojuruh / Alasmalang / TPS 016: surat suara sisa 14 disesuaikan ke diterima-digunakan-rusak 18.
+- Singojuruh / Alasmalang / TPS 017: pengguna hak pilih 212 tidak sama dengan sah+tidak sah 207; pengguna_dpt_pr disesuaikan 104 -> 99.
+- Singojuruh / Alasmalang / TPS 017: surat suara digunakan 212 disesuaikan ke sah+tidak sah 207.
+- Singojuruh / Alasmalang / TPS 017: surat suara sisa 21 disesuaikan ke diterima-digunakan-rusak 26.
+- Singojuruh / Benelan Kidul / TPS 005: pengguna hak pilih 219 tidak sama dengan sah+tidak sah 218; pengguna_dpt_pr disesuaikan 106 -> 105.
+- Singojuruh / Benelan Kidul / TPS 005: surat suara digunakan 219 disesuaikan ke sah+tidak sah 218.
+- Singojuruh / Benelan Kidul / TPS 005: surat suara sisa 40 disesuaikan ke diterima-digunakan-rusak 41.
+- Singojuruh / Benelan Kidul / TPS 009: pengguna hak pilih 186 tidak sama dengan sah+tidak sah 176; pengguna_dpt_pr disesuaikan 93 -> 83.
+- Singojuruh / Benelan Kidul / TPS 009: surat suara digunakan 186 disesuaikan ke sah+tidak sah 176.
+- Singojuruh / Benelan Kidul / TPS 009: surat suara sisa 48 disesuaikan ke diterima-digunakan-rusak 58.
+- Singojuruh / Benelan Kidul / TPS 011: pengguna hak pilih 206 tidak sama dengan sah+tidak sah 205; pengguna_dpt_pr disesuaikan 108 -> 107.
+- Singojuruh / Benelan Kidul / TPS 011: surat suara digunakan 206 disesuaikan ke sah+tidak sah 205.
+- Singojuruh / Benelan Kidul / TPS 011: surat suara sisa 53 disesuaikan ke diterima-digunakan-rusak 54.
+- Singojuruh / Benelan Kidul / TPS 013: pengguna hak pilih 204 tidak sama dengan sah+tidak sah 193; pengguna_dpt_pr disesuaikan 107 -> 96.
+- Singojuruh / Benelan Kidul / TPS 013: surat suara digunakan 204 disesuaikan ke sah+tidak sah 193.
+- Singojuruh / Benelan Kidul / TPS 013: surat suara sisa 41 disesuaikan ke diterima-digunakan-rusak 52.
+- Singojuruh / Benelan Kidul / TPS 014: pengguna hak pilih 194 tidak sama dengan sah+tidak sah 193; pengguna_dpt_pr disesuaikan 98 -> 97.
+- Singojuruh / Benelan Kidul / TPS 014: surat suara digunakan 194 disesuaikan ke sah+tidak sah 193.
+- Singojuruh / Benelan Kidul / TPS 014: surat suara sisa 42 disesuaikan ke diterima-digunakan-rusak 43.
+- Singojuruh / Cantuk / TPS 002: pengguna hak pilih 201 tidak sama dengan sah+tidak sah 208; pengguna_dpt_pr disesuaikan 102 -> 109.
+- Singojuruh / Cantuk / TPS 002: surat suara digunakan 201 disesuaikan ke sah+tidak sah 208.
+- Singojuruh / Cantuk / TPS 002: surat suara sisa 53 disesuaikan ke diterima-digunakan-rusak 46.
+- Singojuruh / Cantuk / TPS 010: pengguna hak pilih 199 tidak sama dengan sah+tidak sah 198; pengguna_dpt_pr disesuaikan 109 -> 108.
+- Singojuruh / Cantuk / TPS 010: surat suara digunakan 199 disesuaikan ke sah+tidak sah 198.
+- Singojuruh / Cantuk / TPS 010: surat suara sisa 81 disesuaikan ke diterima-digunakan-rusak 82.
+- Singojuruh / Cantuk / TPS 011: pengguna hak pilih 158 tidak sama dengan sah+tidak sah 188; pengguna_dpt_pr disesuaikan 69 -> 99.
+- Singojuruh / Cantuk / TPS 011: surat suara digunakan 158 disesuaikan ke sah+tidak sah 188.
+- Singojuruh / Cantuk / TPS 011: surat suara sisa 44 disesuaikan ke diterima-digunakan-rusak 14.
+- Singojuruh / Cantuk / TPS 012: pengguna hak pilih 157 tidak sama dengan sah+tidak sah 167; pengguna_dpt_pr disesuaikan 84 -> 94.
+- Singojuruh / Cantuk / TPS 012: surat suara digunakan 137 disesuaikan ke sah+tidak sah 167.
+- Singojuruh / Cantuk / TPS 012: surat suara sisa 70 disesuaikan ke diterima-digunakan-rusak 40.
+- Singojuruh / Cantuk / TPS 013: pengguna hak pilih 197 tidak sama dengan sah+tidak sah 202; pengguna_dpt_pr disesuaikan 103 -> 108.
+- Singojuruh / Cantuk / TPS 015: pengguna hak pilih 206 tidak sama dengan sah+tidak sah 207; pengguna_dpt_pr disesuaikan 98 -> 99.
+- Singojuruh / Cantuk / TPS 015: surat suara digunakan 206 disesuaikan ke sah+tidak sah 207.
+- Singojuruh / Cantuk / TPS 015: surat suara sisa 32 disesuaikan ke diterima-digunakan-rusak 31.
+- Singojuruh / Gambor / TPS 005: pengguna hak pilih 199 tidak sama dengan sah+tidak sah 201; pengguna_dpt_pr disesuaikan 102 -> 104.
+- Singojuruh / Gambor / TPS 005: surat suara digunakan 199 disesuaikan ke sah+tidak sah 201.
+- Singojuruh / Gambor / TPS 005: surat suara sisa 37 disesuaikan ke diterima-digunakan-rusak 35.
+- Singojuruh / Gambor / TPS 009: pengguna hak pilih 198 tidak sama dengan sah+tidak sah 188; pengguna_dpt_pr disesuaikan 100 -> 90.
+- Singojuruh / Gambor / TPS 009: surat suara digunakan 198 disesuaikan ke sah+tidak sah 188.
+- Singojuruh / Gambor / TPS 009: surat suara sisa 31 disesuaikan ke diterima-digunakan-rusak 41.
+- Singojuruh / Gumirih / TPS 004: pengguna hak pilih 193 tidak sama dengan sah+tidak sah 191; pengguna_dpt_pr disesuaikan 100 -> 98.
+- Singojuruh / Gumirih / TPS 004: surat suara digunakan 193 disesuaikan ke sah+tidak sah 191.
+- Singojuruh / Gumirih / TPS 004: surat suara sisa 71 disesuaikan ke diterima-digunakan-rusak 73.
+- Singojuruh / Gumirih / TPS 005: pengguna hak pilih 204 tidak sama dengan sah+tidak sah 184; pengguna_dpt_pr disesuaikan 108 -> 88.
+- Singojuruh / Gumirih / TPS 005: surat suara digunakan 204 disesuaikan ke sah+tidak sah 184.
+- Singojuruh / Gumirih / TPS 005: surat suara sisa 65 disesuaikan ke diterima-digunakan-rusak 85.
+- Singojuruh / Gumirih / TPS 010: pengguna hak pilih 217 tidak sama dengan sah+tidak sah 218; pengguna_dpt_pr disesuaikan 111 -> 112.
+- Singojuruh / Gumirih / TPS 010: surat suara digunakan 217 disesuaikan ke sah+tidak sah 218.
+- Singojuruh / Gumirih / TPS 010: surat suara sisa 52 disesuaikan ke diterima-digunakan-rusak 51.
+- Singojuruh / Gumirih / TPS 014: pengguna hak pilih 139 tidak sama dengan sah+tidak sah 134; pengguna_dpt_pr disesuaikan 65 -> 60.
+- Singojuruh / Gumirih / TPS 014: surat suara digunakan 109 disesuaikan ke sah+tidak sah 134.
+- Singojuruh / Gumirih / TPS 014: surat suara sisa 80 disesuaikan ke diterima-digunakan-rusak 55.
+- Singojuruh / Kemiri / TPS 003: pengguna hak pilih 170 tidak sama dengan sah+tidak sah 173; pengguna_dpt_pr disesuaikan 88 -> 91.
+- Singojuruh / Kemiri / TPS 003: surat suara digunakan 170 disesuaikan ke sah+tidak sah 173.
+- Singojuruh / Kemiri / TPS 003: surat suara sisa 49 disesuaikan ke diterima-digunakan-rusak 46.
+- Singojuruh / Kemiri / TPS 004: pengguna hak pilih 122 tidak sama dengan sah+tidak sah 132; pengguna_dpt_pr disesuaikan 63 -> 73.
+- Singojuruh / Kemiri / TPS 004: surat suara digunakan 122 disesuaikan ke sah+tidak sah 132.
+- Singojuruh / Kemiri / TPS 004: surat suara sisa 61 disesuaikan ke diterima-digunakan-rusak 51.
+- Singojuruh / Kemiri / TPS 005: pengguna hak pilih 158 tidak sama dengan sah+tidak sah 159; pengguna_dpt_pr disesuaikan 88 -> 89.
+- Singojuruh / Kemiri / TPS 005: surat suara digunakan 158 disesuaikan ke sah+tidak sah 159.
+- Singojuruh / Kemiri / TPS 005: surat suara sisa 54 disesuaikan ke diterima-digunakan-rusak 53.
+- Singojuruh / Kemiri / TPS 006: surat suara sisa -7 disesuaikan ke diterima-digunakan-rusak 0.
+- Singojuruh / Kemiri / TPS 007: pengguna hak pilih 172 tidak sama dengan sah+tidak sah 174; pengguna_dpt_pr disesuaikan 83 -> 85.
+- Singojuruh / Kemiri / TPS 007: surat suara digunakan 172 disesuaikan ke sah+tidak sah 174.
+- Singojuruh / Kemiri / TPS 007: surat suara sisa 51 disesuaikan ke diterima-digunakan-rusak 49.
+- Singojuruh / Kemiri / TPS 008: pengguna hak pilih 214 tidak sama dengan sah+tidak sah 194; pengguna_dpt_pr disesuaikan 106 -> 86.
+- Singojuruh / Kemiri / TPS 008: surat suara digunakan 214 disesuaikan ke sah+tidak sah 194.
+- Singojuruh / Kemiri / TPS 008: surat suara sisa 64 disesuaikan ke diterima-digunakan-rusak 84.
+- Singojuruh / Kemiri / TPS 009: pengguna hak pilih 199 tidak sama dengan sah+tidak sah 186; pengguna_dpt_pr disesuaikan 110 -> 97.
+- Singojuruh / Kemiri / TPS 009: surat suara digunakan 199 disesuaikan ke sah+tidak sah 186.
+- Singojuruh / Kemiri / TPS 009: surat suara sisa 78 disesuaikan ke diterima-digunakan-rusak 91.
+- Singojuruh / Kemiri / TPS 010: pengguna hak pilih 199 tidak sama dengan sah+tidak sah 201; pengguna_dpt_pr disesuaikan 109 -> 111.
+- Singojuruh / Kemiri / TPS 014: surat suara digunakan 154 disesuaikan ke sah+tidak sah 184.
+- Singojuruh / Kemiri / TPS 014: surat suara sisa 84 disesuaikan ke diterima-digunakan-rusak 54.
+- Singojuruh / Kemiri / TPS 015: pengguna hak pilih 209 tidak sama dengan sah+tidak sah 180; pengguna_dpt_pr disesuaikan 108 -> 79.
+- Singojuruh / Kemiri / TPS 015: surat suara digunakan 208 disesuaikan ke sah+tidak sah 180.
+- Singojuruh / Kemiri / TPS 015: surat suara sisa 42 disesuaikan ke diterima-digunakan-rusak 70.
+- Singojuruh / Kemiri / TPS 016: pengguna hak pilih 169 tidak sama dengan sah+tidak sah 179; pengguna_dpt_pr disesuaikan 95 -> 105.
+- Singojuruh / Kemiri / TPS 016: surat suara digunakan 189 disesuaikan ke sah+tidak sah 179.
+- Singojuruh / Kemiri / TPS 016: surat suara sisa 48 disesuaikan ke diterima-digunakan-rusak 58.
+- Singojuruh / Lemahbangkulon / TPS 001: pengguna hak pilih 186 tidak sama dengan sah+tidak sah 185; pengguna_dpt_pr disesuaikan 101 -> 100.
+- Singojuruh / Lemahbangkulon / TPS 001: surat suara digunakan 186 disesuaikan ke sah+tidak sah 185.
+- Singojuruh / Lemahbangkulon / TPS 001: surat suara sisa 66 disesuaikan ke diterima-digunakan-rusak 67.
+- Singojuruh / Lemahbangkulon / TPS 003: pengguna hak pilih 193 tidak sama dengan sah+tidak sah 189; pengguna_dpt_pr disesuaikan 101 -> 97.
+- Singojuruh / Lemahbangkulon / TPS 003: surat suara digunakan 193 disesuaikan ke sah+tidak sah 189.
+- Singojuruh / Lemahbangkulon / TPS 003: surat suara sisa 73 disesuaikan ke diterima-digunakan-rusak 77.
+- Singojuruh / Lemahbangkulon / TPS 005: pengguna hak pilih 203 tidak sama dengan sah+tidak sah 168; pengguna_dpt_pr disesuaikan 110 -> 75.
+- Singojuruh / Lemahbangkulon / TPS 005: surat suara digunakan 203 disesuaikan ke sah+tidak sah 168.
+- Singojuruh / Lemahbangkulon / TPS 005: surat suara sisa 63 disesuaikan ke diterima-digunakan-rusak 98.
+- Singojuruh / Lemahbangkulon / TPS 007: pengguna hak pilih 230 tidak sama dengan sah+tidak sah 226; pengguna_dpt_pr disesuaikan 124 -> 120.
+- Singojuruh / Lemahbangkulon / TPS 007: surat suara digunakan 230 disesuaikan ke sah+tidak sah 226.
+- Singojuruh / Lemahbangkulon / TPS 007: surat suara sisa 35 disesuaikan ke diterima-digunakan-rusak 39.
+- Singojuruh / Lemahbangkulon / TPS 008: pengguna hak pilih 214 tidak sama dengan sah+tidak sah 154; pengguna_dpt_pr disesuaikan 105 -> 45.
+- Singojuruh / Lemahbangkulon / TPS 008: surat suara digunakan 214 disesuaikan ke sah+tidak sah 154.
+- Singojuruh / Lemahbangkulon / TPS 008: surat suara sisa 69 disesuaikan ke diterima-digunakan-rusak 129.
+- Singojuruh / Lemahbangkulon / TPS 011: pengguna hak pilih 144 tidak sama dengan sah+tidak sah 143; pengguna_dpt_pr disesuaikan 80 -> 79.
+- Singojuruh / Lemahbangkulon / TPS 011: surat suara digunakan 144 disesuaikan ke sah+tidak sah 143.
+- Singojuruh / Lemahbangkulon / TPS 011: surat suara sisa 40 disesuaikan ke diterima-digunakan-rusak 41.
+- Singojuruh / Padang / TPS 002: pengguna hak pilih 225 tidak sama dengan sah+tidak sah 226; pengguna_dpt_pr disesuaikan 115 -> 116.
+- Singojuruh / Padang / TPS 002: surat suara digunakan 225 disesuaikan ke sah+tidak sah 226.
+- Singojuruh / Padang / TPS 002: surat suara sisa 38 disesuaikan ke diterima-digunakan-rusak 37.
+- Singojuruh / Padang / TPS 004: pengguna hak pilih 213 tidak sama dengan sah+tidak sah 211; pengguna_dpt_pr disesuaikan 109 -> 107.
+- Singojuruh / Padang / TPS 004: surat suara digunakan 213 disesuaikan ke sah+tidak sah 211.
+- Singojuruh / Padang / TPS 004: surat suara sisa 61 disesuaikan ke diterima-digunakan-rusak 63.
+- Singojuruh / Padang / TPS 005: pengguna hak pilih 210 tidak sama dengan sah+tidak sah 218; pengguna_dpt_pr disesuaikan 113 -> 121.
+- Singojuruh / Padang / TPS 005: surat suara digunakan 210 disesuaikan ke sah+tidak sah 218.
+- Singojuruh / Padang / TPS 005: surat suara sisa 27 disesuaikan ke diterima-digunakan-rusak 19.
+- Singojuruh / Padang / TPS 006: pengguna hak pilih 229 tidak sama dengan sah+tidak sah 219; pengguna_dpt_pr disesuaikan 120 -> 110.
+- Singojuruh / Padang / TPS 006: surat suara digunakan 229 disesuaikan ke sah+tidak sah 219.
+- Singojuruh / Padang / TPS 006: surat suara sisa 34 disesuaikan ke diterima-digunakan-rusak 44.
+- Singojuruh / Padang / TPS 008: pengguna hak pilih 234 tidak sama dengan sah+tidak sah 239; pengguna_dpt_pr disesuaikan 119 -> 124.
+- Singojuruh / Padang / TPS 008: surat suara digunakan 234 disesuaikan ke sah+tidak sah 239.
+- Singojuruh / Padang / TPS 008: surat suara sisa 31 disesuaikan ke diterima-digunakan-rusak 26.
+- Singojuruh / Padang / TPS 011: surat suara digunakan 203 disesuaikan ke sah+tidak sah 202.
+- Singojuruh / Padang / TPS 011: surat suara sisa 66 disesuaikan ke diterima-digunakan-rusak 67.
+- Singojuruh / Padang / TPS 012: pengguna hak pilih 192 tidak sama dengan sah+tidak sah 191; pengguna_dpt_pr disesuaikan 97 -> 96.
+- Singojuruh / Singojuruh / TPS 001: pengguna hak pilih 176 tidak sama dengan sah+tidak sah 177; pengguna_dpt_pr disesuaikan 100 -> 101.
+- Singojuruh / Singojuruh / TPS 001: surat suara digunakan 176 disesuaikan ke sah+tidak sah 177.
+- Singojuruh / Singojuruh / TPS 001: surat suara sisa 66 disesuaikan ke diterima-digunakan-rusak 65.
+- Singojuruh / Singojuruh / TPS 003: pengguna hak pilih 144 tidak sama dengan sah+tidak sah 164; pengguna_dpt_pr disesuaikan 83 -> 103.
+- Singojuruh / Singojuruh / TPS 003: surat suara digunakan 144 disesuaikan ke sah+tidak sah 164.
+- Singojuruh / Singojuruh / TPS 003: surat suara sisa 47 disesuaikan ke diterima-digunakan-rusak 27.
+- Singojuruh / Singojuruh / TPS 004: pengguna hak pilih 204 tidak sama dengan sah+tidak sah 214; pengguna_dpt_pr disesuaikan 106 -> 116.
+- Singojuruh / Singojuruh / TPS 004: surat suara digunakan 204 disesuaikan ke sah+tidak sah 214.
+- Singojuruh / Singojuruh / TPS 004: surat suara sisa 31 disesuaikan ke diterima-digunakan-rusak 21.
+- Singojuruh / Singojuruh / TPS 006: pengguna hak pilih 178 tidak sama dengan sah+tidak sah 147; pengguna_dpt_pr disesuaikan 92 -> 61.
+- Singojuruh / Singojuruh / TPS 006: surat suara digunakan 178 disesuaikan ke sah+tidak sah 147.
+- Singojuruh / Singojuruh / TPS 006: surat suara sisa 59 disesuaikan ke diterima-digunakan-rusak 90.
+- Singojuruh / Singojuruh / TPS 007: pengguna hak pilih 195 tidak sama dengan sah+tidak sah 194; pengguna_dpt_pr disesuaikan 104 -> 103.
+- Singojuruh / Singojuruh / TPS 007: surat suara digunakan 195 disesuaikan ke sah+tidak sah 194.
+- Singojuruh / Singojuruh / TPS 007: surat suara sisa 72 disesuaikan ke diterima-digunakan-rusak 73.
+- Singojuruh / Singojuruh / TPS 008: pengguna hak pilih 239 tidak sama dengan sah+tidak sah 249; pengguna_dpt_pr disesuaikan 96 -> 106.
+- Singojuruh / Singojuruh / TPS 008: surat suara digunakan 239 disesuaikan ke sah+tidak sah 249.
+- Singojuruh / Singojuruh / TPS 008: surat suara sisa 24 disesuaikan ke diterima-digunakan-rusak 14.
+- Singojuruh / Singojuruh / TPS 011: pengguna hak pilih 240 tidak sama dengan sah+tidak sah 237; pengguna_dpt_pr disesuaikan 124 -> 121.
+- Singojuruh / Singojuruh / TPS 011: surat suara digunakan 240 disesuaikan ke sah+tidak sah 237.
+- Singojuruh / Singojuruh / TPS 011: surat suara sisa 48 disesuaikan ke diterima-digunakan-rusak 51.
+- Singojuruh / Singojuruh / TPS 012: pengguna hak pilih 214 tidak sama dengan sah+tidak sah 175; pengguna_dpt_pr disesuaikan 118 -> 79.
+- Singojuruh / Singojuruh / TPS 012: surat suara digunakan 214 disesuaikan ke sah+tidak sah 175.
+- Singojuruh / Singojuruh / TPS 012: surat suara sisa 34 disesuaikan ke diterima-digunakan-rusak 73.
+- Singojuruh / Singojuruh / TPS 013: pengguna hak pilih 197 tidak sama dengan sah+tidak sah 196; pengguna_dpt_pr disesuaikan 106 -> 105.
+- Singojuruh / Singojuruh / TPS 013: surat suara digunakan 197 disesuaikan ke sah+tidak sah 196.
+- Singojuruh / Singojuruh / TPS 013: surat suara sisa 68 disesuaikan ke diterima-digunakan-rusak 69.
+- Singojuruh / Singojuruh / TPS 014: pengguna hak pilih 220 tidak sama dengan sah+tidak sah 221; pengguna_dpt_pr disesuaikan 117 -> 118.
+- Singojuruh / Singojuruh / TPS 014: surat suara digunakan 220 disesuaikan ke sah+tidak sah 221.
+- Singojuruh / Singojuruh / TPS 014: surat suara sisa 51 disesuaikan ke diterima-digunakan-rusak 50.
+- Singojuruh / Singojuruh / TPS 015: pengguna hak pilih 196 tidak sama dengan sah+tidak sah 198; pengguna_dpt_pr disesuaikan 100 -> 102.
+- Singojuruh / Singojuruh / TPS 015: surat suara digunakan 196 disesuaikan ke sah+tidak sah 198.
+- Singojuruh / Singojuruh / TPS 015: surat suara sisa 67 disesuaikan ke diterima-digunakan-rusak 65.
+- Singojuruh / Singojuruh / TPS 019: pengguna hak pilih 197 tidak sama dengan sah+tidak sah 201; pengguna_dpt_pr disesuaikan 94 -> 98.
+- Singojuruh / Singojuruh / TPS 019: surat suara digunakan 197 disesuaikan ke sah+tidak sah 201.
+- Singojuruh / Singojuruh / TPS 019: surat suara sisa 70 disesuaikan ke diterima-digunakan-rusak 66.
+- Singojuruh / Singojuruh / TPS 021: pengguna hak pilih 194 tidak sama dengan sah+tidak sah 195; pengguna_dpt_pr disesuaikan 100 -> 101.
+- Singojuruh / Singojuruh / TPS 021: surat suara digunakan 194 disesuaikan ke sah+tidak sah 195.
+- Singojuruh / Singojuruh / TPS 021: surat suara sisa 69 disesuaikan ke diterima-digunakan-rusak 68.
+- Singojuruh / Singojuruh / TPS 023: pengguna hak pilih 197 tidak sama dengan sah+tidak sah 199; pengguna_dpt_pr disesuaikan 101 -> 103.
+- Singojuruh / Singojuruh / TPS 023: surat suara digunakan 197 disesuaikan ke sah+tidak sah 199.
+- Singojuruh / Singojuruh / TPS 023: surat suara sisa 50 disesuaikan ke diterima-digunakan-rusak 48.
+- Singojuruh / Singolatren / TPS 001: pengguna hak pilih 200 tidak sama dengan sah+tidak sah 205; pengguna_dpt_pr disesuaikan 100 -> 105.
+- Singojuruh / Singolatren / TPS 002: surat suara digunakan 197 disesuaikan ke sah+tidak sah 187.
+- Singojuruh / Singolatren / TPS 002: surat suara sisa 50 disesuaikan ke diterima-digunakan-rusak 60.
+- Singojuruh / Singolatren / TPS 004: pengguna hak pilih 219 tidak sama dengan sah+tidak sah 214; pengguna_dpt_pr disesuaikan 115 -> 110.
+- Singojuruh / Singolatren / TPS 004: surat suara digunakan 219 disesuaikan ke sah+tidak sah 214.
+- Singojuruh / Singolatren / TPS 004: surat suara sisa 25 disesuaikan ke diterima-digunakan-rusak 30.
+- Singojuruh / Singolatren / TPS 006: pengguna hak pilih 200 tidak sama dengan sah+tidak sah 209; pengguna_dpt_pr disesuaikan 105 -> 114.
+- Singojuruh / Singolatren / TPS 006: surat suara digunakan 200 disesuaikan ke sah+tidak sah 209.
+- Singojuruh / Singolatren / TPS 006: surat suara sisa 47 disesuaikan ke diterima-digunakan-rusak 38.
+- Singojuruh / Singolatren / TPS 008: pengguna hak pilih 208 tidak sama dengan sah+tidak sah 209; pengguna_dpt_pr disesuaikan 110 -> 111.
+- Singojuruh / Singolatren / TPS 008: surat suara digunakan 208 disesuaikan ke sah+tidak sah 209.
+- Singojuruh / Singolatren / TPS 008: surat suara sisa 60 disesuaikan ke diterima-digunakan-rusak 59.
+- Singojuruh / Singolatren / TPS 009: pengguna hak pilih 198 tidak sama dengan sah+tidak sah 186; pengguna_dpt_pr disesuaikan 103 -> 91.
+- Singojuruh / Singolatren / TPS 009: surat suara digunakan 198 disesuaikan ke sah+tidak sah 186.
+- Singojuruh / Singolatren / TPS 009: surat suara sisa 63 disesuaikan ke diterima-digunakan-rusak 75.
+- Singojuruh / Singolatren / TPS 010: pengguna hak pilih 196 tidak sama dengan sah+tidak sah 194; pengguna_dpt_pr disesuaikan 100 -> 98.
+- Singojuruh / Singolatren / TPS 010: surat suara digunakan 190 disesuaikan ke sah+tidak sah 194.
+- Singojuruh / Singolatren / TPS 010: surat suara sisa 36 disesuaikan ke diterima-digunakan-rusak 32.
+- Singojuruh / Singolatren / TPS 011: pengguna hak pilih 202 tidak sama dengan sah+tidak sah 209; pengguna_dpt_pr disesuaikan 106 -> 113.
+- Singojuruh / Singolatren / TPS 011: surat suara digunakan 202 disesuaikan ke sah+tidak sah 209.
+- Singojuruh / Singolatren / TPS 011: surat suara sisa 35 disesuaikan ke diterima-digunakan-rusak 28.
+- Singojuruh / Singolatren / TPS 013: pengguna hak pilih 207 tidak sama dengan sah+tidak sah 205; pengguna_dpt_pr disesuaikan 111 -> 109.
+- Singojuruh / Singolatren / TPS 013: surat suara digunakan 207 disesuaikan ke sah+tidak sah 205.
+- Singojuruh / Singolatren / TPS 013: surat suara sisa 31 disesuaikan ke diterima-digunakan-rusak 33.
+- Singojuruh / Singolatren / TPS 014: pengguna hak pilih 195 tidak sama dengan sah+tidak sah 205; pengguna_dpt_pr disesuaikan 105 -> 115.
+- Singojuruh / Singolatren / TPS 014: surat suara digunakan 195 disesuaikan ke sah+tidak sah 205.
+- Singojuruh / Singolatren / TPS 014: surat suara sisa 60 disesuaikan ke diterima-digunakan-rusak 50.
+- Singojuruh / Singolatren / TPS 015: surat suara digunakan 113 disesuaikan ke sah+tidak sah 112.
+- Singojuruh / Singolatren / TPS 015: surat suara sisa 73 disesuaikan ke diterima-digunakan-rusak 74.
+- Singojuruh / Sumberbaru / TPS 001: pengguna hak pilih 144 tidak sama dengan sah+tidak sah 145; pengguna_dpt_pr disesuaikan 69 -> 70.
+- Singojuruh / Sumberbaru / TPS 001: surat suara digunakan 144 disesuaikan ke sah+tidak sah 145.
+- Singojuruh / Sumberbaru / TPS 001: surat suara sisa 44 disesuaikan ke diterima-digunakan-rusak 43.
+- Singojuruh / Sumberbaru / TPS 002: pengguna hak pilih 154 tidak sama dengan sah+tidak sah 142; pengguna_dpt_pr disesuaikan 75 -> 63.
+- Singojuruh / Sumberbaru / TPS 002: surat suara digunakan 154 disesuaikan ke sah+tidak sah 142.
+- Singojuruh / Sumberbaru / TPS 002: surat suara sisa 50 disesuaikan ke diterima-digunakan-rusak 62.
+- Singojuruh / Sumberbaru / TPS 004: pengguna hak pilih 214 tidak sama dengan sah+tidak sah 206; pengguna_dpt_pr disesuaikan 105 -> 97.
+- Singojuruh / Sumberbaru / TPS 004: surat suara digunakan 214 disesuaikan ke sah+tidak sah 206.
+- Singojuruh / Sumberbaru / TPS 004: surat suara sisa 69 disesuaikan ke diterima-digunakan-rusak 77.
+- Singojuruh / Sumberbaru / TPS 005: pengguna hak pilih 224 tidak sama dengan sah+tidak sah 196; pengguna_dpt_pr disesuaikan 119 -> 91.
+- Singojuruh / Sumberbaru / TPS 005: surat suara digunakan 224 disesuaikan ke sah+tidak sah 196.
+- Singojuruh / Sumberbaru / TPS 005: surat suara sisa 46 disesuaikan ke diterima-digunakan-rusak 74.
+- Singojuruh / Sumberbaru / TPS 006: pengguna hak pilih 196 tidak sama dengan sah+tidak sah 206; pengguna_dpt_pr disesuaikan 101 -> 111.
+- Singojuruh / Sumberbaru / TPS 006: surat suara digunakan 195 disesuaikan ke sah+tidak sah 206.
+- Singojuruh / Sumberbaru / TPS 006: surat suara sisa 29 disesuaikan ke diterima-digunakan-rusak 18.
+- Singojuruh / Sumberbaru / TPS 007: pengguna hak pilih 225 tidak sama dengan sah+tidak sah 216; pengguna_dpt_pr disesuaikan 113 -> 104.
+- Singojuruh / Sumberbaru / TPS 007: surat suara digunakan 225 disesuaikan ke sah+tidak sah 216.
+- Singojuruh / Sumberbaru / TPS 007: surat suara sisa 44 disesuaikan ke diterima-digunakan-rusak 53.
+- Singojuruh / Sumberbaru / TPS 008: pengguna hak pilih 221 tidak sama dengan sah+tidak sah 192; pengguna_dpt_pr disesuaikan 115 -> 86.
+- Singojuruh / Sumberbaru / TPS 008: surat suara digunakan 220 disesuaikan ke sah+tidak sah 192.
+- Singojuruh / Sumberbaru / TPS 008: surat suara sisa 47 disesuaikan ke diterima-digunakan-rusak 75.
+- Singojuruh / Sumberbaru / TPS 009: pengguna hak pilih 192 tidak sama dengan sah+tidak sah 190; pengguna_dpt_pr disesuaikan 106 -> 104.
+- Singojuruh / Sumberbaru / TPS 009: surat suara digunakan 192 disesuaikan ke sah+tidak sah 190.
+- Singojuruh / Sumberbaru / TPS 009: surat suara sisa 71 disesuaikan ke diterima-digunakan-rusak 73.
+- Singojuruh / Sumberbaru / TPS 010: pengguna hak pilih 202 tidak sama dengan sah+tidak sah 196; pengguna_dpt_pr disesuaikan 99 -> 93.
+- Singojuruh / Sumberbaru / TPS 010: surat suara digunakan 202 disesuaikan ke sah+tidak sah 196.
+- Singojuruh / Sumberbaru / TPS 010: surat suara sisa 56 disesuaikan ke diterima-digunakan-rusak 62.
+- Singojuruh / Sumberbaru / TPS 011: pengguna hak pilih 206 tidak sama dengan sah+tidak sah 207; pengguna_dpt_pr disesuaikan 102 -> 103.
+- Singojuruh / Sumberbaru / TPS 011: surat suara digunakan 205 disesuaikan ke sah+tidak sah 207.
+- Singojuruh / Sumberbaru / TPS 011: surat suara sisa 44 disesuaikan ke diterima-digunakan-rusak 42.
+- Singojuruh / Sumberbaru / TPS 013: surat suara digunakan 196 disesuaikan ke sah+tidak sah 186.
+- Singojuruh / Sumberbaru / TPS 013: surat suara sisa 57 disesuaikan ke diterima-digunakan-rusak 67.
+- Songgon / Bedewang / TPS 016: suara sah Excel 227 disesuaikan ke jumlah paslon 217.
+- Songgon / Bedewang / TPS 016: total suara Excel 227 tidak sama dengan paslon+tidak sah 217; suara tidak sah disesuaikan 0 -> 10.
+- Srono / Bagorejo / TPS 026: total pengguna Excel 224 tidak sama dengan rincian 225; rincian dipakai.
+- Srono / Bagorejo / TPS 026: pengguna hak pilih 225 tidak sama dengan sah+tidak sah 224; pengguna_dpt_pr disesuaikan 122 -> 121.
+- Srono / Bagorejo / TPS 027: total pengguna Excel 236 tidak sama dengan rincian 235; rincian dipakai.
+- Srono / Bagorejo / TPS 027: pengguna hak pilih 235 tidak sama dengan sah+tidak sah 236; pengguna_dpt_pr disesuaikan 126 -> 127.
+- Srono / Wonosobo / TPS 010: total pengguna Excel 190 tidak sama dengan rincian 189; rincian dipakai.
+- Srono / Wonosobo / TPS 010: pengguna hak pilih 189 tidak sama dengan sah+tidak sah 190; pengguna_dpt_pr disesuaikan 101 -> 102.
+- Srono / Wonosobo / TPS 019: total pengguna Excel 183 tidak sama dengan rincian 184; rincian dipakai.
+- Srono / Wonosobo / TPS 019: pengguna hak pilih 184 tidak sama dengan sah+tidak sah 183; pengguna_dpt_pr disesuaikan 86 -> 85.
+- Srono / Wonosobo / TPS 026: total pengguna Excel 197 tidak sama dengan rincian 198; rincian dipakai.
+- Srono / Wonosobo / TPS 026: pengguna hak pilih 198 tidak sama dengan sah+tidak sah 197; pengguna_dpt_pr disesuaikan 101 -> 100.
+- Srono / Wonosobo / TPS 028: total pengguna Excel 216 tidak sama dengan rincian 214; rincian dipakai.
+- Srono / Wonosobo / TPS 028: pengguna hak pilih 214 tidak sama dengan sah+tidak sah 216; pengguna_dpt_pr disesuaikan 105 -> 107.
+- Srono / Wonosobo / TPS 029: total pengguna Excel 201 tidak sama dengan rincian 202; rincian dipakai.
+- Srono / Wonosobo / TPS 029: pengguna hak pilih 202 tidak sama dengan sah+tidak sah 201; pengguna_dpt_pr disesuaikan 102 -> 101.
+- Srono / Kebaman / TPS 024: total pengguna Excel 202 tidak sama dengan rincian 204; rincian dipakai.
+- Srono / Kebaman / TPS 024: pengguna hak pilih 204 tidak sama dengan sah+tidak sah 202; pengguna_dpt_pr disesuaikan 107 -> 105.
+- Srono / Kebaman / TPS 026: total pengguna Excel 196 tidak sama dengan rincian 193; rincian dipakai.
+- Srono / Kebaman / TPS 026: pengguna hak pilih 193 tidak sama dengan sah+tidak sah 196; pengguna_dpt_pr disesuaikan 106 -> 109.
+- Srono / Kebaman / TPS 039: total pengguna Excel 225 tidak sama dengan rincian 226; rincian dipakai.
+- Srono / Kebaman / TPS 039: pengguna hak pilih 226 tidak sama dengan sah+tidak sah 225; pengguna_dpt_pr disesuaikan 107 -> 106.
+- Srono / Kebaman / TPS 042: total pengguna Excel 215 tidak sama dengan rincian 213; rincian dipakai.
+- Srono / Kebaman / TPS 042: pengguna hak pilih 213 tidak sama dengan sah+tidak sah 215; pengguna_dpt_pr disesuaikan 101 -> 103.
+- Srono / Kebaman / TPS 043: total pengguna Excel 206 tidak sama dengan rincian 207; rincian dipakai.
+- Srono / Kebaman / TPS 043: pengguna hak pilih 207 tidak sama dengan sah+tidak sah 206; pengguna_dpt_pr disesuaikan 108 -> 107.
+- Srono / Sumbersari / TPS 001: pengguna hak pilih 0 tidak sama dengan sah+tidak sah 229; pengguna_dpt_pr disesuaikan 0 -> 229.
+- Srono / Sumbersari / TPS 001: surat suara digunakan 0 disesuaikan ke sah+tidak sah 229.
+- Srono / Sumbersari / TPS 002: pengguna hak pilih 0 tidak sama dengan sah+tidak sah 215; pengguna_dpt_pr disesuaikan 0 -> 215.
+- Srono / Sumbersari / TPS 002: surat suara digunakan 0 disesuaikan ke sah+tidak sah 215.
+- Srono / Sumbersari / TPS 003: pengguna hak pilih 0 tidak sama dengan sah+tidak sah 247; pengguna_dpt_pr disesuaikan 0 -> 247.
+- Srono / Sumbersari / TPS 003: surat suara digunakan 0 disesuaikan ke sah+tidak sah 247.
+- Srono / Sumbersari / TPS 004: pengguna hak pilih 0 tidak sama dengan sah+tidak sah 242; pengguna_dpt_pr disesuaikan 0 -> 242.
+- Srono / Sumbersari / TPS 004: surat suara digunakan 0 disesuaikan ke sah+tidak sah 242.
+- Srono / Sumbersari / TPS 005: pengguna hak pilih 0 tidak sama dengan sah+tidak sah 219; pengguna_dpt_pr disesuaikan 0 -> 219.
+- Srono / Sumbersari / TPS 005: surat suara digunakan 0 disesuaikan ke sah+tidak sah 219.
+- Srono / Sumbersari / TPS 006: pengguna hak pilih 0 tidak sama dengan sah+tidak sah 215; pengguna_dpt_pr disesuaikan 0 -> 215.
+- Srono / Sumbersari / TPS 006: surat suara digunakan 0 disesuaikan ke sah+tidak sah 215.
+- Srono / Sumbersari / TPS 007: pengguna hak pilih 0 tidak sama dengan sah+tidak sah 217; pengguna_dpt_pr disesuaikan 0 -> 217.
+- Srono / Sumbersari / TPS 007: surat suara digunakan 0 disesuaikan ke sah+tidak sah 217.
+- Srono / Sumbersari / TPS 008: pengguna hak pilih 0 tidak sama dengan sah+tidak sah 196; pengguna_dpt_pr disesuaikan 0 -> 196.
+- Srono / Sumbersari / TPS 008: surat suara digunakan 0 disesuaikan ke sah+tidak sah 196.
+- Srono / Sumbersari / TPS 009: pengguna hak pilih 0 tidak sama dengan sah+tidak sah 230; pengguna_dpt_pr disesuaikan 0 -> 230.
+- Srono / Sumbersari / TPS 009: surat suara digunakan 0 disesuaikan ke sah+tidak sah 230.
+- Srono / Sumbersari / TPS 010: pengguna hak pilih 0 tidak sama dengan sah+tidak sah 212; pengguna_dpt_pr disesuaikan 0 -> 212.
+- Srono / Sumbersari / TPS 010: surat suara digunakan 0 disesuaikan ke sah+tidak sah 212.
+- Srono / Sumbersari / TPS 011: pengguna hak pilih 0 tidak sama dengan sah+tidak sah 227; pengguna_dpt_pr disesuaikan 0 -> 227.
+- Srono / Sumbersari / TPS 011: surat suara digunakan 0 disesuaikan ke sah+tidak sah 227.
+- Srono / Sumbersari / TPS 012: pengguna hak pilih 0 tidak sama dengan sah+tidak sah 217; pengguna_dpt_pr disesuaikan 0 -> 217.
+- Srono / Sumbersari / TPS 012: surat suara digunakan 0 disesuaikan ke sah+tidak sah 217.
+- Srono / Sumbersari / TPS 013: pengguna hak pilih 0 tidak sama dengan sah+tidak sah 213; pengguna_dpt_pr disesuaikan 0 -> 213.
+- Srono / Sumbersari / TPS 013: surat suara digunakan 0 disesuaikan ke sah+tidak sah 213.
+- Srono / Sumbersari / TPS 014: pengguna hak pilih 0 tidak sama dengan sah+tidak sah 243; pengguna_dpt_pr disesuaikan 0 -> 243.
+- Srono / Sumbersari / TPS 014: surat suara digunakan 0 disesuaikan ke sah+tidak sah 243.
+- Srono / Sumbersari / TPS 015: pengguna hak pilih 0 tidak sama dengan sah+tidak sah 215; pengguna_dpt_pr disesuaikan 0 -> 215.
+- Srono / Sumbersari / TPS 015: surat suara digunakan 0 disesuaikan ke sah+tidak sah 215.
+- Srono / Sumbersari / TPS 022: pengguna hak pilih 238 tidak sama dengan sah+tidak sah 215; pengguna_dpt_pr disesuaikan 123 -> 100.
+- Srono / Sumbersari / TPS 022: surat suara digunakan 238 disesuaikan ke sah+tidak sah 215.
+- Srono / Sumbersari / TPS 022: surat suara sisa 50 disesuaikan ke diterima-digunakan-rusak 73.
+- Srono / Sumbersari / TPS 024: pengguna hak pilih 224 tidak sama dengan sah+tidak sah 222; pengguna_dpt_pr disesuaikan 113 -> 111.
+- Srono / Sumbersari / TPS 024: surat suara digunakan 224 disesuaikan ke sah+tidak sah 222.
+- Srono / Sumbersari / TPS 024: surat suara sisa 59 disesuaikan ke diterima-digunakan-rusak 61.
+- Srono / Sumbersari / TPS 028: pengguna hak pilih 161 tidak sama dengan sah+tidak sah 163; pengguna_dpt_pr disesuaikan 71 -> 73.
+- Srono / Sumbersari / TPS 028: surat suara digunakan 161 disesuaikan ke sah+tidak sah 163.
+- Srono / Sumbersari / TPS 028: surat suara sisa 55 disesuaikan ke diterima-digunakan-rusak 53.
+- Srono / Parijatah Wetan / TPS 006: total pengguna Excel 183 tidak sama dengan rincian 184; rincian dipakai.
+- Srono / Parijatah Wetan / TPS 006: pengguna hak pilih 184 tidak sama dengan sah+tidak sah 183; pengguna_dpt_pr disesuaikan 91 -> 90.
+- Srono / Parijatah Wetan / TPS 018: total pengguna Excel 220 tidak sama dengan rincian 205; rincian dipakai.
+- Srono / Parijatah Wetan / TPS 018: pengguna hak pilih 205 tidak sama dengan sah+tidak sah 220; pengguna_dpt_pr disesuaikan 103 -> 118.
+- Srono / Parijatah Wetan / TPS 019: total pengguna Excel 224 tidak sama dengan rincian 230; rincian dipakai.
+- Srono / Parijatah Wetan / TPS 019: pengguna hak pilih 230 tidak sama dengan sah+tidak sah 224; pengguna_dpt_pr disesuaikan 114 -> 108.
+- Srono / Parijatah Kulon / TPS 001: pengguna hak pilih 200 tidak sama dengan sah+tidak sah 197; pengguna_dpt_pr disesuaikan 103 -> 100.
+- Srono / Parijatah Kulon / TPS 001: surat suara digunakan 200 disesuaikan ke sah+tidak sah 197.
+- Srono / Parijatah Kulon / TPS 001: surat suara sisa 76 disesuaikan ke diterima-digunakan-rusak 79.
+- Srono / Parijatah Kulon / TPS 004: pengguna hak pilih 203 tidak sama dengan sah+tidak sah 200; pengguna_dpt_pr disesuaikan 102 -> 99.
+- Srono / Parijatah Kulon / TPS 004: surat suara digunakan 203 disesuaikan ke sah+tidak sah 200.
+- Srono / Parijatah Kulon / TPS 004: surat suara sisa 97 disesuaikan ke diterima-digunakan-rusak 100.
+- Srono / Parijatah Kulon / TPS 005: pengguna hak pilih 211 tidak sama dengan sah+tidak sah 213; pengguna_dpt_pr disesuaikan 109 -> 111.
+- Srono / Parijatah Kulon / TPS 005: surat suara digunakan 211 disesuaikan ke sah+tidak sah 213.
+- Srono / Parijatah Kulon / TPS 005: surat suara sisa 60 disesuaikan ke diterima-digunakan-rusak 58.
+- Srono / Parijatah Kulon / TPS 006: pengguna hak pilih 206 tidak sama dengan sah+tidak sah 201; pengguna_dpt_pr disesuaikan 104 -> 99.
+- Srono / Parijatah Kulon / TPS 006: surat suara digunakan 206 disesuaikan ke sah+tidak sah 201.
+- Srono / Parijatah Kulon / TPS 006: surat suara sisa 50 disesuaikan ke diterima-digunakan-rusak 55.
+- Srono / Parijatah Kulon / TPS 007: pengguna hak pilih 208 tidak sama dengan sah+tidak sah 213; pengguna_dpt_pr disesuaikan 94 -> 99.
+- Srono / Parijatah Kulon / TPS 007: surat suara digunakan 208 disesuaikan ke sah+tidak sah 213.
+- Srono / Parijatah Kulon / TPS 007: surat suara sisa 87 disesuaikan ke diterima-digunakan-rusak 82.
+- Srono / Parijatah Kulon / TPS 008: pengguna hak pilih 222 tidak sama dengan sah+tidak sah 220; pengguna_dpt_pr disesuaikan 111 -> 109.
+- Srono / Parijatah Kulon / TPS 008: surat suara digunakan 222 disesuaikan ke sah+tidak sah 220.
+- Srono / Parijatah Kulon / TPS 008: surat suara sisa 71 disesuaikan ke diterima-digunakan-rusak 73.
+- Srono / Parijatah Kulon / TPS 009: pengguna hak pilih 222 tidak sama dengan sah+tidak sah 218; pengguna_dpt_pr disesuaikan 116 -> 112.
+- Srono / Parijatah Kulon / TPS 009: surat suara digunakan 222 disesuaikan ke sah+tidak sah 218.
+- Srono / Parijatah Kulon / TPS 009: surat suara sisa 71 disesuaikan ke diterima-digunakan-rusak 75.
+- Srono / Parijatah Kulon / TPS 010: pengguna hak pilih 219 tidak sama dengan sah+tidak sah 223; pengguna_dpt_pr disesuaikan 113 -> 117.
+- Srono / Parijatah Kulon / TPS 010: surat suara digunakan 219 disesuaikan ke sah+tidak sah 223.
+- Srono / Parijatah Kulon / TPS 010: surat suara sisa 50 disesuaikan ke diterima-digunakan-rusak 46.
+- Srono / Parijatah Kulon / TPS 011: pengguna hak pilih 207 tidak sama dengan sah+tidak sah 210; pengguna_dpt_pr disesuaikan 102 -> 105.
+- Srono / Parijatah Kulon / TPS 011: surat suara digunakan 207 disesuaikan ke sah+tidak sah 210.
+- Srono / Parijatah Kulon / TPS 011: surat suara sisa 46 disesuaikan ke diterima-digunakan-rusak 43.
+- Srono / Parijatah Kulon / TPS 013: suara sah Excel 214 disesuaikan ke jumlah paslon 216.
+- Srono / Parijatah Kulon / TPS 013: total suara Excel 218 tidak sama dengan paslon+tidak sah 220; suara tidak sah disesuaikan 4 -> 2.
+- Srono / Parijatah Kulon / TPS 013: pengguna hak pilih 223 tidak sama dengan sah+tidak sah 218; pengguna_dpt_pr disesuaikan 107 -> 102.
+- Srono / Parijatah Kulon / TPS 013: surat suara digunakan 223 disesuaikan ke sah+tidak sah 218.
+- Srono / Parijatah Kulon / TPS 013: surat suara sisa 45 disesuaikan ke diterima-digunakan-rusak 50.
+- Srono / Parijatah Kulon / TPS 014: suara sah Excel 233 disesuaikan ke jumlah paslon 214.
+- Srono / Parijatah Kulon / TPS 014: total suara Excel 234 tidak sama dengan paslon+tidak sah 215; suara tidak sah disesuaikan 1 -> 20.
+- Srono / Parijatah Kulon / TPS 014: pengguna hak pilih 216 tidak sama dengan sah+tidak sah 234; pengguna_dpt_pr disesuaikan 91 -> 109.
+- Srono / Parijatah Kulon / TPS 014: surat suara digunakan 216 disesuaikan ke sah+tidak sah 234.
+- Srono / Parijatah Kulon / TPS 014: surat suara sisa 9 disesuaikan ke diterima-digunakan-rusak 0.
+- Srono / Parijatah Kulon / TPS 015: pengguna hak pilih 234 tidak sama dengan sah+tidak sah 241; pengguna_dpt_pr disesuaikan 127 -> 134.
+- Srono / Parijatah Kulon / TPS 015: surat suara digunakan 234 disesuaikan ke sah+tidak sah 241.
+- Srono / Parijatah Kulon / TPS 015: surat suara sisa 48 disesuaikan ke diterima-digunakan-rusak 41.
+- Srono / Parijatah Kulon / TPS 016: pengguna hak pilih 246 tidak sama dengan sah+tidak sah 247; pengguna_dpt_pr disesuaikan 122 -> 123.
+- Srono / Parijatah Kulon / TPS 016: surat suara digunakan 246 disesuaikan ke sah+tidak sah 247.
+- Srono / Parijatah Kulon / TPS 016: surat suara sisa 37 disesuaikan ke diterima-digunakan-rusak 36.
+- Srono / Parijatah Kulon / TPS 017: pengguna hak pilih 233 tidak sama dengan sah+tidak sah 228; pengguna_dpt_pr disesuaikan 127 -> 122.
+- Srono / Parijatah Kulon / TPS 017: surat suara digunakan 233 disesuaikan ke sah+tidak sah 228.
+- Srono / Parijatah Kulon / TPS 017: surat suara sisa 60 disesuaikan ke diterima-digunakan-rusak 65.
+- Srono / Parijatah Kulon / TPS 018: pengguna hak pilih 187 tidak sama dengan sah+tidak sah 185; pengguna_dpt_pr disesuaikan 97 -> 95.
+- Srono / Parijatah Kulon / TPS 018: surat suara digunakan 187 disesuaikan ke sah+tidak sah 185.
+- Srono / Parijatah Kulon / TPS 018: surat suara sisa 64 disesuaikan ke diterima-digunakan-rusak 66.
+- Srono / Parijatah Kulon / TPS 019: pengguna hak pilih 223 tidak sama dengan sah+tidak sah 225; pengguna_dpt_pr disesuaikan 118 -> 120.
+- Srono / Parijatah Kulon / TPS 019: surat suara digunakan 223 disesuaikan ke sah+tidak sah 225.
+- Srono / Parijatah Kulon / TPS 019: surat suara sisa 47 disesuaikan ke diterima-digunakan-rusak 45.
+- Srono / Parijatah Kulon / TPS 020: pengguna hak pilih 222 tidak sama dengan sah+tidak sah 226; pengguna_dpt_pr disesuaikan 109 -> 113.
+- Srono / Parijatah Kulon / TPS 020: surat suara digunakan 222 disesuaikan ke sah+tidak sah 226.
+- Srono / Parijatah Kulon / TPS 020: surat suara sisa 43 disesuaikan ke diterima-digunakan-rusak 39.
+- Srono / Rejoagung / TPS 005: pengguna hak pilih 224 tidak sama dengan sah+tidak sah 225; pengguna_dpt_pr disesuaikan 117 -> 118.
+- Srono / Rejoagung / TPS 005: surat suara digunakan 224 disesuaikan ke sah+tidak sah 225.
+- Srono / Rejoagung / TPS 005: surat suara sisa 38 disesuaikan ke diterima-digunakan-rusak 37.
+- Srono / Rejoagung / TPS 006: pengguna hak pilih 207 tidak sama dengan sah+tidak sah 206; pengguna_dpt_pr disesuaikan 106 -> 105.
+- Srono / Rejoagung / TPS 006: surat suara digunakan 207 disesuaikan ke sah+tidak sah 206.
+- Srono / Rejoagung / TPS 006: surat suara sisa 58 disesuaikan ke diterima-digunakan-rusak 59.
+- Tegalsari / Karangdoro / TPS 906: suara sah Excel 178 disesuaikan ke jumlah paslon 168.
+- Tegalsari / Karangdoro / TPS 906: total suara Excel 179 tidak sama dengan paslon+tidak sah 169; suara tidak sah disesuaikan 1 -> 11.
+- Wongsorejo / Bengkak / TPS 018: pengguna hak pilih 231 tidak sama dengan sah+tidak sah 214; pengguna_dpt_pr disesuaikan 124 -> 107.
+- Wongsorejo / Bengkak / TPS 018: surat suara digunakan 231 disesuaikan ke sah+tidak sah 214.
+- Wongsorejo / Bengkak / TPS 018: surat suara sisa 61 disesuaikan ke diterima-digunakan-rusak 78.
+- Wongsorejo / Bengkak / TPS 020: pengguna hak pilih 217 tidak sama dengan sah+tidak sah 234; pengguna_dpt_pr disesuaikan 114 -> 131.
+- Wongsorejo / Bengkak / TPS 020: surat suara digunakan 217 disesuaikan ke sah+tidak sah 234.
+- Wongsorejo / Bengkak / TPS 020: surat suara sisa 65 disesuaikan ke diterima-digunakan-rusak 48.
+- Wongsorejo / Alasbuluh / TPS 007: pengguna hak pilih 203 tidak sama dengan sah+tidak sah 204; pengguna_dpt_pr disesuaikan 110 -> 111.
+- Wongsorejo / Alasbuluh / TPS 007: surat suara digunakan 203 disesuaikan ke sah+tidak sah 204.
+- Wongsorejo / Alasbuluh / TPS 007: surat suara sisa 101 disesuaikan ke diterima-digunakan-rusak 100.
+- Wongsorejo / Alasbuluh / TPS 010: pengguna hak pilih 247 tidak sama dengan sah+tidak sah 246; pengguna_dpt_pr disesuaikan 137 -> 136.
+- Wongsorejo / Alasbuluh / TPS 010: surat suara digunakan 247 disesuaikan ke sah+tidak sah 246.
+- Wongsorejo / Alasbuluh / TPS 010: surat suara sisa 55 disesuaikan ke diterima-digunakan-rusak 56.
+- Wongsorejo / Sidodadi / TPS 012: pengguna hak pilih 233 tidak sama dengan sah+tidak sah 198; pengguna_dpt_pr disesuaikan 126 -> 91.
+- Wongsorejo / Sidodadi / TPS 012: surat suara digunakan 233 disesuaikan ke sah+tidak sah 198.
+- Wongsorejo / Sidodadi / TPS 012: surat suara sisa 59 disesuaikan ke diterima-digunakan-rusak 94.
+- Wongsorejo / Sidodadi / TPS 013: pengguna hak pilih 203 tidak sama dengan sah+tidak sah 225; pengguna_dpt_pr disesuaikan 97 -> 119.
+- Wongsorejo / Sidodadi / TPS 013: surat suara digunakan 203 disesuaikan ke sah+tidak sah 225.
+- Wongsorejo / Sidodadi / TPS 013: surat suara sisa 88 disesuaikan ke diterima-digunakan-rusak 66.
+- Wongsorejo / Sidodadi / TPS 014: pengguna hak pilih 230 tidak sama dengan sah+tidak sah 210; pengguna_dpt_pr disesuaikan 120 -> 100.
+- Wongsorejo / Sidodadi / TPS 014: surat suara digunakan 230 disesuaikan ke sah+tidak sah 210.
+- Wongsorejo / Sidodadi / TPS 014: surat suara sisa 71 disesuaikan ke diterima-digunakan-rusak 91.
+- Wongsorejo / Sidodadi / TPS 015: pengguna hak pilih 200 tidak sama dengan sah+tidak sah 233; pengguna_dpt_pr disesuaikan 103 -> 136.
+- Wongsorejo / Sidodadi / TPS 015: surat suara digunakan 200 disesuaikan ke sah+tidak sah 233.
+- Wongsorejo / Sidodadi / TPS 015: surat suara sisa 57 disesuaikan ke diterima-digunakan-rusak 24.
+- Wongsorejo / Bimorejo / TPS 008: surat suara sisa -20 disesuaikan ke diterima-digunakan-rusak 0.

@@ -2,11 +2,13 @@
 
 namespace App\Console\Commands;
 
+use App\Console\Commands\Concerns\WritesImportReport;
 use App\Models\Desa;
 use App\Models\RekapDpdCalon;
 use App\Models\RekapDpdSuara;
 use App\Models\RekapHeader;
 use App\Models\Tps;
+use App\Services\RekapAdminCache;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -17,6 +19,8 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class ImportDpdFolder extends Command
 {
+    use WritesImportReport;
+
     /*
      * CARA PAKAI IMPORTER DPD FOLDER
      * -------------------------------------------------------------------------
@@ -39,6 +43,15 @@ class ImportDpdFolder extends Command
      * WAJIB cek dulu tanpa mengubah database:
      *
      *   php artisan import:dpd-folder "storage/import/DPD" --dry-run
+     *
+     * Tulis detail masalah/koreksi ke file txt tanpa limit tampilan console:
+     *
+     *   php artisan import:dpd-folder "storage/import/DPD" --dry-run --report
+     *   php artisan import:dpd-folder "storage/import/DPD" --dry-run --report=storage/app/import-reports/dpd.txt
+     *
+     * Kalau --report tidak diberi path, file otomatis dibuat di:
+     *
+     *   storage/app/import-reports/import-folder-dpd-YYYYMMDD-HHMMSS.txt
      *
      * Cek satu kecamatan saja:
      *
@@ -64,7 +77,8 @@ class ImportDpdFolder extends Command
         {path=storage/import/DPD : Folder berisi file DPD per kecamatan atau satu file Excel DPD}
         {--dry-run : Validasi dan tampilkan ringkasan tanpa menyimpan ke database}
         {--only=* : Batasi import ke nama kecamatan tertentu}
-        {--desa=* : Batasi import ke nama desa/sheet tertentu}';
+        {--desa=* : Batasi import ke nama desa/sheet tertentu}
+        {--report= : Tulis detail masalah dan koreksi ke file txt; kosongkan nilainya untuk path otomatis}';
 
     protected $description = 'Import rekap DPD dari folder Excel per kecamatan dan sheet per desa.';
 
@@ -192,6 +206,21 @@ class ImportDpdFolder extends Command
         if ($rows === []) {
             $this->error('Tidak ada data TPS yang terbaca dari file.');
             $this->printProblems($missing, $invalid, $warnings);
+            $reportPath = $this->writeImportReport('Import folder DPD', [
+                'Calon terbaca' => count($calons),
+                'TPS terbaca' => 0,
+                'TPS tidak aman diimpor' => count($invalid),
+                'Koreksi data' => count($corrections),
+            ], [
+                'Data wilayah tidak cocok' => $missing,
+                'Data TPS tidak aman diimpor' => $invalid,
+                'Catatan struktur Excel' => $warnings,
+                'Daftar koreksi' => $corrections,
+            ]);
+
+            if ($reportPath) {
+                $this->info('Detail laporan import ditulis ke: '.$reportPath);
+            }
 
             return self::FAILURE;
         }
@@ -257,6 +286,7 @@ class ImportDpdFolder extends Command
             }
         });
 
+        RekapAdminCache::flushAggregate();
         $this->printReport($rows, $corrections, $missing, $invalid, $warnings, $calons);
 
         return self::SUCCESS;
@@ -488,15 +518,21 @@ class ImportDpdFolder extends Command
 
     private function printReport(array $rows, array $corrections, array $missing, array $invalid, array $warnings, array $calons): void
     {
+        $reportSummary = [
+            'Calon terbaca' => count($calons),
+            'TPS terbaca' => count($rows),
+            'File terbaca' => collect($rows)->pluck('source_file')->unique()->count(),
+            'Kecamatan terbaca' => collect($rows)->pluck('kecamatan')->unique()->count(),
+            'Desa terbaca' => collect($rows)->map(fn ($row) => $row['kecamatan'].' / '.$row['desa'])->unique()->count(),
+            'TPS tidak aman diimpor' => count($invalid),
+            'Koreksi data' => count($corrections),
+        ];
+
         $this->newLine();
         $this->info('Import folder DPD selesai.');
-        $this->line('Calon terbaca: '.count($calons));
-        $this->line('TPS terbaca: '.count($rows));
-        $this->line('File terbaca: '.collect($rows)->pluck('source_file')->unique()->count());
-        $this->line('Kecamatan terbaca: '.collect($rows)->pluck('kecamatan')->unique()->count());
-        $this->line('Desa terbaca: '.collect($rows)->map(fn ($row) => $row['kecamatan'].' / '.$row['desa'])->unique()->count());
-        $this->line('TPS tidak aman diimpor: '.count($invalid));
-        $this->line('Koreksi data: '.count($corrections));
+        foreach ($reportSummary as $label => $value) {
+            $this->line($label.': '.$value);
+        }
 
         $summary = collect($rows)
             ->groupBy('kecamatan')
@@ -530,6 +566,17 @@ class ImportDpdFolder extends Command
             if (count($corrections) > 100) {
                 $this->line('- ... '.(count($corrections) - 100).' koreksi lainnya tidak ditampilkan.');
             }
+        }
+
+        $reportPath = $this->writeImportReport('Import folder DPD', $reportSummary, [
+            'Data wilayah tidak cocok' => $missing,
+            'Data TPS tidak aman diimpor' => $invalid,
+            'Catatan struktur Excel' => $warnings,
+            'Daftar koreksi' => $corrections,
+        ]);
+
+        if ($reportPath) {
+            $this->info('Detail laporan import ditulis ke: '.$reportPath);
         }
     }
 

@@ -20,6 +20,15 @@ class ImportDprdProvFolder extends ImportDprRiFolder
      *
      *   php artisan import:dprd-prov-folder "storage/import/DPRD PROV" --dry-run
      *
+     * Tulis detail masalah/koreksi ke file txt tanpa limit tampilan console:
+     *
+     *   php artisan import:dprd-prov-folder "storage/import/DPRD PROV" --dry-run --report
+     *   php artisan import:dprd-prov-folder "storage/import/DPRD PROV" --dry-run --report=storage/app/import-reports/dprd-prov.txt
+     *
+     * Kalau --report tidak diberi path, file otomatis dibuat di:
+     *
+     *   storage/app/import-reports/import-folder-dprd-prov-YYYYMMDD-HHMMSS.txt
+     *
      * Cek satu kecamatan saja:
      *
      *   php artisan import:dprd-prov-folder "storage/import/DPRD PROV" --only=Bangorejo --dry-run
@@ -36,7 +45,8 @@ class ImportDprdProvFolder extends ImportDprRiFolder
         {path=storage/import/DPRD PROV : Folder berisi file DPRD PROV per kecamatan atau satu file Excel DPRD PROV}
         {--dry-run : Validasi dan tampilkan ringkasan tanpa menyimpan ke database}
         {--only=* : Batasi import ke nama kecamatan tertentu}
-        {--desa=* : Batasi import ke nama desa/sheet tertentu}';
+        {--desa=* : Batasi import ke nama desa/sheet tertentu}
+        {--report= : Tulis detail masalah dan koreksi ke file txt; kosongkan nilainya untuk path otomatis}';
 
     protected $description = 'Import rekap DPRD Provinsi dari folder Excel per kecamatan dan sheet per desa.';
 

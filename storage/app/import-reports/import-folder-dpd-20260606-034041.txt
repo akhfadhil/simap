@@ -1,0 +1,1285 @@
+Import folder DPD
+Dibuat: 2026-06-06 03:40:41
+
+Ringkasan:
+- Calon terbaca: 13
+- TPS terbaca: 5096
+- File terbaca: 25
+- Kecamatan terbaca: 25
+- Desa terbaca: 217
+- TPS tidak aman diimpor: 93
+- Koreksi data: 1170
+
+Data wilayah tidak cocok (0):
+- Tidak ada.
+
+Data TPS tidak aman diimpor (93):
+- DPD - KALIBARU.xlsx / Banyuanyar / TPS 024: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - KALIBARU.xlsx / Kalibarukulon / TPS 001: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - KALIBARU.xlsx / Kalibarukulon / TPS 002: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - KALIBARU.xlsx / Kalibarukulon / TPS 003: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - KALIBARU.xlsx / Kalibarukulon / TPS 004: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - KALIBARU.xlsx / Kalibarukulon / TPS 005: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - KALIBARU.xlsx / Kalibarukulon / TPS 006: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - KALIBARU.xlsx / Kalibarukulon / TPS 007: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - KALIBARU.xlsx / Kalibarukulon / TPS 008: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - KALIBARU.xlsx / Kalibarukulon / TPS 009: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - KALIBARU.xlsx / Kalibarukulon / TPS 010: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - KALIBARU.xlsx / Kalibarukulon / TPS 011: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - KALIBARU.xlsx / Kalibarukulon / TPS 012: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - KALIBARU.xlsx / Kalibarukulon / TPS 013: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - KALIBARU.xlsx / Kalibarukulon / TPS 014: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - KALIBARU.xlsx / Kalibarukulon / TPS 015: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - MUNCAR.xlsx / Sumberberas / TPS 001: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - MUNCAR.xlsx / Sumberberas / TPS 002: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - MUNCAR.xlsx / Sumberberas / TPS 003: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - MUNCAR.xlsx / Sumberberas / TPS 004: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - MUNCAR.xlsx / Sumberberas / TPS 005: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - MUNCAR.xlsx / Sumberberas / TPS 006: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - MUNCAR.xlsx / Sumberberas / TPS 007: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - MUNCAR.xlsx / Sumberberas / TPS 008: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - MUNCAR.xlsx / Sumberberas / TPS 009: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - MUNCAR.xlsx / Sumberberas / TPS 010: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - MUNCAR.xlsx / Sumberberas / TPS 011: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - MUNCAR.xlsx / Sumberberas / TPS 012: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - MUNCAR.xlsx / Sumberberas / TPS 013: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - MUNCAR.xlsx / Sumberberas / TPS 014: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - MUNCAR.xlsx / Sumberberas / TPS 015: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - MUNCAR.xlsx / Sumberberas / TPS 016: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - MUNCAR.xlsx / Sumberberas / TPS 017: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - MUNCAR.xlsx / Sumberberas / TPS 018: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - MUNCAR.xlsx / Sumberberas / TPS 019: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - MUNCAR.xlsx / Sumberberas / TPS 020: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - MUNCAR.xlsx / Sumberberas / TPS 021: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - MUNCAR.xlsx / Sumberberas / TPS 022: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - MUNCAR.xlsx / Sumberberas / TPS 023: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - MUNCAR.xlsx / Sumberberas / TPS 024: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - MUNCAR.xlsx / Sumberberas / TPS 025: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - MUNCAR.xlsx / Sumberberas / TPS 026: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - MUNCAR.xlsx / Sumberberas / TPS 027: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - MUNCAR.xlsx / Sumberberas / TPS 028: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - MUNCAR.xlsx / Sumberberas / TPS 029: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - MUNCAR.xlsx / Sumberberas / TPS 030: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - PURWOHARJO.xlsx / Kradenan / TPS 031: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - PURWOHARJO.xlsx / Kradenan / TPS 032: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Kesilir / TPS 001: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Kesilir / TPS 002: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Kesilir / TPS 003: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Kesilir / TPS 004: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Kesilir / TPS 005: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Kesilir / TPS 006: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Kesilir / TPS 007: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Kesilir / TPS 008: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Kesilir / TPS 009: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Kesilir / TPS 010: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Kesilir / TPS 011: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Kesilir / TPS 012: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Kesilir / TPS 013: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Kesilir / TPS 014: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Kesilir / TPS 015: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Barurejo / TPS 016: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Barurejo / TPS 017: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Barurejo / TPS 018: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Barurejo / TPS 019: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Barurejo / TPS 020: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Barurejo / TPS 021: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Barurejo / TPS 022: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Barurejo / TPS 023: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Barurejo / TPS 024: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Barurejo / TPS 025: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Barurejo / TPS 026: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Barurejo / TPS 027: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Barurejo / TPS 028: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Barurejo / TPS 029: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Barurejo / TPS 030: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Barurejo / TPS 031: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Barurejo / TPS 032: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Barurejo / TPS 033: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Barurejo / TPS 034: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Barurejo / TPS 035: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Barurejo / TPS 036: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Barurejo / TPS 037: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Barurejo / TPS 038: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Barurejo / TPS 039: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Barurejo / TPS 040: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Barurejo / TPS 041: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Barurejo / TPS 042: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Barurejo / TPS 043: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Barurejo / TPS 044: pengguna ada, tetapi suara calon/total suara kosong.
+- DPD - SILIRAGUNG.xlsx / Barurejo / TPS 045: pengguna ada, tetapi suara calon/total suara kosong.
+
+Catatan struktur Excel (2):
+- DPD - BANYUWANGI.xlsx / SUMBERREJO: D9 berisi Lateng; nama sheet Sumberrejo dipakai.
+- DPD - SONGGON.xlsx / Copy of BANGUNSARI: sheet salinan dilewati.
+
+Daftar koreksi (1170):
+- Bangorejo / Kebondalem / TPS 016: suara tidak sah 31 disesuaikan ke surat suara digunakan - suara calon 207.
+- Bangorejo / Kebondalem / TPS 016: total suara Excel 31 tidak sama dengan hasil koreksi 207.
+- Bangorejo / Kebondalem / TPS 017: suara tidak sah 51 disesuaikan ke surat suara digunakan - suara calon 199.
+- Bangorejo / Kebondalem / TPS 017: total suara Excel 51 tidak sama dengan hasil koreksi 199.
+- Bangorejo / Kebondalem / TPS 018: suara tidak sah 75 disesuaikan ke surat suara digunakan - suara calon 215.
+- Bangorejo / Kebondalem / TPS 018: total suara Excel 75 tidak sama dengan hasil koreksi 215.
+- Bangorejo / Kebondalem / TPS 019: suara tidak sah 51 disesuaikan ke surat suara digunakan - suara calon 229.
+- Bangorejo / Kebondalem / TPS 019: total suara Excel 51 tidak sama dengan hasil koreksi 229.
+- Bangorejo / Kebondalem / TPS 020: suara tidak sah 18 disesuaikan ke surat suara digunakan - suara calon 220.
+- Bangorejo / Kebondalem / TPS 020: total suara Excel 18 tidak sama dengan hasil koreksi 220.
+- Bangorejo / Kebondalem / TPS 021: suara tidak sah 18 disesuaikan ke surat suara digunakan - suara calon 207.
+- Bangorejo / Kebondalem / TPS 021: total suara Excel 18 tidak sama dengan hasil koreksi 207.
+- Bangorejo / Kebondalem / TPS 022: suara tidak sah 58 disesuaikan ke surat suara digunakan - suara calon 199.
+- Bangorejo / Kebondalem / TPS 022: total suara Excel 58 tidak sama dengan hasil koreksi 199.
+- Bangorejo / Kebondalem / TPS 023: suara tidak sah 64 disesuaikan ke surat suara digunakan - suara calon 203.
+- Bangorejo / Kebondalem / TPS 023: total suara Excel 64 tidak sama dengan hasil koreksi 203.
+- Bangorejo / Kebondalem / TPS 024: suara tidak sah 38 disesuaikan ke surat suara digunakan - suara calon 192.
+- Bangorejo / Kebondalem / TPS 024: total suara Excel 38 tidak sama dengan hasil koreksi 192.
+- Bangorejo / Kebondalem / TPS 025: suara tidak sah 30 disesuaikan ke surat suara digunakan - suara calon 203.
+- Bangorejo / Kebondalem / TPS 025: total suara Excel 30 tidak sama dengan hasil koreksi 203.
+- Bangorejo / Kebondalem / TPS 026: suara tidak sah 24 disesuaikan ke surat suara digunakan - suara calon 186.
+- Bangorejo / Kebondalem / TPS 026: total suara Excel 24 tidak sama dengan hasil koreksi 186.
+- Bangorejo / Kebondalem / TPS 027: suara tidak sah 27 disesuaikan ke surat suara digunakan - suara calon 217.
+- Bangorejo / Kebondalem / TPS 027: total suara Excel 27 tidak sama dengan hasil koreksi 217.
+- Bangorejo / Kebondalem / TPS 028: suara tidak sah 36 disesuaikan ke surat suara digunakan - suara calon 144.
+- Bangorejo / Kebondalem / TPS 028: total suara Excel 36 tidak sama dengan hasil koreksi 144.
+- Bangorejo / Kebondalem / TPS 029: suara tidak sah 20 disesuaikan ke surat suara digunakan - suara calon 209.
+- Bangorejo / Kebondalem / TPS 029: total suara Excel 20 tidak sama dengan hasil koreksi 209.
+- Bangorejo / Ringintelu / TPS 005: total pengguna Excel 202 tidak sama dengan rincian 197; pengguna_dpt_pr disesuaikan 102 -> 107.
+- Bangorejo / Ringintelu / TPS 016: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 21.
+- Bangorejo / Ringintelu / TPS 016: total suara Excel 119 tidak sama dengan hasil koreksi 140.
+- Bangorejo / Ringintelu / TPS 017: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 17.
+- Bangorejo / Ringintelu / TPS 017: total suara Excel 185 tidak sama dengan hasil koreksi 202.
+- Bangorejo / Ringintelu / TPS 018: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 43.
+- Bangorejo / Ringintelu / TPS 018: total suara Excel 154 tidak sama dengan hasil koreksi 197.
+- Bangorejo / Ringintelu / TPS 019: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 26.
+- Bangorejo / Ringintelu / TPS 019: total suara Excel 171 tidak sama dengan hasil koreksi 197.
+- Bangorejo / Ringintelu / TPS 020: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 37.
+- Bangorejo / Ringintelu / TPS 020: total suara Excel 168 tidak sama dengan hasil koreksi 205.
+- Bangorejo / Ringintelu / TPS 021: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 31.
+- Bangorejo / Ringintelu / TPS 021: total suara Excel 172 tidak sama dengan hasil koreksi 203.
+- Bangorejo / Sambimulyo / TPS 016: suara tidak sah 28 disesuaikan ke surat suara digunakan - suara calon 30.
+- Bangorejo / Sambimulyo / TPS 016: total suara Excel 199 tidak sama dengan hasil koreksi 201.
+- Bangorejo / Sambimulyo / TPS 017: suara tidak sah 34 disesuaikan ke surat suara digunakan - suara calon 30.
+- Bangorejo / Sambimulyo / TPS 017: total suara Excel 221 tidak sama dengan hasil koreksi 217.
+- Bangorejo / Sambimulyo / TPS 019: suara tidak sah 16 disesuaikan ke surat suara digunakan - suara calon 15.
+- Bangorejo / Sambimulyo / TPS 019: total suara Excel 197 tidak sama dengan hasil koreksi 196.
+- Bangorejo / Sambimulyo / TPS 021: suara tidak sah 56 disesuaikan ke surat suara digunakan - suara calon 58.
+- Bangorejo / Sambimulyo / TPS 021: total suara Excel 221 tidak sama dengan hasil koreksi 223.
+- Bangorejo / Sambimulyo / TPS 022: suara tidak sah 60 disesuaikan ke surat suara digunakan - suara calon 62.
+- Bangorejo / Sambimulyo / TPS 022: total suara Excel 223 tidak sama dengan hasil koreksi 225.
+- Bangorejo / Sambimulyo / TPS 024: suara tidak sah 42 disesuaikan ke surat suara digunakan - suara calon 31.
+- Bangorejo / Sambimulyo / TPS 024: total suara Excel 222 tidak sama dengan hasil koreksi 211.
+- Bangorejo / Sambimulyo / TPS 026: suara tidak sah 24 disesuaikan ke surat suara digunakan - suara calon 20.
+- Bangorejo / Sambimulyo / TPS 026: total suara Excel 144 tidak sama dengan hasil koreksi 140.
+- Bangorejo / Sambimulyo / TPS 027: suara tidak sah 31 disesuaikan ke surat suara digunakan - suara calon 26.
+- Bangorejo / Sambimulyo / TPS 027: total suara Excel 145 tidak sama dengan hasil koreksi 140.
+- Bangorejo / Sambirejo / TPS 017: suara tidak sah 27 disesuaikan ke surat suara digunakan - suara calon 37.
+- Bangorejo / Sambirejo / TPS 017: total suara Excel 190 tidak sama dengan hasil koreksi 200.
+- Blimbingsari / Badean / TPS 018: total pengguna Excel 211 tidak sama dengan rincian 209; pengguna_dpt_pr disesuaikan 112 -> 114.
+- Blimbingsari / Badean / TPS 018: pengguna hak pilih 211 tidak sama dengan surat suara digunakan 209; pengguna_dpt_pr disesuaikan 114 -> 112.
+- Blimbingsari / Badean / TPS 021: total pengguna Excel 197 tidak sama dengan rincian 196; pengguna_dpt_pr disesuaikan 92 -> 93.
+- Blimbingsari / Badean / TPS 021: pengguna hak pilih 197 tidak sama dengan surat suara digunakan 196; pengguna_dpt_pr disesuaikan 93 -> 92.
+- Blimbingsari / Blimbingsari / TPS 014: suara tidak sah 10 disesuaikan ke surat suara digunakan - suara calon 102.
+- Blimbingsari / Blimbingsari / TPS 014: total suara Excel 100 tidak sama dengan hasil koreksi 192.
+- Blimbingsari / Kaligung / TPS 901: suara tidak sah 6 disesuaikan ke surat suara digunakan - suara calon 104.
+- Blimbingsari / Kaligung / TPS 901: total suara Excel 36 tidak sama dengan hasil koreksi 134.
+- Blimbingsari / Kaligung / TPS 902: suara tidak sah 7 disesuaikan ke surat suara digunakan - suara calon 48.
+- Blimbingsari / Kaligung / TPS 902: total suara Excel 88 tidak sama dengan hasil koreksi 129.
+- Blimbingsari / Kaotan / TPS 006: suara tidak sah 48 disesuaikan ke surat suara digunakan - suara calon 49.
+- Blimbingsari / Kaotan / TPS 006: total suara Excel 220 tidak sama dengan hasil koreksi 221.
+- Blimbingsari / Kaotan / TPS 008: suara tidak sah 60 disesuaikan ke surat suara digunakan - suara calon 63.
+- Blimbingsari / Kaotan / TPS 008: total suara Excel 242 tidak sama dengan hasil koreksi 245.
+- Cluring / Plampangrejo / TPS 016: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 24.
+- Cluring / Plampangrejo / TPS 016: total suara Excel 185 tidak sama dengan hasil koreksi 209.
+- Cluring / Plampangrejo / TPS 017: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 31.
+- Cluring / Plampangrejo / TPS 017: total suara Excel 193 tidak sama dengan hasil koreksi 224.
+- Cluring / Plampangrejo / TPS 018: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 26.
+- Cluring / Plampangrejo / TPS 018: total suara Excel 211 tidak sama dengan hasil koreksi 237.
+- Cluring / Plampangrejo / TPS 019: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 38.
+- Cluring / Plampangrejo / TPS 019: total suara Excel 196 tidak sama dengan hasil koreksi 234.
+- Cluring / Plampangrejo / TPS 020: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 35.
+- Cluring / Plampangrejo / TPS 020: total suara Excel 185 tidak sama dengan hasil koreksi 220.
+- Cluring / Plampangrejo / TPS 021: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 44.
+- Cluring / Plampangrejo / TPS 021: total suara Excel 170 tidak sama dengan hasil koreksi 214.
+- Cluring / Plampangrejo / TPS 022: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 26.
+- Cluring / Plampangrejo / TPS 022: total suara Excel 187 tidak sama dengan hasil koreksi 213.
+- Cluring / Plampangrejo / TPS 023: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 15.
+- Cluring / Plampangrejo / TPS 023: total suara Excel 173 tidak sama dengan hasil koreksi 188.
+- Cluring / Plampangrejo / TPS 024: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 45.
+- Cluring / Plampangrejo / TPS 024: total suara Excel 130 tidak sama dengan hasil koreksi 175.
+- Cluring / Plampangrejo / TPS 025: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 14.
+- Cluring / Plampangrejo / TPS 025: total suara Excel 206 tidak sama dengan hasil koreksi 220.
+- Cluring / Plampangrejo / TPS 026: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 19.
+- Cluring / Plampangrejo / TPS 026: total suara Excel 162 tidak sama dengan hasil koreksi 181.
+- Cluring / Sarimulyo / TPS 019: total pengguna Excel 202 tidak sama dengan rincian 200; pengguna_dpt_pr disesuaikan 104 -> 106.
+- Cluring / Sraten / TPS 009: suara tidak sah 45 disesuaikan ke surat suara digunakan - suara calon 46.
+- Cluring / Sraten / TPS 009: total suara Excel 191 tidak sama dengan hasil koreksi 192.
+- Cluring / Sraten / TPS 009: surat suara sisa 86 disesuaikan ke diterima-digunakan-rusak 85.
+- Cluring / Tamanagung / TPS 006: surat suara sisa 82 disesuaikan ke diterima-digunakan-rusak 80.
+- Cluring / Tamanagung / TPS 009: surat suara sisa 71 disesuaikan ke diterima-digunakan-rusak 69.
+- Cluring / Tamanagung / TPS 014: suara tidak sah 35 disesuaikan ke surat suara digunakan - suara calon 37.
+- Cluring / Tamanagung / TPS 014: total suara Excel 185 tidak sama dengan hasil koreksi 187.
+- Cluring / Tamanagung / TPS 014: surat suara sisa 54 disesuaikan ke diterima-digunakan-rusak 55.
+- Cluring / Tamanagung / TPS 015: suara tidak sah 27 disesuaikan ke surat suara digunakan - suara calon 28.
+- Cluring / Tamanagung / TPS 015: total suara Excel 184 tidak sama dengan hasil koreksi 185.
+- Cluring / Tamanagung / TPS 016: surat suara sisa 59 disesuaikan ke diterima-digunakan-rusak 64.
+- Cluring / Tamanagung / TPS 022: surat suara sisa 81 disesuaikan ke diterima-digunakan-rusak 92.
+- Cluring / Tamanagung / TPS 023: surat suara sisa 52 disesuaikan ke diterima-digunakan-rusak 53.
+- Cluring / Tamanagung / TPS 024: surat suara sisa 60 disesuaikan ke diterima-digunakan-rusak 50.
+- Cluring / Tampo / TPS 001: suara tidak sah 33 disesuaikan ke surat suara digunakan - suara calon 36.
+- Cluring / Tampo / TPS 001: total suara Excel 204 tidak sama dengan hasil koreksi 207.
+- Cluring / Tampo / TPS 006: suara tidak sah 34 disesuaikan ke surat suara digunakan - suara calon 36.
+- Cluring / Tampo / TPS 006: total suara Excel 226 tidak sama dengan hasil koreksi 228.
+- Cluring / Tampo / TPS 012: suara tidak sah 25 disesuaikan ke surat suara digunakan - suara calon 26.
+- Cluring / Tampo / TPS 012: total suara Excel 183 tidak sama dengan hasil koreksi 184.
+- Cluring / Tampo / TPS 016: suara tidak sah 44 disesuaikan ke surat suara digunakan - suara calon 45.
+- Cluring / Tampo / TPS 016: total suara Excel 195 tidak sama dengan hasil koreksi 196.
+- Gambiran / Gambiran / TPS 003: suara tidak sah 34 disesuaikan ke surat suara digunakan - suara calon 33.
+- Gambiran / Gambiran / TPS 003: total suara Excel 172 tidak sama dengan hasil koreksi 171.
+- Gambiran / Gambiran / TPS 004: suara tidak sah 50 disesuaikan ke surat suara digunakan - suara calon 51.
+- Gambiran / Gambiran / TPS 004: total suara Excel 168 tidak sama dengan hasil koreksi 169.
+- Gambiran / Gambiran / TPS 005: suara tidak sah 47 disesuaikan ke surat suara digunakan - suara calon 46.
+- Gambiran / Gambiran / TPS 005: total suara Excel 209 tidak sama dengan hasil koreksi 208.
+- Gambiran / Gambiran / TPS 006: suara tidak sah 69 disesuaikan ke surat suara digunakan - suara calon 70.
+- Gambiran / Gambiran / TPS 006: total suara Excel 198 tidak sama dengan hasil koreksi 199.
+- Gambiran / Gambiran / TPS 007: suara tidak sah 51 disesuaikan ke surat suara digunakan - suara calon 48.
+- Gambiran / Gambiran / TPS 007: total suara Excel 170 tidak sama dengan hasil koreksi 167.
+- Gambiran / Gambiran / TPS 008: suara tidak sah 27 disesuaikan ke surat suara digunakan - suara calon 30.
+- Gambiran / Gambiran / TPS 008: total suara Excel 191 tidak sama dengan hasil koreksi 194.
+- Gambiran / Gambiran / TPS 012: suara tidak sah 40 disesuaikan ke surat suara digunakan - suara calon 41.
+- Gambiran / Gambiran / TPS 012: total suara Excel 209 tidak sama dengan hasil koreksi 210.
+- Gambiran / Gambiran / TPS 013: suara tidak sah 26 disesuaikan ke surat suara digunakan - suara calon 25.
+- Gambiran / Gambiran / TPS 013: total suara Excel 181 tidak sama dengan hasil koreksi 180.
+- Gambiran / Jajag / TPS 013: suara tidak sah 24 disesuaikan ke surat suara digunakan - suara calon 25.
+- Gambiran / Jajag / TPS 013: total suara Excel 175 tidak sama dengan hasil koreksi 176.
+- Gambiran / Jajag / TPS 014: suara tidak sah 44 disesuaikan ke surat suara digunakan - suara calon 43.
+- Gambiran / Jajag / TPS 014: total suara Excel 233 tidak sama dengan hasil koreksi 232.
+- Kabat / Bunder / TPS 002: suara tidak sah 79 disesuaikan ke surat suara digunakan - suara calon 71.
+- Kabat / Bunder / TPS 002: total suara Excel 226 tidak sama dengan hasil koreksi 218.
+- Kabat / Dadapan / TPS 013: suara tidak sah 39 disesuaikan ke surat suara digunakan - suara calon 34.
+- Kabat / Dadapan / TPS 013: total suara Excel 219 tidak sama dengan hasil koreksi 214.
+- Kabat / Kedayunan / TPS 007: suara tidak sah 47 disesuaikan ke surat suara digunakan - suara calon 43.
+- Kabat / Kedayunan / TPS 007: total suara Excel 229 tidak sama dengan hasil koreksi 225.
+- Kabat / Kedayunan / TPS 015: suara tidak sah 37 disesuaikan ke surat suara digunakan - suara calon 39.
+- Kabat / Kedayunan / TPS 015: total suara Excel 248 tidak sama dengan hasil koreksi 250.
+- Kabat / Labanasem / TPS 006: suara tidak sah 53 disesuaikan ke surat suara digunakan - suara calon 56.
+- Kabat / Labanasem / TPS 006: total suara Excel 232 tidak sama dengan hasil koreksi 235.
+- Kabat / Macan Putih / TPS 012: suara tidak sah 38 disesuaikan ke surat suara digunakan - suara calon 40.
+- Kabat / Macan Putih / TPS 012: total suara Excel 206 tidak sama dengan hasil koreksi 208.
+- Kabat / Macan Putih / TPS 013: suara tidak sah 45 disesuaikan ke surat suara digunakan - suara calon 43.
+- Kabat / Macan Putih / TPS 013: total suara Excel 217 tidak sama dengan hasil koreksi 215.
+- Kabat / Macan Putih / TPS 014: suara tidak sah 38 disesuaikan ke surat suara digunakan - suara calon 39.
+- Kabat / Macan Putih / TPS 014: total suara Excel 204 tidak sama dengan hasil koreksi 205.
+- Kabat / Macan Putih / TPS 015: suara tidak sah 83 disesuaikan ke surat suara digunakan - suara calon 82.
+- Kabat / Macan Putih / TPS 015: total suara Excel 228 tidak sama dengan hasil koreksi 227.
+- Kalibaru / Banyuanyar / TPS 001: suara tidak sah 57 disesuaikan ke surat suara digunakan - suara calon 243.
+- Kalibaru / Banyuanyar / TPS 001: total suara Excel 57 tidak sama dengan hasil koreksi 243.
+- Kalibaru / Banyuanyar / TPS 002: suara tidak sah 60 disesuaikan ke surat suara digunakan - suara calon 235.
+- Kalibaru / Banyuanyar / TPS 002: total suara Excel 60 tidak sama dengan hasil koreksi 235.
+- Kalibaru / Banyuanyar / TPS 003: suara tidak sah 73 disesuaikan ke surat suara digunakan - suara calon 228.
+- Kalibaru / Banyuanyar / TPS 003: total suara Excel 73 tidak sama dengan hasil koreksi 228.
+- Kalibaru / Banyuanyar / TPS 004: suara tidak sah 63 disesuaikan ke surat suara digunakan - suara calon 223.
+- Kalibaru / Banyuanyar / TPS 004: total suara Excel 63 tidak sama dengan hasil koreksi 223.
+- Kalibaru / Banyuanyar / TPS 005: suara tidak sah 44 disesuaikan ke surat suara digunakan - suara calon 183.
+- Kalibaru / Banyuanyar / TPS 005: total suara Excel 44 tidak sama dengan hasil koreksi 183.
+- Kalibaru / Banyuanyar / TPS 006: suara tidak sah 31 disesuaikan ke surat suara digunakan - suara calon 233.
+- Kalibaru / Banyuanyar / TPS 006: total suara Excel 31 tidak sama dengan hasil koreksi 233.
+- Kalibaru / Banyuanyar / TPS 007: suara tidak sah 44 disesuaikan ke surat suara digunakan - suara calon 225.
+- Kalibaru / Banyuanyar / TPS 007: total suara Excel 44 tidak sama dengan hasil koreksi 225.
+- Kalibaru / Banyuanyar / TPS 008: suara tidak sah 74 disesuaikan ke surat suara digunakan - suara calon 223.
+- Kalibaru / Banyuanyar / TPS 008: total suara Excel 74 tidak sama dengan hasil koreksi 223.
+- Kalibaru / Banyuanyar / TPS 009: suara tidak sah 68 disesuaikan ke surat suara digunakan - suara calon 213.
+- Kalibaru / Banyuanyar / TPS 009: total suara Excel 68 tidak sama dengan hasil koreksi 213.
+- Kalibaru / Banyuanyar / TPS 010: suara tidak sah 60 disesuaikan ke surat suara digunakan - suara calon 236.
+- Kalibaru / Banyuanyar / TPS 010: total suara Excel 60 tidak sama dengan hasil koreksi 236.
+- Kalibaru / Banyuanyar / TPS 011: suara tidak sah 58 disesuaikan ke surat suara digunakan - suara calon 203.
+- Kalibaru / Banyuanyar / TPS 011: total suara Excel 58 tidak sama dengan hasil koreksi 203.
+- Kalibaru / Banyuanyar / TPS 012: suara tidak sah 75 disesuaikan ke surat suara digunakan - suara calon 203.
+- Kalibaru / Banyuanyar / TPS 012: total suara Excel 75 tidak sama dengan hasil koreksi 203.
+- Kalibaru / Banyuanyar / TPS 013: suara tidak sah 89 disesuaikan ke surat suara digunakan - suara calon 233.
+- Kalibaru / Banyuanyar / TPS 013: total suara Excel 89 tidak sama dengan hasil koreksi 233.
+- Kalibaru / Banyuanyar / TPS 014: suara tidak sah 50 disesuaikan ke surat suara digunakan - suara calon 245.
+- Kalibaru / Banyuanyar / TPS 014: total suara Excel 50 tidak sama dengan hasil koreksi 245.
+- Kalibaru / Banyuanyar / TPS 015: suara tidak sah 61 disesuaikan ke surat suara digunakan - suara calon 229.
+- Kalibaru / Banyuanyar / TPS 015: total suara Excel 61 tidak sama dengan hasil koreksi 229.
+- Kalibaru / Banyuanyar / TPS 016: suara tidak sah 54 disesuaikan ke surat suara digunakan - suara calon 231.
+- Kalibaru / Banyuanyar / TPS 016: total suara Excel 54 tidak sama dengan hasil koreksi 231.
+- Kalibaru / Banyuanyar / TPS 017: suara tidak sah 43 disesuaikan ke surat suara digunakan - suara calon 168.
+- Kalibaru / Banyuanyar / TPS 017: total suara Excel 43 tidak sama dengan hasil koreksi 168.
+- Kalibaru / Banyuanyar / TPS 018: suara tidak sah 28 disesuaikan ke surat suara digunakan - suara calon 96.
+- Kalibaru / Banyuanyar / TPS 018: total suara Excel 28 tidak sama dengan hasil koreksi 96.
+- Kalibaru / Banyuanyar / TPS 019: suara tidak sah 45 disesuaikan ke surat suara digunakan - suara calon 211.
+- Kalibaru / Banyuanyar / TPS 019: total suara Excel 45 tidak sama dengan hasil koreksi 211.
+- Kalibaru / Banyuanyar / TPS 020: suara tidak sah 22 disesuaikan ke surat suara digunakan - suara calon 133.
+- Kalibaru / Banyuanyar / TPS 020: total suara Excel 22 tidak sama dengan hasil koreksi 133.
+- Kalibaru / Banyuanyar / TPS 021: suara tidak sah 15 disesuaikan ke surat suara digunakan - suara calon 110.
+- Kalibaru / Banyuanyar / TPS 021: total suara Excel 15 tidak sama dengan hasil koreksi 110.
+- Kalibaru / Banyuanyar / TPS 022: suara tidak sah 55 disesuaikan ke surat suara digunakan - suara calon 183.
+- Kalibaru / Banyuanyar / TPS 022: total suara Excel 55 tidak sama dengan hasil koreksi 183.
+- Kalibaru / Banyuanyar / TPS 023: suara tidak sah 79 disesuaikan ke surat suara digunakan - suara calon 147.
+- Kalibaru / Banyuanyar / TPS 023: total suara Excel 79 tidak sama dengan hasil koreksi 147.
+- Kalibaru / Banyuanyar / TPS 025: suara tidak sah 60 disesuaikan ke surat suara digunakan - suara calon 200.
+- Kalibaru / Banyuanyar / TPS 025: total suara Excel 60 tidak sama dengan hasil koreksi 200.
+- Kalibaru / Banyuanyar / TPS 026: suara tidak sah 31 disesuaikan ke surat suara digunakan - suara calon 168.
+- Kalibaru / Banyuanyar / TPS 026: total suara Excel 31 tidak sama dengan hasil koreksi 168.
+- Kalibaru / Banyuanyar / TPS 027: suara tidak sah 41 disesuaikan ke surat suara digunakan - suara calon 143.
+- Kalibaru / Banyuanyar / TPS 027: total suara Excel 41 tidak sama dengan hasil koreksi 143.
+- Kalibaru / Kajarharjo / TPS 001: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 30.
+- Kalibaru / Kajarharjo / TPS 001: total suara Excel 180 tidak sama dengan hasil koreksi 210.
+- Kalibaru / Kajarharjo / TPS 002: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 42.
+- Kalibaru / Kajarharjo / TPS 002: total suara Excel 173 tidak sama dengan hasil koreksi 215.
+- Kalibaru / Kajarharjo / TPS 003: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 20.
+- Kalibaru / Kajarharjo / TPS 003: total suara Excel 161 tidak sama dengan hasil koreksi 181.
+- Kalibaru / Kajarharjo / TPS 004: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 43.
+- Kalibaru / Kajarharjo / TPS 004: total suara Excel 157 tidak sama dengan hasil koreksi 200.
+- Kalibaru / Kajarharjo / TPS 005: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 35.
+- Kalibaru / Kajarharjo / TPS 005: total suara Excel 156 tidak sama dengan hasil koreksi 191.
+- Kalibaru / Kajarharjo / TPS 006: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 36.
+- Kalibaru / Kajarharjo / TPS 006: total suara Excel 149 tidak sama dengan hasil koreksi 185.
+- Kalibaru / Kajarharjo / TPS 007: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 30.
+- Kalibaru / Kajarharjo / TPS 007: total suara Excel 186 tidak sama dengan hasil koreksi 216.
+- Kalibaru / Kajarharjo / TPS 008: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 42.
+- Kalibaru / Kajarharjo / TPS 008: total suara Excel 194 tidak sama dengan hasil koreksi 236.
+- Kalibaru / Kajarharjo / TPS 009: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 27.
+- Kalibaru / Kajarharjo / TPS 009: total suara Excel 199 tidak sama dengan hasil koreksi 226.
+- Kalibaru / Kajarharjo / TPS 010: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 23.
+- Kalibaru / Kajarharjo / TPS 010: total suara Excel 188 tidak sama dengan hasil koreksi 211.
+- Kalibaru / Kajarharjo / TPS 011: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 29.
+- Kalibaru / Kajarharjo / TPS 011: total suara Excel 187 tidak sama dengan hasil koreksi 216.
+- Kalibaru / Kajarharjo / TPS 012: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 24.
+- Kalibaru / Kajarharjo / TPS 012: total suara Excel 209 tidak sama dengan hasil koreksi 233.
+- Kalibaru / Kajarharjo / TPS 013: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 64.
+- Kalibaru / Kajarharjo / TPS 013: total suara Excel 143 tidak sama dengan hasil koreksi 207.
+- Kalibaru / Kajarharjo / TPS 014: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 43.
+- Kalibaru / Kajarharjo / TPS 014: total suara Excel 172 tidak sama dengan hasil koreksi 215.
+- Kalibaru / Kajarharjo / TPS 015: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 37.
+- Kalibaru / Kajarharjo / TPS 015: total suara Excel 153 tidak sama dengan hasil koreksi 190.
+- Kalibaru / Kajarharjo / TPS 024: suara tidak sah 39 disesuaikan ke surat suara digunakan - suara calon 41.
+- Kalibaru / Kajarharjo / TPS 024: total suara Excel 219 tidak sama dengan hasil koreksi 221.
+- Kalibaru / Kajarharjo / TPS 026: suara tidak sah 16 disesuaikan ke surat suara digunakan - suara calon 17.
+- Kalibaru / Kajarharjo / TPS 026: total suara Excel 134 tidak sama dengan hasil koreksi 135.
+- Kalibaru / Kajarharjo / TPS 028: suara tidak sah 17 disesuaikan ke surat suara digunakan - suara calon 18.
+- Kalibaru / Kajarharjo / TPS 028: total suara Excel 166 tidak sama dengan hasil koreksi 167.
+- Kalibaru / Kajarharjo / TPS 029: suara tidak sah 39 disesuaikan ke surat suara digunakan - suara calon 43.
+- Kalibaru / Kajarharjo / TPS 029: total suara Excel 140 tidak sama dengan hasil koreksi 144.
+- Kalibaru / Kajarharjo / TPS 031: suara tidak sah 68 disesuaikan ke surat suara digunakan - suara calon 130.
+- Kalibaru / Kajarharjo / TPS 031: total suara Excel 68 tidak sama dengan hasil koreksi 130.
+- Kalibaru / Kajarharjo / TPS 032: suara tidak sah 16 disesuaikan ke surat suara digunakan - suara calon 101.
+- Kalibaru / Kajarharjo / TPS 032: total suara Excel 16 tidak sama dengan hasil koreksi 101.
+- Kalibaru / Kajarharjo / TPS 033: suara tidak sah 26 disesuaikan ke surat suara digunakan - suara calon 129.
+- Kalibaru / Kajarharjo / TPS 033: total suara Excel 26 tidak sama dengan hasil koreksi 129.
+- Kalibaru / Kajarharjo / TPS 034: suara tidak sah 19 disesuaikan ke surat suara digunakan - suara calon 135.
+- Kalibaru / Kajarharjo / TPS 034: total suara Excel 19 tidak sama dengan hasil koreksi 135.
+- Kalibaru / Kajarharjo / TPS 034: surat suara sisa -48 disesuaikan ke diterima-digunakan-rusak 0.
+- Kalibaru / Kajarharjo / TPS 035: suara tidak sah 15 disesuaikan ke surat suara digunakan - suara calon 107.
+- Kalibaru / Kajarharjo / TPS 035: total suara Excel 15 tidak sama dengan hasil koreksi 107.
+- Kalibaru / Kajarharjo / TPS 036: suara tidak sah 49 disesuaikan ke surat suara digunakan - suara calon 149.
+- Kalibaru / Kajarharjo / TPS 036: total suara Excel 49 tidak sama dengan hasil koreksi 149.
+- Kalibaru / Kajarharjo / TPS 037: suara tidak sah 51 disesuaikan ke surat suara digunakan - suara calon 152.
+- Kalibaru / Kajarharjo / TPS 037: total suara Excel 51 tidak sama dengan hasil koreksi 152.
+- Kalibaru / Kajarharjo / TPS 038: suara tidak sah 103 disesuaikan ke surat suara digunakan - suara calon 242.
+- Kalibaru / Kajarharjo / TPS 038: total suara Excel 103 tidak sama dengan hasil koreksi 242.
+- Kalibaru / Kajarharjo / TPS 039: suara tidak sah 51 disesuaikan ke surat suara digunakan - suara calon 161.
+- Kalibaru / Kajarharjo / TPS 039: total suara Excel 51 tidak sama dengan hasil koreksi 161.
+- Kalibaru / Kajarharjo / TPS 040: suara tidak sah 41 disesuaikan ke surat suara digunakan - suara calon 188.
+- Kalibaru / Kajarharjo / TPS 040: total suara Excel 41 tidak sama dengan hasil koreksi 188.
+- Kalibaru / Kajarharjo / TPS 041: suara tidak sah 46 disesuaikan ke surat suara digunakan - suara calon 200.
+- Kalibaru / Kajarharjo / TPS 041: total suara Excel 46 tidak sama dengan hasil koreksi 200.
+- Kalibaru / Kajarharjo / TPS 042: suara tidak sah 28 disesuaikan ke surat suara digunakan - suara calon 171.
+- Kalibaru / Kajarharjo / TPS 042: total suara Excel 28 tidak sama dengan hasil koreksi 171.
+- Kalibaru / Kajarharjo / TPS 043: suara tidak sah 43 disesuaikan ke surat suara digunakan - suara calon 170.
+- Kalibaru / Kajarharjo / TPS 043: total suara Excel 43 tidak sama dengan hasil koreksi 170.
+- Kalibaru / Kajarharjo / TPS 044: suara tidak sah 55 disesuaikan ke surat suara digunakan - suara calon 195.
+- Kalibaru / Kajarharjo / TPS 044: total suara Excel 55 tidak sama dengan hasil koreksi 195.
+- Kalibaru / Kajarharjo / TPS 045: suara tidak sah 21 disesuaikan ke surat suara digunakan - suara calon 140.
+- Kalibaru / Kajarharjo / TPS 045: total suara Excel 21 tidak sama dengan hasil koreksi 140.
+- Kalibaru / Kajarharjo / TPS 046: suara tidak sah 89 disesuaikan ke surat suara digunakan - suara calon 165.
+- Kalibaru / Kajarharjo / TPS 046: total suara Excel 89 tidak sama dengan hasil koreksi 165.
+- Kalibaru / Kalibarukulon / TPS 016: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 44; pengguna_dpt_pr disesuaikan 0 -> 44.
+- Kalibaru / Kalibarukulon / TPS 016: surat suara digunakan 0 disesuaikan ke 44.
+- Kalibaru / Kalibarukulon / TPS 017: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 14; pengguna_dpt_pr disesuaikan 0 -> 14.
+- Kalibaru / Kalibarukulon / TPS 017: surat suara digunakan 0 disesuaikan ke 14.
+- Kalibaru / Kalibarukulon / TPS 018: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 35; pengguna_dpt_pr disesuaikan 0 -> 35.
+- Kalibaru / Kalibarukulon / TPS 018: surat suara digunakan 0 disesuaikan ke 35.
+- Kalibaru / Kalibarukulon / TPS 019: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 49; pengguna_dpt_pr disesuaikan 0 -> 49.
+- Kalibaru / Kalibarukulon / TPS 019: surat suara digunakan 0 disesuaikan ke 49.
+- Kalibaru / Kalibarukulon / TPS 020: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 33; pengguna_dpt_pr disesuaikan 0 -> 33.
+- Kalibaru / Kalibarukulon / TPS 020: surat suara digunakan 0 disesuaikan ke 33.
+- Kalibaru / Kalibarukulon / TPS 021: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 40; pengguna_dpt_pr disesuaikan 0 -> 40.
+- Kalibaru / Kalibarukulon / TPS 021: surat suara digunakan 0 disesuaikan ke 40.
+- Kalibaru / Kalibarukulon / TPS 022: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 56; pengguna_dpt_pr disesuaikan 0 -> 56.
+- Kalibaru / Kalibarukulon / TPS 022: surat suara digunakan 0 disesuaikan ke 56.
+- Kalibaru / Kalibarukulon / TPS 023: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 23; pengguna_dpt_pr disesuaikan 0 -> 23.
+- Kalibaru / Kalibarukulon / TPS 023: surat suara digunakan 0 disesuaikan ke 23.
+- Kalibaru / Kalibarukulon / TPS 024: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 20; pengguna_dpt_pr disesuaikan 0 -> 20.
+- Kalibaru / Kalibarukulon / TPS 024: surat suara digunakan 0 disesuaikan ke 20.
+- Kalibaru / Kalibarukulon / TPS 025: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 27; pengguna_dpt_pr disesuaikan 0 -> 27.
+- Kalibaru / Kalibarukulon / TPS 025: surat suara digunakan 0 disesuaikan ke 27.
+- Kalibaru / Kalibarukulon / TPS 026: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 56; pengguna_dpt_pr disesuaikan 0 -> 56.
+- Kalibaru / Kalibarukulon / TPS 026: surat suara digunakan 0 disesuaikan ke 56.
+- Kalibaru / Kalibarukulon / TPS 027: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 68; pengguna_dpt_pr disesuaikan 0 -> 68.
+- Kalibaru / Kalibarukulon / TPS 027: surat suara digunakan 0 disesuaikan ke 68.
+- Kalibaru / Kalibarumanis / TPS 001: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 49.
+- Kalibaru / Kalibarumanis / TPS 001: total suara Excel 162 tidak sama dengan hasil koreksi 211.
+- Kalibaru / Kalibarumanis / TPS 002: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 41.
+- Kalibaru / Kalibarumanis / TPS 002: total suara Excel 167 tidak sama dengan hasil koreksi 208.
+- Kalibaru / Kalibarumanis / TPS 003: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 33.
+- Kalibaru / Kalibarumanis / TPS 003: total suara Excel 197 tidak sama dengan hasil koreksi 230.
+- Kalibaru / Kalibarumanis / TPS 004: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 30.
+- Kalibaru / Kalibarumanis / TPS 004: total suara Excel 175 tidak sama dengan hasil koreksi 205.
+- Kalibaru / Kalibarumanis / TPS 005: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 48.
+- Kalibaru / Kalibarumanis / TPS 005: total suara Excel 169 tidak sama dengan hasil koreksi 217.
+- Kalibaru / Kalibarumanis / TPS 006: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 49.
+- Kalibaru / Kalibarumanis / TPS 006: total suara Excel 151 tidak sama dengan hasil koreksi 200.
+- Kalibaru / Kalibarumanis / TPS 007: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 43.
+- Kalibaru / Kalibarumanis / TPS 007: total suara Excel 188 tidak sama dengan hasil koreksi 231.
+- Kalibaru / Kalibarumanis / TPS 008: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 73.
+- Kalibaru / Kalibarumanis / TPS 008: total suara Excel 155 tidak sama dengan hasil koreksi 228.
+- Kalibaru / Kalibarumanis / TPS 009: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 42.
+- Kalibaru / Kalibarumanis / TPS 009: total suara Excel 187 tidak sama dengan hasil koreksi 229.
+- Kalibaru / Kalibarumanis / TPS 010: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 53.
+- Kalibaru / Kalibarumanis / TPS 010: total suara Excel 164 tidak sama dengan hasil koreksi 217.
+- Kalibaru / Kalibarumanis / TPS 011: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 45.
+- Kalibaru / Kalibarumanis / TPS 011: total suara Excel 166 tidak sama dengan hasil koreksi 211.
+- Kalibaru / Kalibarumanis / TPS 012: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 42.
+- Kalibaru / Kalibarumanis / TPS 012: total suara Excel 159 tidak sama dengan hasil koreksi 201.
+- Kalibaru / Kalibarumanis / TPS 013: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 36.
+- Kalibaru / Kalibarumanis / TPS 013: total suara Excel 164 tidak sama dengan hasil koreksi 200.
+- Kalibaru / Kalibarumanis / TPS 014: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 27.
+- Kalibaru / Kalibarumanis / TPS 014: total suara Excel 214 tidak sama dengan hasil koreksi 241.
+- Kalibaru / Kalibarumanis / TPS 015: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 45.
+- Kalibaru / Kalibarumanis / TPS 015: total suara Excel 157 tidak sama dengan hasil koreksi 202.
+- Kalibaru / Kalibarumanis / TPS 016: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 43.
+- Kalibaru / Kalibarumanis / TPS 016: total suara Excel 172 tidak sama dengan hasil koreksi 215.
+- Kalibaru / Kalibarumanis / TPS 017: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 44.
+- Kalibaru / Kalibarumanis / TPS 017: total suara Excel 151 tidak sama dengan hasil koreksi 195.
+- Kalibaru / Kalibarumanis / TPS 018: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 32.
+- Kalibaru / Kalibarumanis / TPS 018: total suara Excel 167 tidak sama dengan hasil koreksi 199.
+- Kalibaru / Kalibarumanis / TPS 019: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 42.
+- Kalibaru / Kalibarumanis / TPS 019: total suara Excel 180 tidak sama dengan hasil koreksi 222.
+- Kalibaru / Kalibarumanis / TPS 020: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 42.
+- Kalibaru / Kalibarumanis / TPS 020: total suara Excel 159 tidak sama dengan hasil koreksi 201.
+- Kalibaru / Kalibarumanis / TPS 021: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 31.
+- Kalibaru / Kalibarumanis / TPS 021: total suara Excel 145 tidak sama dengan hasil koreksi 176.
+- Kalibaru / Kalibarumanis / TPS 022: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 41.
+- Kalibaru / Kalibarumanis / TPS 022: total suara Excel 148 tidak sama dengan hasil koreksi 189.
+- Kalibaru / Kalibarumanis / TPS 023: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 27.
+- Kalibaru / Kalibarumanis / TPS 023: total suara Excel 133 tidak sama dengan hasil koreksi 160.
+- Kalibaru / Kalibarumanis / TPS 024: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 40.
+- Kalibaru / Kalibarumanis / TPS 024: total suara Excel 138 tidak sama dengan hasil koreksi 178.
+- Kalibaru / Kalibarumanis / TPS 025: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 21.
+- Kalibaru / Kalibarumanis / TPS 025: total suara Excel 129 tidak sama dengan hasil koreksi 150.
+- Kalibaru / Kalibarumanis / TPS 026: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 18.
+- Kalibaru / Kalibarumanis / TPS 026: total suara Excel 154 tidak sama dengan hasil koreksi 172.
+- Kalibaru / Kalibarumanis / TPS 027: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 36.
+- Kalibaru / Kalibarumanis / TPS 027: total suara Excel 139 tidak sama dengan hasil koreksi 175.
+- Kalibaru / Kalibarumanis / TPS 028: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 35.
+- Kalibaru / Kalibarumanis / TPS 028: total suara Excel 166 tidak sama dengan hasil koreksi 201.
+- Kalibaru / Kalibarumanis / TPS 029: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 47.
+- Kalibaru / Kalibarumanis / TPS 029: total suara Excel 136 tidak sama dengan hasil koreksi 183.
+- Kalibaru / Kalibarumanis / TPS 030: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 44.
+- Kalibaru / Kalibarumanis / TPS 030: total suara Excel 150 tidak sama dengan hasil koreksi 194.
+- Kalibaru / Kalibarumanis / TPS 031: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 13.
+- Kalibaru / Kalibarumanis / TPS 031: total suara Excel 110 tidak sama dengan hasil koreksi 123.
+- Kalibaru / Kalibarumanis / TPS 032: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 9.
+- Kalibaru / Kalibarumanis / TPS 032: total suara Excel 150 tidak sama dengan hasil koreksi 159.
+- Kalibaru / Kalibaruwetan / TPS 001: suara tidak sah 40 disesuaikan ke surat suara digunakan - suara calon 188.
+- Kalibaru / Kalibaruwetan / TPS 001: total suara Excel 40 tidak sama dengan hasil koreksi 188.
+- Kalibaru / Kalibaruwetan / TPS 002: suara tidak sah 46 disesuaikan ke surat suara digunakan - suara calon 204.
+- Kalibaru / Kalibaruwetan / TPS 002: total suara Excel 46 tidak sama dengan hasil koreksi 204.
+- Kalibaru / Kalibaruwetan / TPS 003: suara tidak sah 56 disesuaikan ke surat suara digunakan - suara calon 209.
+- Kalibaru / Kalibaruwetan / TPS 003: total suara Excel 56 tidak sama dengan hasil koreksi 209.
+- Kalibaru / Kalibaruwetan / TPS 004: suara tidak sah 40 disesuaikan ke surat suara digunakan - suara calon 145.
+- Kalibaru / Kalibaruwetan / TPS 004: total suara Excel 40 tidak sama dengan hasil koreksi 145.
+- Kalibaru / Kalibaruwetan / TPS 005: suara tidak sah 29 disesuaikan ke surat suara digunakan - suara calon 173.
+- Kalibaru / Kalibaruwetan / TPS 005: total suara Excel 29 tidak sama dengan hasil koreksi 173.
+- Kalibaru / Kalibaruwetan / TPS 006: suara tidak sah 48 disesuaikan ke surat suara digunakan - suara calon 188.
+- Kalibaru / Kalibaruwetan / TPS 006: total suara Excel 48 tidak sama dengan hasil koreksi 188.
+- Kalibaru / Kalibaruwetan / TPS 007: suara tidak sah 8 disesuaikan ke surat suara digunakan - suara calon 134.
+- Kalibaru / Kalibaruwetan / TPS 007: total suara Excel 8 tidak sama dengan hasil koreksi 134.
+- Kalibaru / Kalibaruwetan / TPS 008: suara tidak sah 41 disesuaikan ke surat suara digunakan - suara calon 198.
+- Kalibaru / Kalibaruwetan / TPS 008: total suara Excel 41 tidak sama dengan hasil koreksi 198.
+- Kalibaru / Kalibaruwetan / TPS 009: suara tidak sah 38 disesuaikan ke surat suara digunakan - suara calon 189.
+- Kalibaru / Kalibaruwetan / TPS 009: total suara Excel 38 tidak sama dengan hasil koreksi 189.
+- Kalibaru / Kalibaruwetan / TPS 010: suara tidak sah 32 disesuaikan ke surat suara digunakan - suara calon 191.
+- Kalibaru / Kalibaruwetan / TPS 010: total suara Excel 32 tidak sama dengan hasil koreksi 191.
+- Kalibaru / Kalibaruwetan / TPS 011: suara tidak sah 25 disesuaikan ke surat suara digunakan - suara calon 187.
+- Kalibaru / Kalibaruwetan / TPS 011: total suara Excel 25 tidak sama dengan hasil koreksi 187.
+- Kalibaru / Kalibaruwetan / TPS 012: suara tidak sah 32 disesuaikan ke surat suara digunakan - suara calon 194.
+- Kalibaru / Kalibaruwetan / TPS 012: total suara Excel 32 tidak sama dengan hasil koreksi 194.
+- Kalibaru / Kalibaruwetan / TPS 013: suara tidak sah 79 disesuaikan ke surat suara digunakan - suara calon 212.
+- Kalibaru / Kalibaruwetan / TPS 013: total suara Excel 79 tidak sama dengan hasil koreksi 212.
+- Kalibaru / Kalibaruwetan / TPS 014: suara tidak sah 50 disesuaikan ke surat suara digunakan - suara calon 200.
+- Kalibaru / Kalibaruwetan / TPS 014: total suara Excel 50 tidak sama dengan hasil koreksi 200.
+- Kalibaru / Kalibaruwetan / TPS 015: suara tidak sah 33 disesuaikan ke surat suara digunakan - suara calon 208.
+- Kalibaru / Kalibaruwetan / TPS 015: total suara Excel 33 tidak sama dengan hasil koreksi 208.
+- Kalibaru / Kalibaruwetan / TPS 016: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 37.
+- Kalibaru / Kalibaruwetan / TPS 016: total suara Excel 158 tidak sama dengan hasil koreksi 195.
+- Kalibaru / Kalibaruwetan / TPS 017: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 64.
+- Kalibaru / Kalibaruwetan / TPS 017: total suara Excel 157 tidak sama dengan hasil koreksi 221.
+- Kalibaru / Kalibaruwetan / TPS 018: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 39.
+- Kalibaru / Kalibaruwetan / TPS 018: total suara Excel 170 tidak sama dengan hasil koreksi 209.
+- Kalibaru / Kalibaruwetan / TPS 019: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 41.
+- Kalibaru / Kalibaruwetan / TPS 019: total suara Excel 160 tidak sama dengan hasil koreksi 201.
+- Kalibaru / Kalibaruwetan / TPS 020: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 22.
+- Kalibaru / Kalibaruwetan / TPS 020: total suara Excel 190 tidak sama dengan hasil koreksi 212.
+- Kalibaru / Kalibaruwetan / TPS 021: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 33.
+- Kalibaru / Kalibaruwetan / TPS 021: total suara Excel 161 tidak sama dengan hasil koreksi 194.
+- Kalibaru / Kalibaruwetan / TPS 022: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 37.
+- Kalibaru / Kalibaruwetan / TPS 022: total suara Excel 180 tidak sama dengan hasil koreksi 217.
+- Kalibaru / Kalibaruwetan / TPS 023: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 47.
+- Kalibaru / Kalibaruwetan / TPS 023: total suara Excel 185 tidak sama dengan hasil koreksi 232.
+- Kalibaru / Kalibaruwetan / TPS 024: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 35.
+- Kalibaru / Kalibaruwetan / TPS 024: total suara Excel 161 tidak sama dengan hasil koreksi 196.
+- Kalibaru / Kalibaruwetan / TPS 025: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 29.
+- Kalibaru / Kalibaruwetan / TPS 025: total suara Excel 145 tidak sama dengan hasil koreksi 174.
+- Kalibaru / Kalibaruwetan / TPS 026: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 35.
+- Kalibaru / Kalibaruwetan / TPS 026: total suara Excel 162 tidak sama dengan hasil koreksi 197.
+- Kalibaru / Kalibaruwetan / TPS 027: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 26.
+- Kalibaru / Kalibaruwetan / TPS 027: total suara Excel 147 tidak sama dengan hasil koreksi 173.
+- Kalibaru / Kalibaruwetan / TPS 028: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 29.
+- Kalibaru / Kalibaruwetan / TPS 028: total suara Excel 151 tidak sama dengan hasil koreksi 180.
+- Kalibaru / Kalibaruwetan / TPS 029: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 33.
+- Kalibaru / Kalibaruwetan / TPS 029: total suara Excel 141 tidak sama dengan hasil koreksi 174.
+- Kalibaru / Kalibaruwetan / TPS 030: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 23.
+- Kalibaru / Kalibaruwetan / TPS 030: total suara Excel 152 tidak sama dengan hasil koreksi 175.
+- Kalibaru / Kalibaruwetan / TPS 031: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 30; pengguna_dpt_pr disesuaikan 0 -> 30.
+- Kalibaru / Kalibaruwetan / TPS 031: surat suara digunakan 0 disesuaikan ke 30.
+- Kalibaru / Kalibaruwetan / TPS 032: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 32; pengguna_dpt_pr disesuaikan 0 -> 32.
+- Kalibaru / Kalibaruwetan / TPS 032: surat suara digunakan 0 disesuaikan ke 32.
+- Kalibaru / Kalibaruwetan / TPS 033: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 28; pengguna_dpt_pr disesuaikan 0 -> 28.
+- Kalibaru / Kalibaruwetan / TPS 033: surat suara digunakan 0 disesuaikan ke 28.
+- Kalibaru / Kalibaruwetan / TPS 034: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 32; pengguna_dpt_pr disesuaikan 0 -> 32.
+- Kalibaru / Kalibaruwetan / TPS 034: surat suara digunakan 0 disesuaikan ke 32.
+- Kalibaru / Kalibaruwetan / TPS 035: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 20; pengguna_dpt_pr disesuaikan 0 -> 20.
+- Kalibaru / Kalibaruwetan / TPS 035: surat suara digunakan 0 disesuaikan ke 20.
+- Kalibaru / Kalibaruwetan / TPS 036: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 47; pengguna_dpt_pr disesuaikan 0 -> 47.
+- Kalibaru / Kalibaruwetan / TPS 036: surat suara digunakan 0 disesuaikan ke 47.
+- Kalibaru / Kalibaruwetan / TPS 037: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 52; pengguna_dpt_pr disesuaikan 0 -> 52.
+- Kalibaru / Kalibaruwetan / TPS 037: surat suara digunakan 0 disesuaikan ke 52.
+- Kalibaru / Kalibaruwetan / TPS 038: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 38; pengguna_dpt_pr disesuaikan 0 -> 38.
+- Kalibaru / Kalibaruwetan / TPS 038: surat suara digunakan 0 disesuaikan ke 38.
+- Kalibaru / Kalibaruwetan / TPS 039: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 44; pengguna_dpt_pr disesuaikan 0 -> 44.
+- Kalibaru / Kalibaruwetan / TPS 039: surat suara digunakan 0 disesuaikan ke 44.
+- Kalibaru / Kalibaruwetan / TPS 040: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 32; pengguna_dpt_pr disesuaikan 0 -> 32.
+- Kalibaru / Kalibaruwetan / TPS 040: surat suara digunakan 0 disesuaikan ke 32.
+- Kalibaru / Kalibaruwetan / TPS 041: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 49; pengguna_dpt_pr disesuaikan 0 -> 49.
+- Kalibaru / Kalibaruwetan / TPS 041: surat suara digunakan 0 disesuaikan ke 49.
+- Kalibaru / Kalibaruwetan / TPS 042: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 31; pengguna_dpt_pr disesuaikan 0 -> 31.
+- Kalibaru / Kalibaruwetan / TPS 042: surat suara digunakan 0 disesuaikan ke 31.
+- Kalibaru / Kebonrejo / TPS 001: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 173; pengguna_dpt_pr disesuaikan 0 -> 173.
+- Kalibaru / Kebonrejo / TPS 001: surat suara digunakan 0 disesuaikan ke 173.
+- Kalibaru / Kebonrejo / TPS 002: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 189; pengguna_dpt_pr disesuaikan 0 -> 189.
+- Kalibaru / Kebonrejo / TPS 002: surat suara digunakan 0 disesuaikan ke 189.
+- Kalibaru / Kebonrejo / TPS 003: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 180; pengguna_dpt_pr disesuaikan 0 -> 180.
+- Kalibaru / Kebonrejo / TPS 003: surat suara digunakan 0 disesuaikan ke 180.
+- Kalibaru / Kebonrejo / TPS 004: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 164; pengguna_dpt_pr disesuaikan 0 -> 164.
+- Kalibaru / Kebonrejo / TPS 004: surat suara digunakan 0 disesuaikan ke 164.
+- Kalibaru / Kebonrejo / TPS 005: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 132; pengguna_dpt_pr disesuaikan 0 -> 132.
+- Kalibaru / Kebonrejo / TPS 005: surat suara digunakan 0 disesuaikan ke 132.
+- Kalibaru / Kebonrejo / TPS 006: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 175; pengguna_dpt_pr disesuaikan 0 -> 175.
+- Kalibaru / Kebonrejo / TPS 006: surat suara digunakan 0 disesuaikan ke 175.
+- Kalibaru / Kebonrejo / TPS 007: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 155; pengguna_dpt_pr disesuaikan 0 -> 155.
+- Kalibaru / Kebonrejo / TPS 007: surat suara digunakan 0 disesuaikan ke 155.
+- Kalibaru / Kebonrejo / TPS 008: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 178; pengguna_dpt_pr disesuaikan 0 -> 178.
+- Kalibaru / Kebonrejo / TPS 008: surat suara digunakan 0 disesuaikan ke 178.
+- Kalibaru / Kebonrejo / TPS 009: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 145; pengguna_dpt_pr disesuaikan 0 -> 145.
+- Kalibaru / Kebonrejo / TPS 009: surat suara digunakan 0 disesuaikan ke 145.
+- Kalibaru / Kebonrejo / TPS 010: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 185; pengguna_dpt_pr disesuaikan 0 -> 185.
+- Kalibaru / Kebonrejo / TPS 010: surat suara digunakan 0 disesuaikan ke 185.
+- Kalibaru / Kebonrejo / TPS 011: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 145; pengguna_dpt_pr disesuaikan 0 -> 145.
+- Kalibaru / Kebonrejo / TPS 011: surat suara digunakan 0 disesuaikan ke 145.
+- Kalibaru / Kebonrejo / TPS 012: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 175; pengguna_dpt_pr disesuaikan 0 -> 175.
+- Kalibaru / Kebonrejo / TPS 012: surat suara digunakan 0 disesuaikan ke 175.
+- Kalibaru / Kebonrejo / TPS 013: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 142; pengguna_dpt_pr disesuaikan 0 -> 142.
+- Kalibaru / Kebonrejo / TPS 013: surat suara digunakan 0 disesuaikan ke 142.
+- Kalibaru / Kebonrejo / TPS 014: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 148; pengguna_dpt_pr disesuaikan 0 -> 148.
+- Kalibaru / Kebonrejo / TPS 014: surat suara digunakan 0 disesuaikan ke 148.
+- Kalibaru / Kebonrejo / TPS 015: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 167; pengguna_dpt_pr disesuaikan 0 -> 167.
+- Kalibaru / Kebonrejo / TPS 015: surat suara digunakan 0 disesuaikan ke 167.
+- Kalibaru / Kebonrejo / TPS 016: surat suara digunakan 0 disesuaikan ke 224.
+- Kalibaru / Kebonrejo / TPS 017: surat suara digunakan 0 disesuaikan ke 226.
+- Kalibaru / Kebonrejo / TPS 018: surat suara digunakan 0 disesuaikan ke 192.
+- Kalibaru / Kebonrejo / TPS 019: surat suara digunakan 0 disesuaikan ke 158.
+- Kalibaru / Kebonrejo / TPS 020: surat suara digunakan 0 disesuaikan ke 208.
+- Kalibaru / Kebonrejo / TPS 021: surat suara digunakan 0 disesuaikan ke 179.
+- Kalibaru / Kebonrejo / TPS 022: surat suara digunakan 0 disesuaikan ke 171.
+- Kalibaru / Kebonrejo / TPS 023: surat suara digunakan 0 disesuaikan ke 208.
+- Kalibaru / Kebonrejo / TPS 024: surat suara digunakan 0 disesuaikan ke 226.
+- Kalibaru / Kebonrejo / TPS 025: surat suara digunakan 0 disesuaikan ke 170.
+- Kalibaru / Kebonrejo / TPS 026: surat suara digunakan 0 disesuaikan ke 210.
+- Kalibaru / Kebonrejo / TPS 027: surat suara digunakan 0 disesuaikan ke 222.
+- Kalibaru / Kebonrejo / TPS 028: surat suara digunakan 0 disesuaikan ke 151.
+- Kalibaru / Kebonrejo / TPS 029: surat suara digunakan 0 disesuaikan ke 225.
+- Kalibaru / Kebonrejo / TPS 030: surat suara digunakan 0 disesuaikan ke 178.
+- Kalibaru / Kebonrejo / TPS 031: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 220; pengguna_dpt_pr disesuaikan 0 -> 220.
+- Kalibaru / Kebonrejo / TPS 031: surat suara digunakan 0 disesuaikan ke 220.
+- Muncar / Blambangan / TPS 006: pengguna hak pilih 208 tidak sama dengan surat suara digunakan 205; pengguna_dpt_pr disesuaikan 108 -> 105.
+- Muncar / Blambangan / TPS 007: suara tidak sah 57 disesuaikan ke surat suara digunakan - suara calon 67.
+- Muncar / Blambangan / TPS 007: total suara Excel 224 tidak sama dengan hasil koreksi 234.
+- Muncar / Tapanrejo / TPS 003: suara tidak sah 29 disesuaikan ke surat suara digunakan - suara calon 39.
+- Muncar / Tapanrejo / TPS 003: total suara Excel 196 tidak sama dengan hasil koreksi 206.
+- Muncar / Tapanrejo / TPS 007: suara tidak sah 66 disesuaikan ke surat suara digunakan - suara calon 49.
+- Muncar / Tapanrejo / TPS 007: total suara Excel 244 tidak sama dengan hasil koreksi 227.
+- Muncar / Tembokrejo / TPS 012: suara tidak sah 33 disesuaikan ke surat suara digunakan - suara calon 22.
+- Muncar / Tembokrejo / TPS 012: total suara Excel 179 tidak sama dengan hasil koreksi 168.
+- Muncar / Tembokrejo / TPS 023: pengguna hak pilih 207 tidak sama dengan surat suara digunakan 206; pengguna_dpt_pr disesuaikan 97 -> 96.
+- Muncar / Tembokrejo / TPS 036: suara tidak sah 65 disesuaikan ke surat suara digunakan - suara calon 76.
+- Muncar / Tembokrejo / TPS 036: total suara Excel 198 tidak sama dengan hasil koreksi 209.
+- Muncar / Tembokrejo / TPS 039: suara tidak sah 55 disesuaikan ke surat suara digunakan - suara calon 52.
+- Muncar / Tembokrejo / TPS 039: total suara Excel 207 tidak sama dengan hasil koreksi 204.
+- Muncar / Tembokrejo / TPS 047: suara tidak sah 40 disesuaikan ke surat suara digunakan - suara calon 30.
+- Muncar / Tembokrejo / TPS 047: total suara Excel 205 tidak sama dengan hasil koreksi 195.
+- Muncar / Tembokrejo / TPS 079: suara tidak sah 36 disesuaikan ke surat suara digunakan - suara calon 35.
+- Muncar / Tembokrejo / TPS 079: total suara Excel 192 tidak sama dengan hasil koreksi 191.
+- Pesanggaran / Pesanggaran / TPS 004: pengguna hak pilih 205 tidak sama dengan surat suara digunakan 206; pengguna_dpt_pr disesuaikan 111 -> 112.
+- Pesanggaran / Sumberagung / TPS 030: suara tidak sah 30 disesuaikan ke surat suara digunakan - suara calon 32.
+- Pesanggaran / Sumberagung / TPS 030: total suara Excel 196 tidak sama dengan hasil koreksi 198.
+- Pesanggaran / Sumberagung / TPS 031: suara tidak sah 27 disesuaikan ke surat suara digunakan - suara calon 224.
+- Pesanggaran / Sumberagung / TPS 031: total suara Excel 27 tidak sama dengan hasil koreksi 224.
+- Pesanggaran / Sumberagung / TPS 032: suara tidak sah 45 disesuaikan ke surat suara digunakan - suara calon 235.
+- Pesanggaran / Sumberagung / TPS 032: total suara Excel 45 tidak sama dengan hasil koreksi 235.
+- Pesanggaran / Sumberagung / TPS 033: suara tidak sah 44 disesuaikan ke surat suara digunakan - suara calon 236.
+- Pesanggaran / Sumberagung / TPS 033: total suara Excel 44 tidak sama dengan hasil koreksi 236.
+- Pesanggaran / Sumberagung / TPS 034: suara tidak sah 52 disesuaikan ke surat suara digunakan - suara calon 218.
+- Pesanggaran / Sumberagung / TPS 034: total suara Excel 52 tidak sama dengan hasil koreksi 218.
+- Pesanggaran / Sumberagung / TPS 035: suara tidak sah 37 disesuaikan ke surat suara digunakan - suara calon 204.
+- Pesanggaran / Sumberagung / TPS 035: total suara Excel 37 tidak sama dengan hasil koreksi 204.
+- Pesanggaran / Sumberagung / TPS 036: suara tidak sah 53 disesuaikan ke surat suara digunakan - suara calon 229.
+- Pesanggaran / Sumberagung / TPS 036: total suara Excel 53 tidak sama dengan hasil koreksi 229.
+- Pesanggaran / Sumberagung / TPS 037: suara tidak sah 63 disesuaikan ke surat suara digunakan - suara calon 236.
+- Pesanggaran / Sumberagung / TPS 037: total suara Excel 63 tidak sama dengan hasil koreksi 236.
+- Pesanggaran / Sumberagung / TPS 038: suara tidak sah 28 disesuaikan ke surat suara digunakan - suara calon 182.
+- Pesanggaran / Sumberagung / TPS 038: total suara Excel 28 tidak sama dengan hasil koreksi 182.
+- Pesanggaran / Sumberagung / TPS 039: suara tidak sah 48 disesuaikan ke surat suara digunakan - suara calon 223.
+- Pesanggaran / Sumberagung / TPS 039: total suara Excel 48 tidak sama dengan hasil koreksi 223.
+- Pesanggaran / Sumberagung / TPS 040: suara tidak sah 34 disesuaikan ke surat suara digunakan - suara calon 184.
+- Pesanggaran / Sumberagung / TPS 040: total suara Excel 34 tidak sama dengan hasil koreksi 184.
+- Pesanggaran / Sumberagung / TPS 041: suara tidak sah 27 disesuaikan ke surat suara digunakan - suara calon 157.
+- Pesanggaran / Sumberagung / TPS 041: total suara Excel 27 tidak sama dengan hasil koreksi 157.
+- Pesanggaran / Sumberagung / TPS 042: suara tidak sah 36 disesuaikan ke surat suara digunakan - suara calon 185.
+- Pesanggaran / Sumberagung / TPS 042: total suara Excel 36 tidak sama dengan hasil koreksi 185.
+- Pesanggaran / Sumberagung / TPS 043: suara tidak sah 34 disesuaikan ke surat suara digunakan - suara calon 176.
+- Pesanggaran / Sumberagung / TPS 043: total suara Excel 34 tidak sama dengan hasil koreksi 176.
+- Pesanggaran / Sumberagung / TPS 044: suara tidak sah 42 disesuaikan ke surat suara digunakan - suara calon 221.
+- Pesanggaran / Sumberagung / TPS 044: total suara Excel 42 tidak sama dengan hasil koreksi 221.
+- Pesanggaran / Sumberagung / TPS 045: suara tidak sah 26 disesuaikan ke surat suara digunakan - suara calon 201.
+- Pesanggaran / Sumberagung / TPS 045: total suara Excel 26 tidak sama dengan hasil koreksi 201.
+- Purwoharjo / Glagahagung / TPS 016: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 15.
+- Purwoharjo / Glagahagung / TPS 016: total suara Excel 197 tidak sama dengan hasil koreksi 212.
+- Purwoharjo / Glagahagung / TPS 017: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 31.
+- Purwoharjo / Glagahagung / TPS 017: total suara Excel 199 tidak sama dengan hasil koreksi 230.
+- Purwoharjo / Glagahagung / TPS 018: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 25.
+- Purwoharjo / Glagahagung / TPS 018: total suara Excel 218 tidak sama dengan hasil koreksi 243.
+- Purwoharjo / Glagahagung / TPS 019: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 19.
+- Purwoharjo / Glagahagung / TPS 019: total suara Excel 192 tidak sama dengan hasil koreksi 211.
+- Purwoharjo / Glagahagung / TPS 020: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 15.
+- Purwoharjo / Glagahagung / TPS 020: total suara Excel 191 tidak sama dengan hasil koreksi 206.
+- Purwoharjo / Glagahagung / TPS 021: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 51.
+- Purwoharjo / Glagahagung / TPS 021: total suara Excel 186 tidak sama dengan hasil koreksi 237.
+- Purwoharjo / Glagahagung / TPS 022: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 66.
+- Purwoharjo / Glagahagung / TPS 022: total suara Excel 192 tidak sama dengan hasil koreksi 258.
+- Purwoharjo / Sidorejo / TPS 001: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 31.
+- Purwoharjo / Sidorejo / TPS 001: total suara Excel 199 tidak sama dengan hasil koreksi 230.
+- Purwoharjo / Sidorejo / TPS 002: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 25.
+- Purwoharjo / Sidorejo / TPS 002: total suara Excel 183 tidak sama dengan hasil koreksi 208.
+- Purwoharjo / Sidorejo / TPS 003: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 36.
+- Purwoharjo / Sidorejo / TPS 003: total suara Excel 179 tidak sama dengan hasil koreksi 215.
+- Purwoharjo / Sidorejo / TPS 004: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 25.
+- Purwoharjo / Sidorejo / TPS 004: total suara Excel 198 tidak sama dengan hasil koreksi 223.
+- Purwoharjo / Sidorejo / TPS 005: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 53.
+- Purwoharjo / Sidorejo / TPS 005: total suara Excel 170 tidak sama dengan hasil koreksi 223.
+- Purwoharjo / Sidorejo / TPS 006: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 46.
+- Purwoharjo / Sidorejo / TPS 006: total suara Excel 173 tidak sama dengan hasil koreksi 219.
+- Purwoharjo / Sidorejo / TPS 007: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 29.
+- Purwoharjo / Sidorejo / TPS 007: total suara Excel 193 tidak sama dengan hasil koreksi 222.
+- Purwoharjo / Sidorejo / TPS 008: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 36.
+- Purwoharjo / Sidorejo / TPS 008: total suara Excel 187 tidak sama dengan hasil koreksi 223.
+- Purwoharjo / Sidorejo / TPS 009: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 37.
+- Purwoharjo / Sidorejo / TPS 009: total suara Excel 189 tidak sama dengan hasil koreksi 226.
+- Purwoharjo / Sidorejo / TPS 010: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 36.
+- Purwoharjo / Sidorejo / TPS 010: total suara Excel 188 tidak sama dengan hasil koreksi 224.
+- Purwoharjo / Sidorejo / TPS 011: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 37.
+- Purwoharjo / Sidorejo / TPS 011: total suara Excel 190 tidak sama dengan hasil koreksi 227.
+- Purwoharjo / Sidorejo / TPS 012: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 30.
+- Purwoharjo / Sidorejo / TPS 012: total suara Excel 212 tidak sama dengan hasil koreksi 242.
+- Purwoharjo / Sidorejo / TPS 013: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 31.
+- Purwoharjo / Sidorejo / TPS 013: total suara Excel 200 tidak sama dengan hasil koreksi 231.
+- Purwoharjo / Sidorejo / TPS 014: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 74.
+- Purwoharjo / Sidorejo / TPS 014: total suara Excel 143 tidak sama dengan hasil koreksi 217.
+- Purwoharjo / Sidorejo / TPS 015: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 14.
+- Purwoharjo / Sidorejo / TPS 015: total suara Excel 205 tidak sama dengan hasil koreksi 219.
+- Purwoharjo / Bulurejo / TPS 001: suara tidak sah 42 disesuaikan ke surat suara digunakan - suara calon 209.
+- Purwoharjo / Bulurejo / TPS 001: total suara Excel 42 tidak sama dengan hasil koreksi 209.
+- Purwoharjo / Bulurejo / TPS 002: suara tidak sah 43 disesuaikan ke surat suara digunakan - suara calon 227.
+- Purwoharjo / Bulurejo / TPS 002: total suara Excel 43 tidak sama dengan hasil koreksi 227.
+- Purwoharjo / Bulurejo / TPS 003: suara tidak sah 39 disesuaikan ke surat suara digunakan - suara calon 210.
+- Purwoharjo / Bulurejo / TPS 003: total suara Excel 39 tidak sama dengan hasil koreksi 210.
+- Purwoharjo / Bulurejo / TPS 004: suara tidak sah 39 disesuaikan ke surat suara digunakan - suara calon 190.
+- Purwoharjo / Bulurejo / TPS 004: total suara Excel 39 tidak sama dengan hasil koreksi 190.
+- Purwoharjo / Bulurejo / TPS 005: suara tidak sah 44 disesuaikan ke surat suara digunakan - suara calon 190.
+- Purwoharjo / Bulurejo / TPS 005: total suara Excel 44 tidak sama dengan hasil koreksi 190.
+- Purwoharjo / Bulurejo / TPS 006: suara tidak sah 36 disesuaikan ke surat suara digunakan - suara calon 208.
+- Purwoharjo / Bulurejo / TPS 006: total suara Excel 36 tidak sama dengan hasil koreksi 208.
+- Purwoharjo / Bulurejo / TPS 007: suara tidak sah 31 disesuaikan ke surat suara digunakan - suara calon 217.
+- Purwoharjo / Bulurejo / TPS 007: total suara Excel 31 tidak sama dengan hasil koreksi 217.
+- Purwoharjo / Bulurejo / TPS 008: suara tidak sah 48 disesuaikan ke surat suara digunakan - suara calon 199.
+- Purwoharjo / Bulurejo / TPS 008: total suara Excel 48 tidak sama dengan hasil koreksi 199.
+- Purwoharjo / Bulurejo / TPS 009: suara tidak sah 19 disesuaikan ke surat suara digunakan - suara calon 190.
+- Purwoharjo / Bulurejo / TPS 009: total suara Excel 19 tidak sama dengan hasil koreksi 190.
+- Purwoharjo / Bulurejo / TPS 010: suara tidak sah 36 disesuaikan ke surat suara digunakan - suara calon 210.
+- Purwoharjo / Bulurejo / TPS 010: total suara Excel 36 tidak sama dengan hasil koreksi 210.
+- Purwoharjo / Bulurejo / TPS 011: suara tidak sah 40 disesuaikan ke surat suara digunakan - suara calon 201.
+- Purwoharjo / Bulurejo / TPS 011: total suara Excel 40 tidak sama dengan hasil koreksi 201.
+- Purwoharjo / Bulurejo / TPS 012: suara tidak sah 43 disesuaikan ke surat suara digunakan - suara calon 210.
+- Purwoharjo / Bulurejo / TPS 012: total suara Excel 43 tidak sama dengan hasil koreksi 210.
+- Purwoharjo / Bulurejo / TPS 013: suara tidak sah 42 disesuaikan ke surat suara digunakan - suara calon 206.
+- Purwoharjo / Bulurejo / TPS 013: total suara Excel 42 tidak sama dengan hasil koreksi 206.
+- Purwoharjo / Bulurejo / TPS 014: suara tidak sah 53 disesuaikan ke surat suara digunakan - suara calon 194.
+- Purwoharjo / Bulurejo / TPS 014: total suara Excel 53 tidak sama dengan hasil koreksi 194.
+- Purwoharjo / Bulurejo / TPS 015: suara tidak sah 23 disesuaikan ke surat suara digunakan - suara calon 209.
+- Purwoharjo / Bulurejo / TPS 015: total suara Excel 23 tidak sama dengan hasil koreksi 209.
+- Purwoharjo / Kradenan / TPS 001: suara tidak sah 52 disesuaikan ke surat suara digunakan - suara calon 196.
+- Purwoharjo / Kradenan / TPS 001: total suara Excel 52 tidak sama dengan hasil koreksi 196.
+- Purwoharjo / Kradenan / TPS 002: suara tidak sah 51 disesuaikan ke surat suara digunakan - suara calon 215.
+- Purwoharjo / Kradenan / TPS 002: total suara Excel 51 tidak sama dengan hasil koreksi 215.
+- Purwoharjo / Kradenan / TPS 003: suara tidak sah 58 disesuaikan ke surat suara digunakan - suara calon 208.
+- Purwoharjo / Kradenan / TPS 003: total suara Excel 58 tidak sama dengan hasil koreksi 208.
+- Purwoharjo / Kradenan / TPS 004: suara tidak sah 50 disesuaikan ke surat suara digunakan - suara calon 247.
+- Purwoharjo / Kradenan / TPS 004: total suara Excel 50 tidak sama dengan hasil koreksi 247.
+- Purwoharjo / Kradenan / TPS 005: suara tidak sah 45 disesuaikan ke surat suara digunakan - suara calon 206.
+- Purwoharjo / Kradenan / TPS 005: total suara Excel 45 tidak sama dengan hasil koreksi 206.
+- Purwoharjo / Kradenan / TPS 006: suara tidak sah 66 disesuaikan ke surat suara digunakan - suara calon 228.
+- Purwoharjo / Kradenan / TPS 006: total suara Excel 66 tidak sama dengan hasil koreksi 228.
+- Purwoharjo / Kradenan / TPS 007: suara tidak sah 65 disesuaikan ke surat suara digunakan - suara calon 214.
+- Purwoharjo / Kradenan / TPS 007: total suara Excel 65 tidak sama dengan hasil koreksi 214.
+- Purwoharjo / Kradenan / TPS 008: suara tidak sah 53 disesuaikan ke surat suara digunakan - suara calon 201.
+- Purwoharjo / Kradenan / TPS 008: total suara Excel 53 tidak sama dengan hasil koreksi 201.
+- Purwoharjo / Kradenan / TPS 009: suara tidak sah 54 disesuaikan ke surat suara digunakan - suara calon 236.
+- Purwoharjo / Kradenan / TPS 009: total suara Excel 54 tidak sama dengan hasil koreksi 236.
+- Purwoharjo / Kradenan / TPS 010: suara tidak sah 31 disesuaikan ke surat suara digunakan - suara calon 203.
+- Purwoharjo / Kradenan / TPS 010: total suara Excel 31 tidak sama dengan hasil koreksi 203.
+- Purwoharjo / Kradenan / TPS 011: suara tidak sah 32 disesuaikan ke surat suara digunakan - suara calon 227.
+- Purwoharjo / Kradenan / TPS 011: total suara Excel 32 tidak sama dengan hasil koreksi 227.
+- Purwoharjo / Kradenan / TPS 012: suara tidak sah 31 disesuaikan ke surat suara digunakan - suara calon 239.
+- Purwoharjo / Kradenan / TPS 012: total suara Excel 31 tidak sama dengan hasil koreksi 239.
+- Purwoharjo / Kradenan / TPS 013: suara tidak sah 21 disesuaikan ke surat suara digunakan - suara calon 212.
+- Purwoharjo / Kradenan / TPS 013: total suara Excel 21 tidak sama dengan hasil koreksi 212.
+- Purwoharjo / Kradenan / TPS 014: suara tidak sah 32 disesuaikan ke surat suara digunakan - suara calon 224.
+- Purwoharjo / Kradenan / TPS 014: total suara Excel 32 tidak sama dengan hasil koreksi 224.
+- Purwoharjo / Kradenan / TPS 015: suara tidak sah 36 disesuaikan ke surat suara digunakan - suara calon 199.
+- Purwoharjo / Kradenan / TPS 015: total suara Excel 36 tidak sama dengan hasil koreksi 199.
+- Purwoharjo / Kradenan / TPS 016: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 221; pengguna_dpt_pr disesuaikan 0 -> 221.
+- Purwoharjo / Kradenan / TPS 016: surat suara digunakan 0 disesuaikan ke 221.
+- Purwoharjo / Kradenan / TPS 017: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 238; pengguna_dpt_pr disesuaikan 0 -> 238.
+- Purwoharjo / Kradenan / TPS 017: surat suara digunakan 0 disesuaikan ke 238.
+- Purwoharjo / Kradenan / TPS 018: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 209; pengguna_dpt_pr disesuaikan 0 -> 209.
+- Purwoharjo / Kradenan / TPS 018: surat suara digunakan 0 disesuaikan ke 209.
+- Purwoharjo / Kradenan / TPS 019: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 207; pengguna_dpt_pr disesuaikan 0 -> 207.
+- Purwoharjo / Kradenan / TPS 019: surat suara digunakan 0 disesuaikan ke 207.
+- Purwoharjo / Kradenan / TPS 020: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 201; pengguna_dpt_pr disesuaikan 0 -> 201.
+- Purwoharjo / Kradenan / TPS 020: surat suara digunakan 0 disesuaikan ke 201.
+- Purwoharjo / Kradenan / TPS 021: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 186; pengguna_dpt_pr disesuaikan 0 -> 186.
+- Purwoharjo / Kradenan / TPS 021: surat suara digunakan 0 disesuaikan ke 186.
+- Purwoharjo / Kradenan / TPS 022: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 213; pengguna_dpt_pr disesuaikan 0 -> 213.
+- Purwoharjo / Kradenan / TPS 022: surat suara digunakan 0 disesuaikan ke 213.
+- Purwoharjo / Kradenan / TPS 023: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 217; pengguna_dpt_pr disesuaikan 0 -> 217.
+- Purwoharjo / Kradenan / TPS 023: surat suara digunakan 0 disesuaikan ke 217.
+- Purwoharjo / Kradenan / TPS 024: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 209; pengguna_dpt_pr disesuaikan 0 -> 209.
+- Purwoharjo / Kradenan / TPS 024: surat suara digunakan 0 disesuaikan ke 209.
+- Purwoharjo / Kradenan / TPS 025: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 179; pengguna_dpt_pr disesuaikan 0 -> 179.
+- Purwoharjo / Kradenan / TPS 025: surat suara digunakan 0 disesuaikan ke 179.
+- Purwoharjo / Kradenan / TPS 026: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 204; pengguna_dpt_pr disesuaikan 0 -> 204.
+- Purwoharjo / Kradenan / TPS 026: surat suara digunakan 0 disesuaikan ke 204.
+- Purwoharjo / Kradenan / TPS 027: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 209; pengguna_dpt_pr disesuaikan 0 -> 209.
+- Purwoharjo / Kradenan / TPS 027: surat suara digunakan 0 disesuaikan ke 209.
+- Purwoharjo / Kradenan / TPS 028: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 226; pengguna_dpt_pr disesuaikan 0 -> 226.
+- Purwoharjo / Kradenan / TPS 028: surat suara digunakan 0 disesuaikan ke 226.
+- Purwoharjo / Kradenan / TPS 029: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 217; pengguna_dpt_pr disesuaikan 0 -> 217.
+- Purwoharjo / Kradenan / TPS 029: surat suara digunakan 0 disesuaikan ke 217.
+- Purwoharjo / Kradenan / TPS 030: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 242; pengguna_dpt_pr disesuaikan 0 -> 242.
+- Purwoharjo / Kradenan / TPS 030: surat suara digunakan 0 disesuaikan ke 242.
+- Rogojampi / Aliyan / TPS 001: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 31.
+- Rogojampi / Aliyan / TPS 001: total suara Excel 99 tidak sama dengan hasil koreksi 130.
+- Rogojampi / Aliyan / TPS 002: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 38.
+- Rogojampi / Aliyan / TPS 002: total suara Excel 136 tidak sama dengan hasil koreksi 174.
+- Rogojampi / Aliyan / TPS 003: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 18.
+- Rogojampi / Aliyan / TPS 003: total suara Excel 98 tidak sama dengan hasil koreksi 116.
+- Rogojampi / Aliyan / TPS 004: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 22.
+- Rogojampi / Aliyan / TPS 004: total suara Excel 208 tidak sama dengan hasil koreksi 230.
+- Rogojampi / Aliyan / TPS 005: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 34.
+- Rogojampi / Aliyan / TPS 005: total suara Excel 176 tidak sama dengan hasil koreksi 210.
+- Rogojampi / Aliyan / TPS 006: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 62.
+- Rogojampi / Aliyan / TPS 006: total suara Excel 124 tidak sama dengan hasil koreksi 186.
+- Rogojampi / Aliyan / TPS 007: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 51.
+- Rogojampi / Aliyan / TPS 007: total suara Excel 204 tidak sama dengan hasil koreksi 255.
+- Rogojampi / Aliyan / TPS 008: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 60.
+- Rogojampi / Aliyan / TPS 008: total suara Excel 125 tidak sama dengan hasil koreksi 185.
+- Rogojampi / Aliyan / TPS 009: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 54.
+- Rogojampi / Aliyan / TPS 009: total suara Excel 142 tidak sama dengan hasil koreksi 196.
+- Rogojampi / Aliyan / TPS 010: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 68.
+- Rogojampi / Aliyan / TPS 010: total suara Excel 138 tidak sama dengan hasil koreksi 206.
+- Rogojampi / Aliyan / TPS 011: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 156.
+- Rogojampi / Aliyan / TPS 011: total suara Excel 82 tidak sama dengan hasil koreksi 238.
+- Rogojampi / Aliyan / TPS 012: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 99.
+- Rogojampi / Aliyan / TPS 012: total suara Excel 106 tidak sama dengan hasil koreksi 205.
+- Rogojampi / Aliyan / TPS 013: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 101.
+- Rogojampi / Aliyan / TPS 013: total suara Excel 125 tidak sama dengan hasil koreksi 226.
+- Rogojampi / Aliyan / TPS 014: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 74.
+- Rogojampi / Aliyan / TPS 014: total suara Excel 151 tidak sama dengan hasil koreksi 225.
+- Rogojampi / Aliyan / TPS 015: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 54.
+- Rogojampi / Aliyan / TPS 015: total suara Excel 149 tidak sama dengan hasil koreksi 203.
+- Rogojampi / Aliyan / TPS 016: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 76.
+- Rogojampi / Aliyan / TPS 016: total suara Excel 135 tidak sama dengan hasil koreksi 211.
+- Rogojampi / Aliyan / TPS 017: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 59.
+- Rogojampi / Aliyan / TPS 017: total suara Excel 163 tidak sama dengan hasil koreksi 222.
+- Sempu / Gendoh / TPS 018: suara tidak sah 60 disesuaikan ke surat suara digunakan - suara calon 40.
+- Sempu / Gendoh / TPS 018: total suara Excel 206 tidak sama dengan hasil koreksi 186.
+- Sempu / Gendoh / TPS 027: suara tidak sah 31 disesuaikan ke surat suara digunakan - suara calon 51.
+- Sempu / Gendoh / TPS 027: total suara Excel 135 tidak sama dengan hasil koreksi 155.
+- Sempu / Karangsari / TPS 001: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 30.
+- Sempu / Karangsari / TPS 001: total suara Excel 179 tidak sama dengan hasil koreksi 209.
+- Sempu / Karangsari / TPS 002: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 40.
+- Sempu / Karangsari / TPS 002: total suara Excel 190 tidak sama dengan hasil koreksi 230.
+- Sempu / Karangsari / TPS 003: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 34.
+- Sempu / Karangsari / TPS 003: total suara Excel 146 tidak sama dengan hasil koreksi 180.
+- Sempu / Karangsari / TPS 004: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 52.
+- Sempu / Karangsari / TPS 004: total suara Excel 167 tidak sama dengan hasil koreksi 219.
+- Sempu / Karangsari / TPS 005: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 29.
+- Sempu / Karangsari / TPS 005: total suara Excel 187 tidak sama dengan hasil koreksi 216.
+- Sempu / Karangsari / TPS 006: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 25.
+- Sempu / Karangsari / TPS 006: total suara Excel 112 tidak sama dengan hasil koreksi 137.
+- Sempu / Karangsari / TPS 007: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 28.
+- Sempu / Karangsari / TPS 007: total suara Excel 150 tidak sama dengan hasil koreksi 178.
+- Sempu / Karangsari / TPS 008: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 34.
+- Sempu / Karangsari / TPS 008: total suara Excel 188 tidak sama dengan hasil koreksi 222.
+- Sempu / Karangsari / TPS 009: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 42.
+- Sempu / Karangsari / TPS 009: total suara Excel 161 tidak sama dengan hasil koreksi 203.
+- Sempu / Karangsari / TPS 010: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 25.
+- Sempu / Karangsari / TPS 010: total suara Excel 139 tidak sama dengan hasil koreksi 164.
+- Sempu / Karangsari / TPS 011: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 49.
+- Sempu / Karangsari / TPS 011: total suara Excel 127 tidak sama dengan hasil koreksi 176.
+- Sempu / Karangsari / TPS 012: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 34.
+- Sempu / Karangsari / TPS 012: total suara Excel 116 tidak sama dengan hasil koreksi 150.
+- Sempu / Karangsari / TPS 013: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 32.
+- Sempu / Karangsari / TPS 013: total suara Excel 196 tidak sama dengan hasil koreksi 228.
+- Sempu / Karangsari / TPS 014: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 57.
+- Sempu / Karangsari / TPS 014: total suara Excel 161 tidak sama dengan hasil koreksi 218.
+- Sempu / Karangsari / TPS 015: suara tidak sah 540 disesuaikan ke surat suara digunakan - suara calon 29.
+- Sempu / Karangsari / TPS 015: total suara Excel 707 tidak sama dengan hasil koreksi 196.
+- Sempu / Karangsari / TPS 020: surat suara sisa -9 disesuaikan ke diterima-digunakan-rusak 0.
+- Sempu / Temuasri / TPS 001: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 131; pengguna_dpt_pr disesuaikan 0 -> 131.
+- Sempu / Temuasri / TPS 001: surat suara digunakan 0 disesuaikan ke 131.
+- Sempu / Temuasri / TPS 002: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 197; pengguna_dpt_pr disesuaikan 0 -> 197.
+- Sempu / Temuasri / TPS 002: surat suara digunakan 0 disesuaikan ke 197.
+- Sempu / Temuasri / TPS 003: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 188; pengguna_dpt_pr disesuaikan 0 -> 188.
+- Sempu / Temuasri / TPS 003: surat suara digunakan 0 disesuaikan ke 188.
+- Sempu / Temuasri / TPS 004: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 201; pengguna_dpt_pr disesuaikan 0 -> 201.
+- Sempu / Temuasri / TPS 004: surat suara digunakan 0 disesuaikan ke 201.
+- Sempu / Temuasri / TPS 005: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 191; pengguna_dpt_pr disesuaikan 0 -> 191.
+- Sempu / Temuasri / TPS 005: surat suara digunakan 0 disesuaikan ke 191.
+- Sempu / Temuasri / TPS 006: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 215; pengguna_dpt_pr disesuaikan 0 -> 215.
+- Sempu / Temuasri / TPS 006: surat suara digunakan 0 disesuaikan ke 215.
+- Sempu / Temuasri / TPS 007: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 216; pengguna_dpt_pr disesuaikan 0 -> 216.
+- Sempu / Temuasri / TPS 007: surat suara digunakan 0 disesuaikan ke 216.
+- Sempu / Temuasri / TPS 008: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 175; pengguna_dpt_pr disesuaikan 0 -> 175.
+- Sempu / Temuasri / TPS 008: surat suara digunakan 0 disesuaikan ke 175.
+- Sempu / Temuasri / TPS 009: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 150; pengguna_dpt_pr disesuaikan 0 -> 150.
+- Sempu / Temuasri / TPS 009: surat suara digunakan 0 disesuaikan ke 150.
+- Sempu / Temuasri / TPS 010: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 229; pengguna_dpt_pr disesuaikan 0 -> 229.
+- Sempu / Temuasri / TPS 010: surat suara digunakan 0 disesuaikan ke 229.
+- Sempu / Temuasri / TPS 011: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 216; pengguna_dpt_pr disesuaikan 0 -> 216.
+- Sempu / Temuasri / TPS 011: surat suara digunakan 0 disesuaikan ke 216.
+- Sempu / Temuasri / TPS 012: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 190; pengguna_dpt_pr disesuaikan 0 -> 190.
+- Sempu / Temuasri / TPS 012: surat suara digunakan 0 disesuaikan ke 190.
+- Sempu / Temuasri / TPS 013: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 147; pengguna_dpt_pr disesuaikan 0 -> 147.
+- Sempu / Temuasri / TPS 013: surat suara digunakan 0 disesuaikan ke 147.
+- Sempu / Temuasri / TPS 014: pengguna hak pilih 0 tidak sama dengan surat suara digunakan 202; pengguna_dpt_pr disesuaikan 0 -> 202.
+- Sempu / Temuasri / TPS 014: surat suara digunakan 0 disesuaikan ke 202.
+- Sempu / Temuasri / TPS 015: suara tidak sah 60 disesuaikan ke surat suara digunakan - suara calon 2708.
+- Sempu / Temuasri / TPS 015: total suara Excel 193 tidak sama dengan hasil koreksi 2841.
+- Sempu / Temuguruh / TPS 016: pengguna hak pilih 147 tidak sama dengan surat suara digunakan 148; pengguna_dpt_pr disesuaikan 76 -> 77.
+- Sempu / Temuguruh / TPS 030: pengguna hak pilih 198 tidak sama dengan surat suara digunakan 197; pengguna_dpt_pr disesuaikan 95 -> 94.
+- Siliragung / Seneporejo / TPS 001: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 17.
+- Siliragung / Seneporejo / TPS 001: total suara Excel 206 tidak sama dengan hasil koreksi 223.
+- Siliragung / Seneporejo / TPS 002: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 17.
+- Siliragung / Seneporejo / TPS 002: total suara Excel 200 tidak sama dengan hasil koreksi 217.
+- Siliragung / Seneporejo / TPS 003: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 23.
+- Siliragung / Seneporejo / TPS 003: total suara Excel 206 tidak sama dengan hasil koreksi 229.
+- Siliragung / Seneporejo / TPS 004: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 27.
+- Siliragung / Seneporejo / TPS 004: total suara Excel 190 tidak sama dengan hasil koreksi 217.
+- Siliragung / Seneporejo / TPS 005: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 42.
+- Siliragung / Seneporejo / TPS 005: total suara Excel 186 tidak sama dengan hasil koreksi 228.
+- Siliragung / Seneporejo / TPS 006: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 38.
+- Siliragung / Seneporejo / TPS 006: total suara Excel 156 tidak sama dengan hasil koreksi 194.
+- Siliragung / Seneporejo / TPS 007: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 26.
+- Siliragung / Seneporejo / TPS 007: total suara Excel 169 tidak sama dengan hasil koreksi 195.
+- Siliragung / Seneporejo / TPS 008: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 14.
+- Siliragung / Seneporejo / TPS 008: total suara Excel 154 tidak sama dengan hasil koreksi 168.
+- Siliragung / Seneporejo / TPS 009: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 65.
+- Siliragung / Seneporejo / TPS 009: total suara Excel 146 tidak sama dengan hasil koreksi 211.
+- Siliragung / Seneporejo / TPS 010: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 32.
+- Siliragung / Seneporejo / TPS 010: total suara Excel 218 tidak sama dengan hasil koreksi 250.
+- Siliragung / Seneporejo / TPS 011: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 11.
+- Siliragung / Seneporejo / TPS 011: total suara Excel 143 tidak sama dengan hasil koreksi 154.
+- Siliragung / Seneporejo / TPS 012: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 11.
+- Siliragung / Seneporejo / TPS 012: total suara Excel 145 tidak sama dengan hasil koreksi 156.
+- Siliragung / Seneporejo / TPS 013: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 55.
+- Siliragung / Seneporejo / TPS 013: total suara Excel 140 tidak sama dengan hasil koreksi 195.
+- Siliragung / Seneporejo / TPS 014: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 26.
+- Siliragung / Seneporejo / TPS 014: total suara Excel 163 tidak sama dengan hasil koreksi 189.
+- Siliragung / Seneporejo / TPS 015: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 83.
+- Siliragung / Seneporejo / TPS 015: total suara Excel 149 tidak sama dengan hasil koreksi 232.
+- Siliragung / Seneporejo / TPS 016: suara sah Excel 114 disesuaikan ke jumlah calon 0.
+- Siliragung / Seneporejo / TPS 016: suara tidak sah 38 disesuaikan ke surat suara digunakan - suara calon 152.
+- Siliragung / Seneporejo / TPS 017: suara sah Excel 176 disesuaikan ke jumlah calon 0.
+- Siliragung / Seneporejo / TPS 017: suara tidak sah 56 disesuaikan ke surat suara digunakan - suara calon 232.
+- Siliragung / Seneporejo / TPS 018: suara sah Excel 181 disesuaikan ke jumlah calon 0.
+- Siliragung / Seneporejo / TPS 018: suara tidak sah 45 disesuaikan ke surat suara digunakan - suara calon 226.
+- Siliragung / Seneporejo / TPS 019: suara sah Excel 189 disesuaikan ke jumlah calon 0.
+- Siliragung / Seneporejo / TPS 019: suara tidak sah 38 disesuaikan ke surat suara digunakan - suara calon 227.
+- Siliragung / Seneporejo / TPS 020: suara sah Excel 215 disesuaikan ke jumlah calon 0.
+- Siliragung / Seneporejo / TPS 020: suara tidak sah 22 disesuaikan ke surat suara digunakan - suara calon 237.
+- Siliragung / Seneporejo / TPS 021: suara sah Excel 182 disesuaikan ke jumlah calon 0.
+- Siliragung / Seneporejo / TPS 021: suara tidak sah 17 disesuaikan ke surat suara digunakan - suara calon 199.
+- Siliragung / Seneporejo / TPS 022: suara sah Excel 184 disesuaikan ke jumlah calon 0.
+- Siliragung / Seneporejo / TPS 022: suara tidak sah 37 disesuaikan ke surat suara digunakan - suara calon 221.
+- Siliragung / Seneporejo / TPS 023: suara sah Excel 204 disesuaikan ke jumlah calon 0.
+- Siliragung / Seneporejo / TPS 023: suara tidak sah 24 disesuaikan ke surat suara digunakan - suara calon 228.
+- Songgon / Bedewang / TPS 015: suara tidak sah 56 disesuaikan ke surat suara digunakan - suara calon 66.
+- Songgon / Bedewang / TPS 015: total suara Excel 200 tidak sama dengan hasil koreksi 210.
+- Srono / Bagorejo / TPS 001: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 35.
+- Srono / Bagorejo / TPS 001: total suara Excel 173 tidak sama dengan hasil koreksi 208.
+- Srono / Bagorejo / TPS 002: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 35.
+- Srono / Bagorejo / TPS 002: total suara Excel 182 tidak sama dengan hasil koreksi 217.
+- Srono / Bagorejo / TPS 003: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 36.
+- Srono / Bagorejo / TPS 003: total suara Excel 183 tidak sama dengan hasil koreksi 219.
+- Srono / Bagorejo / TPS 004: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 22.
+- Srono / Bagorejo / TPS 004: total suara Excel 162 tidak sama dengan hasil koreksi 184.
+- Srono / Bagorejo / TPS 005: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 28.
+- Srono / Bagorejo / TPS 005: total suara Excel 190 tidak sama dengan hasil koreksi 218.
+- Srono / Bagorejo / TPS 006: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 31.
+- Srono / Bagorejo / TPS 006: total suara Excel 191 tidak sama dengan hasil koreksi 222.
+- Srono / Bagorejo / TPS 007: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 24.
+- Srono / Bagorejo / TPS 007: total suara Excel 181 tidak sama dengan hasil koreksi 205.
+- Srono / Bagorejo / TPS 008: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 50.
+- Srono / Bagorejo / TPS 008: total suara Excel 161 tidak sama dengan hasil koreksi 211.
+- Srono / Bagorejo / TPS 009: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 42.
+- Srono / Bagorejo / TPS 009: total suara Excel 187 tidak sama dengan hasil koreksi 229.
+- Srono / Bagorejo / TPS 010: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 33.
+- Srono / Bagorejo / TPS 010: total suara Excel 187 tidak sama dengan hasil koreksi 220.
+- Srono / Bagorejo / TPS 011: pengguna hak pilih 219 tidak sama dengan surat suara digunakan 218; pengguna_dpt_pr disesuaikan 107 -> 106.
+- Srono / Bagorejo / TPS 011: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 35.
+- Srono / Bagorejo / TPS 011: total suara Excel 183 tidak sama dengan hasil koreksi 218.
+- Srono / Bagorejo / TPS 012: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 37.
+- Srono / Bagorejo / TPS 012: total suara Excel 168 tidak sama dengan hasil koreksi 205.
+- Srono / Bagorejo / TPS 013: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 45.
+- Srono / Bagorejo / TPS 013: total suara Excel 152 tidak sama dengan hasil koreksi 197.
+- Srono / Bagorejo / TPS 014: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 27.
+- Srono / Bagorejo / TPS 014: total suara Excel 187 tidak sama dengan hasil koreksi 214.
+- Srono / Bagorejo / TPS 015: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 34.
+- Srono / Bagorejo / TPS 015: total suara Excel 179 tidak sama dengan hasil koreksi 213.
+- Srono / Bagorejo / TPS 016: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 40.
+- Srono / Bagorejo / TPS 016: total suara Excel 187 tidak sama dengan hasil koreksi 227.
+- Srono / Bagorejo / TPS 017: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 35.
+- Srono / Bagorejo / TPS 017: total suara Excel 177 tidak sama dengan hasil koreksi 212.
+- Srono / Bagorejo / TPS 018: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 31.
+- Srono / Bagorejo / TPS 018: total suara Excel 201 tidak sama dengan hasil koreksi 232.
+- Srono / Bagorejo / TPS 019: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 43.
+- Srono / Bagorejo / TPS 019: total suara Excel 172 tidak sama dengan hasil koreksi 215.
+- Srono / Bagorejo / TPS 020: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 42.
+- Srono / Bagorejo / TPS 020: total suara Excel 186 tidak sama dengan hasil koreksi 228.
+- Srono / Bagorejo / TPS 021: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 32.
+- Srono / Bagorejo / TPS 021: total suara Excel 190 tidak sama dengan hasil koreksi 222.
+- Srono / Bagorejo / TPS 022: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 55.
+- Srono / Bagorejo / TPS 022: total suara Excel 184 tidak sama dengan hasil koreksi 239.
+- Srono / Bagorejo / TPS 023: pengguna hak pilih 227 tidak sama dengan surat suara digunakan 225; pengguna_dpt_pr disesuaikan 108 -> 106.
+- Srono / Bagorejo / TPS 023: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 35.
+- Srono / Bagorejo / TPS 023: total suara Excel 190 tidak sama dengan hasil koreksi 225.
+- Srono / Bagorejo / TPS 024: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 42.
+- Srono / Bagorejo / TPS 024: total suara Excel 163 tidak sama dengan hasil koreksi 205.
+- Srono / Bagorejo / TPS 025: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 60.
+- Srono / Bagorejo / TPS 025: total suara Excel 157 tidak sama dengan hasil koreksi 217.
+- Srono / Bagorejo / TPS 026: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 46.
+- Srono / Bagorejo / TPS 026: total suara Excel 178 tidak sama dengan hasil koreksi 224.
+- Srono / Bagorejo / TPS 027: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 45.
+- Srono / Bagorejo / TPS 027: total suara Excel 191 tidak sama dengan hasil koreksi 236.
+- Srono / Bagorejo / TPS 028: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 38.
+- Srono / Bagorejo / TPS 028: total suara Excel 179 tidak sama dengan hasil koreksi 217.
+- Srono / Bagorejo / TPS 029: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 67.
+- Srono / Bagorejo / TPS 029: total suara Excel 159 tidak sama dengan hasil koreksi 226.
+- Srono / Bagorejo / TPS 030: pengguna hak pilih 207 tidak sama dengan surat suara digunakan 209; pengguna_dpt_pr disesuaikan 108 -> 110.
+- Srono / Bagorejo / TPS 030: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 46.
+- Srono / Bagorejo / TPS 030: total suara Excel 163 tidak sama dengan hasil koreksi 209.
+- Srono / Bagorejo / TPS 031: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 61.
+- Srono / Bagorejo / TPS 031: total suara Excel 153 tidak sama dengan hasil koreksi 214.
+- Srono / Bagorejo / TPS 032: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 38.
+- Srono / Bagorejo / TPS 032: total suara Excel 164 tidak sama dengan hasil koreksi 202.
+- Srono / Bagorejo / TPS 033: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 29.
+- Srono / Bagorejo / TPS 033: total suara Excel 174 tidak sama dengan hasil koreksi 203.
+- Srono / Bagorejo / TPS 034: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 38.
+- Srono / Bagorejo / TPS 034: total suara Excel 162 tidak sama dengan hasil koreksi 200.
+- Srono / Wonosobo / TPS 018: pengguna hak pilih 214 tidak sama dengan surat suara digunakan 213; pengguna_dpt_pr disesuaikan 109 -> 108.
+- Srono / Wonosobo / TPS 024: suara tidak sah 36 disesuaikan ke surat suara digunakan - suara calon 35.
+- Srono / Wonosobo / TPS 024: total suara Excel 214 tidak sama dengan hasil koreksi 213.
+- Srono / Wonosobo / TPS 028: pengguna hak pilih 215 tidak sama dengan surat suara digunakan 216; pengguna_dpt_pr disesuaikan 105 -> 106.
+- Srono / Wonosobo / TPS 030: suara tidak sah 42 disesuaikan ke surat suara digunakan - suara calon 43.
+- Srono / Wonosobo / TPS 030: total suara Excel 225 tidak sama dengan hasil koreksi 226.
+- Srono / Sukonatar / TPS 007: suara tidak sah 46 disesuaikan ke surat suara digunakan - suara calon 45.
+- Srono / Sukonatar / TPS 007: total suara Excel 219 tidak sama dengan hasil koreksi 218.
+- Srono / Sukonatar / TPS 008: suara tidak sah 47 disesuaikan ke surat suara digunakan - suara calon 49.
+- Srono / Sukonatar / TPS 008: total suara Excel 213 tidak sama dengan hasil koreksi 215.
+- Srono / Sukonatar / TPS 009: suara tidak sah 35 disesuaikan ke surat suara digunakan - suara calon 33.
+- Srono / Sukonatar / TPS 009: total suara Excel 213 tidak sama dengan hasil koreksi 211.
+- Srono / Sukonatar / TPS 012: suara tidak sah 34 disesuaikan ke surat suara digunakan - suara calon 33.
+- Srono / Sukonatar / TPS 012: total suara Excel 237 tidak sama dengan hasil koreksi 236.
+- Srono / Sukonatar / TPS 013: pengguna hak pilih 228 tidak sama dengan surat suara digunakan 227; pengguna_dpt_pr disesuaikan 125 -> 124.
+- Srono / Sukonatar / TPS 013: suara tidak sah 28 disesuaikan ke surat suara digunakan - suara calon 29.
+- Srono / Sukonatar / TPS 013: total suara Excel 226 tidak sama dengan hasil koreksi 227.
+- Srono / Sukonatar / TPS 014: pengguna hak pilih 226 tidak sama dengan surat suara digunakan 225; pengguna_dpt_pr disesuaikan 118 -> 117.
+- Srono / Sukonatar / TPS 014: suara tidak sah 33 disesuaikan ke surat suara digunakan - suara calon 30.
+- Srono / Sukonatar / TPS 014: total suara Excel 228 tidak sama dengan hasil koreksi 225.
+- Srono / Sukonatar / TPS 015: pengguna hak pilih 203 tidak sama dengan surat suara digunakan 202; pengguna_dpt_pr disesuaikan 107 -> 106.
+- Srono / Sukonatar / TPS 015: suara tidak sah 33 disesuaikan ke surat suara digunakan - suara calon 36.
+- Srono / Sukonatar / TPS 015: total suara Excel 199 tidak sama dengan hasil koreksi 202.
+- Srono / Kebaman / TPS 006: suara tidak sah 46 disesuaikan ke surat suara digunakan - suara calon 49.
+- Srono / Kebaman / TPS 006: total suara Excel 215 tidak sama dengan hasil koreksi 218.
+- Srono / Kebaman / TPS 007: suara tidak sah 39 disesuaikan ke surat suara digunakan - suara calon 35.
+- Srono / Kebaman / TPS 007: total suara Excel 200 tidak sama dengan hasil koreksi 196.
+- Srono / Kebaman / TPS 011: pengguna hak pilih 200 tidak sama dengan surat suara digunakan 201; pengguna_dpt_pr disesuaikan 101 -> 102.
+- Srono / Kebaman / TPS 019: suara tidak sah 37 disesuaikan ke surat suara digunakan - suara calon 36.
+- Srono / Kebaman / TPS 019: total suara Excel 217 tidak sama dengan hasil koreksi 216.
+- Srono / Kebaman / TPS 025: pengguna hak pilih 222 tidak sama dengan surat suara digunakan 220; pengguna_dpt_pr disesuaikan 113 -> 111.
+- Srono / Kebaman / TPS 027: pengguna hak pilih 219 tidak sama dengan surat suara digunakan 207; pengguna_dpt_pr disesuaikan 116 -> 104.
+- Srono / Kebaman / TPS 027: suara tidak sah 60 disesuaikan ke surat suara digunakan - suara calon 62.
+- Srono / Kebaman / TPS 027: total suara Excel 205 tidak sama dengan hasil koreksi 207.
+- Srono / Kebaman / TPS 035: pengguna hak pilih 212 tidak sama dengan surat suara digunakan 211; pengguna_dpt_pr disesuaikan 111 -> 110.
+- Srono / Kebaman / TPS 037: suara tidak sah 29 disesuaikan ke surat suara digunakan - suara calon 30.
+- Srono / Kebaman / TPS 037: total suara Excel 232 tidak sama dengan hasil koreksi 233.
+- Srono / Kebaman / TPS 038: pengguna hak pilih 221 tidak sama dengan surat suara digunakan 222; pengguna_dpt_pr disesuaikan 110 -> 111.
+- Srono / Kebaman / TPS 038: suara tidak sah 58 disesuaikan ke surat suara digunakan - suara calon 57.
+- Srono / Kebaman / TPS 038: total suara Excel 223 tidak sama dengan hasil koreksi 222.
+- Srono / Kebaman / TPS 039: pengguna hak pilih 229 tidak sama dengan surat suara digunakan 225; pengguna_dpt_pr disesuaikan 111 -> 107.
+- Srono / Kebaman / TPS 040: pengguna hak pilih 202 tidak sama dengan surat suara digunakan 210; pengguna_dpt_pr disesuaikan 107 -> 115.
+- Srono / Kebaman / TPS 041: pengguna hak pilih 208 tidak sama dengan surat suara digunakan 200; pengguna_dpt_pr disesuaikan 115 -> 107.
+- Srono / Kebaman / TPS 042: pengguna hak pilih 221 tidak sama dengan surat suara digunakan 215; pengguna_dpt_pr disesuaikan 107 -> 101.
+- Srono / Kebaman / TPS 043: pengguna hak pilih 199 tidak sama dengan surat suara digunakan 206; pengguna_dpt_pr disesuaikan 101 -> 108.
+- Srono / Kebaman / TPS 043: suara tidak sah 55 disesuaikan ke surat suara digunakan - suara calon 54.
+- Srono / Kebaman / TPS 043: total suara Excel 207 tidak sama dengan hasil koreksi 206.
+- Srono / Kebaman / TPS 044: pengguna hak pilih 245 tidak sama dengan surat suara digunakan 232; pengguna_dpt_pr disesuaikan 108 -> 95.
+- Srono / Sumbersari / TPS 008: suara tidak sah 43 disesuaikan ke surat suara digunakan - suara calon 46.
+- Srono / Sumbersari / TPS 008: total suara Excel 193 tidak sama dengan hasil koreksi 196.
+- Srono / Sumbersari / TPS 009: suara tidak sah 24 disesuaikan ke surat suara digunakan - suara calon 19.
+- Srono / Sumbersari / TPS 009: total suara Excel 233 tidak sama dengan hasil koreksi 228.
+- Srono / Sumbersari / TPS 010: suara tidak sah 36 disesuaikan ke surat suara digunakan - suara calon 35.
+- Srono / Sumbersari / TPS 010: total suara Excel 213 tidak sama dengan hasil koreksi 212.
+- Srono / Sumbersari / TPS 011: suara tidak sah 43 disesuaikan ke surat suara digunakan - suara calon 37.
+- Srono / Sumbersari / TPS 011: total suara Excel 233 tidak sama dengan hasil koreksi 227.
+- Srono / Sumbersari / TPS 013: pengguna hak pilih 213 tidak sama dengan surat suara digunakan 212; pengguna_dpt_pr disesuaikan 106 -> 105.
+- Srono / Sumbersari / TPS 014: pengguna hak pilih 243 tidak sama dengan surat suara digunakan 244; pengguna_dpt_pr disesuaikan 130 -> 131.
+- Srono / Sumbersari / TPS 014: suara tidak sah 40 disesuaikan ke surat suara digunakan - suara calon 43.
+- Srono / Sumbersari / TPS 014: total suara Excel 241 tidak sama dengan hasil koreksi 244.
+- Srono / Sumbersari / TPS 015: suara tidak sah 29 disesuaikan ke surat suara digunakan - suara calon 35.
+- Srono / Sumbersari / TPS 015: total suara Excel 209 tidak sama dengan hasil koreksi 215.
+- Srono / Sumbersari / TPS 027: suara tidak sah 46 disesuaikan ke surat suara digunakan - suara calon 47.
+- Srono / Sumbersari / TPS 027: total suara Excel 223 tidak sama dengan hasil koreksi 224.
+- Srono / Sumbersari / TPS 028: suara tidak sah 4 disesuaikan ke surat suara digunakan - suara calon 3.
+- Srono / Sumbersari / TPS 028: total suara Excel 163 tidak sama dengan hasil koreksi 162.
+- Srono / Parijatah Wetan / TPS 003: suara tidak sah 55 disesuaikan ke surat suara digunakan - suara calon 57.
+- Srono / Parijatah Wetan / TPS 003: total suara Excel 220 tidak sama dengan hasil koreksi 222.
+- Srono / Parijatah Wetan / TPS 004: suara tidak sah 59 disesuaikan ke surat suara digunakan - suara calon 57.
+- Srono / Parijatah Wetan / TPS 004: total suara Excel 211 tidak sama dengan hasil koreksi 209.
+- Srono / Parijatah Wetan / TPS 005: suara tidak sah 51 disesuaikan ke surat suara digunakan - suara calon 52.
+- Srono / Parijatah Wetan / TPS 005: total suara Excel 186 tidak sama dengan hasil koreksi 187.
+- Srono / Parijatah Wetan / TPS 007: suara tidak sah 52 disesuaikan ke surat suara digunakan - suara calon 51.
+- Srono / Parijatah Wetan / TPS 007: total suara Excel 210 tidak sama dengan hasil koreksi 209.
+- Srono / Parijatah Wetan / TPS 009: suara tidak sah 42 disesuaikan ke surat suara digunakan - suara calon 44.
+- Srono / Parijatah Wetan / TPS 009: total suara Excel 232 tidak sama dengan hasil koreksi 234.
+- Srono / Parijatah Wetan / TPS 010: suara tidak sah 25 disesuaikan ke surat suara digunakan - suara calon 23.
+- Srono / Parijatah Wetan / TPS 010: total suara Excel 225 tidak sama dengan hasil koreksi 223.
+- Srono / Parijatah Wetan / TPS 012: pengguna hak pilih 231 tidak sama dengan surat suara digunakan 232; pengguna_dpt_pr disesuaikan 120 -> 121.
+- Srono / Parijatah Wetan / TPS 015: pengguna hak pilih 208 tidak sama dengan surat suara digunakan 207; pengguna_dpt_pr disesuaikan 105 -> 104.
+- Srono / Parijatah Wetan / TPS 018: pengguna hak pilih 210 tidak sama dengan surat suara digunakan 219; pengguna_dpt_pr disesuaikan 108 -> 117.
+- Srono / Parijatah Wetan / TPS 024: pengguna hak pilih 215 tidak sama dengan surat suara digunakan 223; pengguna_dpt_pr disesuaikan 108 -> 116.
+- Srono / Parijatah Kulon / TPS 004: suara tidak sah 52 disesuaikan ke surat suara digunakan - suara calon 50.
+- Srono / Parijatah Kulon / TPS 004: total suara Excel 205 tidak sama dengan hasil koreksi 203.
+- Srono / Parijatah Kulon / TPS 005: suara tidak sah 31 disesuaikan ke surat suara digunakan - suara calon 33.
+- Srono / Parijatah Kulon / TPS 005: total suara Excel 209 tidak sama dengan hasil koreksi 211.
+- Srono / Parijatah Kulon / TPS 010: pengguna hak pilih 220 tidak sama dengan surat suara digunakan 219; pengguna_dpt_pr disesuaikan 113 -> 112.
+- Srono / Parijatah Kulon / TPS 011: suara tidak sah 46 disesuaikan ke surat suara digunakan - suara calon 47.
+- Srono / Parijatah Kulon / TPS 011: total suara Excel 205 tidak sama dengan hasil koreksi 206.
+- Srono / Parijatah Kulon / TPS 015: suara tidak sah 39 disesuaikan ke surat suara digunakan - suara calon 38.
+- Srono / Parijatah Kulon / TPS 015: total suara Excel 235 tidak sama dengan hasil koreksi 234.
+- Srono / Rejoagung / TPS 001: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 55.
+- Srono / Rejoagung / TPS 001: total suara Excel 142 tidak sama dengan hasil koreksi 197.
+- Srono / Rejoagung / TPS 002: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 20.
+- Srono / Rejoagung / TPS 002: total suara Excel 212 tidak sama dengan hasil koreksi 232.
+- Srono / Rejoagung / TPS 003: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 38.
+- Srono / Rejoagung / TPS 003: total suara Excel 186 tidak sama dengan hasil koreksi 224.
+- Srono / Rejoagung / TPS 004: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 36.
+- Srono / Rejoagung / TPS 004: total suara Excel 200 tidak sama dengan hasil koreksi 236.
+- Srono / Rejoagung / TPS 005: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 44.
+- Srono / Rejoagung / TPS 005: total suara Excel 181 tidak sama dengan hasil koreksi 225.
+- Srono / Rejoagung / TPS 006: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 31.
+- Srono / Rejoagung / TPS 006: total suara Excel 175 tidak sama dengan hasil koreksi 206.
+- Srono / Rejoagung / TPS 007: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 25.
+- Srono / Rejoagung / TPS 007: total suara Excel 172 tidak sama dengan hasil koreksi 197.
+- Srono / Rejoagung / TPS 008: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 30.
+- Srono / Rejoagung / TPS 008: total suara Excel 204 tidak sama dengan hasil koreksi 234.
+- Srono / Rejoagung / TPS 009: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 30.
+- Srono / Rejoagung / TPS 009: total suara Excel 187 tidak sama dengan hasil koreksi 217.
+- Srono / Rejoagung / TPS 010: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 38.
+- Srono / Rejoagung / TPS 010: total suara Excel 179 tidak sama dengan hasil koreksi 217.
+- Srono / Rejoagung / TPS 011: pengguna hak pilih 223 tidak sama dengan surat suara digunakan 219; pengguna_dpt_pr disesuaikan 105 -> 101.
+- Srono / Rejoagung / TPS 011: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 37.
+- Srono / Rejoagung / TPS 011: total suara Excel 182 tidak sama dengan hasil koreksi 219.
+- Srono / Rejoagung / TPS 012: pengguna hak pilih 230 tidak sama dengan surat suara digunakan 234; pengguna_dpt_pr disesuaikan 114 -> 118.
+- Srono / Rejoagung / TPS 012: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 35.
+- Srono / Rejoagung / TPS 012: total suara Excel 199 tidak sama dengan hasil koreksi 234.
+- Srono / Rejoagung / TPS 013: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 29.
+- Srono / Rejoagung / TPS 013: total suara Excel 199 tidak sama dengan hasil koreksi 228.
+- Srono / Rejoagung / TPS 014: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 39.
+- Srono / Rejoagung / TPS 014: total suara Excel 181 tidak sama dengan hasil koreksi 220.
+- Srono / Rejoagung / TPS 015: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 39.
+- Srono / Rejoagung / TPS 015: total suara Excel 190 tidak sama dengan hasil koreksi 229.
+- Srono / Rejoagung / TPS 025: suara tidak sah 28 disesuaikan ke surat suara digunakan - suara calon 27.
+- Srono / Rejoagung / TPS 025: total suara Excel 221 tidak sama dengan hasil koreksi 220.
+- Srono / Rejoagung / TPS 027: suara tidak sah 18 disesuaikan ke surat suara digunakan - suara calon 19.
+- Srono / Rejoagung / TPS 027: total suara Excel 184 tidak sama dengan hasil koreksi 185.
+- Srono / Kepundungan / TPS 005: suara tidak sah 26 disesuaikan ke surat suara digunakan - suara calon 29.
+- Srono / Kepundungan / TPS 005: total suara Excel 227 tidak sama dengan hasil koreksi 230.
+- Srono / Kepundungan / TPS 006: suara tidak sah 29 disesuaikan ke surat suara digunakan - suara calon 31.
+- Srono / Kepundungan / TPS 006: total suara Excel 231 tidak sama dengan hasil koreksi 233.
+- Srono / Kepundungan / TPS 007: suara tidak sah 29 disesuaikan ke surat suara digunakan - suara calon 27.
+- Srono / Kepundungan / TPS 007: total suara Excel 239 tidak sama dengan hasil koreksi 237.
+- Srono / Kepundungan / TPS 008: pengguna hak pilih 230 tidak sama dengan surat suara digunakan 231; pengguna_dpt_pr disesuaikan 120 -> 121.
+- Srono / Kepundungan / TPS 008: suara tidak sah 44 disesuaikan ke surat suara digunakan - suara calon 43.
+- Srono / Kepundungan / TPS 008: total suara Excel 232 tidak sama dengan hasil koreksi 231.
+- Srono / Kepundungan / TPS 009: pengguna hak pilih 228 tidak sama dengan surat suara digunakan 227; pengguna_dpt_pr disesuaikan 116 -> 115.
+- Srono / Kepundungan / TPS 011: suara tidak sah 67 disesuaikan ke surat suara digunakan - suara calon 65.
+- Srono / Kepundungan / TPS 011: total suara Excel 234 tidak sama dengan hasil koreksi 232.
+- Srono / Sukomaju / TPS 005: suara tidak sah 48 disesuaikan ke surat suara digunakan - suara calon 45.
+- Srono / Sukomaju / TPS 005: total suara Excel 209 tidak sama dengan hasil koreksi 206.
+- Srono / Sukomaju / TPS 006: suara tidak sah 45 disesuaikan ke surat suara digunakan - suara calon 47.
+- Srono / Sukomaju / TPS 006: total suara Excel 208 tidak sama dengan hasil koreksi 210.
+- Srono / Sukomaju / TPS 007: suara tidak sah 41 disesuaikan ke surat suara digunakan - suara calon 37.
+- Srono / Sukomaju / TPS 007: total suara Excel 195 tidak sama dengan hasil koreksi 191.
+- Srono / Sukomaju / TPS 008: suara tidak sah 40 disesuaikan ke surat suara digunakan - suara calon 44.
+- Srono / Sukomaju / TPS 008: total suara Excel 200 tidak sama dengan hasil koreksi 204.
+- Srono / Sukomaju / TPS 010: pengguna hak pilih 222 tidak sama dengan surat suara digunakan 214; pengguna_dpt_pr disesuaikan 108 -> 100.
+- Srono / Sukomaju / TPS 010: suara tidak sah 51 disesuaikan ke surat suara digunakan - suara calon 43.
+- Srono / Sukomaju / TPS 010: total suara Excel 222 tidak sama dengan hasil koreksi 214.
+- Srono / Sukomaju / TPS 011: pengguna hak pilih 221 tidak sama dengan surat suara digunakan 235; pengguna_dpt_pr disesuaikan 119 -> 133.
+- Srono / Sukomaju / TPS 011: suara tidak sah 43 disesuaikan ke surat suara digunakan - suara calon 56.
+- Srono / Sukomaju / TPS 011: total suara Excel 222 tidak sama dengan hasil koreksi 235.
+- Srono / Sukomaju / TPS 012: pengguna hak pilih 238 tidak sama dengan surat suara digunakan 223; pengguna_dpt_pr disesuaikan 121 -> 106.
+- Srono / Sukomaju / TPS 012: suara tidak sah 48 disesuaikan ke surat suara digunakan - suara calon 35.
+- Srono / Sukomaju / TPS 012: total suara Excel 236 tidak sama dengan hasil koreksi 223.
+- Srono / Sukomaju / TPS 013: pengguna hak pilih 215 tidak sama dengan surat suara digunakan 224; pengguna_dpt_pr disesuaikan 106 -> 115.
+- Srono / Sukomaju / TPS 013: suara tidak sah 48 disesuaikan ke surat suara digunakan - suara calon 58.
+- Srono / Sukomaju / TPS 013: total suara Excel 214 tidak sama dengan hasil koreksi 224.
+- Srono / Sukomaju / TPS 014: pengguna hak pilih 221 tidak sama dengan surat suara digunakan 220; pengguna_dpt_pr disesuaikan 112 -> 111.
+- Srono / Sukomaju / TPS 014: suara tidak sah 36 disesuaikan ke surat suara digunakan - suara calon 35.
+- Srono / Sukomaju / TPS 014: total suara Excel 221 tidak sama dengan hasil koreksi 220.
+- Srono / Sukomaju / TPS 015: pengguna hak pilih 233 tidak sama dengan surat suara digunakan 234; pengguna_dpt_pr disesuaikan 124 -> 125.
+- Srono / Sukomaju / TPS 016: suara tidak sah 27 disesuaikan ke surat suara digunakan - suara calon 28.
+- Srono / Sukomaju / TPS 016: total suara Excel 244 tidak sama dengan hasil koreksi 245.
+- Srono / Sukomaju / TPS 018: suara tidak sah 44 disesuaikan ke surat suara digunakan - suara calon 43.
+- Srono / Sukomaju / TPS 018: total suara Excel 209 tidak sama dengan hasil koreksi 208.
+- Srono / Sukomaju / TPS 019: suara tidak sah 24 disesuaikan ke surat suara digunakan - suara calon 22.
+- Srono / Sukomaju / TPS 019: total suara Excel 202 tidak sama dengan hasil koreksi 200.
+- Srono / Sukomaju / TPS 021: suara tidak sah 35 disesuaikan ke surat suara digunakan - suara calon 36.
+- Srono / Sukomaju / TPS 021: total suara Excel 212 tidak sama dengan hasil koreksi 213.
+- Srono / Sukomaju / TPS 023: suara tidak sah 40 disesuaikan ke surat suara digunakan - suara calon 49.
+- Srono / Sukomaju / TPS 023: total suara Excel 184 tidak sama dengan hasil koreksi 193.
+- Srono / Sukomaju / TPS 024: suara tidak sah 45 disesuaikan ke surat suara digunakan - suara calon 37.
+- Srono / Sukomaju / TPS 024: total suara Excel 238 tidak sama dengan hasil koreksi 230.
+- Tegaldlimo / Kalipait / TPS 001: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 30.
+- Tegaldlimo / Kalipait / TPS 001: total suara Excel 181 tidak sama dengan hasil koreksi 211.
+- Tegaldlimo / Kalipait / TPS 002: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 28.
+- Tegaldlimo / Kalipait / TPS 002: total suara Excel 166 tidak sama dengan hasil koreksi 194.
+- Tegaldlimo / Kalipait / TPS 003: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 21.
+- Tegaldlimo / Kalipait / TPS 003: total suara Excel 180 tidak sama dengan hasil koreksi 201.
+- Tegaldlimo / Kalipait / TPS 004: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 45.
+- Tegaldlimo / Kalipait / TPS 004: total suara Excel 177 tidak sama dengan hasil koreksi 222.
+- Tegaldlimo / Kalipait / TPS 005: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 63.
+- Tegaldlimo / Kalipait / TPS 005: total suara Excel 158 tidak sama dengan hasil koreksi 221.
+- Tegaldlimo / Kalipait / TPS 006: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 25.
+- Tegaldlimo / Kalipait / TPS 006: total suara Excel 187 tidak sama dengan hasil koreksi 212.
+- Tegaldlimo / Kalipait / TPS 007: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 19.
+- Tegaldlimo / Kalipait / TPS 007: total suara Excel 196 tidak sama dengan hasil koreksi 215.
+- Tegaldlimo / Kalipait / TPS 008: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 20.
+- Tegaldlimo / Kalipait / TPS 008: total suara Excel 204 tidak sama dengan hasil koreksi 224.
+- Tegaldlimo / Kalipait / TPS 009: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 16.
+- Tegaldlimo / Kalipait / TPS 009: total suara Excel 185 tidak sama dengan hasil koreksi 201.
+- Tegaldlimo / Kalipait / TPS 010: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 14.
+- Tegaldlimo / Kalipait / TPS 010: total suara Excel 221 tidak sama dengan hasil koreksi 235.
+- Tegaldlimo / Kalipait / TPS 011: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 9.
+- Tegaldlimo / Kalipait / TPS 011: total suara Excel 224 tidak sama dengan hasil koreksi 233.
+- Tegaldlimo / Kalipait / TPS 012: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 15.
+- Tegaldlimo / Kalipait / TPS 012: total suara Excel 202 tidak sama dengan hasil koreksi 217.
+- Tegaldlimo / Kalipait / TPS 013: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 37.
+- Tegaldlimo / Kalipait / TPS 013: total suara Excel 206 tidak sama dengan hasil koreksi 243.
+- Tegaldlimo / Kalipait / TPS 014: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 19.
+- Tegaldlimo / Kalipait / TPS 014: total suara Excel 185 tidak sama dengan hasil koreksi 204.
+- Tegaldlimo / Kalipait / TPS 015: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 28.
+- Tegaldlimo / Kalipait / TPS 015: total suara Excel 162 tidak sama dengan hasil koreksi 190.
+- Tegaldlimo / Kedunggebang / TPS 001: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 38.
+- Tegaldlimo / Kedunggebang / TPS 001: total suara Excel 187 tidak sama dengan hasil koreksi 225.
+- Tegaldlimo / Kedunggebang / TPS 002: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 48.
+- Tegaldlimo / Kedunggebang / TPS 002: total suara Excel 168 tidak sama dengan hasil koreksi 216.
+- Tegaldlimo / Kedunggebang / TPS 003: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 41.
+- Tegaldlimo / Kedunggebang / TPS 003: total suara Excel 171 tidak sama dengan hasil koreksi 212.
+- Tegaldlimo / Kedunggebang / TPS 004: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 31.
+- Tegaldlimo / Kedunggebang / TPS 004: total suara Excel 197 tidak sama dengan hasil koreksi 228.
+- Tegaldlimo / Kedunggebang / TPS 005: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 52.
+- Tegaldlimo / Kedunggebang / TPS 005: total suara Excel 180 tidak sama dengan hasil koreksi 232.
+- Tegaldlimo / Kedunggebang / TPS 006: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 32.
+- Tegaldlimo / Kedunggebang / TPS 006: total suara Excel 193 tidak sama dengan hasil koreksi 225.
+- Tegaldlimo / Kedunggebang / TPS 007: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 52.
+- Tegaldlimo / Kedunggebang / TPS 007: total suara Excel 168 tidak sama dengan hasil koreksi 220.
+- Tegaldlimo / Kedunggebang / TPS 008: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 45.
+- Tegaldlimo / Kedunggebang / TPS 008: total suara Excel 204 tidak sama dengan hasil koreksi 249.
+- Tegaldlimo / Kedunggebang / TPS 009: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 49.
+- Tegaldlimo / Kedunggebang / TPS 009: total suara Excel 173 tidak sama dengan hasil koreksi 222.
+- Tegaldlimo / Kedunggebang / TPS 010: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 30.
+- Tegaldlimo / Kedunggebang / TPS 010: total suara Excel 112 tidak sama dengan hasil koreksi 142.
+- Tegaldlimo / Kedunggebang / TPS 011: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 40.
+- Tegaldlimo / Kedunggebang / TPS 011: total suara Excel 96 tidak sama dengan hasil koreksi 136.
+- Tegaldlimo / Kedunggebang / TPS 012: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 73.
+- Tegaldlimo / Kedunggebang / TPS 012: total suara Excel 132 tidak sama dengan hasil koreksi 205.
+- Tegaldlimo / Kedunggebang / TPS 013: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 41.
+- Tegaldlimo / Kedunggebang / TPS 013: total suara Excel 165 tidak sama dengan hasil koreksi 206.
+- Tegaldlimo / Kedunggebang / TPS 014: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 44.
+- Tegaldlimo / Kedunggebang / TPS 014: total suara Excel 169 tidak sama dengan hasil koreksi 213.
+- Tegaldlimo / Kedunggebang / TPS 015: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 40.
+- Tegaldlimo / Kedunggebang / TPS 015: total suara Excel 157 tidak sama dengan hasil koreksi 197.
+- Tegaldlimo / Kendalrejo / TPS 016: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 5.
+- Tegaldlimo / Kendalrejo / TPS 016: total suara Excel 175 tidak sama dengan hasil koreksi 180.
+- Tegaldlimo / Kendalrejo / TPS 017: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 10.
+- Tegaldlimo / Kendalrejo / TPS 017: total suara Excel 149 tidak sama dengan hasil koreksi 159.
+- Tegaldlimo / Purwoagung / TPS 001: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 34.
+- Tegaldlimo / Purwoagung / TPS 001: total suara Excel 166 tidak sama dengan hasil koreksi 200.
+- Tegaldlimo / Purwoagung / TPS 002: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 7.
+- Tegaldlimo / Purwoagung / TPS 002: total suara Excel 134 tidak sama dengan hasil koreksi 141.
+- Tegaldlimo / Purwoagung / TPS 003: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 19.
+- Tegaldlimo / Purwoagung / TPS 003: total suara Excel 161 tidak sama dengan hasil koreksi 180.
+- Tegaldlimo / Purwoagung / TPS 004: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 35.
+- Tegaldlimo / Purwoagung / TPS 004: total suara Excel 175 tidak sama dengan hasil koreksi 210.
+- Tegaldlimo / Purwoagung / TPS 005: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 9.
+- Tegaldlimo / Purwoagung / TPS 005: total suara Excel 191 tidak sama dengan hasil koreksi 200.
+- Tegaldlimo / Purwoagung / TPS 006: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 26.
+- Tegaldlimo / Purwoagung / TPS 006: total suara Excel 193 tidak sama dengan hasil koreksi 219.
+- Tegaldlimo / Purwoagung / TPS 007: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 21.
+- Tegaldlimo / Purwoagung / TPS 007: total suara Excel 165 tidak sama dengan hasil koreksi 186.
+- Tegaldlimo / Purwoagung / TPS 008: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 25.
+- Tegaldlimo / Purwoagung / TPS 008: total suara Excel 145 tidak sama dengan hasil koreksi 170.
+- Tegaldlimo / Purwoagung / TPS 009: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 19.
+- Tegaldlimo / Purwoagung / TPS 009: total suara Excel 190 tidak sama dengan hasil koreksi 209.
+- Tegaldlimo / Purwoagung / TPS 010: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 14.
+- Tegaldlimo / Purwoagung / TPS 010: total suara Excel 180 tidak sama dengan hasil koreksi 194.
+- Tegaldlimo / Purwoagung / TPS 011: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 21.
+- Tegaldlimo / Purwoagung / TPS 011: total suara Excel 165 tidak sama dengan hasil koreksi 186.
+- Tegaldlimo / Purwoagung / TPS 012: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 15.
+- Tegaldlimo / Purwoagung / TPS 012: total suara Excel 174 tidak sama dengan hasil koreksi 189.
+- Tegaldlimo / Purwoagung / TPS 013: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 16.
+- Tegaldlimo / Purwoagung / TPS 013: total suara Excel 189 tidak sama dengan hasil koreksi 205.
+- Tegaldlimo / Purwoagung / TPS 014: suara tidak sah 0 disesuaikan ke surat suara digunakan - suara calon 23.
+- Tegaldlimo / Purwoagung / TPS 014: total suara Excel 187 tidak sama dengan hasil koreksi 210.

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Console\Commands\Concerns\WritesImportReport;
 use App\Models\Desa;
 use App\Models\RekapCaleg;
 use App\Models\RekapCalegSuara;
@@ -9,6 +10,7 @@ use App\Models\RekapHeader;
 use App\Models\RekapPartai;
 use App\Models\RekapPartaiSuara;
 use App\Models\Tps;
+use App\Services\RekapAdminCache;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -19,6 +21,8 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class ImportDprRiFolder extends Command
 {
+    use WritesImportReport;
+
     /*
      * CARA PAKAI IMPORTER DPR RI FOLDER
      * -------------------------------------------------------------------------
@@ -35,6 +39,15 @@ class ImportDprRiFolder extends Command
      * Wajib cek dulu tanpa mengubah database:
      *
      *   php artisan import:dpr-ri-folder "storage/import/DPR RI" --dry-run
+     *
+     * Tulis detail masalah/koreksi ke file txt tanpa limit tampilan console:
+     *
+     *   php artisan import:dpr-ri-folder "storage/import/DPR RI" --dry-run --report
+     *   php artisan import:dpr-ri-folder "storage/import/DPR RI" --dry-run --report=storage/app/import-reports/dpr-ri.txt
+     *
+     * Kalau --report tidak diberi path, file otomatis dibuat di:
+     *
+     *   storage/app/import-reports/import-folder-dpr-ri-YYYYMMDD-HHMMSS.txt
      *
      * Cek satu kecamatan saja:
      *
@@ -60,7 +73,8 @@ class ImportDprRiFolder extends Command
         {path=storage/import/DPR RI : Folder berisi file DPR RI per kecamatan atau satu file Excel DPR RI}
         {--dry-run : Validasi dan tampilkan ringkasan tanpa menyimpan ke database}
         {--only=* : Batasi import ke nama kecamatan tertentu}
-        {--desa=* : Batasi import ke nama desa/sheet tertentu}';
+        {--desa=* : Batasi import ke nama desa/sheet tertentu}
+        {--report= : Tulis detail masalah dan koreksi ke file txt; kosongkan nilainya untuk path otomatis}';
 
     protected $description = 'Import rekap DPR RI dari folder Excel per kecamatan dan sheet per desa.';
 
@@ -221,6 +235,21 @@ class ImportDprRiFolder extends Command
         if ($rows === []) {
             $this->error('Tidak ada data TPS yang terbaca dari file.');
             $this->printProblems($missing, $invalid, $warnings);
+            $reportPath = $this->writeImportReport('Import folder '.static::LABEL, [
+                'Scope master terbaca' => count($partaisByScope),
+                'TPS terbaca' => 0,
+                'TPS tidak aman diimpor' => count($invalid),
+                'Koreksi data' => count($corrections),
+            ], [
+                'Data wilayah tidak cocok' => $missing,
+                'Data TPS tidak aman diimpor' => $invalid,
+                'Catatan struktur Excel' => $warnings,
+                'Daftar koreksi' => $corrections,
+            ]);
+
+            if ($reportPath) {
+                $this->info('Detail laporan import ditulis ke: '.$reportPath);
+            }
 
             return self::FAILURE;
         }
@@ -301,6 +330,7 @@ class ImportDprRiFolder extends Command
             }
         });
 
+        RekapAdminCache::flushAggregate();
         $this->printReport($rows, $corrections, $missing, $invalid, $warnings, $partaisByScope);
 
         return self::SUCCESS;
@@ -625,18 +655,23 @@ class ImportDprRiFolder extends Command
         $partaiCount = collect($partaisByScope)->sum(fn ($partais) => count($partais));
         $calegCount = collect($partaisByScope)
             ->sum(fn ($partais) => collect($partais)->sum(fn ($partai) => count($partai['calegs'])));
+        $reportSummary = [
+            'Scope master terbaca' => count($partaisByScope),
+            'Partai terbaca' => $partaiCount,
+            'Caleg terbaca' => $calegCount,
+            'TPS terbaca' => count($rows),
+            'File terbaca' => collect($rows)->pluck('source_file')->unique()->count(),
+            'Kecamatan terbaca' => collect($rows)->pluck('kecamatan')->unique()->count(),
+            'Desa terbaca' => collect($rows)->map(fn ($row) => $row['kecamatan'].' / '.$row['desa'])->unique()->count(),
+            'TPS tidak aman diimpor' => count($invalid),
+            'Koreksi data' => count($corrections),
+        ];
 
         $this->newLine();
         $this->info('Import folder '.static::LABEL.' selesai.');
-        $this->line('Scope master terbaca: '.count($partaisByScope));
-        $this->line('Partai terbaca: '.$partaiCount);
-        $this->line('Caleg terbaca: '.$calegCount);
-        $this->line('TPS terbaca: '.count($rows));
-        $this->line('File terbaca: '.collect($rows)->pluck('source_file')->unique()->count());
-        $this->line('Kecamatan terbaca: '.collect($rows)->pluck('kecamatan')->unique()->count());
-        $this->line('Desa terbaca: '.collect($rows)->map(fn ($row) => $row['kecamatan'].' / '.$row['desa'])->unique()->count());
-        $this->line('TPS tidak aman diimpor: '.count($invalid));
-        $this->line('Koreksi data: '.count($corrections));
+        foreach ($reportSummary as $label => $value) {
+            $this->line($label.': '.$value);
+        }
 
         $summary = collect($rows)
             ->groupBy('kecamatan')
@@ -664,6 +699,17 @@ class ImportDprRiFolder extends Command
             if (count($corrections) > 100) {
                 $this->line('- ... '.(count($corrections) - 100).' koreksi lainnya tidak ditampilkan.');
             }
+        }
+
+        $reportPath = $this->writeImportReport('Import folder '.static::LABEL, $reportSummary, [
+            'Data wilayah tidak cocok' => $missing,
+            'Data TPS tidak aman diimpor' => $invalid,
+            'Catatan struktur Excel' => $warnings,
+            'Daftar koreksi' => $corrections,
+        ]);
+
+        if ($reportPath) {
+            $this->info('Detail laporan import ditulis ke: '.$reportPath);
         }
     }
 
