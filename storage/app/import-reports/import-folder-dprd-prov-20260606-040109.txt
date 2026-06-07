@@ -26,15 +26,6 @@ Catatan struktur Excel (0):
 - Tidak ada.
 
 Daftar koreksi (4906):
-- Bangorejo / Kebondalem / TPS 001: pengguna hak pilih 183 tidak sama dengan surat suara digunakan 180; pengguna_dpt_pr disesuaikan 88 -> 85.
-- Bangorejo / Kebondalem / TPS 003: pengguna hak pilih 215 tidak sama dengan surat suara digunakan 207; pengguna_dpt_pr disesuaikan 109 -> 101.
-- Bangorejo / Kebondalem / TPS 009: pengguna hak pilih 203 tidak sama dengan surat suara digunakan 202; pengguna_dpt_pr disesuaikan 101 -> 100.
-- Bangorejo / Kebondalem / TPS 010: pengguna hak pilih 190 tidak sama dengan surat suara digunakan 188; pengguna_dpt_pr disesuaikan 99 -> 97.
-- Bangorejo / Kebondalem / TPS 014: pengguna hak pilih 198 tidak sama dengan surat suara digunakan 196; pengguna_dpt_pr disesuaikan 97 -> 95.
-- Bangorejo / Sambimulyo / TPS 008: suara tidak sah 24 disesuaikan ke surat suara digunakan - suara sah 25.
-- Bangorejo / Sambimulyo / TPS 008: total suara Excel 207 tidak sama dengan hasil koreksi 208.
-- Bangorejo / Sambimulyo / TPS 010: suara tidak sah 26 disesuaikan ke surat suara digunakan - suara sah 25.
-- Bangorejo / Sambimulyo / TPS 010: total suara Excel 204 tidak sama dengan hasil koreksi 203.
 - Banyuwangi / Pakis / TPS 009: suara tidak sah 24 disesuaikan ke surat suara digunakan - suara sah 25.
 - Banyuwangi / Pakis / TPS 009: total suara Excel 217 tidak sama dengan hasil koreksi 218.
 - Banyuwangi / Pakis / TPS 010: suara tidak sah 38 disesuaikan ke surat suara digunakan - suara sah 37.

@@ -34,20 +34,6 @@ Catatan struktur Excel (0):
 - Tidak ada.
 
 Daftar koreksi (1726):
-- Bangorejo / Sukorejo / TPS 005: suara tidak sah 12 disesuaikan ke surat suara digunakan - suara sah 7.
-- Bangorejo / Sukorejo / TPS 005: total suara Excel 162 tidak sama dengan hasil koreksi 157.
-- Bangorejo / Sukorejo / TPS 006: suara tidak sah 27 disesuaikan ke surat suara digunakan - suara sah 31.
-- Bangorejo / Sukorejo / TPS 006: total suara Excel 208 tidak sama dengan hasil koreksi 212.
-- Bangorejo / Sukorejo / TPS 007: suara tidak sah 19 disesuaikan ke surat suara digunakan - suara sah 17.
-- Bangorejo / Sukorejo / TPS 007: total suara Excel 207 tidak sama dengan hasil koreksi 205.
-- Bangorejo / Sukorejo / TPS 008: suara tidak sah 19 disesuaikan ke surat suara digunakan - suara sah 21.
-- Bangorejo / Sukorejo / TPS 008: total suara Excel 169 tidak sama dengan hasil koreksi 171.
-- Bangorejo / Sukorejo / TPS 009: suara tidak sah 11 disesuaikan ke surat suara digunakan - suara sah 12.
-- Bangorejo / Sukorejo / TPS 009: total suara Excel 165 tidak sama dengan hasil koreksi 166.
-- Bangorejo / Sukorejo / TPS 012: suara tidak sah 33 disesuaikan ke surat suara digunakan - suara sah 32.
-- Bangorejo / Sukorejo / TPS 012: total suara Excel 215 tidak sama dengan hasil koreksi 214.
-- Bangorejo / Sukorejo / TPS 013: suara tidak sah 16 disesuaikan ke surat suara digunakan - suara sah 17.
-- Bangorejo / Sukorejo / TPS 013: total suara Excel 212 tidak sama dengan hasil koreksi 213.
 - Banyuwangi / Kebalenan / TPS 018: suara tidak sah 37 disesuaikan ke surat suara digunakan - suara sah 36.
 - Banyuwangi / Kebalenan / TPS 018: total suara Excel 249 tidak sama dengan hasil koreksi 248.
 - Banyuwangi / Kebalenan / TPS 020: suara tidak sah 20 disesuaikan ke surat suara digunakan - suara sah 21.

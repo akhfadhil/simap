@@ -176,7 +176,8 @@ class ImportPpwpFolder extends Command
 
                 foreach ($tpsColumns as $column => $tpsNama) {
                     // Semua angka TPS dibaca dari kolom yang sama:
-                    // E untuk TPS 001, F untuk TPS 002, dan seterusnya sampai AF.
+                    // E untuk TPS 001, F untuk TPS 002, dan seterusnya sampai
+                    // kolom TPS terakhir yang terdeteksi di baris 13.
                     $record = $this->recordFromSheet(
                         $sheet,
                         $column,
