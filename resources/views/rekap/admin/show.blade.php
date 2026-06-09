@@ -429,15 +429,11 @@
         <div class="flex flex-wrap gap-2">
             <button type="button" id="inline-edit-toggle"
                     class="inline-flex items-center justify-center px-4 py-2 rounded-lg text-xs font-semibold bg-red-500 hover:bg-red-600 text-white transition">
-                Edit Semua
+                Edit
             </button>
             <button type="button" id="inline-edit-save"
                     class="hidden inline-flex items-center justify-center px-4 py-2 rounded-lg text-xs font-semibold bg-teal-500 hover:bg-teal-600 text-white transition">
-                Simpan Perubahan
-            </button>
-            <button type="button" id="inline-edit-cancel"
-                    class="hidden inline-flex items-center justify-center px-4 py-2 rounded-lg text-xs font-semibold border dark:border-gray-700 border-gray-300 dark:text-gray-300 text-gray-600 dark:hover:bg-gray-700 hover:bg-gray-100 transition">
-                Batal
+                Simpan
             </button>
         </div>
     </div>
@@ -1047,7 +1043,6 @@
     function setInlineControls(editing) {
         document.getElementById('inline-edit-toggle')?.classList.toggle('hidden', editing);
         document.getElementById('inline-edit-save')?.classList.toggle('hidden', !editing);
-        document.getElementById('inline-edit-cancel')?.classList.toggle('hidden', !editing);
     }
     function enterInlineEditMode() {
         if (inlineEditMode) return;
@@ -1154,7 +1149,6 @@
 
     document.getElementById('inline-edit-toggle')?.addEventListener('click', enterInlineEditMode);
     document.getElementById('inline-edit-save')?.addEventListener('click', saveInlineChanges);
-    document.getElementById('inline-edit-cancel')?.addEventListener('click', () => leaveInlineEditMode(true));
 
     document.addEventListener('submit', async function(event) {
         const form = event.target.closest('[data-flag-form]');
