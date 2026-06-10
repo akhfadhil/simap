@@ -48,6 +48,13 @@
     $canEditRekap = Auth::user()->role === 'kpps' || $isAdminRekapEdit;
     $isFinal = $rekap && $rekap->status === 'final';
     $readOnly = !$canEditRekap || ($isFinal && !$isAdminRekapEdit);
+    $totalPenggunaHakPilih =
+        (int) old('pengguna_dpt_lk', $rekap?->pengguna_dpt_lk ?? 0) +
+        (int) old('pengguna_dpt_pr', $rekap?->pengguna_dpt_pr ?? 0) +
+        (int) old('pengguna_dptb_lk', $rekap?->pengguna_dptb_lk ?? 0) +
+        (int) old('pengguna_dptb_pr', $rekap?->pengguna_dptb_pr ?? 0) +
+        (int) old('pengguna_dpk_lk', $rekap?->pengguna_dpk_lk ?? 0) +
+        (int) old('pengguna_dpk_pr', $rekap?->pengguna_dpk_pr ?? 0);
 @endphp
 
 @if($isAdminRekapEdit)
@@ -115,10 +122,9 @@
     </div>
     <div class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-        {{-- 3 field biasa --}}
+        {{-- Surat suara digunakan otomatis mengikuti total pengguna hak pilih. --}}
         @foreach([
             ['ss_diterima', 'Surat suara diterima (termasuk cadangan 2%)'],
-            ['ss_digunakan', 'Surat suara digunakan'],
             ['ss_rusak', 'Surat suara rusak / keliru coblos'],
         ] as [$name, $label])
         <div>
@@ -128,6 +134,17 @@
                    class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-3 py-2 text-sm rounded-lg focus:border-sky-400 focus:ring-0 focus:outline-none {{ $readOnly ? 'opacity-60 cursor-not-allowed' : '' }}">
         </div>
         @endforeach
+
+        <div>
+            <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 mb-2">
+                Surat suara digunakan
+                <span class="text-[10px] dark:text-gray-600 text-gray-400 normal-case tracking-normal font-normal">(otomatis dari total pengguna hak pilih)</span>
+            </label>
+            <input type="number" name="ss_digunakan" id="ss_digunakan" min="0"
+                   value="{{ $totalPenggunaHakPilih }}"
+                   readonly
+                   class="w-full dark:bg-gray-900 bg-gray-100 border dark:border-gray-700 border-gray-300 dark:text-gray-400 text-gray-500 px-3 py-2 text-sm rounded-lg cursor-not-allowed">
+        </div>
 
         {{-- ss_sisa: otomatis --}}
         <div>
@@ -358,6 +375,22 @@ function updateJml() {
 }
 
 // ── SISA SURAT SUARA ─────────────────────────────────────
+function totalPenggunaHakPilih() {
+    return [
+        'pengguna_dpt_lk',
+        'pengguna_dpt_pr',
+        'pengguna_dptb_lk',
+        'pengguna_dptb_pr',
+        'pengguna_dpk_lk',
+        'pengguna_dpk_pr',
+    ].reduce((total, name) => total + (parseInt(document.querySelector(`[name="${name}"]`)?.value) || 0), 0);
+}
+
+function updateSuratSuaraDigunakan() {
+    const el = document.getElementById('ss_digunakan');
+    if (el) el.value = totalPenggunaHakPilih();
+}
+
 function updateSisa() {
     const diterima  = parseInt(document.querySelector('[name="ss_diterima"]')?.value) || 0;
     const digunakan = parseInt(document.querySelector('[name="ss_digunakan"]')?.value) || 0;
@@ -417,6 +450,7 @@ function updateTotal(sah) {
 // ── TRIGGER SEMUA ────────────────────────────────────────
 function updateAll() {
     updateJml();
+    updateSuratSuaraDigunakan();
     updateSisa();
     updateSuaraSah();
 }

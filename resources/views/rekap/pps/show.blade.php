@@ -28,6 +28,12 @@
     $totalTdkSah = $rekaps->sum('suara_tidak_sah');
 
     $rowKeyFor = fn($row) => isset($row['field']) && $row['field'] ? $row['field'] : 'sum:' . implode('+', $row['sum']);
+    $totalPenggunaRowKey = 'sum:pengguna_dpt_lk+pengguna_dpt_pr+pengguna_dptb_lk+pengguna_dptb_pr+pengguna_dpk_lk+pengguna_dpk_pr';
+    $mismatchRowKeys = [$totalPenggunaRowKey, 'ss_digunakan'];
+    $isMismatchRow = fn(string $rowKey) => in_array($rowKey, $mismatchRowKeys, true);
+    $rekapTotalPengguna = fn($r) => (int) $r->pengguna_dpt_lk + (int) $r->pengguna_dpt_pr + (int) $r->pengguna_dptb_lk + (int) $r->pengguna_dptb_pr + (int) $r->pengguna_dpk_lk + (int) $r->pengguna_dpk_pr;
+    $rekapHasMismatch = fn($r) => $r && $rekapTotalPengguna($r) !== (int) $r->ss_digunakan;
+    $totalHasMismatch = fn() => $rekaps->sum(fn($r) => $rekapTotalPengguna($r)) !== $rekaps->sum('ss_digunakan');
     $flaggedClasses = 'bg-red-500/20 text-red-600 dark:bg-red-500/20 dark:text-red-200 ring-1 ring-inset ring-red-400/60';
     $renderFlaggedCell = function(bool $flagged, $value, string $baseClass = '') use ($flaggedClasses) {
         $classes = trim($baseClass . ' ' . ($flagged ? $flaggedClasses : ''));
@@ -35,11 +41,11 @@
 
         return new \Illuminate\Support\HtmlString('<td class="' . e($classes) . '">' . $content . '</td>');
     };
-    $renderFlaggedTpsCell = function($tps, string $rowKey, $value, string $baseClass = '') use ($tpsCellFlags, $renderFlaggedCell) {
-        return $renderFlaggedCell($tpsCellFlags->has($tps->id . ':' . $rowKey), $value, $baseClass);
+    $renderFlaggedTpsCell = function($tps, string $rowKey, $value, string $baseClass = '', bool $autoFlagged = false) use ($tpsCellFlags, $renderFlaggedCell) {
+        return $renderFlaggedCell($autoFlagged || $tpsCellFlags->has($tps->id . ':' . $rowKey), $value, $baseClass);
     };
-    $renderFlaggedTotalCell = function(string $rowKey, $value, string $baseClass = '') use ($cellFlags, $renderFlaggedCell) {
-        return $renderFlaggedCell($cellFlags->has($rowKey), $value, $baseClass);
+    $renderFlaggedTotalCell = function(string $rowKey, $value, string $baseClass = '', bool $autoFlagged = false) use ($cellFlags, $renderFlaggedCell) {
+        return $renderFlaggedCell($autoFlagged || $cellFlags->has($rowKey), $value, $baseClass);
     };
 @endphp
 <div class="grid grid-cols-3 gap-4 mb-8">
@@ -115,12 +121,14 @@
                     @foreach($tpsList as $tps)
                     @php
                         $r = $rekaps[$tps->id] ?? null;
+                        $rowKey = $rowKeyFor($row);
                         $val = $r ? (($row['field'] ?? null) ? ($r->{$row['field']} ?? 0) : collect($row['sum'])->sum(fn($f) => $r->$f ?? 0)) : null;
                         $rowTotal += $val ?? 0;
+                        $autoFlagged = $isMismatchRow($rowKey) && $rekapHasMismatch($r);
                     @endphp
-                    {!! $renderFlaggedTpsCell($tps, $rowKeyFor($row), $r ? $val : null, 'px-3 py-2.5 text-center ' . ($isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500')) !!}
+                    {!! $renderFlaggedTpsCell($tps, $rowKey, $r ? $val : null, 'px-3 py-2.5 text-center ' . ($isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500'), $autoFlagged) !!}
                     @endforeach
-                    {!! $renderFlaggedTotalCell($rowKeyFor($row), $rowTotal, 'px-3 py-2.5 text-center font-bold text-teal-400') !!}
+                    {!! $renderFlaggedTotalCell($rowKeyFor($row), $rowTotal, 'px-3 py-2.5 text-center font-bold text-teal-400', $isMismatchRow($rowKeyFor($row)) && $totalHasMismatch()) !!}
                 </tr>
                 @endforeach
             @endforeach

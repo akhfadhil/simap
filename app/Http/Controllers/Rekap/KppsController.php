@@ -71,18 +71,32 @@ class KppsController extends Controller
             $status = request('finalisasi') == '1'
                 ? 'final'
                 : (($isAdminEdit && $existing?->status === 'final') ? 'final' : 'draft');
+            $suratSuaraDigunakan =
+                $request->integer('pengguna_dpt_lk') +
+                $request->integer('pengguna_dpt_pr') +
+                $request->integer('pengguna_dptb_lk') +
+                $request->integer('pengguna_dptb_pr') +
+                $request->integer('pengguna_dpk_lk') +
+                $request->integer('pengguna_dpk_pr');
+            $suratSuaraSisa = max(
+                0,
+                $request->integer('ss_diterima') - $suratSuaraDigunakan - $request->integer('ss_rusak')
+            );
+            $headerData = $request->only([
+                'dpt_lk', 'dpt_pr',
+                'pengguna_dpt_lk', 'pengguna_dpt_pr',
+                'pengguna_dptb_lk', 'pengguna_dptb_pr',
+                'pengguna_dpk_lk', 'pengguna_dpk_pr',
+                'ss_diterima', 'ss_rusak',
+                'disabilitas_lk', 'disabilitas_pr',
+                'suara_tidak_sah',
+            ]);
+            $headerData['ss_digunakan'] = $suratSuaraDigunakan;
+            $headerData['ss_sisa'] = $suratSuaraSisa;
 
             $rekap = RekapHeader::updateOrCreate(
                 ['tps_id' => $tps->id, 'jenis' => $jenis],
-                array_merge($request->only([
-                    'dpt_lk', 'dpt_pr',
-                    'pengguna_dpt_lk', 'pengguna_dpt_pr',
-                    'pengguna_dptb_lk', 'pengguna_dptb_pr',
-                    'pengguna_dpk_lk', 'pengguna_dpk_pr',
-                    'ss_diterima', 'ss_digunakan', 'ss_rusak', 'ss_sisa',
-                    'disabilitas_lk', 'disabilitas_pr',
-                    'suara_tidak_sah',
-                ]), ['diinput_oleh' => Auth::id(), 'status' => $status])
+                array_merge($headerData, ['diinput_oleh' => Auth::id(), 'status' => $status])
             );
 
             if ($jenis === 'ppwp') {

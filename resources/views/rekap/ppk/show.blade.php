@@ -80,6 +80,14 @@
     };
 
     $rowKeyFor = fn($row) => isset($row['field']) ? $row['field'] : 'sum:' . implode('+', $row['sum']);
+    $totalPenggunaRowKey = 'sum:pengguna_dpt_lk+pengguna_dpt_pr+pengguna_dptb_lk+pengguna_dptb_pr+pengguna_dpk_lk+pengguna_dpk_pr';
+    $mismatchRowKeys = [$totalPenggunaRowKey, 'ss_digunakan'];
+    $isMismatchRow = fn(string $rowKey) => in_array($rowKey, $mismatchRowKeys, true);
+    $statsTotalPengguna = fn(array $stats) => (int) ($stats['pengguna_dpt_lk'] ?? 0) + (int) ($stats['pengguna_dpt_pr'] ?? 0) + (int) ($stats['pengguna_dptb_lk'] ?? 0) + (int) ($stats['pengguna_dptb_pr'] ?? 0) + (int) ($stats['pengguna_dpk_lk'] ?? 0) + (int) ($stats['pengguna_dpk_pr'] ?? 0);
+    $statsHasMismatch = fn(array $stats) => $statsTotalPengguna($stats) !== (int) ($stats['ss_digunakan'] ?? 0);
+    $rekapTotalPengguna = fn($r) => (int) $r->pengguna_dpt_lk + (int) $r->pengguna_dpt_pr + (int) $r->pengguna_dptb_lk + (int) $r->pengguna_dptb_pr + (int) $r->pengguna_dpk_lk + (int) $r->pengguna_dpk_pr;
+    $rekapHasMismatch = fn($r) => $r && $rekapTotalPengguna($r) !== (int) $r->ss_digunakan;
+    $collectionHasMismatch = fn($items) => $items->sum(fn($r) => $rekapTotalPengguna($r)) !== $items->sum('ss_digunakan');
     $flaggedClasses = 'bg-red-500/20 text-red-600 dark:bg-red-500/20 dark:text-red-200 ring-1 ring-inset ring-red-400/60';
     $renderFlaggedCell = function(bool $flagged, $value, string $baseClass = '') use ($flaggedClasses) {
         $classes = trim($baseClass . ' ' . ($flagged ? $flaggedClasses : ''));
@@ -87,16 +95,16 @@
 
         return new \Illuminate\Support\HtmlString('<td class="' . e($classes) . '"><span>' . $content . '</span></td>');
     };
-    $renderDesaCell = function($desa, string $rowKey, $value, string $baseClass = '') use ($cellFlags, $renderFlaggedCell) {
+    $renderDesaCell = function($desa, string $rowKey, $value, string $baseClass = '', bool $autoFlagged = false) use ($cellFlags, $renderFlaggedCell) {
         $flagged = $cellFlags->has($desa->id . ':' . $rowKey);
 
-        return $renderFlaggedCell($flagged, $value, $baseClass);
+        return $renderFlaggedCell($autoFlagged || $flagged, $value, $baseClass);
     };
-    $renderDetailTpsCell = function($tps, string $rowKey, $value, string $baseClass = '') use ($tpsCellFlags, $renderFlaggedCell) {
-        return $renderFlaggedCell($tpsCellFlags->has($tps->id . ':' . $rowKey), $value, $baseClass);
+    $renderDetailTpsCell = function($tps, string $rowKey, $value, string $baseClass = '', bool $autoFlagged = false) use ($tpsCellFlags, $renderFlaggedCell) {
+        return $renderFlaggedCell($autoFlagged || $tpsCellFlags->has($tps->id . ':' . $rowKey), $value, $baseClass);
     };
-    $renderDetailTotalCell = function($desa, string $rowKey, $value, string $baseClass = '') use ($cellFlags, $renderFlaggedCell) {
-        return $renderFlaggedCell($cellFlags->has($desa->id . ':' . $rowKey), $value, $baseClass);
+    $renderDetailTotalCell = function($desa, string $rowKey, $value, string $baseClass = '', bool $autoFlagged = false) use ($cellFlags, $renderFlaggedCell) {
+        return $renderFlaggedCell($autoFlagged || $cellFlags->has($desa->id . ':' . $rowKey), $value, $baseClass);
     };
 @endphp
 
@@ -138,10 +146,15 @@
                 <tr class="border-b dark:border-gray-700 border-gray-100 {{ $isBold ? 'dark:bg-gray-700/20 bg-gray-50' : 'dark:hover:bg-gray-750 hover:bg-gray-50' }}">
                     <td class="px-5 py-2 text-sm {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-800' : 'dark:text-gray-300 text-gray-600' }}">{{ $row['label'] }}</td>
                     @foreach($desas as $desa)
-                    @php $val = $getDesaVal($desa, $row); $rowTotal += $val; @endphp
-                    {!! $renderDesaCell($desa, $rowKeyFor($row), $val, 'px-3 py-2 text-center ' . ($isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500')) !!}
+                    @php
+                        $rowKey = $rowKeyFor($row);
+                        $val = $getDesaVal($desa, $row);
+                        $rowTotal += $val;
+                        $autoFlagged = $isMismatchRow($rowKey) && $statsHasMismatch($desaStats[$desa->id] ?? []);
+                    @endphp
+                    {!! $renderDesaCell($desa, $rowKey, $val, 'px-3 py-2 text-center ' . ($isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500'), $autoFlagged) !!}
                     @endforeach
-                    <td class="px-3 py-2 text-center font-bold text-orange-400">{{ number_format($rowTotal) }}</td>
+                    <td class="px-3 py-2 text-center font-bold text-orange-400 {{ $isMismatchRow($rowKeyFor($row)) && $collectionHasMismatch($rekaps) ? $flaggedClasses : '' }}">{{ number_format($rowTotal) }}</td>
                 </tr>
                 @endforeach
             @endforeach
@@ -268,7 +281,7 @@
 </div>
 @else
 @foreach($detailDesas as $desa)
-@php $tpsIds = $desa->tps->pluck('id'); $desaRekaps = $detailRekaps->whereIn('tps_id', $tpsIds->toArray()); $desaFinal = $desaRekaps->where('status','final')->count(); $desaTotalTps = $desa->tps->count(); $desaHasFlag = $cellFlags->keys()->contains(fn($key) => str_starts_with($key, $desa->id . ':')); @endphp
+@php $tpsIds = $desa->tps->pluck('id'); $desaRekaps = $detailRekaps->whereIn('tps_id', $tpsIds->toArray()); $desaFinal = $desaRekaps->where('status','final')->count(); $desaTotalTps = $desa->tps->count(); $desaHasFlag = $cellFlags->keys()->contains(fn($key) => str_starts_with($key, $desa->id . ':')); $desaAutoMismatch = $collectionHasMismatch($desaRekaps); @endphp
 
 <div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm mb-4 overflow-hidden">
     <div class="flex items-center justify-between px-6 py-4 border-b dark:border-gray-700 border-gray-200 cursor-pointer dark:hover:bg-gray-750 hover:bg-gray-50 transition"
@@ -320,10 +333,16 @@
                     <tr class="border-b dark:border-gray-700 border-gray-100 {{ $isBold ? 'dark:bg-gray-700/20 bg-gray-50' : 'dark:hover:bg-gray-750 hover:bg-gray-50' }}">
                         <td class="px-5 py-2 text-sm {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-800' : 'dark:text-gray-300 text-gray-600' }}">{{ $row['label'] }}</td>
                         @foreach($desa->tps as $tps)
-                        @php $r = $detailRekaps[$tps->id] ?? null; $val = $r ? (isset($row['field']) ? ($r->{$row['field']} ?? 0) : collect($row['sum'])->sum(fn($f) => $r->$f ?? 0)) : null; $rowTotal += $val ?? 0; @endphp
-                        {!! $renderDetailTpsCell($tps, $rowKeyFor($row), $r ? $val : null, 'px-3 py-2 text-center ' . ($isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500')) !!}
+                        @php
+                            $r = $detailRekaps[$tps->id] ?? null;
+                            $rowKey = $rowKeyFor($row);
+                            $val = $r ? (isset($row['field']) ? ($r->{$row['field']} ?? 0) : collect($row['sum'])->sum(fn($f) => $r->$f ?? 0)) : null;
+                            $rowTotal += $val ?? 0;
+                            $autoFlagged = $isMismatchRow($rowKey) && $rekapHasMismatch($r);
+                        @endphp
+                        {!! $renderDetailTpsCell($tps, $rowKey, $r ? $val : null, 'px-3 py-2 text-center ' . ($isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500'), $autoFlagged) !!}
                         @endforeach
-                        {!! $renderDetailTotalCell($desa, $rowKeyFor($row), $rowTotal, 'px-3 py-2 text-center font-bold text-orange-400') !!}
+                        {!! $renderDetailTotalCell($desa, $rowKeyFor($row), $rowTotal, 'px-3 py-2 text-center font-bold text-orange-400', $isMismatchRow($rowKeyFor($row)) && $desaAutoMismatch) !!}
                     </tr>
                     @endforeach
                 @endforeach

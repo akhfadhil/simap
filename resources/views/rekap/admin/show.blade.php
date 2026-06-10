@@ -89,11 +89,19 @@
 
     $canFlagCells = Auth::user()->role === 'admin';
     $rowKeyFor = fn($row) => isset($row['field']) && $row['field'] ? $row['field'] : 'sum:' . implode('+', $row['sum']);
+    $totalPenggunaRowKey = 'sum:pengguna_dpt_lk+pengguna_dpt_pr+pengguna_dptb_lk+pengguna_dptb_pr+pengguna_dpk_lk+pengguna_dpk_pr';
+    $mismatchRowKeys = [$totalPenggunaRowKey, 'ss_digunakan'];
+    $isMismatchRow = fn(string $rowKey) => in_array($rowKey, $mismatchRowKeys, true);
+    $statsTotalPengguna = fn(array $stats) => (int) ($stats['pengguna_dpt_lk'] ?? 0) + (int) ($stats['pengguna_dpt_pr'] ?? 0) + (int) ($stats['pengguna_dptb_lk'] ?? 0) + (int) ($stats['pengguna_dptb_pr'] ?? 0) + (int) ($stats['pengguna_dpk_lk'] ?? 0) + (int) ($stats['pengguna_dpk_pr'] ?? 0);
+    $statsHasMismatch = fn(array $stats) => $statsTotalPengguna($stats) !== (int) ($stats['ss_digunakan'] ?? 0);
+    $rekapTotalPengguna = fn($r) => (int) $r->pengguna_dpt_lk + (int) $r->pengguna_dpt_pr + (int) $r->pengguna_dptb_lk + (int) $r->pengguna_dptb_pr + (int) $r->pengguna_dpk_lk + (int) $r->pengguna_dpk_pr;
+    $rekapHasMismatch = fn($r) => $r && $rekapTotalPengguna($r) !== (int) $r->ss_digunakan;
+    $collectionHasMismatch = fn($items) => $items->sum(fn($r) => $rekapTotalPengguna($r)) !== $items->sum('ss_digunakan');
     $flaggedClasses = 'bg-red-500/20 text-red-600 dark:bg-red-500/20 dark:text-red-200 ring-1 ring-inset ring-red-400/60';
-    $renderKecFlaggedCell = function($kecamatan, string $rowKey, $value, string $baseClass = '') use ($kecCellFlags, $kecDirectCellFlags, $canFlagCells, $jenis, $flaggedClasses) {
+    $renderKecFlaggedCell = function($kecamatan, string $rowKey, $value, string $baseClass = '', bool $autoFlagged = false) use ($kecCellFlags, $kecDirectCellFlags, $canFlagCells, $jenis, $flaggedClasses) {
         $flagged = $kecCellFlags->has($kecamatan->id . ':' . $rowKey);
         $directFlagged = $kecDirectCellFlags->has($kecamatan->id . ':' . $rowKey);
-        $classes = trim($baseClass . ' relative group ' . ($flagged ? $flaggedClasses : ''));
+        $classes = trim($baseClass . ' relative group ' . (($autoFlagged || $flagged) ? $flaggedClasses : ''));
         $content = is_null($value) ? '&mdash;' : number_format($value);
         $button = '';
 
@@ -111,7 +119,7 @@
                 . '</form>';
         }
 
-        return new \Illuminate\Support\HtmlString('<td class="' . e($classes) . '" data-flag-scope="kec" data-kec-id="' . e($kecamatan->id) . '" data-row-key="' . e($rowKey) . '" data-direct-flagged="' . ($directFlagged ? '1' : '0') . '"><span>' . $content . '</span>' . $button . '</td>');
+        return new \Illuminate\Support\HtmlString('<td class="' . e($classes) . '" data-flag-scope="kec" data-kec-id="' . e($kecamatan->id) . '" data-row-key="' . e($rowKey) . '" data-direct-flagged="' . ($directFlagged ? '1' : '0') . '" data-auto-flagged="' . ($autoFlagged ? '1' : '0') . '"><span>' . $content . '</span>' . $button . '</td>');
     };
     $isInlineEditableRow = function(string $rowKey) {
         $baseEditable = [
@@ -129,9 +137,9 @@
             || str_starts_with($rowKey, 'partai:')
             || str_starts_with($rowKey, 'caleg:');
     };
-    $renderAdminTpsCell = function($tps, string $rowKey, $value, string $baseClass = '') use ($tpsCellFlags, $canFlagCells, $jenis, $flaggedClasses, $isInlineEditableRow) {
+    $renderAdminTpsCell = function($tps, string $rowKey, $value, string $baseClass = '', bool $autoFlagged = false) use ($tpsCellFlags, $canFlagCells, $jenis, $flaggedClasses, $isInlineEditableRow) {
         $flagged = $tpsCellFlags->has($tps->id . ':' . $rowKey);
-        $classes = trim($baseClass . ' relative group ' . ($flagged ? $flaggedClasses : ''));
+        $classes = trim($baseClass . ' relative group ' . (($autoFlagged || $flagged) ? $flaggedClasses : ''));
         $rawValue = is_null($value) ? 0 : (int) $value;
         $content = is_null($value) ? '&mdash;' : number_format($value);
         $editableAttrs = $isInlineEditableRow($rowKey)
@@ -153,14 +161,14 @@
                 . '</form>';
         }
 
-        return new \Illuminate\Support\HtmlString('<td class="' . e($classes) . '" data-flag-scope="tps" data-tps-id="' . e($tps->id) . '" data-desa-id="' . e($tps->desa_id) . '" data-row-key="' . e($rowKey) . '"' . $editableAttrs . '><span class="js-cell-value">' . $content . '</span>' . $button . '</td>');
+        return new \Illuminate\Support\HtmlString('<td class="' . e($classes) . '" data-flag-scope="tps" data-tps-id="' . e($tps->id) . '" data-desa-id="' . e($tps->desa_id) . '" data-row-key="' . e($rowKey) . '" data-direct-flagged="' . ($flagged ? '1' : '0') . '" data-auto-flagged="' . ($autoFlagged ? '1' : '0') . '"' . $editableAttrs . '><span class="js-cell-value">' . $content . '</span>' . $button . '</td>');
     };
-    $renderAdminFlaggedTotalCell = function($desa, string $rowKey, $value, string $baseClass = '') use ($desaCellFlags, $kecDirectCellFlags, $flaggedClasses) {
+    $renderAdminFlaggedTotalCell = function($desa, string $rowKey, $value, string $baseClass = '', bool $autoFlagged = false) use ($desaCellFlags, $kecDirectCellFlags, $flaggedClasses) {
         $parentFlagged = $kecDirectCellFlags->has($desa->kecamatan_id . ':' . $rowKey);
-        $classes = trim($baseClass . ' ' . ($desaCellFlags->has($desa->id . ':' . $rowKey) ? $flaggedClasses : ''));
+        $classes = trim($baseClass . ' ' . (($autoFlagged || $desaCellFlags->has($desa->id . ':' . $rowKey)) ? $flaggedClasses : ''));
         $content = is_null($value) ? '&mdash;' : number_format($value);
 
-        return new \Illuminate\Support\HtmlString('<td class="' . e($classes) . '" data-flag-scope="desa" data-desa-id="' . e($desa->id) . '" data-row-key="' . e($rowKey) . '" data-parent-flagged="' . ($parentFlagged ? '1' : '0') . '"><span>' . $content . '</span></td>');
+        return new \Illuminate\Support\HtmlString('<td class="' . e($classes) . '" data-flag-scope="desa" data-desa-id="' . e($desa->id) . '" data-row-key="' . e($rowKey) . '" data-parent-flagged="' . ($parentFlagged ? '1' : '0') . '" data-auto-flagged="' . ($autoFlagged ? '1' : '0') . '"><span>' . $content . '</span></td>');
     };
 @endphp
 
@@ -227,10 +235,15 @@
             <tr class="border-b dark:border-gray-700 border-gray-100 {{ $isBold ? 'dark:bg-gray-700/20 bg-gray-50' : 'dark:hover:bg-gray-750 hover:bg-gray-50' }}">
                 <td class="px-5 py-2 text-sm {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-800' : 'dark:text-gray-300 text-gray-600' }}">{{ $row['label'] }}</td>
                 @foreach($kecamatans as $kec)
-                @php $val = $getKecVal($kec, $row); $rowTotal += $val; @endphp
-                {!! $renderKecFlaggedCell($kec, $rowKeyFor($row), $val, 'px-3 py-2 text-center ' . ($isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500')) !!}
+                @php
+                    $rowKey = $rowKeyFor($row);
+                    $val = $getKecVal($kec, $row);
+                    $rowTotal += $val;
+                    $autoFlagged = $isMismatchRow($rowKey) && $statsHasMismatch($kecStats[$kec->id] ?? []);
+                @endphp
+                {!! $renderKecFlaggedCell($kec, $rowKey, $val, 'px-3 py-2 text-center ' . ($isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500'), $autoFlagged) !!}
                 @endforeach
-                <td class="px-3 py-2 text-center font-bold text-red-500">{{ number_format($rowTotal) }}</td>
+                <td class="px-3 py-2 text-center font-bold text-red-500 {{ $isMismatchRow($rowKeyFor($row)) && $collectionHasMismatch($rekaps) ? $flaggedClasses : '' }}">{{ number_format($rowTotal) }}</td>
             </tr>
             @endforeach
 
@@ -245,10 +258,15 @@
             <tr class="border-b dark:border-gray-700 border-gray-100 {{ $isBold ? 'dark:bg-gray-700/20 bg-gray-50' : 'dark:hover:bg-gray-750 hover:bg-gray-50' }}">
                 <td class="px-5 py-2 text-sm {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-800' : 'dark:text-gray-300 text-gray-600' }}">{{ $row['label'] }}</td>
                 @foreach($kecamatans as $kec)
-                @php $val = $getKecVal($kec, $row); $rowTotal += $val; @endphp
-                {!! $renderKecFlaggedCell($kec, $rowKeyFor($row), $val, 'px-3 py-2 text-center ' . ($isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500')) !!}
+                @php
+                    $rowKey = $rowKeyFor($row);
+                    $val = $getKecVal($kec, $row);
+                    $rowTotal += $val;
+                    $autoFlagged = $isMismatchRow($rowKey) && $statsHasMismatch($kecStats[$kec->id] ?? []);
+                @endphp
+                {!! $renderKecFlaggedCell($kec, $rowKey, $val, 'px-3 py-2 text-center ' . ($isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500'), $autoFlagged) !!}
                 @endforeach
-                <td class="px-3 py-2 text-center font-bold text-red-500">{{ number_format($rowTotal) }}</td>
+                <td class="px-3 py-2 text-center font-bold text-red-500 {{ $isMismatchRow($rowKeyFor($row)) && $collectionHasMismatch($rekaps) ? $flaggedClasses : '' }}">{{ number_format($rowTotal) }}</td>
             </tr>
             @endforeach
 
@@ -481,8 +499,10 @@
     @foreach($kecamatan->desas as $desa)
     @php
         $desaTpsIds = $desa->tps->pluck('id')->toArray();
+        $desaRekaps = $detailRekaps->whereIn('tps_id', $desaTpsIds);
         $desaFinal  = $detailRekaps->whereIn('tps_id', $desaTpsIds)->where('status','final')->count();
         $desaHasFlag = $desaCellFlags->keys()->contains(fn($key) => str_starts_with($key, $desa->id . ':'));
+        $desaAutoMismatch = $collectionHasMismatch($desaRekaps);
     @endphp
 
     {{-- Sub-header desa --}}
@@ -539,10 +559,16 @@
                 <tr class="border-b dark:border-gray-700 border-gray-100 {{ $isBold ? 'dark:bg-gray-700/20 bg-gray-50' : 'dark:hover:bg-gray-750 hover:bg-gray-50' }}">
                     <td class="px-5 py-1.5 text-sm {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-800' : 'dark:text-gray-300 text-gray-600' }}">{{ $row['label'] }}</td>
                     @foreach($desa->tps as $tps)
-                    @php $r = $detailRekaps[$tps->id] ?? null; $val = $r ? (isset($row['field']) ? ($r->{$row['field']} ?? 0) : collect($row['sum'])->sum(fn($f) => $r->$f ?? 0)) : null; $rowTotal += $val ?? 0; @endphp
-                    {!! $renderAdminTpsCell($tps, $rowKeyFor($row), $r ? $val : null, 'px-3 py-1.5 text-center ' . ($isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500')) !!}
+                    @php
+                        $r = $detailRekaps[$tps->id] ?? null;
+                        $rowKey = $rowKeyFor($row);
+                        $val = $r ? (isset($row['field']) ? ($r->{$row['field']} ?? 0) : collect($row['sum'])->sum(fn($f) => $r->$f ?? 0)) : null;
+                        $rowTotal += $val ?? 0;
+                        $autoFlagged = $isMismatchRow($rowKey) && $rekapHasMismatch($r);
+                    @endphp
+                    {!! $renderAdminTpsCell($tps, $rowKey, $r ? $val : null, 'px-3 py-1.5 text-center ' . ($isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500'), $autoFlagged) !!}
                     @endforeach
-                    {!! $renderAdminFlaggedTotalCell($desa, $rowKeyFor($row), $rowTotal, 'px-3 py-1.5 text-center font-bold text-red-500') !!}
+                    {!! $renderAdminFlaggedTotalCell($desa, $rowKeyFor($row), $rowTotal, 'px-3 py-1.5 text-center font-bold text-red-500', $isMismatchRow($rowKeyFor($row)) && $desaAutoMismatch) !!}
                 </tr>
                 @endforeach
 
@@ -557,10 +583,16 @@
                 <tr class="border-b dark:border-gray-700 border-gray-100 {{ $isBold ? 'dark:bg-gray-700/20 bg-gray-50' : 'dark:hover:bg-gray-750 hover:bg-gray-50' }}">
                     <td class="px-5 py-1.5 text-sm {{ $isBold ? 'font-bold dark:text-gray-200 text-gray-800' : 'dark:text-gray-300 text-gray-600' }}">{{ $row['label'] }}</td>
                     @foreach($desa->tps as $tps)
-                    @php $r = $detailRekaps[$tps->id] ?? null; $val = $r ? ($r->{$row['field']} ?? 0) : null; $rowTotal += $val ?? 0; @endphp
-                    {!! $renderAdminTpsCell($tps, $rowKeyFor($row), $r ? $val : null, 'px-3 py-1.5 text-center ' . ($isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500')) !!}
+                    @php
+                        $r = $detailRekaps[$tps->id] ?? null;
+                        $rowKey = $rowKeyFor($row);
+                        $val = $r ? ($r->{$row['field']} ?? 0) : null;
+                        $rowTotal += $val ?? 0;
+                        $autoFlagged = $isMismatchRow($rowKey) && $rekapHasMismatch($r);
+                    @endphp
+                    {!! $renderAdminTpsCell($tps, $rowKey, $r ? $val : null, 'px-3 py-1.5 text-center ' . ($isBold ? 'font-bold dark:text-gray-200 text-gray-700' : 'dark:text-gray-400 text-gray-500'), $autoFlagged) !!}
                     @endforeach
-                    {!! $renderAdminFlaggedTotalCell($desa, $rowKeyFor($row), $rowTotal, 'px-3 py-1.5 text-center font-bold text-red-500') !!}
+                    {!! $renderAdminFlaggedTotalCell($desa, $rowKeyFor($row), $rowTotal, 'px-3 py-1.5 text-center font-bold text-red-500', $isMismatchRow($rowKeyFor($row)) && $desaAutoMismatch) !!}
                 </tr>
                 @endforeach
 
@@ -841,6 +873,11 @@
     const inlineUpdateUrl = '{{ route('admin.rekap.inline-update', $jenis) }}';
     const csrfToken = '{{ csrf_token() }}';
     const flagClasses = ['bg-red-500/20', 'text-red-600', 'dark:bg-red-500/20', 'dark:text-red-200', 'ring-1', 'ring-inset', 'ring-red-400/60'];
+    const totalPenggunaRowKey = 'sum:pengguna_dpt_lk+pengguna_dpt_pr+pengguna_dptb_lk+pengguna_dptb_pr+pengguna_dpk_lk+pengguna_dpk_pr';
+    const legislativeParties = @json(collect($master['partais'] ?? [])->map(fn($partai) => [
+        'id' => $partai->id,
+        'caleg_ids' => $partai->calegs->pluck('id')->values(),
+    ])->values());
     const inlineSumFormulas = {
         'sum:dpt_lk+dpt_pr': ['dpt_lk', 'dpt_pr'],
         'sum:pengguna_dpt_lk+pengguna_dpt_pr': ['pengguna_dpt_lk', 'pengguna_dpt_pr'],
@@ -857,11 +894,20 @@
     let inlineEditMode = false;
 
     function isFlaggedCell(cell) {
-        return cell?.classList.contains('bg-red-500/20');
+        return cell?.classList.contains('bg-red-500/20') || cell?.dataset.autoFlagged === '1';
     }
     function setFlaggedCell(cell, flagged) {
         if (!cell) return;
-        flagClasses.forEach(cls => cell.classList.toggle(cls, flagged));
+        const effectiveFlagged = flagged || cell.dataset.autoFlagged === '1';
+        flagClasses.forEach(cls => cell.classList.toggle(cls, effectiveFlagged));
+    }
+    function hasManualOrParentFlag(cell) {
+        return cell?.dataset.directFlagged === '1' || cell?.dataset.parentFlagged === '1';
+    }
+    function setAutoFlaggedCell(cell, flagged) {
+        if (!cell) return;
+        cell.dataset.autoFlagged = flagged ? '1' : '0';
+        setFlaggedCell(cell, hasManualOrParentFlag(cell));
     }
     function setFlagButtonState(cell, flagged) {
         const form = cell.querySelector('[data-flag-form]');
@@ -971,6 +1017,9 @@
     function tpsCellFor(tpsId, rowKey) {
         return inlineTpsCells().find(cell => cell.dataset.tpsId == tpsId && cell.dataset.rowKey === rowKey);
     }
+    function tpsCellsForRowPrefix(tpsId, prefix) {
+        return inlineTpsCells().filter(cell => cell.dataset.tpsId == tpsId && cell.dataset.rowKey?.startsWith(prefix));
+    }
     function setInlineStatus(message, isError = false) {
         const target = document.getElementById('inline-edit-status');
         if (!target) return;
@@ -988,6 +1037,80 @@
             const span = cell.querySelector('span');
             if (span) span.textContent = numberFormatter.format(total);
         });
+    }
+    function refreshInlineMismatchFlagsForDesa(desaId) {
+        const totalPengguna = inlineTpsCells()
+            .filter(cell => cell.dataset.desaId == desaId && cell.dataset.rowKey === totalPenggunaRowKey)
+            .reduce((sum, cell) => sum + inlineValue(cell), 0);
+        const suratDigunakan = inlineTpsCells()
+            .filter(cell => cell.dataset.desaId == desaId && cell.dataset.rowKey === 'ss_digunakan')
+            .reduce((sum, cell) => sum + inlineValue(cell), 0);
+        const flagged = totalPengguna !== suratDigunakan;
+
+        desaCellsFor(desaId, totalPenggunaRowKey).forEach(cell => setAutoFlaggedCell(cell, flagged));
+        desaCellsFor(desaId, 'ss_digunakan').forEach(cell => setAutoFlaggedCell(cell, flagged));
+        refreshDesaFlag(desaId, totalPenggunaRowKey);
+        refreshDesaFlag(desaId, 'ss_digunakan');
+
+        const desa = allDesas.find(item => item.id == desaId);
+        if (desa) {
+            refreshKecFlag(desa.kecamatan_id, totalPenggunaRowKey);
+            refreshKecFlag(desa.kecamatan_id, 'ss_digunakan');
+        }
+    }
+    function refreshInlineMismatchFlagsForTps(tpsId) {
+        const totalCell = tpsCellFor(tpsId, totalPenggunaRowKey);
+        const usedCell = tpsCellFor(tpsId, 'ss_digunakan');
+        if (!totalCell || !usedCell) return;
+
+        const flagged = inlineValue(totalCell) !== inlineValue(usedCell);
+        setAutoFlaggedCell(totalCell, flagged);
+        setAutoFlaggedCell(usedCell, flagged);
+
+        refreshInlineMismatchFlagsForDesa(totalCell.dataset.desaId);
+    }
+    function refreshInlinePartaiTotal(tpsId, partaiId, refreshRowTotal = true) {
+        const target = tpsCellFor(tpsId, `partai_total:${partaiId}`);
+        if (!target) return;
+
+        const partaiCell = tpsCellFor(tpsId, `partai:${partaiId}`);
+        const party = legislativeParties.find(item => String(item.id) === String(partaiId));
+        const calegTotal = (party?.caleg_ids || []).reduce((sum, calegId) => {
+            const cell = tpsCellFor(tpsId, `caleg:${calegId}`);
+            return sum + (cell ? inlineValue(cell) : 0);
+        }, 0);
+        const total = (partaiCell ? inlineValue(partaiCell) : 0) + calegTotal;
+
+        setInlineCellValue(target, total);
+        if (refreshRowTotal) {
+            refreshInlineRowTotal(target.dataset.desaId, target.dataset.rowKey);
+        }
+    }
+    function refreshInlineLegislativePartyTotals(tpsId, refreshRowTotal = true) {
+        legislativeParties.forEach(party => refreshInlinePartaiTotal(tpsId, party.id, refreshRowTotal));
+    }
+    function refreshInlineSuaraSah(tpsId, refreshRowTotal = true) {
+        const target = tpsCellFor(tpsId, 'suara_sah');
+        if (!target) return;
+
+        const candidateCells = tpsCellsForRowPrefix(tpsId, 'calon:');
+        let total = 0;
+
+        if (candidateCells.length) {
+            total = candidateCells.reduce((sum, cell) => sum + inlineValue(cell), 0);
+        } else {
+            refreshInlineLegislativePartyTotals(tpsId, refreshRowTotal);
+            total = legislativeParties.reduce((sum, party) => {
+                const cell = tpsCellFor(tpsId, `partai_total:${party.id}`);
+                return sum + (cell ? inlineValue(cell) : 0);
+            }, 0);
+        }
+
+        setInlineCellValue(target, total);
+        if (refreshRowTotal) {
+            refreshInlineRowTotal(target.dataset.desaId, 'suara_sah');
+        }
+        refreshInlineTpsSum(tpsId, 'suara_total', refreshRowTotal);
     }
     function refreshAllInlineRowTotals() {
         const totals = {};
@@ -1029,6 +1152,9 @@
 
         tpsIds.forEach(tpsId => {
             formulaKeys.forEach(rowKey => refreshInlineTpsSum(tpsId, rowKey, false));
+            refreshInlineSuaraSah(tpsId, false);
+            refreshInlineTpsSum(tpsId, 'suara_total', false);
+            refreshInlineMismatchFlagsForTps(tpsId);
         });
 
         refreshAllInlineRowTotals();
@@ -1039,6 +1165,16 @@
         Object.entries(inlineSumFormulas)
             .filter(([, fields]) => fields.includes(cell.dataset.rowKey))
             .forEach(([rowKey]) => refreshInlineTpsSum(cell.dataset.tpsId, rowKey));
+
+        if (
+            cell.dataset.rowKey.startsWith('calon:')
+            || cell.dataset.rowKey.startsWith('partai:')
+            || cell.dataset.rowKey.startsWith('caleg:')
+        ) {
+            refreshInlineSuaraSah(cell.dataset.tpsId);
+        }
+
+        refreshInlineMismatchFlagsForTps(cell.dataset.tpsId);
     }
     function setInlineControls(editing) {
         document.getElementById('inline-edit-toggle')?.classList.toggle('hidden', editing);
@@ -1178,7 +1314,7 @@
 
             const payload = await response.json();
             const flagged = Boolean(payload.flagged);
-            if (cell.dataset.flagScope === 'kec') {
+            if (cell.dataset.flagScope === 'kec' || cell.dataset.flagScope === 'tps') {
                 cell.dataset.directFlagged = flagged ? '1' : '0';
             }
             setFlaggedCell(cell, flagged);
