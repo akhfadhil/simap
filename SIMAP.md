@@ -13,6 +13,7 @@ SIMAP adalah aplikasi Laravel untuk pengelolaan arsip dokumen pemilu dan rekapit
 | Export | Maatwebsite Excel |
 | Grafik | Chart.js di halaman grafik admin |
 | Peta | GeoJSON Banyuwangi di `public/geojson` |
+| Cache rekap | Cache Laravel, dikonfigurasi lewat `config/rekap.php` |
 
 ## Role dan Akses
 
@@ -49,6 +50,7 @@ Jenis pemilihan didefinisikan di `App\Models\RekapHeader::JENIS_LABELS` dan dapa
 
 - Login/logout multi-role dengan redirect dashboard.
 - Login khusus akun partai tersedia di `/partai/login`.
+- Semua user login dapat mengganti password sendiri melalui `/password`.
 - Middleware role untuk membatasi halaman.
 - Layout utama dengan topbar, logo KPU, dark/light mode, toast konfirmasi global, dan modal preview PDF.
 - Error page custom untuk 403, 404, 419, 500, dan 503.
@@ -86,25 +88,28 @@ Jenis pemilihan didefinisikan di `App\Models\RekapHeader::JENIS_LABELS` dan dapa
 - Status rekap: `draft` dan `final`.
 - Admin bisa unlock rekap yang sudah final agar dapat diedit ulang; komisioner tidak dapat unlock.
 - Admin bisa membuka form koreksi rekap TPS dari detail rekap admin dan menyimpan perubahan langsung. Rekap final tetap berstatus final setelah dikoreksi admin.
+- Admin juga dapat mengubah nilai cell TPS langsung dari tabel detail rekap admin melalui endpoint inline update.
 - Rekap PPS menampilkan agregasi desa.
 - Rekap PPK menampilkan agregasi kecamatan.
 - Rekap Admin/Komisioner menampilkan agregasi kabupaten, filter/level wilayah, summary, dan export.
 - Admin dapat memberi atau menghapus penanda koreksi manual pada cell TPS dari halaman Rekapitulasi Data admin setelah memilih jenis pemilu, kecamatan, dan desa. Jika sebuah cell TPS ditandai, cell total desa untuk baris yang sama ikut merah, rekap PPK pada kolom desa ikut merah, dan rekap kabupaten pada kolom kecamatan ikut merah; PPS/PPK hanya melihat tanda tersebut.
 - Export Excel tersedia untuk KPPS, PPS, PPK, Admin, dan Komisioner sesuai akses baca masing-masing.
 - `RekapExportService` membuat export bertingkat ketika rekap final memenuhi syarat.
-- `RekapAdminCache` menyimpan agregasi admin sementara selama 10 menit dan dapat di-flush saat data berubah.
+- `RekapAdminCache` menyimpan agregasi admin, data chart, dan ringkasan dashboard sesuai TTL `REKAP_CACHE_TTL_SECONDS` dengan default 30 detik. Cache dapat dimatikan dengan nilai `0` dan di-flush saat data berubah.
+- `DashboardElectionSummary` membuat ringkasan pemenang dan caleg/partai teratas di dashboard sesuai scope user atau mode view admin.
 
 ### Grafik dan Peta
 
-- Halaman grafik admin/komisioner ada di `admin/rekap/chart`.
+- Halaman grafik admin/komisioner/partai ada di `admin/rekap/chart`.
 - Data grafik diambil lewat AJAX dari `admin/rekap/chart/data`.
 - Mendukung grafik perolehan suara, partisipasi, pemenang wilayah, dan mode dapil untuk `dprd_kab`.
-- Aset peta ada di `public/geojson`, termasuk kecamatan dan desa Banyuwangi.
+- Aset peta ada di `public/geojson`, termasuk kecamatan dan desa Banyuwangi. JavaScript halaman grafik ada di `public/js/rekap-admin-chart.js`.
 
 ### Dokumen
 
 - KPPS upload dokumen PDF level TPS.
 - PPK upload dokumen PDF level kecamatan.
+- PPK memiliki form upload khusus di `/ppk/upload` untuk dokumen D-Hasil kecamatan.
 - PPS/PPK/Admin/Komisioner dapat melihat dokumen sesuai role dan konteks wilayah.
 - Verifikasi dokumen berjenjang dengan status `menunggu_verifikasi`, `terverifikasi`, dan `ditolak`.
 - Penolakan dokumen menyimpan komentar/alasan.
@@ -183,22 +188,28 @@ php artisan backup:dokumen --dry-run
 # Restore dokumen arsip berdasarkan ID dokumen
 php artisan restore:dokumen {id}
 
-# Import data rekap Bangorejo dari Excel per TPS
-php artisan import:bangorejo-dprd-prov --dry-run
-php artisan import:bangorejo-dprd-kab --dry-run
-
-# Import data PPWP/DPD/DPR RI historis dari folder Excel semua kecamatan
+# Import data PPWP/DPD/DPR RI/DPRD historis dari folder Excel semua kecamatan
 php artisan import:ppwp-folder "storage/import/PPWP" --dry-run
 php artisan import:ppwp-folder "storage/import/PPWP"
 php artisan import:dpd-folder "storage/import/DPD" --dry-run
 php artisan import:dpd-folder "storage/import/DPD"
 php artisan import:dpr-ri-folder "storage/import/DPR RI" --dry-run
 php artisan import:dpr-ri-folder "storage/import/DPR RI"
+php artisan import:dprd-prov-folder "storage/import/DPRD PROV" --dry-run
+php artisan import:dprd-prov-folder "storage/import/DPRD PROV"
+php artisan import:dprd-kab-folder "storage/import/DPRD KAB" --dry-run
+php artisan import:dprd-kab-folder "storage/import/DPRD KAB"
+
+# Tulis laporan detail import ke storage/app/import-reports
+php artisan import:ppwp-folder "storage/import/PPWP" --dry-run --report
+
+# Buat dokumen TPS dummy dari File_contoh.pdf untuk jenis pemilu aktif
+php artisan seed:dummy-dokumen --status=menunggu_verifikasi
 ```
 
 Scheduler menjalankan backup dokumen harian melalui `app/Console/Kernel.php`.
 
-Jalankan command import dengan `--dry-run` terlebih dahulu untuk memvalidasi baris yang terbaca dan melihat koreksi otomatis sebelum menulis ke database. `import:ppwp-folder`, `import:dpd-folder`, dan `import:dpr-ri-folder` adalah helper sementara untuk data historis: satu file Excel mewakili satu kecamatan dan setiap sheet mewakili satu desa. Command ini memakai nama sheet sebagai nama desa utama, melewati sheet pembuka tanpa TPS, dan menerima opsi `--only=NAMA_KECAMATAN` untuk membatasi import.
+Jalankan command import dengan `--dry-run` terlebih dahulu untuk memvalidasi baris yang terbaca dan melihat koreksi otomatis sebelum menulis ke database. `import:ppwp-folder`, `import:dpd-folder`, `import:dpr-ri-folder`, `import:dprd-prov-folder`, dan `import:dprd-kab-folder` adalah helper data historis: satu file Excel mewakili satu kecamatan dan setiap sheet mewakili satu desa. Command ini memakai nama sheet sebagai nama desa utama, melewati sheet pembuka tanpa TPS, dan menerima opsi `--only=NAMA_KECAMATAN`, `--desa=NAMA_DESA`, serta `--report[=path]`. Untuk `dprd_kab`, master partai/caleg dipisah per dapil sehingga kecamatan yang diimport harus sudah memiliki dapil.
 
 ## Routes Penting
 
@@ -209,6 +220,8 @@ POST /login                    login.post
 GET  /partai/login             partai.login
 POST /partai/login             partai.login.post
 POST /logout                   logout
+GET  /password                 password.edit
+POST /password                 password.update
 
 // Dashboard
 GET /dashboard/admin
@@ -229,6 +242,12 @@ POST /dokumen/{dokumen}/verifikasi-admin
 POST /dokumen/{dokumen}/restore
 GET  /dokumen/{dokumen}/preview
 GET  /dokumen/{dokumen}/download
+GET  /ppk/upload
+POST /ppk/upload
+GET  /ppk/data-pps
+GET  /ppk/view-pps/{desa}
+GET  /pps/data-tps
+GET  /pps/view-tps/{tps}
 
 // Admin user & wilayah
 GET    /admin/users
@@ -271,13 +290,14 @@ GET /pps/rekap/{jenis}/export
 GET /ppk/rekap
 GET /ppk/rekap/{jenis}
 GET /ppk/rekap/{jenis}/export
-POST /admin/rekap/{jenis}/cell-flag  admin only
 
-// Rekap Admin/Komisioner
+// Rekap Admin/Komisioner/Partai
 GET  /admin/rekap
 GET  /admin/rekap/chart
 GET  /admin/rekap/chart/data
 GET  /admin/rekap/export/download
+POST /admin/rekap/{jenis}/cell-flag  admin only
+POST /admin/rekap/{jenis}/inline-update  admin only
 POST /admin/rekap/{jenis}/unlock   admin only
 GET  /admin/rekap/{jenis}/edit-tps/{tps}   admin only
 GET  /admin/rekap/{jenis}/export
@@ -295,13 +315,18 @@ app/
     Commands/ImportPpwpFolder.php
     Commands/ImportDpdFolder.php
     Commands/ImportDprRiFolder.php
-    Commands/ImportBangorejoDprdProv.php
-    Commands/ImportBangorejoDprdKab.php
+    Commands/ImportDprdProvFolder.php
+    Commands/ImportDprdKabFolder.php
+    Commands/SeedDummyDokumen.php
+    Commands/Concerns/WritesImportReport.php
   Http/
     Controllers/
       AuthController.php
+      AccountController.php
       DashboardController.php
       DokumenController.php
+      PpkController.php
+      PpsController.php
       Admin/
         SetupController.php
         ToolsController.php
@@ -326,6 +351,7 @@ app/
     Tps.php
     User.php
   Services/
+    DashboardElectionSummary.php
     RekapAdminCache.php
     RekapExportService.php
   Exports/
@@ -351,6 +377,7 @@ resources/views/
 
 public/
   images/logo-kpu.png
+  js/rekap-admin-chart.js
   geojson/
 ```
 
@@ -361,9 +388,13 @@ APP_DEBUG=true|false
 
 # Path folder backup dokumen PDF
 BACKUP_DOKUMEN_PATH=E:\Backup\SIMAP
+
+# TTL cache agregasi/chart/dashboard rekap dalam detik, 0 untuk nonaktif
+REKAP_CACHE_TTL_SECONDS=30
 ```
 
 `config/filesystems.php` membaca fallback backup ke `storage_path('app/backup')` jika `BACKUP_DOKUMEN_PATH` tidak diisi.
+`config/rekap.php` membaca `REKAP_CACHE_TTL_SECONDS` dan default ke 30 detik.
 
 ## Perintah Development
 
@@ -386,4 +417,4 @@ npm run build
 - `PROJECT.md` sudah dihapus karena duplikat dan lebih lama dari `SIMAP.md`.
 - Role `komisioner` dan `partai` bersifat read-only dan memakai sebagian route admin untuk baca data; aksi tulis tetap dipisahkan pada route/controller admin-only.
 - Manajemen pengguna dapat membuat akun admin/operator dan partai. Pastikan minimal satu akun admin/operator tetap tersedia untuk mencegah lockout.
-- Ada file contoh desain dan backup view lokal yang belum menjadi bagian dokumentasi utama: `Contoh_design_grafik*.html` dan `resources/views/rekap/admin/chart.blade.php.backup-*`.
+- Ada file contoh desain lokal yang belum menjadi bagian dokumentasi utama: `Contoh_design_grafik*.html`.
