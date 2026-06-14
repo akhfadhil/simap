@@ -1,6 +1,259 @@
-# Brainstorm Portal Partai SIMAP
+# Brainstorm Portal Partai SIMAPy
+# https://satuin.tech/home, https://t.me/Ns_Autoorder_bot, https://kprem.web.id/#products, https://zuxop.com/id
 
 Catatan ini merangkum ide pengembangan portal partai di SIMAP berdasarkan diskusi perencanaan fitur.
+
+## Catatan Keputusan Terbaru: Project Baru Khusus Partai
+
+Setelah diskusi lanjutan, arah yang diminta adalah bukan lagi menambah fitur partai di project SIMAP utama, tetapi membuat project baru khusus partai.
+
+Project baru ini sebaiknya diposisikan sebagai aplikasi mandiri berbasis fork dari SIMAP, bukan sekadar fitur tambahan di sistem utama. Artinya, kode awal boleh mengambil banyak pola dari SIMAP agar pengembangan cepat, tetapi database, role, istilah, akses, dan alur kerja disesuaikan untuk kebutuhan partai.
+
+Prinsip utama keputusan ini:
+
+- Project partai berdiri sendiri.
+- Database partai terpisah dari database SIMAP utama.
+- Partai tidak membaca langsung database SIMAP utama.
+- Data yang masuk ke project partai berasal dari import, export, atau input mandiri.
+- Struktur wilayah dan hierarki pengguna tetap bisa mirip PPK, PPS, dan KPPS, tetapi nama role dan konteksnya diganti sesuai organisasi partai.
+- Fitur internal KPU/SIMAP yang tidak relevan sebaiknya dihapus, disembunyikan, atau dinonaktifkan.
+
+Pendekatan yang paling sehat adalah membuat fork resmi, misalnya:
+
+```text
+simap-partai
+```
+
+atau nama lain sesuai identitas produk yang diinginkan.
+
+### Phase 1 Locked: SIMAP Garuda
+
+Project pertama yang akan dibuat adalah project khusus Partai Garuda.
+
+Keputusan Phase 1:
+
+```text
+Project: SIMAP Garuda
+Folder: simap-garuda
+Database: simap_garuda
+Partai: Partai Garuda
+Slug permanen: garuda
+Model aplikasi: satu project untuk satu partai
+Role: admin_partai, korcam, kordes, saksi_tps
+Data MVP: input manual TPS terlebih dahulu
+Import: fase berikutnya setelah struktur role dan rekap stabil
+```
+
+Nomor urut partai tidak boleh dijadikan identitas utama Partai Garuda karena nomor urut dapat berubah pada pemilu berikutnya.
+
+Untuk data historis Pemilu 2024, nomor urut Garuda di master SIMAP saat ini adalah:
+
+```text
+GARUDA = nomor_urut 11
+```
+
+Fungsi `nomor_urut` dalam konteks project Garuda:
+
+- Kunci bantu untuk ekstrak atau matching data Pemilu 2024 dari database SIMAP utama.
+- Referensi historis pada laporan dan arsip.
+- Alat validasi saat import data suara, partai, atau caleg dari sumber eksternal.
+- Bahan rekonsiliasi jika suatu hari perlu mencocokkan data Garuda dengan data SIMAP/KPU.
+
+Yang tidak boleh dilakukan:
+
+- Jangan memakai `nomor_urut` sebagai identitas permanen Partai Garuda.
+- Jangan membuat project Garuda bergantung runtime ke database SIMAP utama.
+- Jangan menganggap nomor urut 2024 akan tetap sama pada pemilu berikutnya.
+
+Alur yang benar:
+
+```text
+SIMAP utama -> export/sanitasi data Garuda berdasarkan nomor_urut 11 -> import ke simap_garuda
+```
+
+Setelah data masuk ke database `simap_garuda`, hubungan dengan database SIMAP utama putus. Project Garuda berjalan sebagai aplikasi mandiri yang dipegang Partai Garuda. Jika ada sengketa atau selisih angka, data Garuda dapat dibandingkan dengan data SIMAP/KPU berdasarkan pemilu, jenis pemilihan, wilayah, TPS, caleg, partai, dan nomor urut pada pemilu tersebut.
+
+### Kenapa Project Baru Masuk Akal
+
+Arah project baru masuk akal jika kebutuhan atasan adalah membuat produk khusus partai, bukan sekadar memberi akun partai untuk melihat data di SIMAP.
+
+Keuntungannya:
+
+- Data internal SIMAP/KPU tetap aman karena tidak dibuka ke sistem partai.
+- Partai punya aplikasi sendiri dengan database sendiri.
+- Risiko akses silang ke data admin, operator, dokumen internal, catatan verifikasi, atau fitur koreksi SIMAP utama menjadi jauh lebih kecil.
+- Istilah, role, menu, dashboard, dan laporan bisa disesuaikan penuh untuk kebutuhan partai.
+- Tiap partai bisa memiliki data, branding, akun, dan kebijakan akses sendiri.
+- Cocok jika nantinya partai membutuhkan sistem jangka panjang, bukan hanya akses sementara.
+
+Namun project baru tidak boleh hanya berupa copy mentah yang dibiarkan berkembang tanpa kendali. Lebih aman jika dianggap sebagai fork resmi dari SIMAP dengan scope yang jelas.
+
+### Risiko Yang Harus Disadari
+
+Risiko utama dari project baru adalah maintenance menjadi dua jalur.
+
+Hal yang perlu dijaga:
+
+- Bug fix penting di SIMAP utama mungkin perlu diterapkan juga ke project partai.
+- Perubahan format export, chart, rekap, atau struktur wilayah bisa perlu disinkronkan.
+- Jika terlalu banyak modifikasi liar, project partai bisa sulit di-maintain.
+- Jika database dan importer tidak dirancang jelas, angka bisa berbeda dari sumber data yang diharapkan.
+- Jika role baru tidak dipetakan dengan rapi, akses wilayah bisa bocor atau membingungkan.
+
+Karena itu, project partai sebaiknya dibuat dengan scope tegas:
+
+- Fokus pada kebutuhan partai.
+- Database sendiri.
+- Read-only atau input terbatas sesuai kebutuhan partai.
+- Tidak membawa fitur internal KPU yang tidak diperlukan.
+- Import data harus punya format dan validasi jelas.
+
+### Struktur Role Yang Disarankan
+
+Role SIMAP utama seperti `admin`, `komisioner`, `partai`, `ppk`, `pps`, dan `kpps` sebaiknya tidak dipakai mentah. Untuk project partai, istilah role bisa diganti agar sesuai struktur partai.
+
+Contoh struktur role:
+
+```text
+admin_partai
+korcam
+kordes
+saksi_tps
+```
+
+Alternatif nama lain:
+
+```text
+operator_partai
+koordinator_kecamatan
+koordinator_desa
+koordinator_tps
+```
+
+Pola akses yang disarankan:
+
+- `admin_partai` melihat semua data partai.
+- `korcam` melihat data di satu kecamatan.
+- `kordes` melihat data di satu desa atau kelurahan.
+- `saksi_tps` atau `kortps` melihat dan/atau menginput data TPS miliknya.
+
+Hierarki ini mirip PPK, PPS, dan KPPS di SIMAP, tetapi konteksnya bukan struktur penyelenggara pemilu. Konteksnya adalah struktur internal partai atau tim saksi.
+
+### Fitur Yang Bisa Dipertahankan Dari SIMAP
+
+Beberapa modul SIMAP masih berguna untuk project partai:
+
+- Login dan session auth.
+- Manajemen user.
+- Master kecamatan, desa, dan TPS.
+- Relasi user ke wilayah.
+- Rekap suara per TPS.
+- Agregasi desa, kecamatan, dan kabupaten.
+- Dashboard ringkasan.
+- Grafik dan peta.
+- Export Excel/PDF.
+- Import data dari Excel/CSV jika diperlukan.
+
+Modul ini bisa dipakai sebagai fondasi, tetapi perlu disesuaikan agar tidak membawa istilah dan akses KPU yang tidak relevan.
+
+### Fitur Yang Sebaiknya Dihapus atau Dinonaktifkan
+
+Fitur internal SIMAP utama yang sebaiknya tidak ikut ke project partai:
+
+- Role `komisioner` jika tidak dibutuhkan.
+- Login partai sebagai fitur tambahan, karena project ini sendiri sudah khusus partai.
+- Fitur verifikasi dokumen internal KPU jika tidak relevan.
+- Catatan penolakan/verifikasi dokumen petugas.
+- Unlock rekap final oleh admin KPU.
+- Koreksi inline internal admin jika tidak dibutuhkan.
+- Penanda cell koreksi manual internal.
+- Backup/restore dokumen internal SIMAP.
+- Tool setup pemilu yang terlalu luas jika data partai bersifat snapshot atau import.
+- Akses ke data partai lain jika project dibuat untuk satu partai.
+
+Jika ada fitur yang tetap diperlukan, fitur tersebut harus diberi konteks baru untuk partai, bukan dibawa apa adanya.
+
+### Model Data Project Partai
+
+Karena database berdiri sendiri, project partai bisa memiliki struktur data yang lebih sederhana.
+
+Data minimal:
+
+- Wilayah: kecamatan, desa/kelurahan, TPS.
+- User dan role hierarchy.
+- Master partai jika project mendukung lebih dari satu partai, atau konfigurasi identitas partai jika hanya satu partai.
+- Caleg partai.
+- Rekap suara partai.
+- Rekap suara caleg.
+- Status data masuk per TPS.
+- Riwayat import atau sinkronisasi data jika diperlukan.
+
+Jika project hanya untuk satu partai, tabel master partai bisa dibuat sebagai konfigurasi aplikasi, bukan data utama yang kompleks.
+
+Jika project akan dipakai banyak partai dengan database masing-masing, struktur tetap bisa sama, tetapi setiap deployment hanya berisi data partai tersebut.
+
+### Alur Data Yang Disarankan
+
+Karena project partai tidak mengambil langsung database SIMAP utama, alur data harus dibuat eksplisit.
+
+Opsi alur data:
+
+1. Import dari Excel atau CSV
+
+   Admin partai mengupload file hasil rekap, lalu sistem membaca data TPS, desa, kecamatan, partai, dan caleg.
+
+2. Import dari JSON hasil export SIMAP
+
+   SIMAP utama menghasilkan file export yang sudah disanitasi, lalu project partai mengimport file tersebut.
+
+3. Input manual oleh saksi atau koordinator
+
+   `saksi_tps` menginput data TPS, lalu `kordes`, `korcam`, dan `admin_partai` memantau progres.
+
+4. Snapshot final
+
+   Setelah data final, project partai hanya berisi data akhir untuk dashboard, grafik, dan laporan.
+
+Untuk tahap awal, opsi paling aman adalah import file yang sudah jelas formatnya. Jangan langsung koneksi antar database agar batas keamanan tetap bersih.
+
+### Dashboard Project Partai
+
+Dashboard project partai sebaiknya fokus pada kebutuhan partai, bukan kebutuhan operator KPU.
+
+Isi dashboard yang relevan:
+
+- Total suara partai.
+- Total suara caleg partai.
+- Ranking caleg internal.
+- Wilayah kuat dan lemah.
+- Perbandingan suara per kecamatan.
+- Perbandingan suara per desa.
+- Progress data TPS masuk.
+- TPS belum masuk.
+- TPS bermasalah atau perlu verifikasi internal.
+- Peta kekuatan suara.
+- Export laporan untuk pengurus partai.
+
+Jika project hanya untuk satu partai, dashboard tidak perlu terlalu banyak menampilkan data partai lain. Data kompetitor hanya ditampilkan jika memang dibutuhkan dan diizinkan oleh kebijakan data.
+
+### Rekomendasi Eksekusi Besok
+
+Tahapan eksekusi yang disarankan:
+
+1. Duplikasi/fork project SIMAP ke folder project baru.
+2. Tentukan nama project, nama database, dan identitas aplikasi partai.
+3. Tentukan istilah role final: misalnya `admin_partai`, `korcam`, `kordes`, dan `saksi_tps`.
+4. Bersihkan role lama yang tidak diperlukan.
+5. Sesuaikan middleware role dan redirect dashboard.
+6. Sesuaikan menu sidebar/topbar agar hanya menampilkan fitur partai.
+7. Pertahankan struktur wilayah kecamatan, desa, dan TPS.
+8. Sesuaikan manajemen user agar mengikuti hierarchy partai.
+9. Tentukan apakah data akan diinput manual, diimport dari Excel/CSV, atau diimport dari export JSON.
+10. Buat dashboard awal khusus partai.
+11. Sesuaikan grafik dan export agar fokus pada suara partai/caleg.
+12. Jalankan test dasar login, akses role, scope wilayah, input/import data, agregasi, dan export.
+
+Keputusan penting: setuju dengan arah project baru, tetapi implementasinya sebaiknya berupa fork SIMAP yang dirapikan, bukan copy-paste total tanpa batas. Project baru harus punya database sendiri, role hierarchy baru, dan hanya membawa fitur yang memang berguna untuk kebutuhan partai.
 
 ## Kesimpulan Utama
 
