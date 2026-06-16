@@ -426,3 +426,234 @@ Tahap awal yang paling masuk akal:
 6. Setelah data final, siapkan tool export snapshot per partai jika diperlukan.
 
 Prinsip utamanya: saat pemilu berjalan, gunakan satu SIMAP multi-partai. Setelah data final, ekstrak per partai boleh dilakukan sebagai snapshot read-only yang sudah disanitasi.
+
+## Update Arah Setelah SIMAP Garuda
+
+Setelah project `simap-garuda` berjalan, arah pengembangan berubah dari sekadar portal partai di SIMAP utama menjadi pola pemecahan project per partai.
+
+Artinya:
+
+- SIMAP utama tetap menjadi sistem induk dan sumber pola teknis.
+- SIMAP Garuda menjadi pilot project aplikasi partai mandiri.
+- Project partai berikutnya sebaiknya dibuat dari template resmi, bukan fork manual yang berkembang sendiri-sendiri.
+- `partai_profiles` di SIMAP utama tidak lagi menjadi prioritas utama untuk operasional partai, kecuali SIMAP utama tetap ingin menyediakan portal read-only multi-partai.
+- Fokus strategis berikutnya adalah membuat standar `simap-partai-template` agar `simap-garuda`, `simap-golkar`, `simap-pkb`, dan project partai lain punya struktur yang konsisten.
+
+Keputusan ini tidak membatalkan ide login `/partai/{slug}/login`, tetapi menurunkan prioritasnya. Login dinamis multi-partai tetap berguna jika SIMAP utama ingin memberi akses read-only cepat untuk banyak partai dari satu sistem. Namun untuk kebutuhan aplikasi operasional internal partai, pola project terpisah lebih aman.
+
+## Checklist SIMAP Utama
+
+Peran SIMAP utama setelah ada project partai mandiri:
+
+- Sistem induk data pemilu dan rekap lengkap.
+- Sumber pola fitur umum: wilayah, TPS, rekap, dashboard, export, import, dan validasi.
+- Sumber data untuk export/snapshot per partai.
+- Referensi bugfix dan perubahan aturan yang perlu diport ke project partai.
+
+Yang sudah cukup tepat:
+
+- Struktur wilayah kecamatan, desa, TPS sudah menjadi fondasi yang bisa dipakai semua project.
+- Master rekap lengkap masih tersedia untuk semua jenis pemilihan.
+- Role internal SIMAP utama tetap lengkap untuk kebutuhan operator.
+- Akun role `partai` sudah ada sebagai konsep awal akses partai.
+- Rekap legislatif sudah punya master partai/caleg yang dapat dipakai sebagai sumber export per partai.
+
+Yang masih kurang atau perlu diputuskan:
+
+- [ ] Tentukan apakah SIMAP utama tetap akan menyediakan portal partai read-only multi-partai.
+- [ ] Jika portal read-only tetap dipakai, buat `partai_profiles`.
+- [ ] Jika portal read-only tidak diprioritaskan, jangan bongkar besar `users.partai_id` dulu.
+- [ ] Definisikan SIMAP utama sebagai `core/template source` untuk project partai.
+- [ ] Buat format export resmi dari SIMAP utama ke project partai.
+- [ ] Tentukan format snapshot: JSON, Excel, CSV, SQLite, atau kombinasi.
+- [ ] Buat command export per partai, misalnya `export:party-snapshot {slug}`.
+- [ ] Pastikan export per partai hanya membawa data yang boleh dibagikan.
+- [ ] Jangan export user internal, password, log, dokumen mentah, catatan verifikasi, atau fitur koreksi.
+- [ ] Dokumentasikan mapping partai berdasarkan identitas stabil, bukan hanya `nomor_urut`.
+- [ ] Siapkan strategi sync bugfix dari SIMAP utama ke template/project partai.
+- [ ] Pisahkan catatan fitur yang hanya milik SIMAP utama dari fitur yang boleh masuk template partai.
+
+Jika tetap membuat `partai_profiles`, struktur minimal yang disarankan:
+
+```text
+partai_profiles
+- id
+- slug
+- nama
+- nama_singkat
+- logo_path
+- warna_utama
+- warna_aksen
+- nomor_urut_aktif
+- nomor_urut_historis_json
+- is_active
+```
+
+Catatan penting:
+
+- `slug` menjadi identitas permanen aplikasi/partai.
+- `nomor_urut` hanya metadata pemilu tertentu.
+- `rekap_partais` tetap menjadi master teknis rekap per jenis pemilu/dapil.
+- Relasi akun partai idealnya ke `partai_profiles`, bukan langsung ke satu baris `rekap_partais`.
+
+## Checklist SIMAP Garuda
+
+Peran SIMAP Garuda:
+
+- Pilot project aplikasi partai mandiri.
+- Bukti bahwa fork SIMAP bisa dibersihkan menjadi aplikasi internal satu partai.
+- Contoh struktur role partai: Admin Partai, Korcam, Kordes, Saksi TPS.
+- Kandidat awal untuk diekstrak menjadi template project partai.
+
+Yang sudah tepat:
+
+- Project berdiri sendiri di folder `simap-garuda`.
+- Database terpisah dari SIMAP utama.
+- Branding Partai Garuda sudah menjadi identitas aplikasi.
+- Login dan UI sudah diarahkan ke konteks Partai Garuda.
+- Role internal partai sudah dipakai di UI.
+- Input suara manual TPS tersedia.
+- Kordes dan Korcam sudah bisa ikut input/edit sesuai scope wilayah.
+- Admin Partai bisa koreksi lintas wilayah.
+- Data fokus ke Partai Garuda dan caleg Garuda.
+- Dashboard dan export sudah fokus ke suara Garuda.
+- Banyak fitur internal SIMAP utama sudah dibersihkan.
+
+Yang masih kurang atau perlu dilanjutkan:
+
+- [ ] Putuskan apakah nilai role database tetap kompatibel (`admin/ppk/pps/kpps`) atau dimigrasi penuh ke `admin_partai/korcam/kordes/saksi_tps`.
+- [ ] Rename URI teknis `ppk/pps/kpps` menjadi istilah partai jika sudah siap.
+- [ ] Tambahkan backward redirect sementara jika URI lama diganti.
+- [ ] Audit aman kolom legacy seperti `users.partai_id`.
+- [ ] Hapus relasi/model/tabel legacy non-partai jika sudah benar-benar tidak dipakai runtime.
+- [ ] Pastikan semua tampilan publik tidak membawa istilah KPU/internal SIMAP utama yang tidak relevan.
+- [ ] Finalisasi format import jika SIMAP Garuda nanti menerima snapshot dari SIMAP utama.
+- [ ] Tambahkan dokumentasi operasional untuk Admin Partai, Korcam, Kordes, dan Saksi TPS.
+- [ ] Tambahkan seed/demo data khusus Garuda untuk testing internal.
+- [ ] Siapkan daftar perubahan yang perlu dipromosikan ke template partai.
+
+Hal yang perlu dijaga:
+
+- SIMAP Garuda jangan kembali bergantung runtime ke database SIMAP utama.
+- Nomor urut Garuda jangan dijadikan identitas permanen.
+- Perubahan fitur jangan terlalu spesifik Garuda jika sebenarnya berguna untuk template partai.
+- Semua cleanup besar schema harus lewat migration dan test.
+
+## Checklist SIMAP Partai Template
+
+Peran `simap-partai-template`:
+
+- Blueprint resmi untuk membuat project partai berikutnya.
+- Sumber standar agar `simap-garuda`, `simap-golkar`, `simap-pkb`, dan project lain tidak berbeda liar.
+- Tempat menaruh fitur generik partai tanpa branding partai tertentu.
+
+Struktur yang disarankan:
+
+```text
+simap-partai-template
+config/party.php
+resources/images/party-logo.*
+database/migrations
+database/seeders
+app/Services/PartyScopeService.php
+app/Services/PartyImportService.php
+app/Services/PartyExportService.php
+```
+
+Checklist awal template:
+
+- [ ] Buat `config/party.php` sebagai sumber identitas partai.
+- [ ] Isi config dengan `slug`, `name`, `short_name`, `logo_path`, `primary_color`, `accent_color`, dan `historical_numbers`.
+- [ ] Buat `.env.example` yang jelas untuk nama app, database, dan party slug.
+- [ ] Buat command setup awal project partai, misalnya `party:install`.
+- [ ] Buat seeder akun Admin Partai awal.
+- [ ] Buat seeder/config wilayah opsional jika project tidak import dari SIMAP utama.
+- [ ] Standarkan role: `admin_partai`, `korcam`, `kordes`, `saksi_tps`.
+- [ ] Standarkan middleware scope wilayah.
+- [ ] Standarkan dashboard partai.
+- [ ] Standarkan form input suara TPS.
+- [ ] Standarkan export laporan partai.
+- [ ] Standarkan status internal TPS: draft, perlu dicek, final.
+- [ ] Standarkan catatan internal TPS.
+- [ ] Standarkan import snapshot dari SIMAP utama.
+- [ ] Standarkan validasi agar data hanya masuk untuk partai yang sesuai config.
+- [ ] Buat test wajib: login, role scope, input TPS, update TPS, finalisasi, export, dashboard, dan guard data partai.
+- [ ] Buat dokumentasi cara membuat project partai baru dari template.
+
+Data minimal yang harus dimiliki tiap project partai:
+
+- Wilayah: kecamatan, desa, TPS.
+- Dapil jika DPRD Kabupaten dipakai.
+- Identitas partai dari config.
+- Master caleg partai.
+- Rekap suara partai.
+- Rekap suara caleg.
+- User internal partai.
+- Status input TPS.
+
+Data yang tidak boleh ikut secara default:
+
+- User admin/operator SIMAP utama.
+- Password atau hash user dari SIMAP utama.
+- Dokumen mentah internal.
+- Catatan verifikasi internal KPU/SIMAP.
+- Log import, backup, cache, dan audit internal.
+- Data partai lain kecuali memang ada kebutuhan kompetitor dan sudah disetujui.
+
+## Pola Membuat Project Partai Baru
+
+Urutan kerja yang disarankan untuk partai berikutnya:
+
+1. Clone dari `simap-partai-template`, bukan langsung dari SIMAP utama.
+2. Set `APP_NAME`, database, dan `config/party.php`.
+3. Pasang logo dan warna partai.
+4. Jalankan migration dan seeder admin awal.
+5. Import wilayah dari SIMAP utama atau seed wilayah manual.
+6. Import/susun master caleg partai.
+7. Import snapshot suara atau aktifkan input manual TPS.
+8. Jalankan test template.
+9. Review UI agar tidak ada branding/istilah partai lain.
+10. Deploy sebagai project mandiri.
+
+Contoh naming:
+
+```text
+simap-garuda
+simap-golkar
+simap-pkb
+simap-gerindra
+```
+
+## Pembagian Tanggung Jawab Jangka Panjang
+
+SIMAP utama:
+
+- Menjadi sumber data penuh.
+- Menjadi sumber export/snapshot.
+- Menjadi tempat perubahan aturan umum.
+- Menjadi referensi perbaikan bug inti.
+
+SIMAP partai template:
+
+- Menjadi standar aplikasi partai.
+- Menjadi tempat fitur generik partai dikembangkan.
+- Menjadi sumber fork untuk partai baru.
+
+SIMAP Garuda dan project partai lain:
+
+- Menjadi deployment mandiri.
+- Menyimpan branding dan data partai masing-masing.
+- Menerima bugfix/template update secara terkontrol.
+- Tidak mengubah fitur core secara liar tanpa dipromosikan balik ke template jika berguna umum.
+
+## Keputusan Roadmap Terbaru
+
+Prioritas yang disarankan setelah SIMAP Garuda:
+
+1. Selesaikan hardening SIMAP Garuda sampai benar-benar layak jadi acuan.
+2. Ekstrak bagian generik SIMAP Garuda menjadi `simap-partai-template`.
+3. Di SIMAP utama, buat export/snapshot per partai.
+4. Buat dokumentasi membuat project partai baru.
+5. Baru pertimbangkan `partai_profiles` di SIMAP utama jika masih ingin portal read-only multi-partai dari satu sistem.
+
+Dengan arah ini, `partai_profiles` bukan dibuang, tetapi menjadi opsi untuk SIMAP utama. Untuk aplikasi mandiri per partai, identitas partai lebih sederhana dan lebih aman diletakkan di `config/party.php` masing-masing project.
