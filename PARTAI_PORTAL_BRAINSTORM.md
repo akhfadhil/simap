@@ -657,3 +657,74 @@ Prioritas yang disarankan setelah SIMAP Garuda:
 5. Baru pertimbangkan `partai_profiles` di SIMAP utama jika masih ingin portal read-only multi-partai dari satu sistem.
 
 Dengan arah ini, `partai_profiles` bukan dibuang, tetapi menjadi opsi untuk SIMAP utama. Untuk aplikasi mandiri per partai, identitas partai lebih sederhana dan lebih aman diletakkan di `config/party.php` masing-masing project.
+
+## Checklist Eksekusi Multi-Project Partai
+
+Bagian ini dipakai sebagai quick reference saat membuka session baru. Checklist dibagi per project supaya pekerjaan SIMAP utama, SIMAP Garuda, dan SIMAP Partai Template tidak tercampur.
+
+### A. SIMAP Utama
+
+Tujuan: SIMAP utama tetap menjadi core data, sumber export/snapshot, dan referensi bugfix.
+
+- [ ] Tetapkan SIMAP utama sebagai sumber data penuh dan core teknis.
+- [ ] Putuskan apakah portal read-only multi-partai tetap dibutuhkan di SIMAP utama.
+- [ ] Jika portal read-only tetap dibutuhkan, rancang `partai_profiles` berisi identitas partai seperti `party_key`, nama, nomor urut, warna, logo, dan status aktif.
+- [ ] Jangan migrasi besar ke `users.partai_id` sampai keputusan portal read-only jelas.
+- [ ] Audit data apa saja yang boleh keluar ke project partai mandiri.
+- [ ] Definisikan format snapshot per partai untuk hasil TPS, status TPS, wilayah, saksi, dan metadata pemilu.
+- [ ] Buat command export snapshot seperti `export:party-snapshot {party}`.
+- [ ] Pastikan export tidak membawa user internal, password, dokumen sensitif, log verifikasi, dan catatan koreksi internal.
+- [ ] Dokumentasikan mapping partai dari SIMAP utama ke project partai: slug, nama, nomor urut historis, dan relasi ke data rekap.
+- [ ] Tambahkan test export/snapshot per partai.
+- [ ] Dokumentasikan proses porting bugfix dari SIMAP utama ke SIMAP Partai Template atau project partai mandiri.
+
+### B. SIMAP Garuda
+
+Tujuan: SIMAP Garuda menjadi pilot project matang dan blueprint nyata sebelum dibuat template partai.
+
+- [x] Project sudah mandiri dari SIMAP utama.
+- [x] Branding dasar Garuda sudah masuk ke login dan identitas aplikasi.
+- [x] Input manual suara partai sudah fokus ke Garuda.
+- [x] Role desa dan kecamatan sudah bisa ikut edit suara sesuai kebutuhan project partai.
+- [x] Dashboard dan export sudah diarahkan ke kebutuhan Garuda.
+- [ ] Audit sisa penggunaan `users.partai_id` dan pastikan tidak ada scope multi-partai yang tidak perlu.
+- [ ] Putuskan role teknis final untuk aplikasi partai: admin kabupaten, kecamatan, desa, dan TPS.
+- [ ] Rename URI, label, dan teks yang masih terasa generik SIMAP utama jika mengganggu identitas Garuda.
+- [ ] Audit model, controller, view, route, dan menu legacy non-party yang sudah tidak dipakai.
+- [ ] Dokumentasikan cara setup SIMAP Garuda dari fresh clone sampai siap dipakai.
+- [ ] Tandai fitur generik Garuda yang layak dipromosikan ke template.
+- [ ] Tandai fitur spesifik Garuda yang tidak boleh masuk template.
+- [ ] Siapkan compatibility dengan format snapshot/export dari SIMAP utama.
+
+### C. SIMAP Partai Template
+
+Tujuan: membuat blueprint resmi untuk membuat project partai lain setelah SIMAP Garuda stabil.
+
+- [ ] Tentukan sumber awal template dari SIMAP Garuda setelah hardening selesai.
+- [ ] Buat repo atau folder `simap-partai-template`.
+- [ ] Jadikan `config/party.php` sebagai standar identitas partai.
+- [ ] Standarkan isi identitas partai: slug, nama, nomor urut, warna utama, warna aksen, logo, dan label aplikasi.
+- [ ] Buat command setup seperti `party:install` atau dokumentasi setup manual yang setara.
+- [ ] Standarkan role dan permission untuk admin kabupaten, kecamatan, desa, dan TPS.
+- [ ] Standarkan middleware scope supaya data selalu terbatas ke satu partai.
+- [ ] Standarkan form input TPS, status pengisian, koreksi, dan audit trail.
+- [ ] Standarkan dashboard, export, dan laporan yang umum dipakai semua partai.
+- [ ] Standarkan import snapshot dari SIMAP utama.
+- [ ] Tambahkan test wajib untuk input suara, role wilayah, export, dan import snapshot.
+- [ ] Dokumentasikan langkah membuat project baru seperti `simap-{slug}` dari template.
+- [ ] Pastikan tidak ada nama, logo, warna, atau teks Garuda yang hardcoded di template.
+
+### D. Urutan Eksekusi Yang Disarankan
+
+1. Lanjutkan SIMAP Garuda sampai checklist hardening pilot selesai.
+2. Ekstrak SIMAP Partai Template dari SIMAP Garuda yang sudah bersih.
+3. Buat export/snapshot di SIMAP utama setelah format kebutuhan template jelas.
+4. Project partai berikutnya dibuat dari SIMAP Partai Template, bukan dari SIMAP utama langsung.
+5. SIMAP utama hanya menambahkan `partai_profiles` jika portal read-only multi-partai memang masih dibutuhkan.
+
+### E. Yang Ditunda Dulu
+
+- [ ] Jangan prioritaskan `partai_profiles` kalau fokus utama masih project partai mandiri.
+- [ ] Jangan pecah project partai baru langsung dari SIMAP utama sebelum template siap.
+- [ ] Jangan masukkan fitur spesifik Garuda ke template tanpa alasan generik.
+- [ ] Jangan export data sensitif dari SIMAP utama ke project partai.
