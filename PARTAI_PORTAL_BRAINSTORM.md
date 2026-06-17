@@ -528,7 +528,7 @@ Yang masih kurang atau perlu dilanjutkan:
 - [x] Hapus relasi/model/tabel legacy non-partai lain yang sudah diaudit aman; tabel/model/relasi rekap non-legislatif SIMAP Garuda sudah dibersihkan lewat migration cleanup.
 - [ ] Pastikan semua tampilan publik tidak membawa istilah KPU/internal SIMAP utama yang tidak relevan.
 - [ ] Finalisasi format import jika SIMAP Garuda nanti menerima snapshot dari SIMAP utama.
-- [ ] Tambahkan dokumentasi operasional untuk Admin Partai, Korcam, Kordes, dan Saksi TPS.
+- [x] Tambahkan dokumentasi operasional untuk Admin Partai, Korcam, Kordes, dan Saksi TPS; tersedia di `simap-garuda/SIMAP_GARUDA_OPERASIONAL.md`.
 - [ ] Tambahkan seed/demo data khusus Garuda untuk testing internal.
 - [ ] Siapkan daftar perubahan yang perlu dipromosikan ke template partai.
 
@@ -692,7 +692,7 @@ Tujuan: SIMAP Garuda menjadi pilot project matang dan blueprint nyata sebelum di
 - [x] Rename URI, label, dan teks yang masih terasa generik SIMAP utama jika mengganggu identitas Garuda.
 - [x] Audit model, controller, view, route, dan menu legacy non-party yang sudah tidak dipakai; route, view, dan command non-party tidak reachable.
 - [x] Buat migration cleanup untuk drop tabel rekap non-legislatif legacy setelah audit aman; model dan relasi runtime terkait sudah dihapus.
-- [ ] Dokumentasikan cara setup SIMAP Garuda dari fresh clone sampai siap dipakai.
+- [x] Dokumentasikan cara setup SIMAP Garuda dari fresh clone sampai siap dipakai; termasuk konfigurasi, role/scope, penggunaan fitur, export, deployment, backup, dan troubleshooting.
 - [ ] Tandai fitur generik Garuda yang layak dipromosikan ke template.
 - [ ] Tandai fitur spesifik Garuda yang tidak boleh masuk template.
 - [ ] Siapkan compatibility dengan format snapshot/export dari SIMAP utama.
