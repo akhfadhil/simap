@@ -696,6 +696,7 @@ Tujuan: SIMAP Garuda menjadi pilot project matang dan blueprint nyata sebelum di
 - [x] Tandai fitur generik Garuda yang layak dipromosikan ke template; audit tersedia di `simap-garuda/SIMAP_GARUDA_TEMPLATE_AUDIT.md`.
 - [x] Tandai fitur spesifik Garuda yang tidak boleh masuk template; hardcode Garuda, label export, test fixture, dan route/class legacy sudah dicatat.
 - [x] Generalisasi hardcode Garuda tahap pertama: helper `PartyConfig`, scope `configuredParty()`, dan label export/UI utama sudah berbasis config.
+- [x] Ekstrak aturan scope wilayah ke `PartyScopeService` agar akses kecamatan/desa/TPS reusable untuk template.
 - [ ] Siapkan compatibility dengan format snapshot/export dari SIMAP utama.
 
 ### C. SIMAP Partai Template
