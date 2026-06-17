@@ -693,8 +693,8 @@ Tujuan: SIMAP Garuda menjadi pilot project matang dan blueprint nyata sebelum di
 - [x] Audit model, controller, view, route, dan menu legacy non-party yang sudah tidak dipakai; route, view, dan command non-party tidak reachable.
 - [x] Buat migration cleanup untuk drop tabel rekap non-legislatif legacy setelah audit aman; model dan relasi runtime terkait sudah dihapus.
 - [x] Dokumentasikan cara setup SIMAP Garuda dari fresh clone sampai siap dipakai; termasuk konfigurasi, role/scope, penggunaan fitur, export, deployment, backup, dan troubleshooting.
-- [ ] Tandai fitur generik Garuda yang layak dipromosikan ke template.
-- [ ] Tandai fitur spesifik Garuda yang tidak boleh masuk template.
+- [x] Tandai fitur generik Garuda yang layak dipromosikan ke template; audit tersedia di `simap-garuda/SIMAP_GARUDA_TEMPLATE_AUDIT.md`.
+- [x] Tandai fitur spesifik Garuda yang tidak boleh masuk template; hardcode Garuda, label export, test fixture, dan route/class legacy sudah dicatat.
 - [ ] Siapkan compatibility dengan format snapshot/export dari SIMAP utama.
 
 ### C. SIMAP Partai Template
