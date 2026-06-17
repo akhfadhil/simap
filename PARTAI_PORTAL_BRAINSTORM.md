@@ -525,7 +525,7 @@ Yang masih kurang atau perlu dilanjutkan:
 - [x] Rename URI teknis `ppk/pps/kpps` menjadi istilah partai jika sudah siap.
 - [x] Tambahkan backward redirect sementara jika URI lama diganti.
 - [x] Audit aman kolom legacy seperti `users.partai_id`; hasilnya kolom user-partai tidak dipakai runtime SIMAP Garuda dan sudah dibersihkan lewat migration.
-- [ ] Hapus relasi/model/tabel legacy non-partai lain jika sudah benar-benar tidak dipakai runtime.
+- [ ] Hapus relasi/model/tabel legacy non-partai lain yang sudah diaudit aman, dimulai dari tabel/model rekap non-legislatif.
 - [ ] Pastikan semua tampilan publik tidak membawa istilah KPU/internal SIMAP utama yang tidak relevan.
 - [ ] Finalisasi format import jika SIMAP Garuda nanti menerima snapshot dari SIMAP utama.
 - [ ] Tambahkan dokumentasi operasional untuk Admin Partai, Korcam, Kordes, dan Saksi TPS.
@@ -690,7 +690,8 @@ Tujuan: SIMAP Garuda menjadi pilot project matang dan blueprint nyata sebelum di
 - [x] Audit sisa penggunaan `users.partai_id` dan pastikan tidak ada scope multi-partai yang tidak perlu; kolom legacy ini sudah dihapus dari schema user SIMAP Garuda.
 - [x] Putuskan role teknis final untuk aplikasi partai: admin kabupaten, kecamatan, desa, dan TPS.
 - [x] Rename URI, label, dan teks yang masih terasa generik SIMAP utama jika mengganggu identitas Garuda.
-- [ ] Audit model, controller, view, route, dan menu legacy non-party yang sudah tidak dipakai.
+- [x] Audit model, controller, view, route, dan menu legacy non-party yang sudah tidak dipakai; route, view, dan command non-party tidak reachable, sedangkan tabel/model rekap non-legislatif menjadi kandidat cleanup migration berikutnya.
+- [ ] Buat migration cleanup untuk drop tabel rekap non-legislatif legacy setelah audit aman.
 - [ ] Dokumentasikan cara setup SIMAP Garuda dari fresh clone sampai siap dipakai.
 - [ ] Tandai fitur generik Garuda yang layak dipromosikan ke template.
 - [ ] Tandai fitur spesifik Garuda yang tidak boleh masuk template.
