@@ -698,6 +698,7 @@ Tujuan: SIMAP Garuda menjadi pilot project matang dan blueprint nyata sebelum di
 - [x] Generalisasi hardcode Garuda tahap pertama: helper `PartyConfig`, scope `configuredParty()`, dan label export/UI utama sudah berbasis config.
 - [x] Ekstrak aturan scope wilayah ke `PartyScopeService` agar akses kecamatan/desa/TPS reusable untuk template.
 - [x] Rename controller, method, folder view, dan DOM/helper internal legacy `Ppk/Pps/Kpps` ke istilah final `Korcam/Kordes/Saksi`; backward route lama masih redirect sementara dan tidak boleh masuk template.
+- [x] Generalisasi fixture test Garuda ke party config; test feature utama sudah menjadi `PartyRoleAccessTest` dan fixture partai/caleg memakai `config('party.*')`.
 - [ ] Siapkan compatibility dengan format snapshot/export dari SIMAP utama.
 
 ### C. SIMAP Partai Template
