@@ -700,6 +700,8 @@ Tujuan: SIMAP Garuda menjadi pilot project matang dan blueprint nyata sebelum di
 - [x] Rename controller, method, folder view, dan DOM/helper internal legacy `Ppk/Pps/Kpps` ke istilah final `Korcam/Kordes/Saksi`; backward route lama masih redirect sementara dan tidak boleh masuk template.
 - [x] Generalisasi fixture test Garuda ke party config; test feature utama sudah menjadi `PartyRoleAccessTest` dan fixture partai/caleg memakai `config('party.*')`.
 - [x] Generalisasi sisa identifier/key internal Garuda di model, dashboard summary, form input, dan view rekap ke istilah party/configured party; sisa nama Garuda di kode runtime tinggal identitas `config/party.php`.
+- [x] Audit backward route legacy `ppk/pps/kpps`; semua sisa legacy hanya redirect kompatibilitas di SIMAP Garuda dan tidak boleh masuk template.
+- [x] Audit fresh schema template; template perlu migration squashed legislatif-only dengan role final, wilayah/dapil, rekap partai/caleg, status internal, flag internal, dan index final tanpa migration cleanup legacy.
 - [ ] Siapkan compatibility dengan format snapshot/export dari SIMAP utama.
 
 ### C. SIMAP Partai Template
