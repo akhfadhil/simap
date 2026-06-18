@@ -140,7 +140,21 @@ class SetupController extends Controller
     public function storeCaleg(Request $request, RekapPartai $partai)
     {
         $request->validate(['nomor_urut' => 'required|integer', 'nama_caleg' => 'required|string|max:200']);
-        $partai->calegs()->create($request->only('nomor_urut','nama_caleg'));
+        $caleg = $partai->calegs()->create($request->only('nomor_urut','nama_caleg'));
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Caleg berhasil ditambahkan.',
+                'partai_id' => $partai->id,
+                'caleg' => [
+                    'id' => $caleg->id,
+                    'nomor_urut' => $caleg->nomor_urut,
+                    'nama_caleg' => $caleg->nama_caleg,
+                    'destroy_url' => route('admin.setup.caleg.destroy', $caleg),
+                ],
+            ]);
+        }
+
         return back()->with('success', 'Caleg berhasil ditambahkan.');
     }
 
@@ -148,6 +162,11 @@ class SetupController extends Controller
     public function destroyCaleg(RekapCaleg $caleg)
     {
         $caleg->delete();
+
+        if (request()->expectsJson()) {
+            return response()->json(['message' => 'Caleg dihapus.']);
+        }
+
         return back()->with('success', 'Caleg dihapus.');
     }
 

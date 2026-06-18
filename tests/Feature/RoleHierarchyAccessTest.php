@@ -78,6 +78,29 @@ class RoleHierarchyAccessTest extends TestCase
             ->assertRedirect(route('dashboard.kpps'));
     }
 
+    public function test_admin_can_create_caleg_with_ajax(): void
+    {
+        $partai = RekapPartai::create([
+            'jenis' => 'dpr_ri',
+            'nomor_urut' => 1,
+            'nama_partai' => 'Partai A',
+        ]);
+
+        $this->actingAs($this->admin)
+            ->postJson(route('admin.setup.caleg.store', $partai), [
+                'nomor_urut' => 1,
+                'nama_caleg' => 'Caleg Ajax',
+            ])
+            ->assertOk()
+            ->assertJsonPath('caleg.nama_caleg', 'Caleg Ajax');
+
+        $this->assertDatabaseHas('rekap_calegs', [
+            'partai_id' => $partai->id,
+            'nomor_urut' => 1,
+            'nama_caleg' => 'Caleg Ajax',
+        ]);
+    }
+
     public function test_ppk_can_access_only_lower_roles_inside_own_kecamatan(): void
     {
         $this->actingAs($this->ppkA)
