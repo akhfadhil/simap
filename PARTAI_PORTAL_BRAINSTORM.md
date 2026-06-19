@@ -725,8 +725,8 @@ Tujuan: membuat blueprint resmi untuk membuat project partai lain setelah SIMAP 
 Status awal eksekusi:
 
 - Folder `../simap-partai-template` sudah dibuat.
-- Isi tahap pertama baru fondasi kecil: `config/party.php`, `PartyConfig`, `PartyScopeService`, `.gitignore`, README, dan dokumen operasional awal.
-- Template belum menjadi aplikasi Laravel lengkap; batch berikutnya perlu memilih satu area kecil, misalnya skeleton Laravel minimal atau migration fresh/squashed.
+- Isi tahap pertama baru fondasi kecil: `config/party.php`, `PartyConfig`, `PartyScopeService`, migration fresh/squashed awal, `.gitignore`, README, dan dokumen operasional awal.
+- Template belum menjadi aplikasi Laravel lengkap; batch berikutnya perlu memilih satu area kecil, misalnya skeleton Laravel minimal atau pemindahan model inti.
 
 ### D. Urutan Eksekusi Yang Disarankan
 
