@@ -708,9 +708,9 @@ Tujuan: SIMAP Garuda menjadi pilot project matang dan blueprint nyata sebelum di
 
 Tujuan: membuat blueprint resmi untuk membuat project partai lain setelah SIMAP Garuda stabil.
 
-- [ ] Tentukan sumber awal template dari SIMAP Garuda setelah hardening selesai.
-- [ ] Buat repo atau folder `simap-partai-template`.
-- [ ] Jadikan `config/party.php` sebagai standar identitas partai.
+- [x] Tentukan sumber awal template dari SIMAP Garuda setelah hardening selesai.
+- [x] Buat repo atau folder `simap-partai-template`.
+- [x] Jadikan `config/party.php` sebagai standar identitas partai.
 - [ ] Standarkan isi identitas partai: slug, nama, nomor urut, warna utama, warna aksen, logo, dan label aplikasi.
 - [ ] Buat command setup seperti `party:install` atau dokumentasi setup manual yang setara.
 - [ ] Standarkan role dan permission untuk admin kabupaten, kecamatan, desa, dan TPS.
@@ -721,6 +721,12 @@ Tujuan: membuat blueprint resmi untuk membuat project partai lain setelah SIMAP 
 - [ ] Tambahkan test wajib untuk input suara, role wilayah, export, dan import snapshot.
 - [ ] Dokumentasikan langkah membuat project baru seperti `simap-{slug}` dari template.
 - [ ] Pastikan tidak ada nama, logo, warna, atau teks Garuda yang hardcoded di template.
+
+Status awal eksekusi:
+
+- Folder `../simap-partai-template` sudah dibuat.
+- Isi tahap pertama baru fondasi kecil: `config/party.php`, `PartyConfig`, `PartyScopeService`, `.gitignore`, README, dan dokumen operasional awal.
+- Template belum menjadi aplikasi Laravel lengkap; batch berikutnya perlu memilih satu area kecil, misalnya skeleton Laravel minimal atau migration fresh/squashed.
 
 ### D. Urutan Eksekusi Yang Disarankan
 
