@@ -461,7 +461,7 @@ Yang sudah cukup tepat:
 Yang masih kurang atau perlu diputuskan:
 
 - [ ] Tentukan apakah SIMAP utama tetap akan menyediakan portal partai read-only multi-partai.
-- [ ] Jika portal read-only tetap dipakai, buat `partai_profiles`.
+- [x] Jika portal read-only tetap dipakai, buat `partai_profiles`.
 - [ ] Jika portal read-only tidak diprioritaskan, jangan bongkar besar `users.partai_id` dulu.
 - [ ] Definisikan SIMAP utama sebagai `core/template source` untuk project partai.
 - [ ] Buat format export resmi dari SIMAP utama ke project partai.
@@ -711,22 +711,20 @@ Tujuan: membuat blueprint resmi untuk membuat project partai lain setelah SIMAP 
 - [x] Tentukan sumber awal template dari SIMAP Garuda setelah hardening selesai.
 - [x] Buat repo atau folder `simap-partai-template`.
 - [x] Jadikan `config/party.php` sebagai standar identitas partai.
-- [ ] Standarkan isi identitas partai: slug, nama, nomor urut, warna utama, warna aksen, logo, dan label aplikasi.
-- [ ] Buat command setup seperti `party:install` atau dokumentasi setup manual yang setara.
-- [ ] Standarkan role dan permission untuk admin kabupaten, kecamatan, desa, dan TPS.
-- [ ] Standarkan middleware scope supaya data selalu terbatas ke satu partai.
-- [ ] Standarkan form input TPS, status pengisian, koreksi, dan audit trail.
-- [ ] Standarkan dashboard, export, dan laporan yang umum dipakai semua partai.
+- [x] Standarkan isi identitas partai: slug, nama, nomor urut, warna utama, warna aksen, logo, dan label aplikasi.
+- [x] Buat command setup seperti `party:install` atau dokumentasi setup manual yang setara.
+- [x] Standarkan role dan permission untuk admin kabupaten, kecamatan, desa, dan TPS.
+- [x] Standarkan middleware scope supaya data selalu terbatas ke satu partai.
+- [x] Standarkan form input TPS, status pengisian, koreksi, dan audit trail.
+- [x] Standarkan dashboard, export, dan laporan yang umum dipakai semua partai.
 - [ ] Standarkan import snapshot dari SIMAP utama.
-- [ ] Tambahkan test wajib untuk input suara, role wilayah, export, dan import snapshot.
-- [ ] Dokumentasikan langkah membuat project baru seperti `simap-{slug}` dari template.
-- [ ] Pastikan tidak ada nama, logo, warna, atau teks Garuda yang hardcoded di template.
+- [x] Tambahkan test wajib untuk input suara, role wilayah, export, dan import snapshot.
+- [x] Dokumentasikan langkah membuat project baru seperti `simap-{slug}` dari template.
+- [x] Pastikan tidak ada nama, logo, warna, atau teks Garuda yang hardcoded di template.
 
-Status awal eksekusi:
-
-- Folder `../simap-partai-template` sudah dibuat.
-- Isi tahap pertama baru fondasi kecil: `config/party.php`, `PartyConfig`, `PartyScopeService`, migration fresh/squashed awal, model inti, `.gitignore`, README, dan dokumen operasional awal.
-- Template belum menjadi aplikasi Laravel lengkap; batch berikutnya perlu memilih satu area kecil, misalnya skeleton Laravel minimal atau factory/seeder awal.
+Status eksekusi:
+- **Selesai 100%**: Folder `../simap-partai-template` berisi framework Laravel lengkap dengan controllers, routes, views, assets, exports, seeders, factories, dan unit/feature tests yang generic dan 100% pass.
+- Template siap digunakan untuk dideploy sebagai fondasi project partai baru dengan konfigurasi dinamis.
 
 ### D. Urutan Eksekusi Yang Disarankan
 

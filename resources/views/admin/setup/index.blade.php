@@ -9,23 +9,25 @@
     <p class="dark:text-gray-400 text-gray-500 text-sm mt-1">Input master data paslon, calon, partai, dan caleg.</p>
 </div>
 
-@if(session('success'))
-<div class="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 px-4 py-3 text-xs mb-6 rounded-lg font-medium">
-    ✓ {{ session('success') }}
-</div>
-@endif
+<div id="alert-container">
+    @if(session('success'))
+    <div class="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 px-4 py-3 text-xs mb-6 rounded-lg font-medium">
+        ✓ {{ session('success') }}
+    </div>
+    @endif
 
-@if(session('seed_result'))
-<div class="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 px-4 py-3 text-xs mb-6 rounded-lg font-medium">
-    {{ session('seed_result') }}
-</div>
-@endif
+    @if(session('seed_result'))
+    <div class="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 px-4 py-3 text-xs mb-6 rounded-lg font-medium">
+        {{ session('seed_result') }}
+    </div>
+    @endif
 
-@if($errors->any())
-<div class="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 text-xs mb-6 rounded-lg font-medium">
-    {{ $errors->first() }}
+    @if($errors->any())
+    <div class="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 text-xs mb-6 rounded-lg font-medium">
+        {{ $errors->first() }}
+    </div>
+    @endif
 </div>
-@endif
 
 {{-- Tools Setup --}}
 <div class="dark:bg-gray-800 bg-white rounded-xl p-6 border-l-4 border border-l-blue-500 dark:border-gray-700 border-gray-200 shadow-sm mb-8">
@@ -82,6 +84,98 @@
         </button>
     </form>
 </div>
+
+{{-- ══ SEKSI SETUP PROFIL PARTAI (COLLAPSIBLE) ══ --}}
+<div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm overflow-hidden mb-8">
+    <button type="button" onclick="togglePartaiProfileSection()" class="w-full px-6 py-4 flex items-center justify-between border-b dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
+        <div class="text-left">
+            <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold">// Setup Profil & Nomor Urut Partai</p>
+            <p class="text-xs dark:text-gray-400 text-gray-500 mt-1">Kelola nama resmi, akronim, nomor urut aktif, logo, dan warna aksen partai politik.</p>
+        </div>
+        <span id="partai-profile-section-arrow" class="text-lg dark:text-gray-400 text-gray-500">▼</span>
+    </button>
+    
+    <div id="partai-profile-section-content" class="p-6">
+        <!-- Grid Partai Profiles -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            @forelse($partaiProfiles as $profile)
+            <div data-profile-card="{{ $profile->id }}" class="dark:bg-gray-700/40 bg-gray-50 border dark:border-gray-700 border-gray-200 rounded-xl shadow-sm overflow-hidden flex flex-col justify-between hover:shadow-md transition duration-200">
+                <!-- Header with dynamic accent color -->
+                <div class="h-2 w-full" data-color-bar style="background-color: {{ $profile->warna_utama ?: '#6B7280' }}"></div>
+                
+                <div class="p-5 flex-1">
+                    <div class="flex items-start justify-between gap-4 mb-4">
+                        <div class="flex items-center gap-3" data-logo-container>
+                            @if($profile->logo_path)
+                                <img data-logo src="{{ asset($profile->logo_path) }}" alt="{{ $profile->nama_singkat }}" class="w-12 h-12 object-contain rounded-lg border dark:border-gray-700 border-gray-100 p-1 bg-white">
+                            @else
+                                <div data-avatar-placeholder class="w-12 h-12 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center border dark:border-gray-600 border-gray-200 text-gray-400 dark:text-gray-500 font-bold text-lg">
+                                    {{ substr($profile->nama_singkat, 0, 2) }}
+                                </div>
+                            @endif
+                            <div>
+                                <h3 class="font-bold text-sm dark:text-gray-100 text-gray-800 leading-snug" data-nama>{{ $profile->nama }}</h3>
+                                <p class="text-xs dark:text-gray-400 text-gray-500 font-medium" data-nama-singkat>{{ $profile->nama_singkat }}</p>
+                            </div>
+                        </div>
+                        
+                        <span class="w-8 h-8 rounded-full text-white text-sm font-extrabold flex items-center justify-center flex-shrink-0 shadow-sm" data-nomor-badge style="background-color: {{ $profile->warna_utama ?: '#ef4444' }}">
+                            {{ $profile->nomor_urut_aktif }}
+                        </span>
+                    </div>
+
+                    <div class="border-t dark:border-gray-700 border-gray-200 pt-3 mt-3 text-xs space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="dark:text-gray-500 text-gray-400">Warna Utama</span>
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-3.5 h-3.5 rounded-full border dark:border-gray-600 border-gray-300" data-warna-utama-dot style="background-color: {{ $profile->warna_utama ?: '#6B7280' }}"></span>
+                                <code class="dark:text-gray-300 text-gray-700" data-warna-utama-text>{{ $profile->warna_utama ?: '-' }}</code>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="dark:text-gray-500 text-gray-400">Warna Aksen</span>
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-3.5 h-3.5 rounded-full border dark:border-gray-600 border-gray-300" data-warna-aksen-dot style="background-color: {{ $profile->warna_aksen ?: '#6B7280' }}"></span>
+                                <code class="dark:text-gray-300 text-gray-700" data-warna-aksen-text>{{ $profile->warna_aksen ?: '-' }}</code>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-start">
+                            <span class="dark:text-gray-500 text-gray-400">Riwayat Nomor Urut</span>
+                            <div class="text-right" data-history-container>
+                                @if(!empty($profile->nomor_urut_historis_json))
+                                    <div class="flex flex-wrap gap-1 justify-end max-w-[180px]">
+                                        @foreach($profile->nomor_urut_historis_json as $tahun => $no)
+                                            <span class="px-2 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-[10px] dark:text-gray-300 text-gray-600 font-semibold" title="Tahun {{ $tahun }}">
+                                                {{ $tahun }}: No.{{ $no }}
+                                            </span>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <span class="dark:text-gray-500 text-gray-400 italic">-</span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="px-5 py-3.5 dark:bg-gray-900/30 bg-gray-100 border-t dark:border-gray-700 border-gray-200 flex justify-end">
+                    <button type="button" 
+                            data-profile="{{ json_encode($profile) }}"
+                            onclick="openEditProfileModal(this)"
+                            class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200 text-gray-700 border dark:border-gray-600 border-gray-200 shadow-sm transition">
+                        Edit Profil
+                    </button>
+                </div>
+            </div>
+            @empty
+            <div class="col-span-full py-12 text-center dark:text-gray-500 text-gray-400 text-sm">
+                Belum ada data profil partai. Jalankan seeder partai atau buat data terlebih dahulu.
+            </div>
+            @endforelse
+        </div>
+    </div>
+</div>
+
 
 {{-- ══ TAB PPWP ══ --}}
 <div id="panel-ppwp" class="tab-panel">
@@ -328,12 +422,16 @@
             @forelse($$var as $partai)
             <div class="border-b dark:border-gray-700 border-gray-100 last:border-0">
                 <div class="flex items-center justify-between px-6 py-3 dark:bg-gray-700 bg-gray-50 cursor-pointer group"
-                     onclick="togglePartai({{ $partai->id }})">
+                     onclick="togglePartai({{ $partai->id }})"
+                     data-rekap-partai-row="{{ $partai->id }}"
+                     data-rekap-partai-nama="{{ strtolower($partai->nama_partai) }}">
                     <div class="flex items-center gap-3">
-                        <span class="w-7 h-7 rounded-lg {{ $color }} text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
+                        <span class="w-7 h-7 rounded-lg {{ $color }} text-white text-xs font-bold flex items-center justify-center flex-shrink-0"
+                              data-rekap-partai-badge>
                             {{ $partai->nomor_urut }}
                         </span>
-                        <p class="text-sm font-semibold dark:text-gray-100 text-gray-800">{{ $partai->nama_partai }}</p>
+                        <p class="text-sm font-semibold dark:text-gray-100 text-gray-800"
+                           data-rekap-partai-name-text>{{ $partai->nama_partai }}</p>
                         <span class="text-[10px] dark:text-gray-500 text-gray-400" data-caleg-count="{{ $partai->id }}">{{ $partai->calegs->count() }} caleg</span>
                     </div>
                     <div class="flex items-center gap-2">
@@ -514,12 +612,16 @@
                 <div class="border-b dark:border-gray-700 border-gray-100 last:border-0">
                     {{-- Header partai --}}
                     <div class="flex items-center justify-between px-6 py-3 dark:bg-gray-700 bg-gray-50 cursor-pointer group"                    
-                        onclick="togglePartai({{ $partai->id }})">
+                        onclick="togglePartai({{ $partai->id }})"
+                        data-rekap-partai-row="{{ $partai->id }}"
+                        data-rekap-partai-nama="{{ strtolower($partai->nama_partai) }}">
                         <div class="flex items-center gap-3">
-                            <span class="w-7 h-7 rounded-lg bg-violet-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
+                            <span class="w-7 h-7 rounded-lg bg-violet-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0"
+                                  data-rekap-partai-badge>
                                 {{ $partai->nomor_urut }}
                             </span>
-                            <p class="text-sm font-semibold dark:text-gray-100 text-gray-800">{{ $partai->nama_partai }}</p>
+                            <p class="text-sm font-semibold dark:text-gray-100 text-gray-800"
+                               data-rekap-partai-name-text>{{ $partai->nama_partai }}</p>
                             <span class="text-[10px] dark:text-gray-500 text-gray-400" data-caleg-count="{{ $partai->id }}">{{ $partai->calegs->count() }} caleg</span>
                         </div>
                         <div class="flex items-center gap-2">
@@ -569,6 +671,83 @@
 
             @endif
         </div>
+    </div>
+</div>
+
+{{-- MODAL EDIT PROFIL PARTAI --}}
+<div id="modal-edit-profile" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-4">
+    <div class="w-full max-w-lg rounded-xl border dark:border-gray-700 border-gray-200 dark:bg-gray-900 bg-white shadow-xl overflow-hidden">
+        <div class="px-6 py-4 border-b dark:border-gray-700 border-gray-200 flex items-center justify-between">
+            <h3 class="text-sm font-semibold dark:text-gray-100 text-gray-800">Edit Profil Partai</h3>
+            <button type="button" onclick="closeEditProfileModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                <span class="text-xl">&times;</span>
+            </button>
+        </div>
+        
+        <form id="form-edit-profile" method="POST" action="" enctype="multipart/form-data" class="p-6 space-y-4">
+            @csrf
+            @method('PUT')
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">Nama Resmi Partai</label>
+                    <input type="text" id="edit-nama" name="nama" required
+                           class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-4 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">Nama Singkat / Akronim</label>
+                    <input type="text" id="edit-nama-singkat" name="nama_singkat" required
+                           class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-4 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">Nomor Urut Aktif</label>
+                    <input type="number" id="edit-nomor-urut" name="nomor_urut_aktif" required min="1" max="999"
+                           class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-4 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">Upload Logo Partai (Opsional)</label>
+                    <input type="file" id="edit-logo-file" name="logo" accept="image/*"
+                           class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-4 py-2 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">Warna Utama (HEX)</label>
+                    <div class="flex gap-2">
+                        <input type="color" id="edit-warna-utama-picker" oninput="document.getElementById('edit-warna-utama').value = this.value"
+                               class="w-10 h-10 p-0 border-0 rounded-lg cursor-pointer bg-transparent">
+                        <input type="text" id="edit-warna-utama" name="warna_utama" placeholder="#008000" pattern="^#[a-fA-F0-9]{6}$" required
+                               oninput="document.getElementById('edit-warna-utama-picker').value = this.value"
+                               class="flex-1 dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-4 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">Warna Aksen (HEX)</label>
+                    <div class="flex gap-2">
+                        <input type="color" id="edit-warna-aksen-picker" oninput="document.getElementById('edit-warna-aksen').value = this.value"
+                               class="w-10 h-10 p-0 border-0 rounded-lg cursor-pointer bg-transparent">
+                        <input type="text" id="edit-warna-aksen" name="warna_aksen" placeholder="#006400" pattern="^#[a-fA-F0-9]{6}$" required
+                               oninput="document.getElementById('edit-warna-aksen-picker').value = this.value"
+                               class="flex-1 dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-4 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-4 border-t dark:border-gray-700 border-gray-200">
+                <button type="button" onclick="closeEditProfileModal()" 
+                        class="px-4 py-2 rounded-lg text-xs font-semibold border dark:border-gray-700 border-gray-300 dark:text-gray-300 text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    Batal
+                </button>
+                <button type="submit" 
+                        class="px-4 py-2 rounded-lg text-xs font-semibold bg-red-600 hover:bg-red-700 text-white transition">
+                    Simpan Perubahan
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -680,6 +859,207 @@ function switchTab(active) {
     localStorage.setItem('setup_tab', active);
 }
 
+function togglePartaiProfileSection() {
+    const content = document.getElementById('partai-profile-section-content');
+    const arrow = document.getElementById('partai-profile-section-arrow');
+    const isHidden = content.classList.contains('hidden');
+    if (isHidden) {
+        content.classList.remove('hidden');
+        arrow.textContent = '▼';
+        localStorage.setItem('partai_profile_section_collapsed', 'false');
+    } else {
+        content.classList.add('hidden');
+        arrow.textContent = '▲';
+        localStorage.setItem('partai_profile_section_collapsed', 'true');
+    }
+}
+
+function openEditProfileModal(btn) {
+    const profile = btn.dataset && btn.dataset.profile ? JSON.parse(btn.dataset.profile) : btn;
+    const form = document.getElementById('form-edit-profile');
+    form.action = `/admin/setup/partai-profile/${profile.id}`;
+    
+    document.getElementById('edit-nama').value = profile.nama;
+    document.getElementById('edit-nama-singkat').value = profile.nama_singkat;
+    document.getElementById('edit-nomor-urut').value = profile.nomor_urut_aktif;
+    
+    const warnaUtama = profile.warna_utama || '#000000';
+    document.getElementById('edit-warna-utama').value = warnaUtama;
+    document.getElementById('edit-warna-utama-picker').value = warnaUtama;
+    
+    const warnaAksen = profile.warna_aksen || '#000000';
+    document.getElementById('edit-warna-aksen').value = warnaAksen;
+    document.getElementById('edit-warna-aksen-picker').value = warnaAksen;
+
+    // Reset file upload input
+    document.getElementById('edit-logo-file').value = '';
+
+    const modal = document.getElementById('modal-edit-profile');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function closeEditProfileModal() {
+    const modal = document.getElementById('modal-edit-profile');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+document.getElementById('form-edit-profile').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const form = event.target;
+    const submitBtn = form.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.classList.add('opacity-60');
+
+    const token = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+    try {
+        const formData = new FormData(form);
+        const response = await fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': token,
+            },
+            body: formData
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Gagal menyimpan perubahan');
+        }
+
+        const data = await response.json();
+        
+        // 1. Close Modal
+        closeEditProfileModal();
+
+        // 2. Update the specific party card
+        const profile = data.profile;
+        const sync = data.sync;
+        const card = document.querySelector(`[data-profile-card="${profile.id}"]`);
+        
+        if (card) {
+            // Update color bar background
+            const colorBar = card.querySelector('[data-color-bar]');
+            if (colorBar) colorBar.style.backgroundColor = profile.warna_utama || '#6B7280';
+            
+            // Update logo/placeholder
+            let logoImg = card.querySelector('[data-logo]');
+            const placeholder = card.querySelector('[data-avatar-placeholder]');
+            if (profile.logo_path) {
+                if (logoImg) {
+                    logoImg.src = '/' + profile.logo_path;
+                    logoImg.alt = profile.nama_singkat;
+                } else {
+                    if (placeholder) placeholder.remove();
+                    logoImg = document.createElement('img');
+                    logoImg.dataset.logo = '';
+                    logoImg.src = '/' + profile.logo_path;
+                    logoImg.alt = profile.nama_singkat;
+                    logoImg.className = 'w-12 h-12 object-contain rounded-lg border dark:border-gray-700 border-gray-100 p-1 bg-white';
+                    card.querySelector('[data-logo-container]').prepend(logoImg);
+                }
+            } else {
+                if (logoImg) logoImg.remove();
+                if (!placeholder) {
+                    const newPlaceholder = document.createElement('div');
+                    newPlaceholder.dataset.avatarPlaceholder = '';
+                    newPlaceholder.className = 'w-12 h-12 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center border dark:border-gray-600 border-gray-200 text-gray-400 dark:text-gray-500 font-bold text-lg';
+                    newPlaceholder.textContent = (profile.nama_singkat || '').substring(0, 2);
+                    card.querySelector('[data-logo-container]').prepend(newPlaceholder);
+                } else {
+                    placeholder.textContent = (profile.nama_singkat || '').substring(0, 2);
+                }
+            }
+
+            // Update names
+            const namaEl = card.querySelector('[data-nama]');
+            if (namaEl) namaEl.textContent = profile.nama;
+            const namaSingkatEl = card.querySelector('[data-nama-singkat]');
+            if (namaSingkatEl) namaSingkatEl.textContent = profile.nama_singkat;
+
+            // Update badge
+            const badge = card.querySelector('[data-nomor-badge]');
+            if (badge) {
+                badge.textContent = profile.nomor_urut_aktif;
+                badge.style.backgroundColor = profile.warna_utama || '#ef4444';
+            }
+
+            // Update color dots and text
+            const warnaUtamaDot = card.querySelector('[data-warna-utama-dot]');
+            if (warnaUtamaDot) warnaUtamaDot.style.backgroundColor = profile.warna_utama || '#6B7280';
+            const warnaUtamaText = card.querySelector('[data-warna-utama-text]');
+            if (warnaUtamaText) warnaUtamaText.textContent = profile.warna_utama || '-';
+            const warnaAksenDot = card.querySelector('[data-warna-aksen-dot]');
+            if (warnaAksenDot) warnaAksenDot.style.backgroundColor = profile.warna_aksen || '#6B7280';
+            const warnaAksenText = card.querySelector('[data-warna-aksen-text]');
+            if (warnaAksenText) warnaAksenText.textContent = profile.warna_aksen || '-';
+
+            // Update history
+            const historyContainer = card.querySelector('[data-history-container]');
+            if (historyContainer && profile.nomor_urut_historis_json) {
+                historyContainer.innerHTML = '';
+                const historyDiv = document.createElement('div');
+                historyDiv.className = 'flex flex-wrap gap-1 justify-end max-w-[180px]';
+                Object.entries(profile.nomor_urut_historis_json).forEach(([tahun, no]) => {
+                    const span = document.createElement('span');
+                    span.className = 'px-2 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-[10px] dark:text-gray-300 text-gray-600 font-semibold';
+                    span.title = `Tahun ${tahun}`;
+                    span.textContent = `${tahun}: No.${no}`;
+                    historyDiv.appendChild(span);
+                });
+                historyContainer.appendChild(historyDiv);
+            }
+
+            // Update edit button profile data attribute
+            const editBtn = card.querySelector('button[data-profile]');
+            if (editBtn) editBtn.dataset.profile = JSON.stringify(profile);
+        }
+
+        // 3. Update all RekapPartai headers dynamically matching old/new acronyms or names
+        if (sync) {
+            document.querySelectorAll('[data-rekap-partai-row]').forEach(row => {
+                const rowNama = (row.dataset.rekapPartaiNama || '').toLowerCase();
+                const oldSingkat = sync.old_nama_singkat.toLowerCase();
+                const oldNama = sync.old_nama.toLowerCase();
+                const newSingkat = sync.new_nama_singkat.toLowerCase();
+
+                if (rowNama === oldSingkat || rowNama === oldNama || rowNama === newSingkat ||
+                    rowNama.includes(oldSingkat) || rowNama.includes(newSingkat)) {
+                    
+                    const rBadge = row.querySelector('[data-rekap-partai-badge]');
+                    if (rBadge) rBadge.textContent = sync.new_nomor_urut;
+
+                    const rNameText = row.querySelector('[data-rekap-partai-name-text]');
+                    if (rNameText) rNameText.textContent = sync.new_nama_singkat;
+
+                    row.dataset.rekapPartaiNama = sync.new_nama_singkat.toLowerCase();
+                }
+            });
+        }
+
+        // 4. Show success alert
+        const alertContainer = document.getElementById('alert-container');
+        if (alertContainer) {
+            alertContainer.innerHTML = `
+                <div class="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 px-4 py-3 text-xs mb-6 rounded-lg font-medium transition duration-300">
+                    ✓ ${data.message}
+                </div>
+            `;
+            alertContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        
+    } catch (error) {
+        alert('Gagal menyimpan perubahan: ' + error.message);
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('opacity-60');
+    }
+});
+
 function togglePartai(id) {
     const el    = document.getElementById('partai-' + id);
     const arrow = document.getElementById('arrow-partai-' + id);
@@ -722,6 +1102,17 @@ if (firstDapilBtn) {
 // Restore tab dari localStorage
 const savedTab = localStorage.getItem('setup_tab') || 'ppwp';
 switchTab(savedTab);
+
+// Restore collapsible profile section state
+const isCollapsed = localStorage.getItem('partai_profile_section_collapsed') === 'true';
+if (isCollapsed) {
+    const content = document.getElementById('partai-profile-section-content');
+    const arrow = document.getElementById('partai-profile-section-arrow');
+    if (content && arrow) {
+        content.classList.add('hidden');
+        arrow.textContent = '▲';
+    }
+}
 
 document.querySelectorAll('.paslon-extra-rows').forEach((container) => {
     const addButton = container.nextElementSibling;

@@ -30,11 +30,13 @@ class SetupController extends Controller
         $gubernurCalons = \App\Models\RekapGubernurCalon::orderBy('nomor_urut')->get();
         $bupatiCalons   = \App\Models\RekapBupatiCalon::orderBy('nomor_urut')->get();
 
-        $pemiluSettings = \App\Models\PemiluSetting::orderByRaw("FIELD(jenis,'ppwp','gubernur','bupati','dpd','dpr_ri','dprd_prov','dprd_kab')")->get()->keyBy('jenis');
+        $pemiluSettings = \App\Models\PemiluSetting::all()->keyBy('jenis');
+        $partaiProfiles = \App\Models\PartaiProfile::orderBy('nomor_urut_aktif')->get();
 
         return view('admin.setup.index', compact(
             'ppwpCalons','gubernurCalons','bupatiCalons','dpdCalons',
-            'partaiDprRi','partaiProv','partaiKab','dapils','kecamatans','pemiluSettings'
+            'partaiDprRi','partaiProv','partaiKab','dapils','kecamatans','pemiluSettings',
+            'partaiProfiles'
         ));
     }
 
@@ -50,6 +52,76 @@ class SetupController extends Controller
         }
 
         return back()->with('success', 'Pengaturan jenis pemilu berhasil disimpan.');
+    }
+
+    // Memperbarui data profil partai.
+    public function updatePartaiProfile(Request $request, \App\Models\PartaiProfile $profile)
+    {
+        $request->validate([
+            'nama' => 'required|string|max:200',
+            'nama_singkat' => 'required|string|max:50',
+            'nomor_urut_aktif' => 'required|integer|min:1|max:999',
+            'warna_utama' => 'nullable|string|max:7|regex:/^#[a-fA-F0-9]{6}$/',
+            'warna_aksen' => 'nullable|string|max:7|regex:/^#[a-fA-F0-9]{6}$/',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ]);
+
+        $originalNamaSingkat = $profile->nama_singkat;
+        $originalNama = $profile->nama;
+        
+        $oldNomorUrut = $profile->nomor_urut_aktif;
+        $newNomorUrut = (int) $request->nomor_urut_aktif;
+        $newNamaSingkat = $request->nama_singkat;
+
+        $profile->nama = $request->nama;
+        $profile->nama_singkat = $newNamaSingkat;
+        $profile->nomor_urut_aktif = $newNomorUrut;
+        $profile->warna_utama = $request->warna_utama;
+        $profile->warna_aksen = $request->warna_aksen;
+
+        if ($request->hasFile('logo')) {
+            $file = $request->file('logo');
+            $filename = 'logo-' . $profile->slug . '-' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('images'), $filename);
+            $profile->logo_path = 'images/' . $filename;
+        }
+
+        // Update nomor_urut_historis_json
+        $history = $profile->nomor_urut_historis_json ?? [];
+        $activeYear = date('Y');
+        $history[$activeYear] = $newNomorUrut;
+        $profile->nomor_urut_historis_json = $history;
+
+        $profile->save();
+
+        // Sync changes to RekapPartai so that legislative view and caleg lists match
+        \App\Models\RekapPartai::where(function($query) use ($originalNamaSingkat, $originalNama, $newNamaSingkat) {
+            $query->whereRaw('LOWER(nama_partai) = ?', [strtolower($originalNamaSingkat)])
+                  ->orWhereRaw('LOWER(nama_partai) = ?', [strtolower($newNamaSingkat)])
+                  ->orWhereRaw('LOWER(nama_partai) = ?', [strtolower($originalNama)])
+                  ->orWhereRaw('LOWER(nama_partai) LIKE ?', ['%' . strtolower($originalNamaSingkat) . '%'])
+                  ->orWhereRaw('LOWER(nama_partai) LIKE ?', ['%' . strtolower($newNamaSingkat) . '%']);
+        })
+        ->update([
+            'nomor_urut' => $newNomorUrut,
+            'nama_partai' => $newNamaSingkat,
+        ]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Profil partai ' . $profile->nama_singkat . ' berhasil diperbarui.',
+                'profile' => $profile,
+                'sync' => [
+                    'old_nama_singkat' => $originalNamaSingkat,
+                    'old_nama' => $originalNama,
+                    'new_nama_singkat' => $newNamaSingkat,
+                    'new_nomor_urut' => $newNomorUrut
+                ]
+            ]);
+        }
+
+        return back()->with('success', 'Profil partai ' . $profile->nama_singkat . ' berhasil diperbarui.');
     }
 
     // Menyimpan batch paslon PPWP.

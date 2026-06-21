@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             WilayahSeeder::class,
             PartaiSeeder::class,
+            PartaiProfileSeeder::class,
             PemiluSettingSeeder::class,
         ]);
     }

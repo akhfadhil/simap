@@ -18,7 +18,7 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name', 'username', 'role', 'email', 'password',
-        'kecamatan_id', 'desa_id', 'tps_id', 'partai_id',
+        'kecamatan_id', 'desa_id', 'tps_id', 'partai_id', 'partai_profile_id',
     ];
 
     /**
@@ -66,4 +66,6 @@ class User extends Authenticatable
     public function tps()       { return $this->belongsTo(Tps::class); }
     // Relasi partai untuk akun partai.
     public function partai()    { return $this->belongsTo(RekapPartai::class, 'partai_id'); }
+    // Relasi profil partai untuk akun partai multi-partai.
+    public function partaiProfile() { return $this->belongsTo(PartaiProfile::class, 'partai_profile_id'); }
 }

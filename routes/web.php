@@ -108,6 +108,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('admin/setup')->name('admin.setup.')->middleware('role:admin')->group(function () {
         Route::get('/', [App\Http\Controllers\Admin\SetupController::class, 'index'])->name('index');
         Route::post('pemilu-settings', [App\Http\Controllers\Admin\SetupController::class, 'updatePemiluSettings'])->name('pemilu.settings');
+        Route::put('partai-profile/{profile}', [App\Http\Controllers\Admin\SetupController::class, 'updatePartaiProfile'])->name('partai-profile.update');
 
         // PPWP
         Route::post('ppwp', [App\Http\Controllers\Admin\SetupController::class, 'storePpwp'])->name('ppwp.store');

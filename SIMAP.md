@@ -205,6 +205,9 @@ php artisan import:ppwp-folder "storage/import/PPWP" --dry-run --report
 
 # Buat dokumen TPS dummy dari File_contoh.pdf untuk jenis pemilu aktif
 php artisan seed:dummy-dokumen --status=menunggu_verifikasi
+
+# Ekspor data wilayah, caleg, dan hasil suara legislatif partai tertentu ke file JSON
+php artisan export:party-snapshot {slug}
 ```
 
 Scheduler menjalankan backup dokumen harian melalui `app/Console/Kernel.php`.
