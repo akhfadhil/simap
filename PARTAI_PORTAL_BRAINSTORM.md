@@ -666,17 +666,17 @@ Bagian ini dipakai sebagai quick reference saat membuka session baru. Checklist 
 
 Tujuan: SIMAP utama tetap menjadi core data, sumber export/snapshot, dan referensi bugfix.
 
-- [ ] Tetapkan SIMAP utama sebagai sumber data penuh dan core teknis.
-- [ ] Putuskan apakah portal read-only multi-partai tetap dibutuhkan di SIMAP utama.
-- [ ] Jika portal read-only tetap dibutuhkan, rancang `partai_profiles` berisi identitas partai seperti `party_key`, nama, nomor urut, warna, logo, dan status aktif.
-- [ ] Jangan migrasi besar ke `users.partai_id` sampai keputusan portal read-only jelas.
-- [ ] Audit data apa saja yang boleh keluar ke project partai mandiri.
-- [ ] Definisikan format snapshot per partai untuk hasil TPS, status TPS, wilayah, saksi, dan metadata pemilu.
-- [ ] Buat command export snapshot seperti `export:party-snapshot {party}`.
-- [ ] Pastikan export tidak membawa user internal, password, dokumen sensitif, log verifikasi, dan catatan koreksi internal.
-- [ ] Dokumentasikan mapping partai dari SIMAP utama ke project partai: slug, nama, nomor urut historis, dan relasi ke data rekap.
-- [ ] Tambahkan test export/snapshot per partai.
-- [ ] Dokumentasikan proses porting bugfix dari SIMAP utama ke SIMAP Partai Template atau project partai mandiri.
+- [x] Tetapkan SIMAP utama sebagai sumber data penuh dan core teknis.
+- [x] Putuskan apakah portal read-only multi-partai tetap dibutuhkan di SIMAP utama.
+- [x] Jika portal read-only tetap dibutuhkan, rancang `partai_profiles` berisi identitas partai seperti `party_key`, nama, nomor urut, warna, logo, dan status aktif.
+- [x] Jangan migrasi besar ke `users.partai_id` sampai keputusan portal read-only jelas.
+- [x] Audit data apa saja yang boleh keluar ke project partai mandiri.
+- [x] Definisikan format snapshot per partai untuk hasil TPS, status TPS, wilayah, saksi, dan metadata pemilu.
+- [x] Buat command export snapshot seperti `export:party-snapshot {party}`.
+- [x] Pastikan export tidak membawa user internal, password, dokumen sensitif, log verifikasi, dan catatan koreksi internal.
+- [x] Dokumentasikan mapping partai dari SIMAP utama ke project partai: slug, nama, nomor urut historis, dan relasi ke data rekap.
+- [x] Tambahkan test export/snapshot per partai.
+- [x] Dokumentasikan proses porting bugfix dari SIMAP utama ke SIMAP Partai Template atau project partai mandiri.
 
 ### B. SIMAP Garuda
 
@@ -702,7 +702,7 @@ Tujuan: SIMAP Garuda menjadi pilot project matang dan blueprint nyata sebelum di
 - [x] Generalisasi sisa identifier/key internal Garuda di model, dashboard summary, form input, dan view rekap ke istilah party/configured party; sisa nama Garuda di kode runtime tinggal identitas `config/party.php`.
 - [x] Audit backward route legacy `ppk/pps/kpps`; semua sisa legacy hanya redirect kompatibilitas di SIMAP Garuda dan tidak boleh masuk template.
 - [x] Audit fresh schema template; template perlu migration squashed legislatif-only dengan role final, wilayah/dapil, rekap partai/caleg, status internal, flag internal, dan index final tanpa migration cleanup legacy.
-- [ ] Siapkan compatibility dengan format snapshot/export dari SIMAP utama.
+- [x] Siapkan compatibility dengan format snapshot/export dari SIMAP utama.
 
 ### C. SIMAP Partai Template
 
@@ -717,7 +717,7 @@ Tujuan: membuat blueprint resmi untuk membuat project partai lain setelah SIMAP 
 - [x] Standarkan middleware scope supaya data selalu terbatas ke satu partai.
 - [x] Standarkan form input TPS, status pengisian, koreksi, dan audit trail.
 - [x] Standarkan dashboard, export, dan laporan yang umum dipakai semua partai.
-- [ ] Standarkan import snapshot dari SIMAP utama.
+- [x] Standarkan import snapshot dari SIMAP utama.
 - [x] Tambahkan test wajib untuk input suara, role wilayah, export, dan import snapshot.
 - [x] Dokumentasikan langkah membuat project baru seperti `simap-{slug}` dari template.
 - [x] Pastikan tidak ada nama, logo, warna, atau teks Garuda yang hardcoded di template.
