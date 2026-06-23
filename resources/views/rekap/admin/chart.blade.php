@@ -82,7 +82,7 @@
         .admin-mobile-overlay {
             position: fixed;
             inset: 0;
-            z-index: 80;
+            z-index: 1020;
             background: rgba(15, 23, 42, 0.46);
             opacity: 0;
             pointer-events: none;
@@ -92,7 +92,7 @@
         .admin-mobile-drawer {
             position: fixed;
             inset: 0 auto 0 0;
-            z-index: 90;
+            z-index: 1030;
             width: min(82vw, 20rem);
             transform: translateX(-100%);
             transition: transform 0.25s ease;
@@ -367,7 +367,7 @@
             }
 
             .chart-summary {
-                grid-column: 2 / -1;
+                grid-column: 3 / -1;
                 height: auto;
                 border-left: 0;
                 border-top: 1px solid var(--line);
@@ -576,7 +576,7 @@
     </nav>
 </aside>
 
-<header class="fixed top-0 left-0 right-0 z-50 h-16 bg-white border-b border-slate-200 shadow-sm">
+<header class="fixed top-0 left-0 right-0 z-[1010] h-16 bg-white border-b border-slate-200 shadow-sm">
     <div class="h-full px-6 flex items-center justify-between gap-6">
         <div class="flex items-center gap-4 min-w-0">
             <label for="admin-mobile-menu" class="md:hidden cursor-pointer -ml-2 p-2 text-slate-500 hover:text-red-600">
