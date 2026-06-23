@@ -177,3 +177,7 @@ Route::middleware('auth')->group(function () {
         ->middleware('role:admin')
         ->name('admin.rekap.unlock');
 });
+
+// API endpoint for sub-projects to fetch legislative candidate vote totals
+Route::get('/api/legislative-totals', [App\Http\Controllers\Api\LegislativeTotalsController::class, 'index']);
+

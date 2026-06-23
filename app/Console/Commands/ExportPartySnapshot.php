@@ -32,21 +32,12 @@ class ExportPartySnapshot extends Command
 
         $this->info("Memulai ekspor snapshot untuk partai: {$profile->nama} ({$profile->nama_singkat})...");
 
-        // 1. Dapatkan semua RekapPartai yang cocok berdasarkan nama_singkat atau nama
-        $partaiMatches = RekapPartai::where(function($query) use ($profile) {
-            $query->whereRaw('LOWER(nama_partai) = ?', [strtolower($profile->nama_singkat)])
-                  ->orWhereRaw('LOWER(nama_partai) = ?', [strtolower($profile->nama)])
-                  ->orWhereRaw('LOWER(nama_partai) LIKE ?', ['%' . strtolower($profile->nama_singkat) . '%']);
-        })->get();
-
-        if ($partaiMatches->isEmpty()) {
-            $this->warn("Tidak ditemukan data RekapPartai (legislatif) yang cocok dengan nama partai.");
-        }
-
+        // 1. Dapatkan semua RekapPartai
+        $partaiMatches = RekapPartai::all();
         $partaiIds = $partaiMatches->pluck('id')->toArray();
 
-        // 2. Dapatkan semua RekapCaleg dari partai yang cocok
-        $calegs = RekapCaleg::whereIn('partai_id', $partaiIds)->get();
+        // 2. Dapatkan semua RekapCaleg
+        $calegs = RekapCaleg::all();
         $calegIds = $calegs->pluck('id')->toArray();
 
         // 3. Muat data wilayah secara lengkap
@@ -98,7 +89,7 @@ class ExportPartySnapshot extends Command
                 'pengguna_dpk_lk', 'pengguna_dpk_pr',
                 'ss_diterima', 'ss_digunakan', 'ss_rusak', 'ss_sisa',
                 'disabilitas_lk', 'disabilitas_pr',
-                'suara_tidak_sah', 'status', 'difinalisasi_at'
+                'suara_sah', 'suara_tidak_sah', 'status', 'difinalisasi_at'
             ])),
             'rekap_partai_suaras' => $partaiSuaras->map(fn($item) => $item->only(['id', 'rekap_id', 'partai_id', 'suara'])),
             'rekap_caleg_suaras' => $calegSuaras->map(fn($item) => $item->only(['id', 'rekap_id', 'caleg_id', 'suara'])),
