@@ -22,6 +22,7 @@ class ExportPartySnapshot extends Command
 
     public function handle(): int
     {
+        ini_set('memory_limit', '-1');
         $slug = $this->argument('slug');
         $profile = PartaiProfile::whereRaw('LOWER(slug) = ?', [strtolower($slug)])->first();
 
