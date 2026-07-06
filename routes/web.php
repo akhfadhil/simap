@@ -181,3 +181,7 @@ Route::middleware('auth')->group(function () {
 // API endpoint for sub-projects to fetch legislative candidate vote totals
 Route::get('/api/legislative-totals', [App\Http\Controllers\Api\LegislativeTotalsController::class, 'index']);
 
+// API endpoint to validate and reserve supporter NIK
+Route::post('/api/check-nik', [App\Http\Controllers\Api\NikValidationController::class, 'checkAndReserve']);
+
+
