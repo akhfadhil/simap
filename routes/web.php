@@ -86,7 +86,6 @@ Route::middleware('auth')->group(function () {
         Route::post('/dokumen/{dokumen}/verifikasi-admin', [DokumenController::class, 'verifikasiAdmin'])->name('dokumen.verifikasi.admin');
         Route::post('/dokumen/{dokumen}/restore', [DokumenController::class, 'restore'])->name('dokumen.restore')->middleware('role:admin');
         Route::post('admin/tools/backup', [App\Http\Controllers\Admin\ToolsController::class, 'backup'])->name('admin.tools.backup');
-        Route::post('admin/tools/seed-partai', [App\Http\Controllers\Admin\ToolsController::class, 'seedPartai'])->name('admin.tools.seed-partai');
     });
 
     // Admin CRUD

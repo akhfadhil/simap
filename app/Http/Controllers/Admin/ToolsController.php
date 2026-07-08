@@ -21,13 +21,4 @@ class ToolsController extends Controller
 
         return back()->with('backup_result', $summary);
     }
-
-    // Menjalankan ulang seeder partai dari halaman setup.
-    public function seedPartai()
-    {
-        Artisan::call('db:seed', ['--class' => 'PartaiSeeder', '--force' => true]);
-        $output = trim(Artisan::output());
-
-        return back()->with('seed_result', 'OK ' . $output);
-    }
 }

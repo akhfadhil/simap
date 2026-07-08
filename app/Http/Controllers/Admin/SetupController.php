@@ -64,6 +64,15 @@ class SetupController extends Controller
             'warna_utama' => 'nullable|string|max:7|regex:/^#[a-fA-F0-9]{6}$/',
             'warna_aksen' => 'nullable|string|max:7|regex:/^#[a-fA-F0-9]{6}$/',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'alamat_kantor' => 'nullable|string',
+            'status_kantor' => 'nullable|string|max:50',
+            'google_maps_url' => 'nullable|string',
+            'nama_ketua' => 'nullable|string|max:150',
+            'telp_ketua' => 'nullable|string|max:30',
+            'nama_sekretaris' => 'nullable|string|max:150',
+            'telp_sekretaris' => 'nullable|string|max:30',
+            'nama_bendahara' => 'nullable|string|max:150',
+            'telp_bendahara' => 'nullable|string|max:30',
         ]);
 
         $originalNamaSingkat = $profile->nama_singkat;
@@ -78,6 +87,16 @@ class SetupController extends Controller
         $profile->nomor_urut_aktif = $newNomorUrut;
         $profile->warna_utama = $request->warna_utama;
         $profile->warna_aksen = $request->warna_aksen;
+
+        $profile->alamat_kantor = $request->alamat_kantor;
+        $profile->status_kantor = $request->status_kantor;
+        $profile->google_maps_url = $request->google_maps_url;
+        $profile->nama_ketua = $request->nama_ketua;
+        $profile->telp_ketua = $request->telp_ketua;
+        $profile->nama_sekretaris = $request->nama_sekretaris;
+        $profile->telp_sekretaris = $request->telp_sekretaris;
+        $profile->nama_bendahara = $request->nama_bendahara;
+        $profile->telp_bendahara = $request->telp_bendahara;
 
         if ($request->hasFile('logo')) {
             $file = $request->file('logo');

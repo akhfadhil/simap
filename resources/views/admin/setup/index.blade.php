@@ -16,30 +16,11 @@
     </div>
     @endif
 
-    @if(session('seed_result'))
-    <div class="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 px-4 py-3 text-xs mb-6 rounded-lg font-medium">
-        {{ session('seed_result') }}
-    </div>
-    @endif
-
     @if($errors->any())
     <div class="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 text-xs mb-6 rounded-lg font-medium">
         {{ $errors->first() }}
     </div>
     @endif
-</div>
-
-{{-- Tools Setup --}}
-<div class="dark:bg-gray-800 bg-white rounded-xl p-6 border-l-4 border border-l-blue-500 dark:border-gray-700 border-gray-200 shadow-sm mb-8">
-    <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">// Tools Setup</p>
-    <p class="font-semibold text-sm mb-1 dark:text-gray-100 text-gray-800">Seed Partai</p>
-    <p class="text-xs dark:text-gray-500 text-gray-500 leading-relaxed mb-4">Isi otomatis 18 partai untuk DPR RI, DPRD Provinsi, dan DPRD Kabupaten per dapil. Aman dijalankan berulang.</p>
-    <form method="POST" action="{{ route('admin.tools.seed-partai') }}">
-        @csrf
-        <button class="px-4 py-2 text-xs font-semibold bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition">
-            Jalankan Seeder
-        </button>
-    </form>
 </div>
 
 {{-- TAB NAVIGATION --}}
@@ -124,35 +105,66 @@
                         </span>
                     </div>
 
-                    <div class="border-t dark:border-gray-700 border-gray-200 pt-3 mt-3 text-xs space-y-2">
-                        <div class="flex justify-between items-center">
-                            <span class="dark:text-gray-500 text-gray-400">Warna Utama</span>
-                            <div class="flex items-center gap-1.5">
-                                <span class="w-3.5 h-3.5 rounded-full border dark:border-gray-600 border-gray-300" data-warna-utama-dot style="background-color: {{ $profile->warna_utama ?: '#6B7280' }}"></span>
-                                <code class="dark:text-gray-300 text-gray-700" data-warna-utama-text>{{ $profile->warna_utama ?: '-' }}</code>
-                            </div>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="dark:text-gray-500 text-gray-400">Warna Aksen</span>
-                            <div class="flex items-center gap-1.5">
-                                <span class="w-3.5 h-3.5 rounded-full border dark:border-gray-600 border-gray-300" data-warna-aksen-dot style="background-color: {{ $profile->warna_aksen ?: '#6B7280' }}"></span>
-                                <code class="dark:text-gray-300 text-gray-700" data-warna-aksen-text>{{ $profile->warna_aksen ?: '-' }}</code>
-                            </div>
-                        </div>
-                        <div class="flex justify-between items-start">
-                            <span class="dark:text-gray-500 text-gray-400">Riwayat Nomor Urut</span>
-                            <div class="text-right" data-history-container>
-                                @if(!empty($profile->nomor_urut_historis_json))
-                                    <div class="flex flex-wrap gap-1 justify-end max-w-[180px]">
-                                        @foreach($profile->nomor_urut_historis_json as $tahun => $no)
-                                            <span class="px-2 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-[10px] dark:text-gray-300 text-gray-600 font-semibold" title="Tahun {{ $tahun }}">
-                                                {{ $tahun }}: No.{{ $no }}
-                                            </span>
-                                        @endforeach
+                    <div class="border-t dark:border-gray-700 border-gray-200 pt-3.5 mt-3 text-xs space-y-3.5">
+                        <!-- Kepengurusan DPC -->
+                        <div class="space-y-1.5">
+                            <span class="text-[10px] uppercase font-bold dark:text-gray-400 text-gray-500 tracking-wider flex items-center gap-1.5">
+                                👥 Kepengurusan DPC
+                            </span>
+                            <div class="pl-2.5 border-l-2 border-red-500/30 dark:border-red-500/20 space-y-1 dark:text-gray-300 text-gray-600">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <span class="font-semibold text-gray-400 dark:text-gray-500">Ketua:</span> 
+                                        <span class="font-medium" data-display-ketua>{{ $profile->nama_ketua ?: '-' }}</span>
                                     </div>
-                                @else
-                                    <span class="dark:text-gray-500 text-gray-400 italic">-</span>
-                                @endif
+                                    <div data-telp-ketua-container>
+                                        @if($profile->telp_ketua)
+                                            <a href="tel:{{ $profile->telp_ketua }}" class="text-[10px] bg-red-50 dark:bg-red-950/30 dark:text-red-400 text-red-600 hover:bg-red-100 dark:hover:bg-red-950/60 px-2 py-0.5 rounded font-mono transition" data-display-telp-ketua>{{ $profile->telp_ketua }}</a>
+                                        @endif
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <span class="font-semibold text-gray-400 dark:text-gray-500">Sekretaris:</span> 
+                                        <span class="font-medium" data-display-sekretaris>{{ $profile->nama_sekretaris ?: '-' }}</span>
+                                    </div>
+                                    <div data-telp-sekretaris-container>
+                                        @if($profile->telp_sekretaris)
+                                            <a href="tel:{{ $profile->telp_sekretaris }}" class="text-[10px] bg-red-50 dark:bg-red-950/30 dark:text-red-400 text-red-600 hover:bg-red-100 dark:hover:bg-red-950/60 px-2 py-0.5 rounded font-mono transition" data-display-telp-sekretaris>{{ $profile->telp_sekretaris }}</a>
+                                        @endif
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <span class="font-semibold text-gray-400 dark:text-gray-500">Bendahara:</span> 
+                                        <span class="font-medium" data-display-bendahara>{{ $profile->nama_bendahara ?: '-' }}</span>
+                                    </div>
+                                    <div data-telp-bendahara-container>
+                                        @if($profile->telp_bendahara)
+                                            <a href="tel:{{ $profile->telp_bendahara }}" class="text-[10px] bg-red-50 dark:bg-red-950/30 dark:text-red-400 text-red-600 hover:bg-red-100 dark:hover:bg-red-950/60 px-2 py-0.5 rounded font-mono transition" data-display-telp-bendahara>{{ $profile->telp_bendahara }}</a>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Kantor Sekretariat -->
+                        <div class="space-y-1.5 pt-1.5">
+                            <span class="text-[10px] uppercase font-bold dark:text-gray-400 text-gray-500 tracking-wider flex items-center gap-1.5">
+                                📍 Kantor Sekretariat
+                            </span>
+                            <div class="pl-2.5 border-l-2 border-blue-500/30 dark:border-blue-500/20 space-y-2 dark:text-gray-300 text-gray-600">
+                                <div class="line-clamp-2 leading-relaxed text-xs" data-display-alamat title="{{ $profile->alamat_kantor }}">{{ $profile->alamat_kantor ?: 'Alamat belum diatur' }}</div>
+                                <div class="flex items-center justify-between text-[10px] pt-0.5">
+                                    <span class="px-2 py-0.5 rounded-full dark:bg-gray-800 bg-gray-100 border dark:border-gray-700 border-gray-200 text-gray-500 dark:text-gray-400 font-semibold" data-display-status>Status: {{ $profile->status_kantor ?: '-' }}</span>
+                                    <div data-display-maps-container>
+                                        @if($profile->google_maps_url)
+                                            <a href="{{ $profile->google_maps_url }}" target="_blank" class="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 font-bold flex items-center gap-0.5" data-display-maps>Peta Lokasi ↗</a>
+                                        @else
+                                            <span class="text-gray-400 italic" data-display-maps-placeholder>Maps ↗</span>
+                                        @endif
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -162,7 +174,10 @@
                     <button type="button" 
                             data-profile="{{ json_encode($profile) }}"
                             onclick="openEditProfileModal(this)"
-                            class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200 text-gray-700 border dark:border-gray-600 border-gray-200 shadow-sm transition">
+                            class="px-4 py-1.5 rounded-lg text-xs font-semibold bg-red-50 text-red-600 hover:bg-red-600 hover:text-white dark:bg-red-950/20 dark:text-red-400 dark:hover:bg-red-900/60 border border-red-200 dark:border-red-900/30 transition-all duration-200 shadow-sm flex items-center gap-1.5 cursor-pointer">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                        </svg>
                         Edit Profil
                     </button>
                 </div>
@@ -676,15 +691,15 @@
 
 {{-- MODAL EDIT PROFIL PARTAI --}}
 <div id="modal-edit-profile" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-4">
-    <div class="w-full max-w-lg rounded-xl border dark:border-gray-700 border-gray-200 dark:bg-gray-900 bg-white shadow-xl overflow-hidden">
-        <div class="px-6 py-4 border-b dark:border-gray-700 border-gray-200 flex items-center justify-between">
+    <div class="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl border dark:border-gray-700 border-gray-200 dark:bg-gray-900 bg-white shadow-xl flex flex-col">
+        <div class="px-6 py-4 border-b dark:border-gray-700 border-gray-200 flex items-center justify-between sticky top-0 bg-white dark:bg-gray-900 z-10">
             <h3 class="text-sm font-semibold dark:text-gray-100 text-gray-800">Edit Profil Partai</h3>
             <button type="button" onclick="closeEditProfileModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
                 <span class="text-xl">&times;</span>
             </button>
         </div>
         
-        <form id="form-edit-profile" method="POST" action="" enctype="multipart/form-data" class="p-6 space-y-4">
+        <form id="form-edit-profile" method="POST" action="" enctype="multipart/form-data" class="p-6 space-y-4 flex-1">
             @csrf
             @method('PUT')
             
@@ -737,7 +752,80 @@
                 </div>
             </div>
 
-            <div class="flex justify-end gap-2 pt-4 border-t dark:border-gray-700 border-gray-200">
+            <!-- Section: Kantor Sekretariat -->
+            <div class="border-t dark:border-gray-700 border-gray-200 pt-3">
+                <h4 class="text-xs font-bold dark:text-gray-300 text-gray-700 uppercase tracking-wider mb-3">📍 Kantor Sekretariat</h4>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">Alamat Lengkap Kantor</label>
+                        <textarea id="edit-alamat-kantor" name="alamat_kantor" rows="2"
+                                  class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-4 py-2 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none"></textarea>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">Status Kantor</label>
+                            <select id="edit-status-kantor" name="status_kantor"
+                                    class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-4 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
+                                <option value="">-- Pilih Status --</option>
+                                <option value="Milik Sendiri">Milik Sendiri</option>
+                                <option value="Sewa">Sewa</option>
+                                <option value="Pinjam Pakai">Pinjam Pakai</option>
+                                <option value="Lainnya">Lainnya</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">Link Google Maps URL</label>
+                            <input type="text" id="edit-google-maps-url" name="google_maps_url" placeholder="https://maps.google.com/..."
+                                   class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-4 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section: Kepengurusan DPC -->
+            <div class="border-t dark:border-gray-700 border-gray-200 pt-3">
+                <h4 class="text-xs font-bold dark:text-gray-300 text-gray-700 uppercase tracking-wider mb-3">👥 Kepengurusan DPC</h4>
+                <div class="space-y-3">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">Nama Ketua</label>
+                            <input type="text" id="edit-nama-ketua" name="nama_ketua"
+                                   class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-4 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">No. HP Ketua</label>
+                            <input type="text" id="edit-telp-ketua" name="telp_ketua" placeholder="0812..."
+                                   class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-4 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">Nama Sekretaris</label>
+                            <input type="text" id="edit-nama-sekretaris" name="nama_sekretaris"
+                                   class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-4 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">No. HP Sekretaris</label>
+                            <input type="text" id="edit-telp-sekretaris" name="telp_sekretaris" placeholder="0812..."
+                                   class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-4 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">Nama Bendahara</label>
+                            <input type="text" id="edit-nama-bendahara" name="nama_bendahara"
+                                   class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-4 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">No. HP Bendahara</label>
+                            <input type="text" id="edit-telp-bendahara" name="telp_bendahara" placeholder="0812..."
+                                   class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-4 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-4 border-t dark:border-gray-700 border-gray-200 sticky bottom-0 bg-white dark:bg-gray-900 py-2 z-10">
                 <button type="button" onclick="closeEditProfileModal()" 
                         class="px-4 py-2 rounded-lg text-xs font-semibold border dark:border-gray-700 border-gray-300 dark:text-gray-300 text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
                     Batal
@@ -894,6 +982,17 @@ function openEditProfileModal(btn) {
     // Reset file upload input
     document.getElementById('edit-logo-file').value = '';
 
+    // Populate new detail inputs
+    document.getElementById('edit-alamat-kantor').value = profile.alamat_kantor || '';
+    document.getElementById('edit-status-kantor').value = profile.status_kantor || '';
+    document.getElementById('edit-google-maps-url').value = profile.google_maps_url || '';
+    document.getElementById('edit-nama-ketua').value = profile.nama_ketua || '';
+    document.getElementById('edit-telp-ketua').value = profile.telp_ketua || '';
+    document.getElementById('edit-nama-sekretaris').value = profile.nama_sekretaris || '';
+    document.getElementById('edit-telp-sekretaris').value = profile.telp_sekretaris || '';
+    document.getElementById('edit-nama-bendahara').value = profile.nama_bendahara || '';
+    document.getElementById('edit-telp-bendahara').value = profile.telp_bendahara || '';
+
     const modal = document.getElementById('modal-edit-profile');
     modal.classList.remove('hidden');
     modal.classList.add('flex');
@@ -1012,6 +1111,82 @@ document.getElementById('form-edit-profile').addEventListener('submit', async (e
                     historyDiv.appendChild(span);
                 });
                 historyContainer.appendChild(historyDiv);
+            }
+
+            // Update Kepengurusan DPC
+            const ketuaEl = card.querySelector('[data-display-ketua]');
+            if (ketuaEl) ketuaEl.textContent = profile.nama_ketua || '-';
+            const telpKetuaContainer = card.querySelector('[data-telp-ketua-container]');
+            if (telpKetuaContainer) {
+                telpKetuaContainer.innerHTML = '';
+                if (profile.telp_ketua) {
+                    const link = document.createElement('a');
+                    link.href = `tel:${profile.telp_ketua}`;
+                    link.className = 'text-[10px] bg-red-50 dark:bg-red-950/30 dark:text-red-400 text-red-600 hover:bg-red-100 dark:hover:bg-red-950/60 px-2 py-0.5 rounded font-mono transition';
+                    link.dataset.displayTelpKetua = '';
+                    link.textContent = profile.telp_ketua;
+                    telpKetuaContainer.appendChild(link);
+                }
+            }
+
+            const sekretarisEl = card.querySelector('[data-display-sekretaris]');
+            if (sekretarisEl) sekretarisEl.textContent = profile.nama_sekretaris || '-';
+            const telpSekretarisContainer = card.querySelector('[data-telp-sekretaris-container]');
+            if (telpSekretarisContainer) {
+                telpSekretarisContainer.innerHTML = '';
+                if (profile.telp_sekretaris) {
+                    const link = document.createElement('a');
+                    link.href = `tel:${profile.telp_sekretaris}`;
+                    link.className = 'text-[10px] bg-red-50 dark:bg-red-950/30 dark:text-red-400 text-red-600 hover:bg-red-100 dark:hover:bg-red-950/60 px-2 py-0.5 rounded font-mono transition';
+                    link.dataset.displayTelpSekretaris = '';
+                    link.textContent = profile.telp_sekretaris;
+                    telpSekretarisContainer.appendChild(link);
+                }
+            }
+
+            const bendaharaEl = card.querySelector('[data-display-bendahara]');
+            if (bendaharaEl) bendaharaEl.textContent = profile.nama_bendahara || '-';
+            const telpBendaharaContainer = card.querySelector('[data-telp-bendahara-container]');
+            if (telpBendaharaContainer) {
+                telpBendaharaContainer.innerHTML = '';
+                if (profile.telp_bendahara) {
+                    const link = document.createElement('a');
+                    link.href = `tel:${profile.telp_bendahara}`;
+                    link.className = 'text-[10px] bg-red-50 dark:bg-red-950/30 dark:text-red-400 text-red-600 hover:bg-red-100 dark:hover:bg-red-950/60 px-2 py-0.5 rounded font-mono transition';
+                    link.dataset.displayTelpBendahara = '';
+                    link.textContent = profile.telp_bendahara;
+                    telpBendaharaContainer.appendChild(link);
+                }
+            }
+
+            // Update Alamat & Status Kantor
+            const alamatEl = card.querySelector('[data-display-alamat]');
+            if (alamatEl) {
+                alamatEl.textContent = profile.alamat_kantor || 'Alamat belum diatur';
+                alamatEl.title = profile.alamat_kantor || '';
+            }
+            const statusEl = card.querySelector('[data-display-status]');
+            if (statusEl) statusEl.textContent = `Status: ${profile.status_kantor || '-'}`;
+
+            // Update Maps Link
+            const mapsContainer = card.querySelector('[data-display-maps-container]');
+            if (mapsContainer) {
+                mapsContainer.innerHTML = '';
+                if (profile.google_maps_url) {
+                    const mapsLink = document.createElement('a');
+                    mapsLink.href = profile.google_maps_url;
+                    mapsLink.target = '_blank';
+                    mapsLink.className = 'text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 font-bold flex items-center gap-0.5';
+                    mapsLink.dataset.displayMaps = '';
+                    mapsLink.textContent = 'Peta Lokasi ↗';
+                    mapsContainer.appendChild(mapsLink);
+                } else {
+                    const mapsSpan = document.createElement('span');
+                    mapsSpan.className = 'text-gray-400 italic';
+                    mapsSpan.dataset.displayMapsPlaceholder = '';
+                    mapsSpan.textContent = 'Maps ↗';
+                    mapsContainer.appendChild(mapsSpan);
+                }
             }
 
             // Update edit button profile data attribute
