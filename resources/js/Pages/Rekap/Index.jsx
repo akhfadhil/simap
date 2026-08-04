@@ -75,7 +75,7 @@ export default function RekapIndex({ kecamatans, rekaps, flaggedJenis }) {
                         const isFlagged = flaggedJenis && (opt.key in flaggedJenis);
 
                         return (
-                            <Link
+                            <a
                                 key={opt.key}
                                 href={`/admin/rekap/${opt.key}`}
                                 className="bg-white dark:bg-[#151f32] border border-[#e2e8f0] dark:border-[#1e293b] hover:border-[#bb152c] dark:hover:border-red-500 rounded-2xl p-5 shadow-xs transition group flex flex-col justify-between"
@@ -104,7 +104,7 @@ export default function RekapIndex({ kecamatans, rekaps, flaggedJenis }) {
                                         Buka Rekap <ArrowRight className="w-3.5 h-3.5" />
                                     </span>
                                 </div>
-                            </Link>
+                            </a>
                         );
                     })}
                 </div>

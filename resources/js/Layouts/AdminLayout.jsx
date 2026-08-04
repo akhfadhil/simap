@@ -54,26 +54,26 @@ export default function AdminLayout({ children, title }) {
 
     const menus = isPartai
         ? [
-              { href: '/admin/rekap/chart', label: 'Grafik & Statistik', icon: BarChart3 },
-              { href: '/admin/rekap', label: 'Rekapitulasi Data', icon: BarChart2 },
+              { href: '/admin/rekap/chart', label: 'Grafik & Statistik', icon: BarChart3, isBlade: true },
+              { href: '/admin/rekap', label: 'Rekapitulasi Data', icon: BarChart2, isBlade: false },
           ]
         : isKomisioner
         ? [
-              { href: '/dashboard/komisioner', label: 'Beranda', icon: LayoutDashboard },
-              { href: '/admin/rekap/chart', label: 'Grafik & Statistik', icon: BarChart3 },
-              { href: '/dokumen/semua', label: 'Rekap Dokumen', icon: FolderOpen },
-              { href: '/admin/rekap', label: 'Rekapitulasi Data', icon: BarChart2 },
+              { href: '/dashboard/komisioner', label: 'Beranda', icon: LayoutDashboard, isBlade: false },
+              { href: '/admin/rekap/chart', label: 'Grafik & Statistik', icon: BarChart3, isBlade: true },
+              { href: '/dokumen/semua', label: 'Rekap Dokumen', icon: FolderOpen, isBlade: false },
+              { href: '/admin/rekap', label: 'Rekapitulasi Data', icon: BarChart2, isBlade: false },
           ]
         : [
-              { href: '/dashboard/admin', label: 'Beranda', icon: LayoutDashboard },
-              { href: '/admin/users', label: 'Pengguna', icon: Users },
-              { href: '/admin/rekap/chart', label: 'Grafik & Statistik', icon: BarChart3 },
-              { href: '/admin/kecamatan', label: 'Kelola Kecamatan', icon: MapPin },
-              { href: '/admin/desa', label: 'Kelola Desa', icon: Building2 },
-              { href: '/admin/tps', label: 'Kelola TPS', icon: Pin },
-              { href: '/dokumen/semua', label: 'Rekap Dokumen', icon: FolderOpen },
-              { href: '/admin/rekap', label: 'Rekapitulasi Data', icon: BarChart2 },
-              { href: '/admin/setup', label: 'Setup Data Pemilu', icon: Settings },
+              { href: '/dashboard/admin', label: 'Beranda', icon: LayoutDashboard, isBlade: false },
+              { href: '/admin/users', label: 'Pengguna', icon: Users, isBlade: false },
+              { href: '/admin/rekap/chart', label: 'Grafik & Statistik', icon: BarChart3, isBlade: true },
+              { href: '/admin/kecamatan', label: 'Kelola Kecamatan', icon: MapPin, isBlade: false },
+              { href: '/admin/desa', label: 'Kelola Desa', icon: Building2, isBlade: false },
+              { href: '/admin/tps', label: 'Kelola TPS', icon: Pin, isBlade: false },
+              { href: '/dokumen/semua', label: 'Rekap Dokumen', icon: FolderOpen, isBlade: false },
+              { href: '/admin/rekap', label: 'Rekapitulasi Data', icon: BarChart2, isBlade: false },
+              { href: '/admin/setup', label: 'Setup Data Pemilu', icon: Settings, isBlade: true },
           ];
 
     const currentUrl = window.location.pathname;
@@ -120,16 +120,28 @@ export default function AdminLayout({ children, title }) {
                     {menus.map((menu, idx) => {
                         const Icon = menu.icon;
                         const active = currentUrl === menu.href || (menu.href !== '/dashboard/admin' && currentUrl.startsWith(menu.href));
-                        return (
+                        const className = `flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium transition duration-150 ${
+                            active
+                                ? 'bg-red-50 dark:bg-red-950/40 text-[#bb152c] dark:text-red-400 font-semibold'
+                                : 'text-[#475569] dark:text-[#94a3b8] hover:bg-[#f1f5f9] dark:hover:bg-[#1f2937] hover:text-[#0f172a] dark:hover:text-[#f8fafc]'
+                        }`;
+
+                        return menu.isBlade ? (
+                            <a
+                                key={idx}
+                                href={menu.href}
+                                onClick={() => setMobileMenuOpen(false)}
+                                className={className}
+                            >
+                                <Icon className={`w-4 h-4 ${active ? 'text-[#bb152c] dark:text-red-400' : 'text-[#94a3b8]'}`} />
+                                <span>{menu.label}</span>
+                            </a>
+                        ) : (
                             <Link
                                 key={idx}
                                 href={menu.href}
                                 onClick={() => setMobileMenuOpen(false)}
-                                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium transition duration-150 ${
-                                    active
-                                        ? 'bg-red-50 dark:bg-red-950/40 text-[#bb152c] dark:text-red-400 font-semibold'
-                                        : 'text-[#475569] dark:text-[#94a3b8] hover:bg-[#f1f5f9] dark:hover:bg-[#1f2937] hover:text-[#0f172a] dark:hover:text-[#f8fafc]'
-                                }`}
+                                className={className}
                             >
                                 <Icon className={`w-4 h-4 ${active ? 'text-[#bb152c] dark:text-red-400' : 'text-[#94a3b8]'}`} />
                                 <span>{menu.label}</span>
@@ -146,15 +158,17 @@ export default function AdminLayout({ children, title }) {
                         <Lock className="w-4 h-4 text-[#94a3b8]" />
                         <span>Ubah Password</span>
                     </Link>
-                    <Link
+                    <a
                         href="/logout"
-                        method="post"
-                        as="button"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            router.post('/logout');
+                        }}
                         className="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs text-[#bb152c] hover:bg-red-50 dark:hover:bg-red-950/30 transition font-semibold"
                     >
                         <LogOut className="w-4 h-4" />
                         <span>Log Keluar</span>
-                    </Link>
+                    </a>
                 </div>
             </aside>
 
@@ -178,15 +192,26 @@ export default function AdminLayout({ children, title }) {
                         {menus.map((menu, idx) => {
                             const Icon = menu.icon;
                             const active = currentUrl === menu.href || (menu.href !== '/dashboard/admin' && currentUrl.startsWith(menu.href));
-                            return (
+                            const className = `flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium transition duration-150 ${
+                                active
+                                    ? 'bg-red-50 dark:bg-red-950/40 text-[#bb152c] dark:text-red-400 font-semibold border-l-4 border-[#bb152c] dark:border-red-500'
+                                    : 'text-[#475569] dark:text-[#94a3b8] hover:bg-[#f1f5f9] dark:hover:bg-[#1f2937] hover:text-[#0f172a] dark:hover:text-[#f8fafc]'
+                            }`;
+
+                            return menu.isBlade ? (
+                                <a
+                                    key={idx}
+                                    href={menu.href}
+                                    className={className}
+                                >
+                                    <Icon className={`w-4 h-4 ${active ? 'text-[#bb152c] dark:text-red-400' : 'text-[#94a3b8]'}`} />
+                                    <span>{menu.label}</span>
+                                </a>
+                            ) : (
                                 <Link
                                     key={idx}
                                     href={menu.href}
-                                    className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium transition duration-150 ${
-                                        active
-                                            ? 'bg-red-50 dark:bg-red-950/40 text-[#bb152c] dark:text-red-400 font-semibold border-l-4 border-[#bb152c] dark:border-red-500'
-                                            : 'text-[#475569] dark:text-[#94a3b8] hover:bg-[#f1f5f9] dark:hover:bg-[#1f2937] hover:text-[#0f172a] dark:hover:text-[#f8fafc]'
-                                    }`}
+                                    className={className}
                                 >
                                     <Icon className={`w-4 h-4 ${active ? 'text-[#bb152c] dark:text-red-400' : 'text-[#94a3b8]'}`} />
                                     <span>{menu.label}</span>
@@ -203,15 +228,17 @@ export default function AdminLayout({ children, title }) {
                             <Lock className="w-4 h-4 text-[#94a3b8]" />
                             <span>Ubah Password</span>
                         </Link>
-                        <Link
+                        <a
                             href="/logout"
-                            method="post"
-                            as="button"
-                            className="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs text-[#bb152c] hover:bg-red-50 dark:hover:bg-red-950/30 transition font-semibold"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                router.post('/logout');
+                            }}
+                            className="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs text-[#bb152c] hover:bg-red-50 dark:hover:bg-red-950/30 transition font-semibold cursor-pointer"
                         >
                             <LogOut className="w-4 h-4" />
                             <span>Log Keluar</span>
-                        </Link>
+                        </a>
                     </div>
                 </aside>
 
