@@ -3,19 +3,32 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Tps;
 use App\Models\Desa;
 use App\Models\Kecamatan;
+use App\Models\Tps;
 use Illuminate\Http\Request;
 
 class TpsController extends Controller
 {
-    // Menampilkan daftar TPS sesuai filter kecamatan/desa.
+    // Menampilkan daftar TPS sesuai filter kecamatan/desa (default: Desa Bangorejo, Kecamatan Bangorejo).
     public function index(Request $request)
     {
         $kecamatans = Kecamatan::with(['desas' => fn ($query) => $query->orderBy('nama')])
             ->orderBy('nama')
             ->get();
+
+        if (! $request->has('kecamatan_id') && ! $request->has('desa_id')) {
+            $bangorejoKec = $kecamatans->first(fn ($k) => strtolower($k->nama) === 'bangorejo')
+                ?? $kecamatans->first(fn ($k) => stripos($k->nama, 'bangorejo') !== false);
+            if ($bangorejoKec) {
+                $bangorejoDesa = $bangorejoKec->desas->first(fn ($d) => strtolower($d->nama) === 'bangorejo')
+                    ?? $bangorejoKec->desas->first(fn ($d) => stripos($d->nama, 'bangorejo') !== false);
+                $request->merge([
+                    'kecamatan_id' => $bangorejoKec->id,
+                    'desa_id' => $bangorejoDesa?->id,
+                ]);
+            }
+        }
 
         $selectedKecamatanId = $request->integer('kecamatan_id') ?: null;
         $selectedDesaId = $request->integer('desa_id') ?: null;
@@ -64,7 +77,7 @@ class TpsController extends Controller
             $processed++;
 
             for ($i = 1; $i <= $jumlah; $i++) {
-                $nama = 'TPS ' . str_pad($i, 3, '0', STR_PAD_LEFT);
+                $nama = 'TPS '.str_pad($i, 3, '0', STR_PAD_LEFT);
 
                 $exists = Tps::where('desa_id', $desaId)->where('nama', $nama)->exists();
                 if (! $exists) {
@@ -94,6 +107,7 @@ class TpsController extends Controller
     {
         $nama = $tps->nama;
         $tps->delete();
+
         return back()->with('success', "{$nama} berhasil dihapus.");
     }
 }

@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Dokumen;
 use App\Models\Desa;
+use App\Models\Dokumen;
 use App\Models\PemiluSetting;
 use App\Models\Tps;
 use App\Models\User;
@@ -21,30 +21,33 @@ class SeedDummyDokumen extends Command
     public function handle(): int
     {
         $source = base_path('File_contoh.pdf');
-        if (!is_file($source)) {
-            $this->error('File sumber tidak ditemukan: ' . $source);
+        if (! is_file($source)) {
+            $this->error('File sumber tidak ditemukan: '.$source);
+
             return self::FAILURE;
         }
 
         $status = $this->option('status');
-        if (!in_array($status, array_keys(Dokumen::STATUS_LABELS), true)) {
-            $this->error('Status tidak valid. Gunakan: ' . implode(', ', array_keys(Dokumen::STATUS_LABELS)));
+        if (! in_array($status, array_keys(Dokumen::STATUS_LABELS), true)) {
+            $this->error('Status tidak valid. Gunakan: '.implode(', ', array_keys(Dokumen::STATUS_LABELS)));
+
             return self::FAILURE;
         }
 
         $jenisAktif = collect(PemiluSetting::aktif())
-            ->map(fn($jenis) => strtoupper($jenis))
-            ->map(fn($jenis) => $jenis === 'DPR_RI' ? 'DPR_RI' : $jenis)
+            ->map(fn ($jenis) => strtoupper($jenis))
+            ->map(fn ($jenis) => $jenis === 'DPR_RI' ? 'DPR_RI' : $jenis)
             ->values();
 
         if ($jenisAktif->isEmpty()) {
             $this->warn('Tidak ada jenis pemilihan aktif.');
+
             return self::SUCCESS;
         }
 
         $desaIds = collect($this->option('desa-id'))
-            ->filter(fn($id) => $id !== null && $id !== '')
-            ->map(fn($id) => (int) $id)
+            ->filter(fn ($id) => $id !== null && $id !== '')
+            ->map(fn ($id) => (int) $id)
             ->unique()
             ->values();
 
@@ -56,18 +59,20 @@ class SeedDummyDokumen extends Command
             if ($desaList->count() !== $desaIds->count()) {
                 $foundIds = $desaList->pluck('id');
                 $missingIds = $desaIds->diff($foundIds)->implode(', ');
-                $this->error('Desa tidak ditemukan: ' . $missingIds);
+                $this->error('Desa tidak ditemukan: '.$missingIds);
+
                 return self::FAILURE;
             }
 
-            $this->info('Scope desa: ' . $desaList
-                ->map(fn($desa) => "{$desa->nama} ({$desa->kecamatan?->nama})")
+            $this->info('Scope desa: '.$desaList
+                ->map(fn ($desa) => "{$desa->nama} ({$desa->kecamatan?->nama})")
                 ->implode(', '));
         }
 
         $fallbackUploaderId = User::where('role', 'admin')->value('id') ?? User::value('id');
-        if (!$fallbackUploaderId) {
+        if (! $fallbackUploaderId) {
             $this->error('Tidak ada user untuk kolom uploaded_by.');
+
             return self::FAILURE;
         }
 
@@ -87,6 +92,7 @@ class SeedDummyDokumen extends Command
         $totalTps = (clone $tpsQuery)->count();
         if ($totalTps === 0) {
             $this->warn('Tidak ada TPS untuk scope yang dipilih.');
+
             return self::SUCCESS;
         }
 
@@ -102,11 +108,11 @@ class SeedDummyDokumen extends Command
                 $uploaderId = $uploaderByTps[$tps->id] ?? $fallbackUploaderId;
 
                 foreach ($jenisAktif as $jenis) {
-                    $path = "documents/{$kecFolder}/desa/{$desaFolder}/{$tpsFolder}/" . strtolower($jenis) . '.pdf';
+                    $path = "documents/{$kecFolder}/desa/{$desaFolder}/{$tpsFolder}/".strtolower($jenis).'.pdf';
                     $storagePath = Storage::path($path);
                     $dir = dirname($storagePath);
 
-                    if (!is_dir($dir)) {
+                    if (! is_dir($dir)) {
                         mkdir($dir, 0755, true);
                     }
 
@@ -141,7 +147,7 @@ class SeedDummyDokumen extends Command
 
         $bar->finish();
         $this->newLine(2);
-        $this->info("Selesai. Dibuat: {$created}, diperbarui: {$updated}, jenis aktif: " . $jenisAktif->implode(', '));
+        $this->info("Selesai. Dibuat: {$created}, diperbarui: {$updated}, jenis aktif: ".$jenisAktif->implode(', '));
 
         return self::SUCCESS;
     }

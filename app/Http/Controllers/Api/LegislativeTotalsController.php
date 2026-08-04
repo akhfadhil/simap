@@ -48,7 +48,7 @@ class LegislativeTotalsController extends Controller
         return response()->json([
             'dpr_ri' => (int) ($nonKabTotals['dpr_ri'] ?? 0),
             'dprd_prov' => (int) ($nonKabTotals['dprd_prov'] ?? 0),
-            'dprd_kab' => collect($kabTotals)->map(fn($v) => (int) $v)->toArray(),
+            'dprd_kab' => collect($kabTotals)->map(fn ($v) => (int) $v)->toArray(),
         ]);
     }
 }

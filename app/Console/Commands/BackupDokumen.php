@@ -39,6 +39,7 @@ class BackupDokumen extends Command
 
         if ($dokumens->isEmpty()) {
             $this->info('Tidak ada dokumen terverifikasi yang perlu dibackup.');
+
             return self::SUCCESS;
         }
 
@@ -50,16 +51,17 @@ class BackupDokumen extends Command
 
         foreach ($dokumens as $dok) {
             $sourcePath = Storage::path($dok->file_path);
-            $destPath = $backupDir . DIRECTORY_SEPARATOR . $dok->file_path;
+            $destPath = $backupDir.DIRECTORY_SEPARATOR.$dok->file_path;
             $destDir = dirname($destPath);
             $label = "[{$dok->id}] {$dok->file_name}";
 
-            if (!Storage::exists($dok->file_path)) {
+            if (! Storage::exists($dok->file_path)) {
                 $this->warn("  SKIP   {$label} - file sumber tidak ditemukan");
-                if (!$dryRun) {
+                if (! $dryRun) {
                     $dok->update(['is_archived' => true, 'archived_at' => now()]);
                 }
                 $gagal++;
+
                 continue;
             }
 
@@ -67,10 +69,11 @@ class BackupDokumen extends Command
                 $this->line("  DRY    {$label}");
                 $this->line("         -> {$destPath}");
                 $berhasil++;
+
                 continue;
             }
 
-            if (!is_dir($destDir)) {
+            if (! is_dir($destDir)) {
                 mkdir($destDir, 0755, true);
             }
 

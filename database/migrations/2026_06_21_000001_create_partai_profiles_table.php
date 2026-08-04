@@ -22,7 +22,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        if (!Schema::hasColumn('users', 'partai_profile_id')) {
+        if (! Schema::hasColumn('users', 'partai_profile_id')) {
             Schema::table('users', function (Blueprint $table) {
                 $table->unsignedBigInteger('partai_profile_id')->nullable()->after('partai_id');
             });

@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class PartaiProfileSeeder extends Seeder
 {
@@ -199,7 +199,7 @@ class PartaiProfileSeeder extends Seeder
             $exists = DB::table('partai_profiles')
                 ->where('slug', $p['slug'])
                 ->exists();
-            if (!$exists) {
+            if (! $exists) {
                 DB::table('partai_profiles')->insert(array_merge($p, [
                     'created_at' => $now,
                     'updated_at' => $now,

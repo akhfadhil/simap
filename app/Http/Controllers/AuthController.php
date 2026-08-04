@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -10,8 +11,9 @@ class AuthController extends Controller
     public function showLogin()
     {
         if (Auth::check()) {
-            return redirect()->route('dashboard.' . Auth::user()->role);
+            return redirect()->route('dashboard.'.Auth::user()->role);
         }
+
         return view('auth.login');
     }
 
@@ -19,7 +21,7 @@ class AuthController extends Controller
     public function showPartaiLogin()
     {
         if (Auth::check()) {
-            return redirect()->route('dashboard.' . Auth::user()->role);
+            return redirect()->route('dashboard.'.Auth::user()->role);
         }
 
         return view('auth.partai-login');
@@ -46,7 +48,8 @@ class AuthController extends Controller
                 'admin_view_tps_id',
             ]);
             $role = Auth::user()->role;
-            return redirect()->route('dashboard.' . $role);
+
+            return redirect()->route('dashboard.'.$role);
         }
 
         return back()
@@ -91,6 +94,7 @@ class AuthController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
         return redirect()->route('login');
     }
 }

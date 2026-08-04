@@ -8,22 +8,28 @@ use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 class RekapExport implements WithMultipleSheets
 {
     protected $rekaps;
+
     protected $master;
+
     protected $tpsList;
+
     protected $level;
+
     protected $wilayah;
+
     protected $desas;
+
     protected $jenis; // jenis yang dipilih (untuk PPK & Admin)
 
     public function __construct($rekaps, $master, $tpsList, $level, $wilayah, $desas = null, $jenis = null)
     {
-        $this->rekaps  = $rekaps;
-        $this->master  = $master;
+        $this->rekaps = $rekaps;
+        $this->master = $master;
         $this->tpsList = $tpsList;
-        $this->level   = $level;
+        $this->level = $level;
         $this->wilayah = $wilayah;
-        $this->desas   = $desas;
-        $this->jenis   = $jenis;
+        $this->desas = $desas;
+        $this->jenis = $jenis;
     }
 
     public function sheets(): array
@@ -31,14 +37,14 @@ class RekapExport implements WithMultipleSheets
         $sheets = [];
 
         if (in_array($this->level, ['ppk', 'admin']) && $this->desas && $this->jenis) {
-            $jenis       = $this->jenis;
-            $label       = RekapHeader::JENIS_LABELS[$jenis];
+            $jenis = $this->jenis;
+            $label = RekapHeader::JENIS_LABELS[$jenis];
             $masterJenis = $this->master[$jenis] ?? [];
 
             // Sheet 1: Rekap total (kolom = desa)
             $sheets[] = new RekapTotalSheetExport(
                 $jenis,
-                'Rekap_' . $label,
+                'Rekap_'.$label,
                 $this->rekaps,
                 $masterJenis,
                 $this->desas,
@@ -48,11 +54,13 @@ class RekapExport implements WithMultipleSheets
 
             // Sheet 2+: Per desa (kolom = TPS)
             foreach ($this->desas as $desa) {
-                $tpsDesaList    = $this->tpsList->where('desa_id', $desa->id)->values();
-                if ($tpsDesaList->isEmpty()) continue;
+                $tpsDesaList = $this->tpsList->where('desa_id', $desa->id)->values();
+                if ($tpsDesaList->isEmpty()) {
+                    continue;
+                }
 
                 $rekapsFiltered = $this->rekaps->whereIn('tps_id', $tpsDesaList->pluck('id'));
-                $sheetTitle     = substr($desa->nama, 0, 28);
+                $sheetTitle = substr($desa->nama, 0, 28);
 
                 $sheets[] = new RekapSheetExport(
                     $jenis,
@@ -61,7 +69,7 @@ class RekapExport implements WithMultipleSheets
                     $this->master,
                     $tpsDesaList,
                     $this->level,
-                    $desa->nama . ' — ' . $this->wilayah
+                    $desa->nama.' — '.$this->wilayah
                 );
             }
         } else {

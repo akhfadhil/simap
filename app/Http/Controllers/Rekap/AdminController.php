@@ -1290,18 +1290,21 @@ class AdminController extends Controller
                 'dpd' => $rekap->dpdSuaras()->updateOrCreate(['calon_id' => $calonId], ['suara' => $value]),
                 default => abort(422, 'Baris calon tidak valid untuk jenis pemilihan ini.'),
             };
+
             return;
         }
 
         if (str_starts_with($rowKey, 'partai:') && in_array($jenis, ['dpr_ri', 'dprd_prov', 'dprd_kab'], true)) {
             $partaiId = (int) substr($rowKey, strlen('partai:'));
             $rekap->partaiSuaras()->updateOrCreate(['partai_id' => $partaiId], ['suara' => $value]);
+
             return;
         }
 
         if (str_starts_with($rowKey, 'caleg:') && in_array($jenis, ['dpr_ri', 'dprd_prov', 'dprd_kab'], true)) {
             $calegId = (int) substr($rowKey, strlen('caleg:'));
             $rekap->calegSuaras()->updateOrCreate(['caleg_id' => $calegId], ['suara' => $value]);
+
             return;
         }
 

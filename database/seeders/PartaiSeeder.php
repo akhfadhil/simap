@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use App\Models\Dapil;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class PartaiSeeder extends Seeder
 {
@@ -41,14 +41,14 @@ class PartaiSeeder extends Seeder
                     ->where('jenis', $jenis)
                     ->where('nomor_urut', $nomor)
                     ->exists();
-                if (!$exists) {
+                if (! $exists) {
                     DB::table('rekap_partais')->insert([
-                        'jenis'       => $jenis,
-                        'nomor_urut'  => $nomor,
+                        'jenis' => $jenis,
+                        'nomor_urut' => $nomor,
                         'nama_partai' => $nama,
-                        'dapil_id'    => null,
-                        'created_at'  => $now,
-                        'updated_at'  => $now,
+                        'dapil_id' => null,
+                        'created_at' => $now,
+                        'updated_at' => $now,
                     ]);
                 }
             }
@@ -59,6 +59,7 @@ class PartaiSeeder extends Seeder
 
         if ($dapils->isEmpty()) {
             $this->command->warn('Tidak ada dapil ditemukan. Jalankan WilayahSeeder + tambah dapil dulu.');
+
             return;
         }
 
@@ -69,19 +70,19 @@ class PartaiSeeder extends Seeder
                     ->where('dapil_id', $dapil->id)
                     ->where('nomor_urut', $nomor)
                     ->exists();
-                if (!$exists) {
+                if (! $exists) {
                     DB::table('rekap_partais')->insert([
-                        'jenis'       => 'dprd_kab',
-                        'nomor_urut'  => $nomor,
+                        'jenis' => 'dprd_kab',
+                        'nomor_urut' => $nomor,
                         'nama_partai' => $nama,
-                        'dapil_id'    => $dapil->id,
-                        'created_at'  => $now,
-                        'updated_at'  => $now,
+                        'dapil_id' => $dapil->id,
+                        'created_at' => $now,
+                        'updated_at' => $now,
                     ]);
                 }
             }
         }
 
-        $this->command->info('Partai selesai di-seed: ' . count($partai) . ' partai × (dpr_ri + dprd_prov + ' . $dapils->count() . ' dapil).');
+        $this->command->info('Partai selesai di-seed: '.count($partai).' partai × (dpr_ri + dprd_prov + '.$dapils->count().' dapil).');
     }
 }

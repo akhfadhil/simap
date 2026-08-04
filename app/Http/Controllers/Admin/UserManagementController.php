@@ -1,12 +1,13 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use App\Models\Kecamatan;
 use App\Models\Desa;
-use App\Models\Tps;
+use App\Models\Kecamatan;
 use App\Models\RekapPartai;
+use App\Models\Tps;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -15,21 +16,25 @@ use Illuminate\Validation\ValidationException;
 
 class UserManagementController extends Controller
 {
-    // Menampilkan daftar user setelah filter dipilih.
-    public function index()
+    // Menampilkan daftar user (default: role admin jika tanpa filter).
+    public function index(Request $request)
     {
-        $usersLoaded = $this->hasUserFilter(request());
+        if (! $request->has('role') && ! $request->has('kecamatan_id') && ! $request->has('desa_id')) {
+            $request->merge(['role' => 'admin']);
+        }
+
+        $usersLoaded = $this->hasUserFilter($request);
         $users = $usersLoaded
-            ? $this->filteredUsers(request())
+            ? $this->filteredUsers($request)
                 ->orderBy('name')
                 ->paginate(15)
                 ->withQueryString()
             : User::whereRaw('1 = 0')->paginate(15)->withQueryString();
 
         $kecamatans = Kecamatan::orderBy('nama')->get();
-        $desas      = Desa::orderBy('nama')->get(['id', 'nama', 'kecamatan_id']);
-        $tpsList    = Tps::orderBy('nama')->get(['id', 'nama', 'desa_id']);
-        $partais    = RekapPartai::where('jenis', 'dpr_ri')->orderBy('nomor_urut')->get(['id', 'nomor_urut', 'nama_partai']);
+        $desas = Desa::orderBy('nama')->get(['id', 'nama', 'kecamatan_id']);
+        $tpsList = Tps::orderBy('nama')->get(['id', 'nama', 'desa_id']);
+        $partais = RekapPartai::where('jenis', 'dpr_ri')->orderBy('nomor_urut')->get(['id', 'nomor_urut', 'nama_partai']);
 
         return view('admin.users.index', compact('users', 'usersLoaded', 'kecamatans', 'desas', 'tpsList', 'partais'));
     }
@@ -37,11 +42,14 @@ class UserManagementController extends Controller
     // Mengekspor daftar user sesuai filter ke CSV.
     public function export(Request $request)
     {
-        if (!$this->hasUserFilter($request)) {
+        if (! $request->has('role') && ! $request->has('kecamatan_id') && ! $request->has('desa_id')) {
+            $request->merge(['role' => 'admin']);
+        }
+        if (! $this->hasUserFilter($request)) {
             return back()->with('error', 'Pilih role/kecamatan/desa dulu sebelum export.');
         }
 
-        $filename = 'daftar-user-' . now()->format('Ymd-His') . '.csv';
+        $filename = 'daftar-user-'.now()->format('Ymd-His').'.csv';
 
         return response()->streamDownload(function () use ($request) {
             $handle = fopen('php://output', 'w');
@@ -75,25 +83,25 @@ class UserManagementController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name'         => 'required|string|max:100',
-            'username'     => 'required|string|unique:users|max:50',
-            'password'     => 'nullable|string|min:6',
-            'role'         => 'required|in:admin,komisioner,partai,ppk,pps,kpps',
+            'name' => 'required|string|max:100',
+            'username' => 'required|string|unique:users|max:50',
+            'password' => 'nullable|string|min:6',
+            'role' => 'required|in:admin,komisioner,partai,ppk,pps,kpps',
             'kecamatan_id' => 'required_if:role,ppk|nullable|exists:kecamatans,id',
-            'desa_id'      => 'required_if:role,pps|nullable|exists:desas,id',
-            'tps_id'       => 'required_if:role,kpps|nullable|exists:tps,id',
-            'partai_id'    => 'required_if:role,partai|nullable|exists:rekap_partais,id',
+            'desa_id' => 'required_if:role,pps|nullable|exists:desas,id',
+            'tps_id' => 'required_if:role,kpps|nullable|exists:tps,id',
+            'partai_id' => 'required_if:role,partai|nullable|exists:rekap_partais,id',
         ]);
 
         User::create([
-            'name'         => $request->name,
-            'username'     => $request->username,
-            'password'     => Hash::make($request->filled('password') ? $request->password : $request->username),
-            'role'         => $request->role,
-            'kecamatan_id' => $request->role === 'ppk'  ? $request->kecamatan_id : null,
-            'desa_id'      => $request->role === 'pps'  ? $request->desa_id      : null,
-            'tps_id'       => $request->role === 'kpps' ? $request->tps_id       : null,
-            'partai_id'    => $request->role === 'partai' ? $request->partai_id  : null,
+            'name' => $request->name,
+            'username' => $request->username,
+            'password' => Hash::make($request->filled('password') ? $request->password : $request->username),
+            'role' => $request->role,
+            'kecamatan_id' => $request->role === 'ppk' ? $request->kecamatan_id : null,
+            'desa_id' => $request->role === 'pps' ? $request->desa_id : null,
+            'tps_id' => $request->role === 'kpps' ? $request->tps_id : null,
+            'partai_id' => $request->role === 'partai' ? $request->partai_id : null,
         ]);
 
         return back()->with('success', 'User berhasil ditambahkan.');
@@ -103,22 +111,22 @@ class UserManagementController extends Controller
     public function update(Request $request, User $user)
     {
         $request->validate([
-            'name'         => 'required|string|max:100',
-            'username'     => 'required|string|max:50|unique:users,username,' . $user->id,
-            'password'     => 'nullable|string|min:6',
+            'name' => 'required|string|max:100',
+            'username' => 'required|string|max:50|unique:users,username,'.$user->id,
+            'password' => 'nullable|string|min:6',
             'kecamatan_id' => 'nullable|exists:kecamatans,id',
-            'desa_id'      => 'nullable|exists:desas,id',
-            'tps_id'       => 'nullable|exists:tps,id',
-            'partai_id'    => ($user->role === 'partai' ? 'required' : 'nullable') . '|exists:rekap_partais,id',
+            'desa_id' => 'nullable|exists:desas,id',
+            'tps_id' => 'nullable|exists:tps,id',
+            'partai_id' => ($user->role === 'partai' ? 'required' : 'nullable').'|exists:rekap_partais,id',
         ]);
 
         $data = [
-            'name'         => $request->name,
-            'username'     => $request->username,
-            'kecamatan_id' => $user->role === 'ppk'  ? $request->kecamatan_id : null,
-            'desa_id'      => $user->role === 'pps'  ? $request->desa_id      : null,
-            'tps_id'       => $user->role === 'kpps' ? $request->tps_id       : null,
-            'partai_id'    => $user->role === 'partai' ? $request->partai_id  : null,
+            'name' => $request->name,
+            'username' => $request->username,
+            'kecamatan_id' => $user->role === 'ppk' ? $request->kecamatan_id : null,
+            'desa_id' => $user->role === 'pps' ? $request->desa_id : null,
+            'tps_id' => $user->role === 'kpps' ? $request->tps_id : null,
+            'partai_id' => $user->role === 'partai' ? $request->partai_id : null,
         ];
 
         if ($request->filled('password')) {
@@ -126,6 +134,7 @@ class UserManagementController extends Controller
         }
 
         $user->update($data);
+
         return back()->with('success', 'User berhasil diupdate.');
     }
 
@@ -141,6 +150,7 @@ class UserManagementController extends Controller
         }
 
         $user->delete();
+
         return back()->with('success', 'User berhasil dihapus.');
     }
 
@@ -148,7 +158,7 @@ class UserManagementController extends Controller
     public function bulk(Request $request)
     {
         $role = $request->input('role', 'kpps');
-        if (!in_array($role, ['ppk', 'pps', 'kpps'], true)) {
+        if (! in_array($role, ['ppk', 'pps', 'kpps'], true)) {
             $role = 'kpps';
         }
 
@@ -186,7 +196,7 @@ class UserManagementController extends Controller
 
         $role = $data['role'];
         $selectedRows = collect($data['rows'])
-            ->filter(fn($row) => !empty($row['enabled']));
+            ->filter(fn ($row) => ! empty($row['enabled']));
 
         if ($selectedRows->isEmpty()) {
             throw ValidationException::withMessages([
@@ -214,7 +224,7 @@ class UserManagementController extends Controller
                     ]);
                 }
 
-                if (!$existing && $password !== '' && strlen($password) < 6) {
+                if (! $existing && $password !== '' && strlen($password) < 6) {
                     throw ValidationException::withMessages([
                         'rows' => "Password minimal 6 karakter untuk user baru {$entity['label']}.",
                     ]);
@@ -235,7 +245,7 @@ class UserManagementController extends Controller
                 $submittedUsernames[$usernameKey] = true;
 
                 $usernameTaken = User::where('username', $username)
-                    ->when($existing, fn($query) => $query->where('id', '!=', $existing->id))
+                    ->when($existing, fn ($query) => $query->where('id', '!=', $existing->id))
                     ->exists();
 
                 if ($usernameTaken) {
@@ -255,13 +265,14 @@ class UserManagementController extends Controller
 
                 if ($password !== '') {
                     $payload['password'] = Hash::make($password);
-                } elseif (!$existing) {
+                } elseif (! $existing) {
                     $payload['password'] = Hash::make($username);
                 }
 
                 if ($existing) {
                     $existing->update($payload);
                     $updated++;
+
                     continue;
                 }
 
@@ -278,15 +289,15 @@ class UserManagementController extends Controller
     // Menyiapkan baris bulk user PPK per kecamatan.
     private function bulkPpkRows()
     {
-        return Kecamatan::with(['users' => fn($query) => $query->where('role', 'ppk')])
+        return Kecamatan::with(['users' => fn ($query) => $query->where('role', 'ppk')])
             ->orderBy('nama')
             ->get()
-            ->map(fn($kecamatan) => $this->bulkRow(
+            ->map(fn ($kecamatan) => $this->bulkRow(
                 $kecamatan->id,
                 $kecamatan->nama,
                 'Kecamatan',
                 $kecamatan->users->first(),
-                'PPK ' . $kecamatan->nama,
+                'PPK '.$kecamatan->nama,
                 $this->suggestUsername('ppk', $kecamatan->id, $kecamatan->nama)
             ));
     }
@@ -294,16 +305,16 @@ class UserManagementController extends Controller
     // Menyiapkan baris bulk user PPS per desa.
     private function bulkPpsRows(int $kecamatanId)
     {
-        return Desa::with(['kecamatan', 'users' => fn($query) => $query->where('role', 'pps')])
+        return Desa::with(['kecamatan', 'users' => fn ($query) => $query->where('role', 'pps')])
             ->where('kecamatan_id', $kecamatanId)
             ->orderBy('nama')
             ->get()
-            ->map(fn($desa) => $this->bulkRow(
+            ->map(fn ($desa) => $this->bulkRow(
                 $desa->id,
                 $desa->nama,
                 $desa->kecamatan?->nama ?? 'Kecamatan',
                 $desa->users->first(),
-                'PPS ' . $desa->nama,
+                'PPS '.$desa->nama,
                 $this->suggestUsername('pps', $desa->id, $desa->nama)
             ));
     }
@@ -311,16 +322,16 @@ class UserManagementController extends Controller
     // Menyiapkan baris bulk user KPPS per TPS.
     private function bulkKppsRows(int $desaId)
     {
-        return Tps::with(['desa.kecamatan', 'users' => fn($query) => $query->where('role', 'kpps')])
+        return Tps::with(['desa.kecamatan', 'users' => fn ($query) => $query->where('role', 'kpps')])
             ->where('desa_id', $desaId)
             ->orderBy('nama')
             ->get()
-            ->map(fn($tps) => $this->bulkRow(
+            ->map(fn ($tps) => $this->bulkRow(
                 $tps->id,
                 $tps->nama,
-                ($tps->desa?->nama ?? 'Desa') . ' / ' . ($tps->desa?->kecamatan?->nama ?? 'Kecamatan'),
+                ($tps->desa?->nama ?? 'Desa').' / '.($tps->desa?->kecamatan?->nama ?? 'Kecamatan'),
                 $tps->users->first(),
-                'KPPS ' . $tps->nama . ' ' . ($tps->desa?->nama ?? ''),
+                'KPPS '.$tps->nama.' '.($tps->desa?->nama ?? ''),
                 $this->suggestUsername('kpps', $tps->id, $tps->nama)
             ));
     }
@@ -347,7 +358,7 @@ class UserManagementController extends Controller
             'kpps' => Tps::find($entityId),
         };
 
-        if (!$entity) {
+        if (! $entity) {
             throw ValidationException::withMessages([
                 'rows' => 'Ada wilayah yang tidak ditemukan.',
             ]);
@@ -360,9 +371,9 @@ class UserManagementController extends Controller
     private function existingUserForRole(string $role, int $entityId): ?User
     {
         return User::where('role', $role)
-            ->when($role === 'ppk', fn($query) => $query->where('kecamatan_id', $entityId))
-            ->when($role === 'pps', fn($query) => $query->where('desa_id', $entityId))
-            ->when($role === 'kpps', fn($query) => $query->where('tps_id', $entityId))
+            ->when($role === 'ppk', fn ($query) => $query->where('kecamatan_id', $entityId))
+            ->when($role === 'pps', fn ($query) => $query->where('desa_id', $entityId))
+            ->when($role === 'kpps', fn ($query) => $query->where('tps_id', $entityId))
             ->first();
     }
 
@@ -370,31 +381,32 @@ class UserManagementController extends Controller
     private function suggestUsername(string $role, int $id, string $name): string
     {
         $slug = Str::slug($name, '_') ?: 'wilayah';
+
         return Str::limit("{$role}_{$id}_{$slug}", 50, '');
     }
 
     // Mengecek apakah user sudah memilih filter daftar pengguna.
     private function hasUserFilter(Request $request): bool
     {
-        return $request->filled('role') || $request->filled('kecamatan_id') || $request->filled('desa_id');
+        return $request->has('role') || $request->filled('kecamatan_id') || $request->filled('desa_id');
     }
 
     // Membentuk query user sesuai filter.
     private function filteredUsers(Request $request)
     {
         return User::with('kecamatan', 'desa.kecamatan', 'tps.desa.kecamatan', 'partai')
-            ->when($request->filled('role'), fn($query) => $query->where('role', $request->role))
+            ->when($request->filled('role'), fn ($query) => $query->where('role', $request->role))
             ->when($request->filled('kecamatan_id'), function ($query) use ($request) {
                 $query->where(function ($query) use ($request) {
                     $query->where('kecamatan_id', $request->kecamatan_id)
-                        ->orWhereHas('desa', fn($desaQuery) => $desaQuery->where('kecamatan_id', $request->kecamatan_id))
-                        ->orWhereHas('tps.desa', fn($desaQuery) => $desaQuery->where('kecamatan_id', $request->kecamatan_id));
+                        ->orWhereHas('desa', fn ($desaQuery) => $desaQuery->where('kecamatan_id', $request->kecamatan_id))
+                        ->orWhereHas('tps.desa', fn ($desaQuery) => $desaQuery->where('kecamatan_id', $request->kecamatan_id));
                 });
             })
             ->when($request->filled('desa_id'), function ($query) use ($request) {
                 $query->where(function ($query) use ($request) {
                     $query->where('desa_id', $request->desa_id)
-                        ->orWhereHas('tps', fn($tpsQuery) => $tpsQuery->where('desa_id', $request->desa_id));
+                        ->orWhereHas('tps', fn ($tpsQuery) => $tpsQuery->where('desa_id', $request->desa_id));
                 });
             });
     }

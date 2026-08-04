@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Desa;
@@ -34,7 +35,7 @@ class DashboardController extends Controller
         $viewKecamatan = null;
 
         if ($user->role === 'admin') {
-            abort_if(!session('admin_view_kecamatan_id'), 403, 'Pilih kecamatan yang ingin dilihat.');
+            abort_if(! session('admin_view_kecamatan_id'), 403, 'Pilih kecamatan yang ingin dilihat.');
             $viewKecamatan = Kecamatan::findOrFail(session('admin_view_kecamatan_id'));
         } else {
             $this->checkRole('ppk');
@@ -56,7 +57,7 @@ class DashboardController extends Controller
         if ($user->role === 'pps') {
             // PPS membuka dashboard wilayahnya sendiri.
         } else {
-            abort_if(!session('admin_view_desa_id'), 403, 'Pilih desa yang ingin dilihat.');
+            abort_if(! session('admin_view_desa_id'), 403, 'Pilih desa yang ingin dilihat.');
             $viewDesa = Desa::with('kecamatan')->findOrFail(session('admin_view_desa_id'));
             $this->authorizeDesaScope($viewDesa);
         }
@@ -77,7 +78,7 @@ class DashboardController extends Controller
         if ($user->role === 'kpps') {
             // KPPS membuka dashboard TPS miliknya sendiri.
         } else {
-            abort_if(!session('admin_view_tps_id'), 403, 'Pilih TPS yang ingin dilihat.');
+            abort_if(! session('admin_view_tps_id'), 403, 'Pilih TPS yang ingin dilihat.');
             $viewTps = Tps::with('desa.kecamatan')->findOrFail(session('admin_view_tps_id'));
             $this->authorizeTpsScope($viewTps);
         }
@@ -92,7 +93,9 @@ class DashboardController extends Controller
     // Memastikan user hanya membuka dashboard role miliknya.
     private function checkRole(string $role)
     {
-        if (Auth::user()->role !== $role) abort(403, 'Akses ditolak.');
+        if (Auth::user()->role !== $role) {
+            abort(403, 'Akses ditolak.');
+        }
     }
 
     private function authorizeDesaScope(Desa $desa): void
@@ -105,7 +108,7 @@ class DashboardController extends Controller
             default => false,
         };
 
-        abort_if(!$allowed, 403, 'Akses ditolak.');
+        abort_if(! $allowed, 403, 'Akses ditolak.');
     }
 
     private function authorizeTpsScope(Tps $tps): void
@@ -119,7 +122,7 @@ class DashboardController extends Controller
             default => false,
         };
 
-        abort_if(!$allowed, 403, 'Akses ditolak.');
+        abort_if(! $allowed, 403, 'Akses ditolak.');
     }
 
     // Menyimpan mode lihat sebagai PPK untuk admin.

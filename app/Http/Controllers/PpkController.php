@@ -1,9 +1,10 @@
 <?php
+
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Auth;
 use App\Models\Desa;
 use App\Models\Kecamatan;
+use Illuminate\Support\Facades\Auth;
 
 class PpkController extends Controller
 {
@@ -13,7 +14,7 @@ class PpkController extends Controller
         $kecamatan = $this->activeKecamatan();
 
         $desas = Desa::where('kecamatan_id', $kecamatan->id)
-            ->with(['tps.dokumens', 'users' => fn($q) => $q->where('role', 'pps')])
+            ->with(['tps.dokumens', 'users' => fn ($q) => $q->where('role', 'pps')])
             ->get();
 
         return view('ppk.data-pps', compact('desas'));
@@ -40,11 +41,12 @@ class PpkController extends Controller
         $user = Auth::user();
 
         if ($user->role === 'admin') {
-            abort_if(!session('admin_view_kecamatan_id'), 403, 'Pilih kecamatan yang ingin dilihat.');
+            abort_if(! session('admin_view_kecamatan_id'), 403, 'Pilih kecamatan yang ingin dilihat.');
+
             return Kecamatan::findOrFail(session('admin_view_kecamatan_id'));
         }
 
-        abort_if(!$user->kecamatan_id, 403, 'Akun belum di-assign ke Kecamatan.');
+        abort_if(! $user->kecamatan_id, 403, 'Akun belum di-assign ke Kecamatan.');
 
         return Kecamatan::findOrFail($user->kecamatan_id);
     }

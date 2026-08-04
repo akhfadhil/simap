@@ -13,10 +13,10 @@ class ToolsController extends Controller
         $exit = Artisan::call('backup:dokumen');
         $output = trim(Artisan::output());
         $lines = collect(preg_split('/\r\n|\r|\n/', $output))
-            ->map(fn($line) => trim($line))
+            ->map(fn ($line) => trim($line))
             ->filter();
-        $summary = $lines->first(fn($line) => str_contains($line, 'Backup dokumen selesai.'))
-            ?? $lines->first(fn($line) => str_contains($line, 'Tidak ada dokumen terverifikasi'))
+        $summary = $lines->first(fn ($line) => str_contains($line, 'Backup dokumen selesai.'))
+            ?? $lines->first(fn ($line) => str_contains($line, 'Tidak ada dokumen terverifikasi'))
             ?? ($exit === 0 ? 'Backup dokumen selesai.' : 'Backup dokumen gagal dijalankan.');
 
         return back()->with('backup_result', $summary);

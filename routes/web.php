@@ -182,5 +182,3 @@ Route::get('/api/legislative-totals', [App\Http\Controllers\Api\LegislativeTotal
 
 // API endpoint to validate and reserve supporter NIK
 Route::post('/api/check-nik', [App\Http\Controllers\Api\NikValidationController::class, 'checkAndReserve']);
-
-

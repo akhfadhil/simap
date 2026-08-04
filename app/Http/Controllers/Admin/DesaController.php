@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -8,10 +9,19 @@ use Illuminate\Http\Request;
 
 class DesaController extends Controller
 {
-    // Menampilkan daftar desa sesuai filter kecamatan.
+    // Menampilkan daftar desa sesuai filter kecamatan (default: Kecamatan Bangorejo).
     public function index(Request $request)
     {
-        $kecamatans = Kecamatan::all();
+        $kecamatans = Kecamatan::orderBy('nama')->get();
+
+        if (! $request->has('kecamatan_id')) {
+            $bangorejo = $kecamatans->first(fn ($k) => strtolower($k->nama) === 'bangorejo')
+                ?? $kecamatans->first(fn ($k) => stripos($k->nama, 'bangorejo') !== false);
+            if ($bangorejo) {
+                $request->merge(['kecamatan_id' => $bangorejo->id]);
+            }
+        }
+
         $desas = collect();
 
         if ($request->filled('kecamatan_id')) {
@@ -29,10 +39,11 @@ class DesaController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nama'         => 'required|string|max:100',
+            'nama' => 'required|string|max:100',
             'kecamatan_id' => 'required|exists:kecamatans,id',
         ]);
         Desa::create($request->only('nama', 'kecamatan_id'));
+
         return back()->with('success', 'Desa berhasil ditambahkan.');
     }
 
@@ -40,10 +51,11 @@ class DesaController extends Controller
     public function update(Request $request, Desa $desa)
     {
         $request->validate([
-            'nama'         => 'required|string|max:100',
+            'nama' => 'required|string|max:100',
             'kecamatan_id' => 'required|exists:kecamatans,id',
         ]);
         $desa->update($request->only('nama', 'kecamatan_id'));
+
         return back()->with('success', 'Desa berhasil diupdate.');
     }
 
@@ -51,6 +63,7 @@ class DesaController extends Controller
     public function destroy(Desa $desa)
     {
         $desa->delete();
+
         return back()->with('success', 'Desa berhasil dihapus.');
     }
 }

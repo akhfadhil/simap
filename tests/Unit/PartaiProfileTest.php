@@ -2,12 +2,12 @@
 
 namespace Tests\Unit;
 
-use Tests\TestCase;
 use App\Models\PartaiProfile;
-use App\Models\User;
 use App\Models\RekapPartai;
+use App\Models\User;
 use Database\Seeders\PartaiProfileSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class PartaiProfileTest extends TestCase
 {

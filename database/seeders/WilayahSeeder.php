@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class WilayahSeeder extends Seeder
 {
@@ -45,9 +45,9 @@ class WilayahSeeder extends Seeder
 
         foreach ($kecamatans as $k) {
             $exists = DB::table('kecamatans')->where('nama', $k[0])->exists();
-            if (!$exists) {
+            if (! $exists) {
                 DB::table('kecamatans')->insert([
-                    'nama'       => $k[0],
+                    'nama' => $k[0],
                     'created_at' => $now,
                     'updated_at' => $now,
                 ]);
@@ -87,18 +87,20 @@ class WilayahSeeder extends Seeder
 
         foreach ($desaData as $kecNama => $desas) {
             $kec = DB::table('kecamatans')->where('nama', $kecNama)->first();
-            if (!$kec) continue;
+            if (! $kec) {
+                continue;
+            }
             foreach ($desas as $desaNama) {
                 $exists = DB::table('desas')
                     ->where('kecamatan_id', $kec->id)
                     ->where('nama', $desaNama)
                     ->exists();
-                if (!$exists) {
+                if (! $exists) {
                     DB::table('desas')->insert([
-                        'nama'          => $desaNama,
-                        'kecamatan_id'  => $kec->id,
-                        'created_at'    => $now,
-                        'updated_at'    => $now,
+                        'nama' => $desaNama,
+                        'kecamatan_id' => $kec->id,
+                        'created_at' => $now,
+                        'updated_at' => $now,
                     ]);
                 }
             }

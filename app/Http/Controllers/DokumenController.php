@@ -1,10 +1,11 @@
 <?php
+
 namespace App\Http\Controllers;
 
-use App\Models\Dokumen;
-use App\Models\Tps;
 use App\Models\Desa;
+use App\Models\Dokumen;
 use App\Models\Kecamatan;
+use App\Models\Tps;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -33,10 +34,10 @@ class DokumenController extends Controller
         $tps = $this->activeTps();
 
         $request->validate([
-            'jenis' => 'required|in:' . implode(',', array_keys(Dokumen::JENIS)),
-            'file'  => 'required|file|mimes:pdf|max:10240',
+            'jenis' => 'required|in:'.implode(',', array_keys(Dokumen::JENIS)),
+            'file' => 'required|file|mimes:pdf|max:10240',
         ]);
-        abort_if(!in_array(strtolower($request->jenis), \App\Models\PemiluSetting::aktif()), 403, 'Jenis pemilu ini tidak aktif.');
+        abort_if(! in_array(strtolower($request->jenis), \App\Models\PemiluSetting::aktif()), 403, 'Jenis pemilu ini tidak aktif.');
 
         $existing = Dokumen::where('tps_id', $tps->id)
             ->where('jenis', $request->jenis)
@@ -47,31 +48,31 @@ class DokumenController extends Controller
             $existing->delete();
         }
 
-        $kecFolder  = preg_replace('/[^A-Za-z0-9_\-]/', '_', $tps->desa->kecamatan->nama);
+        $kecFolder = preg_replace('/[^A-Za-z0-9_\-]/', '_', $tps->desa->kecamatan->nama);
         $desaFolder = preg_replace('/[^A-Za-z0-9_\-]/', '_', $tps->desa->nama);
-        $tpsFolder  = preg_replace('/[^A-Za-z0-9_\-]/', '_', $tps->nama);
+        $tpsFolder = preg_replace('/[^A-Za-z0-9_\-]/', '_', $tps->nama);
 
         $file = $request->file('file');
         $path = $file->storeAs(
             "documents/{$kecFolder}/desa/{$desaFolder}/{$tpsFolder}",
-            strtolower($request->jenis) . '.pdf'
+            strtolower($request->jenis).'.pdf'
         );
 
         Dokumen::create([
-            'tps_id'      => $tps->id,
-            'kecamatan_id'=> null,
+            'tps_id' => $tps->id,
+            'kecamatan_id' => null,
             'uploaded_by' => $user->id,
-            'jenis'       => $request->jenis,
-            'level'       => 'tps',
-            'status'      => 'menunggu_verifikasi',
-            'file_path'   => $path,
-            'file_name'   => $file->getClientOriginalName(),
-            'file_size'   => $file->getSize(),
+            'jenis' => $request->jenis,
+            'level' => 'tps',
+            'status' => 'menunggu_verifikasi',
+            'file_path' => $path,
+            'file_name' => $file->getClientOriginalName(),
+            'file_size' => $file->getSize(),
         ]);
 
-        return back()->with('success', Dokumen::JENIS[$request->jenis] . ' berhasil diupload.');
+        return back()->with('success', Dokumen::JENIS[$request->jenis].' berhasil diupload.');
     }
-    
+
     // Menampilkan dokumen TPS untuk diverifikasi PPS.
     public function indexPps(Request $request)
     {
@@ -85,7 +86,7 @@ class DokumenController extends Controller
 
         $tpsList = $selectedTpsId
             ? Tps::where('id', $selectedTpsId)
-                ->with(['dokumens' => fn($q) => $q->with('uploader', 'verifier')])
+                ->with(['dokumens' => fn ($q) => $q->with('uploader', 'verifier')])
                 ->get()
             : collect();
 
@@ -108,17 +109,18 @@ class DokumenController extends Controller
         if ($aksi === 'ditolak') {
             $request->validate(['komentar' => 'required|string|max:500']);
             $dokumen->update([
-                'status'      => 'ditolak',
-                'komentar'    => $request->komentar,
+                'status' => 'ditolak',
+                'komentar' => $request->komentar,
                 'verified_by' => $user->id,
                 'verified_at' => now(),
             ]);
+
             return back()->with('success', 'Dokumen berhasil ditolak.');
         }
 
         $dokumen->update([
-            'status'      => 'terverifikasi',
-            'komentar'    => null,
+            'status' => 'terverifikasi',
+            'komentar' => null,
             'verified_by' => $user->id,
             'verified_at' => now(),
         ]);
@@ -135,13 +137,13 @@ class DokumenController extends Controller
             $kecamatanId = session('admin_view_kecamatan_id');
             $isAdminView = true;
         } else {
-            abort_if(!$user->kecamatan_id, 403, 'Akun belum di-assign ke Kecamatan.');
+            abort_if(! $user->kecamatan_id, 403, 'Akun belum di-assign ke Kecamatan.');
             $kecamatanId = $user->kecamatan_id;
             $isAdminView = false;
         }
 
         $kecamatan = \App\Models\Kecamatan::findOrFail($kecamatanId);
-        $desaIds   = \App\Models\Desa::where('kecamatan_id', $kecamatanId)->pluck('id');
+        $desaIds = \App\Models\Desa::where('kecamatan_id', $kecamatanId)->pluck('id');
 
         $desas = \App\Models\Desa::where('kecamatan_id', $kecamatanId)->get();
         $selectedDesaId = $request->filled('desa_id') && $desas->contains('id', (int) $request->desa_id)
@@ -177,10 +179,10 @@ class DokumenController extends Controller
         $kecamatan = $this->activePpkKecamatan();
 
         $request->validate([
-            'jenis' => 'required|in:' . implode(',', array_keys(Dokumen::JENIS)),
-            'file'  => 'required|file|mimes:pdf|max:10240',
+            'jenis' => 'required|in:'.implode(',', array_keys(Dokumen::JENIS)),
+            'file' => 'required|file|mimes:pdf|max:10240',
         ]);
-        abort_if(!in_array(strtolower($request->jenis), \App\Models\PemiluSetting::aktif()), 403, 'Jenis pemilu ini tidak aktif.');
+        abort_if(! in_array(strtolower($request->jenis), \App\Models\PemiluSetting::aktif()), 403, 'Jenis pemilu ini tidak aktif.');
 
         $existing = Dokumen::where('kecamatan_id', $kecamatan->id)
             ->where('level', 'kecamatan')
@@ -197,28 +199,42 @@ class DokumenController extends Controller
         $file = $request->file('file');
         $path = $file->storeAs(
             "documents/{$kecFolder}/d_hasil",
-            strtolower($request->jenis) . '.pdf'
+            strtolower($request->jenis).'.pdf'
         );
 
         Dokumen::create([
             'kecamatan_id' => $kecamatan->id,
-            'tps_id'       => null,
-            'uploaded_by'  => $user->id,
-            'jenis'        => $request->jenis,
-            'level'        => 'kecamatan',
-            'status'       => 'menunggu_verifikasi',
-            'file_path'    => $path,
-            'file_name'    => $file->getClientOriginalName(),
-            'file_size'    => $file->getSize(),
+            'tps_id' => null,
+            'uploaded_by' => $user->id,
+            'jenis' => $request->jenis,
+            'level' => 'kecamatan',
+            'status' => 'menunggu_verifikasi',
+            'file_path' => $path,
+            'file_name' => $file->getClientOriginalName(),
+            'file_size' => $file->getSize(),
         ]);
 
-        return back()->with('success', Dokumen::JENIS[$request->jenis] . ' berhasil diupload.');
+        return back()->with('success', Dokumen::JENIS[$request->jenis].' berhasil diupload.');
     }
-    
-    // Menampilkan rekap dokumen seluruh wilayah untuk admin.
+
+    // Menampilkan rekap dokumen seluruh wilayah untuk admin (default: Desa Bangorejo, Kecamatan Bangorejo).
     public function indexAdmin(Request $request)
     {
         $kecamatans = Kecamatan::all();
+
+        if (! $request->has('kecamatan_id') && ! $request->has('desa_id')) {
+            $bangorejoKec = $kecamatans->first(fn ($k) => strtolower($k->nama) === 'bangorejo')
+                ?? $kecamatans->first(fn ($k) => stripos($k->nama, 'bangorejo') !== false);
+            if ($bangorejoKec) {
+                $bangorejoDesa = Desa::where('kecamatan_id', $bangorejoKec->id)
+                    ->where(fn ($q) => $q->whereRaw('LOWER(nama) = ?', ['bangorejo'])->orWhere('nama', 'LIKE', '%bangorejo%'))
+                    ->first();
+                $request->merge([
+                    'kecamatan_id' => $bangorejoKec->id,
+                    'desa_id' => $bangorejoDesa?->id,
+                ]);
+            }
+        }
 
         $desaIds = $request->kecamatan_id
             ? Desa::where('kecamatan_id', $request->kecamatan_id)->pluck('id')
@@ -263,17 +279,18 @@ class DokumenController extends Controller
         if ($aksi === 'ditolak') {
             $request->validate(['komentar' => 'required|string|max:500']);
             $dokumen->update([
-                'status'      => 'ditolak',
-                'komentar'    => $request->komentar,
+                'status' => 'ditolak',
+                'komentar' => $request->komentar,
                 'verified_by' => Auth::id(),
                 'verified_at' => now(),
             ]);
+
             return back()->with('success', 'Dokumen berhasil ditolak.');
         }
 
         $dokumen->update([
-            'status'      => 'terverifikasi',
-            'komentar'    => null,
+            'status' => 'terverifikasi',
+            'komentar' => null,
             'verified_by' => Auth::id(),
             'verified_at' => now(),
         ]);
@@ -288,17 +305,18 @@ class DokumenController extends Controller
 
         if ($dokumen->is_archived) {
             return response()->view('dokumen.archived', [
-                'dokumen'   => $dokumen,
-                'isAdmin'   => Auth::user()->role === 'admin',
+                'dokumen' => $dokumen,
+                'isAdmin' => Auth::user()->role === 'admin',
             ], 200);
         }
 
-        abort_if(!Storage::exists($dokumen->file_path), 404, 'File tidak ditemukan.');
+        abort_if(! Storage::exists($dokumen->file_path), 404, 'File tidak ditemukan.');
 
         $path = Storage::path($dokumen->file_path);
+
         return response()->file($path, [
-            'Content-Type'        => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="' . $dokumen->file_name . '"',
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="'.$dokumen->file_name.'"',
         ]);
     }
 
@@ -311,7 +329,7 @@ class DokumenController extends Controller
             return back()->with('error', 'File ini telah diarsipkan dan tidak dapat diunduh. Hubungi admin untuk restore.');
         }
 
-        abort_if(!Storage::exists($dokumen->file_path), 404, 'File tidak ditemukan.');
+        abort_if(! Storage::exists($dokumen->file_path), 404, 'File tidak ditemukan.');
 
         return Storage::download($dokumen->file_path, $dokumen->file_name);
     }
@@ -320,23 +338,24 @@ class DokumenController extends Controller
     public function restore(Dokumen $dokumen)
     {
         abort_if(Auth::user()->role !== 'admin', 403);
-        abort_if(!$dokumen->is_archived, 400, 'Dokumen ini tidak dalam status diarsipkan.');
+        abort_if(! $dokumen->is_archived, 400, 'Dokumen ini tidak dalam status diarsipkan.');
 
-        $backupDir  = config('filesystems.backup_path', storage_path('app/backup'));
-        $backupPath = $backupDir . DIRECTORY_SEPARATOR . $dokumen->file_path;
+        $backupDir = config('filesystems.backup_path', storage_path('app/backup'));
+        $backupPath = $backupDir.DIRECTORY_SEPARATOR.$dokumen->file_path;
 
-        if (!file_exists($backupPath)) {
+        if (! file_exists($backupPath)) {
             return back()->with('error', 'File backup tidak ditemukan di server. Hubungi administrator.');
         }
 
         $storageDir = dirname(Storage::path($dokumen->file_path));
-        if (!is_dir($storageDir)) {
+        if (! is_dir($storageDir)) {
             mkdir($storageDir, 0755, true);
         }
 
         if (copy($backupPath, Storage::path($dokumen->file_path))) {
             unlink($backupPath);
             $dokumen->update(['is_archived' => false, 'archived_at' => null]);
+
             return back()->with('success', 'Dokumen berhasil di-restore dan siap diakses kembali.');
         }
 
@@ -349,24 +368,24 @@ class DokumenController extends Controller
         $user = Auth::user();
 
         if ($dokumen->level === 'kecamatan') {
-            $allowed = match($user->role) {
+            $allowed = match ($user->role) {
                 'admin', 'komisioner' => true,
-                'ppk'   => $dokumen->kecamatan_id === $user->kecamatan_id,
+                'ppk' => $dokumen->kecamatan_id === $user->kecamatan_id,
                 default => false,
             };
         } else {
             $tps = Tps::with('desa')->findOrFail($dokumen->tps_id);
-            $allowed = match($user->role) {
+            $allowed = match ($user->role) {
                 'admin', 'komisioner' => true,
-                'ppk'   => \App\Models\Desa::where('kecamatan_id', $user->kecamatan_id)
-                                ->where('id', $tps->desa_id)->exists(),
-                'pps'   => $tps->desa_id === $user->desa_id,
-                'kpps'  => $tps->id === $user->tps_id,
+                'ppk' => \App\Models\Desa::where('kecamatan_id', $user->kecamatan_id)
+                    ->where('id', $tps->desa_id)->exists(),
+                'pps' => $tps->desa_id === $user->desa_id,
+                'kpps' => $tps->id === $user->tps_id,
                 default => false,
             };
         }
 
-        abort_if(!$allowed, 403);
+        abort_if(! $allowed, 403);
     }
 
     private function activePpkKecamatan(): Kecamatan
@@ -374,11 +393,12 @@ class DokumenController extends Controller
         $user = Auth::user();
 
         if ($user->role === 'admin') {
-            abort_if(!session('admin_view_kecamatan_id'), 403, 'Pilih kecamatan yang ingin dilihat.');
+            abort_if(! session('admin_view_kecamatan_id'), 403, 'Pilih kecamatan yang ingin dilihat.');
+
             return Kecamatan::findOrFail(session('admin_view_kecamatan_id'));
         }
 
-        abort_if(!$user->kecamatan_id, 403, 'Akun belum di-assign ke Kecamatan.');
+        abort_if(! $user->kecamatan_id, 403, 'Akun belum di-assign ke Kecamatan.');
 
         return Kecamatan::findOrFail($user->kecamatan_id);
     }
@@ -388,19 +408,20 @@ class DokumenController extends Controller
         $user = Auth::user();
 
         if ($user->role === 'admin') {
-            abort_if(!session('admin_view_desa_id'), 403, 'Pilih desa yang ingin dilihat.');
+            abort_if(! session('admin_view_desa_id'), 403, 'Pilih desa yang ingin dilihat.');
+
             return Desa::with('kecamatan')->findOrFail(session('admin_view_desa_id'));
         }
 
         if ($user->role === 'ppk') {
-            abort_if(!session('admin_view_desa_id'), 403, 'Pilih desa yang ingin dilihat.');
+            abort_if(! session('admin_view_desa_id'), 403, 'Pilih desa yang ingin dilihat.');
             $desa = Desa::with('kecamatan')->findOrFail(session('admin_view_desa_id'));
             abort_if($desa->kecamatan_id !== $user->kecamatan_id, 403, 'Akses ditolak.');
 
             return $desa;
         }
 
-        abort_if(!$user->desa_id, 403, 'Akun belum di-assign ke Desa.');
+        abort_if(! $user->desa_id, 403, 'Akun belum di-assign ke Desa.');
 
         return Desa::with('kecamatan')->findOrFail($user->desa_id);
     }
@@ -410,7 +431,7 @@ class DokumenController extends Controller
         $user = Auth::user();
 
         if (in_array($user->role, ['admin', 'ppk', 'pps'], true)) {
-            abort_if(!session('admin_view_tps_id'), 403, 'Pilih TPS yang ingin dilihat.');
+            abort_if(! session('admin_view_tps_id'), 403, 'Pilih TPS yang ingin dilihat.');
             $tps = Tps::with('desa.kecamatan')->findOrFail(session('admin_view_tps_id'));
 
             $allowed = match ($user->role) {
@@ -420,12 +441,12 @@ class DokumenController extends Controller
                 default => false,
             };
 
-            abort_if(!$allowed, 403, 'Akses ditolak.');
+            abort_if(! $allowed, 403, 'Akses ditolak.');
 
             return $tps;
         }
 
-        abort_if(!$user->tps_id, 403, 'Akun belum di-assign ke TPS.');
+        abort_if(! $user->tps_id, 403, 'Akun belum di-assign ke TPS.');
 
         return Tps::with('desa.kecamatan')->findOrFail($user->tps_id);
     }

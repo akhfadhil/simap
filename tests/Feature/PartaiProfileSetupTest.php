@@ -2,25 +2,25 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use App\Models\User;
 use App\Models\PartaiProfile;
 use App\Models\RekapPartai;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
+use Tests\TestCase;
 
 class PartaiProfileSetupTest extends TestCase
 {
     use RefreshDatabase;
 
     private User $admin;
+
     private User $nonAdmin;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->admin = User::create([
             'name' => 'Admin',
             'username' => 'admin',
@@ -120,7 +120,7 @@ class PartaiProfileSetupTest extends TestCase
 
         $this->assertEquals(99, $rekapDpr->nomor_urut);
         $this->assertEquals('PKB Baru', $rekapDpr->nama_partai);
-        
+
         $this->assertEquals(99, $rekapProv->nomor_urut);
         $this->assertEquals('PKB Baru', $rekapProv->nama_partai);
 
@@ -221,7 +221,7 @@ class PartaiProfileSetupTest extends TestCase
                 'old_nama' => 'Partai Kebangkitan Bangsa',
                 'new_nama_singkat' => 'PKB Baru',
                 'new_nomor_urut' => 99,
-            ]
+            ],
         ]);
 
         $profile->refresh();
