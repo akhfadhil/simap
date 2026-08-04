@@ -43,7 +43,7 @@ class AdminController extends Controller
             ->unique()
             ->flip();
 
-        return view('rekap.admin.index', compact('kecamatans', 'rekaps', 'flaggedJenis'));
+        return \Inertia\Inertia::render('Rekap/Index', compact('kecamatans', 'rekaps', 'flaggedJenis'));
     }
 
     // Menampilkan rekap agregat kabupaten untuk jenis pemilihan.

@@ -266,7 +266,7 @@ class DokumenController extends Controller
                 ->groupBy('kecamatan_id')
             : collect();
 
-        return view('dokumen.admin', compact('tpsList', 'kecamatans', 'desas', 'dokumenKecamatan', 'selectedKecamatanId', 'selectedDesaId'));
+        return \Inertia\Inertia::render('Dokumen/Admin', compact('tpsList', 'kecamatans', 'desas', 'dokumenKecamatan', 'selectedKecamatanId', 'selectedDesaId'));
     }
 
     // Memverifikasi atau menolak dokumen oleh admin.

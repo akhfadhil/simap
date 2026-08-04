@@ -16,7 +16,7 @@ class DashboardController extends Controller
         $this->checkRole('admin');
         session()->forget(['admin_view_kecamatan_id', 'admin_view_desa_id', 'admin_view_tps_id']);
 
-        return view('dashboard.admin', ['electionSummary' => $summary->forUser(Auth::user())]);
+        return \Inertia\Inertia::render('Dashboard/Admin', ['electionSummary' => $summary->forUser(Auth::user())]);
     }
 
     // Menampilkan dashboard komisioner kabupaten.
@@ -25,7 +25,7 @@ class DashboardController extends Controller
         $this->checkRole('komisioner');
         session()->forget(['admin_view_kecamatan_id', 'admin_view_desa_id', 'admin_view_tps_id']);
 
-        return view('dashboard.admin', ['electionSummary' => $summary->forUser(Auth::user())]);
+        return \Inertia\Inertia::render('Dashboard/Admin', ['electionSummary' => $summary->forUser(Auth::user())]);
     }
 
     // Menampilkan dashboard PPK sesuai kecamatan user.
@@ -41,7 +41,7 @@ class DashboardController extends Controller
             $this->checkRole('ppk');
         }
 
-        return view('dashboard.ppk', [
+        return \Inertia\Inertia::render('Dashboard/Ppk', [
             'electionSummary' => $summary->forUser($user),
             'viewKecamatan' => $viewKecamatan,
             'isAdminView' => (bool) $viewKecamatan,
@@ -62,7 +62,7 @@ class DashboardController extends Controller
             $this->authorizeDesaScope($viewDesa);
         }
 
-        return view('dashboard.pps', [
+        return \Inertia\Inertia::render('Dashboard/Pps', [
             'electionSummary' => $summary->forUser($user),
             'viewDesa' => $viewDesa,
             'isAdminView' => (bool) $viewDesa,
@@ -83,7 +83,7 @@ class DashboardController extends Controller
             $this->authorizeTpsScope($viewTps);
         }
 
-        return view('dashboard.kpps', [
+        return \Inertia\Inertia::render('Dashboard/Kpps', [
             'electionSummary' => $summary->forUser($user),
             'viewTps' => $viewTps,
             'isAdminView' => (bool) $viewTps,

@@ -11,7 +11,7 @@ class AccountController extends Controller
     // Menampilkan form ubah password user.
     public function editPassword()
     {
-        return view('account.password');
+        return \Inertia\Inertia::render('Password/Edit');
     }
 
     // Memvalidasi dan menyimpan password baru user.

@@ -13,7 +13,7 @@ class KecamatanController extends Controller
     {
         $kecamatans = Kecamatan::withCount('desas')->latest()->get();
 
-        return view('admin.wilayah.kecamatan', compact('kecamatans'));
+        return \Inertia\Inertia::render('Admin/Wilayah/Kecamatan', compact('kecamatans'));
     }
 
     // Menyimpan kecamatan baru.

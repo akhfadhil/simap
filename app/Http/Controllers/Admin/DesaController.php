@@ -32,7 +32,11 @@ class DesaController extends Controller
                 ->get();
         }
 
-        return view('admin.wilayah.desa', compact('desas', 'kecamatans'));
+        return \Inertia\Inertia::render('Admin/Wilayah/Desa', [
+            'desas' => $desas,
+            'kecamatans' => $kecamatans,
+            'filters' => $request->only(['kecamatan_id']),
+        ]);
     }
 
     // Menyimpan desa baru.

@@ -10,25 +10,25 @@
 
     <link rel="icon" type="image/png" href="{{ asset('images/logo-kpu.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 
     <style>
         :root {
-            --surface: #f8f9fa;
-            --surface-low: #eef1f4;
+            --surface: #f8fafc;
+            --surface-low: #f1f5f9;
             --surface-card: #ffffff;
-            --surface-soft: #f3f5f7;
-            --ink: #17202a;
-            --muted: #657181;
-            --line: #d9dee5;
-            --primary: #001f45;
-            --primary-2: #2d476f;
-            --red: #c81924;
-            --red-soft: #ffe1df;
-            --blue-soft: #dbe8ff;
-            --map-dot: rgba(0, 31, 69, 0.08);
+            --surface-soft: #f8fafc;
+            --ink: #0f172a;
+            --muted: #475569;
+            --line: #e2e8f0;
+            --primary: #0f172a;
+            --primary-2: #334155;
+            --red: #bb152c;
+            --red-soft: #fef2f2;
+            --blue-soft: #e0e7ff;
+            --map-dot: rgba(15, 23, 42, 0.06);
         }
 
         html, body {
@@ -40,7 +40,11 @@
             overflow: hidden;
             background: var(--surface);
             color: var(--ink);
-            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        h1, h2, h3, h4, .font-heading {
+            font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
         }
 
         .font-mono-data {

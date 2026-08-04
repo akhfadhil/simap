@@ -14,7 +14,7 @@ class AuthController extends Controller
             return redirect()->route('dashboard.'.Auth::user()->role);
         }
 
-        return view('auth.login');
+        return \Inertia\Inertia::render('Auth/Login');
     }
 
     // Menampilkan halaman login khusus partai.
@@ -24,7 +24,7 @@ class AuthController extends Controller
             return redirect()->route('dashboard.'.Auth::user()->role);
         }
 
-        return view('auth.partai-login');
+        return \Inertia\Inertia::render('Auth/PartaiLogin');
     }
 
     // Memproses login dan mengarahkan user ke dashboard sesuai role.

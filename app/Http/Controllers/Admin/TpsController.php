@@ -44,7 +44,7 @@ class TpsController extends Controller
                 ->get();
         }
 
-        return view('admin.tps.index', compact('kecamatans', 'filteredTps', 'selectedKecamatanId', 'selectedDesaId'));
+        return \Inertia\Inertia::render('Admin/Wilayah/Tps', compact('kecamatans', 'filteredTps', 'selectedKecamatanId', 'selectedDesaId'));
     }
 
     // Membuat TPS massal per desa dan melewati TPS yang sudah ada.

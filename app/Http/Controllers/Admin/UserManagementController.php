@@ -36,7 +36,15 @@ class UserManagementController extends Controller
         $tpsList = Tps::orderBy('nama')->get(['id', 'nama', 'desa_id']);
         $partais = RekapPartai::where('jenis', 'dpr_ri')->orderBy('nomor_urut')->get(['id', 'nomor_urut', 'nama_partai']);
 
-        return view('admin.users.index', compact('users', 'usersLoaded', 'kecamatans', 'desas', 'tpsList', 'partais'));
+        return \Inertia\Inertia::render('Admin/Users/Index', [
+            'users' => $users,
+            'usersLoaded' => $usersLoaded,
+            'kecamatans' => $kecamatans,
+            'desas' => $desas,
+            'tpsList' => $tpsList,
+            'partais' => $partais,
+            'filters' => $request->only(['role', 'kecamatan_id', 'desa_id']),
+        ]);
     }
 
     // Mengekspor daftar user sesuai filter ke CSV.
