@@ -43,9 +43,29 @@ class DashboardElectionSummary
                 }
             }
 
+            $filteredSections = array_values(array_filter($sections));
+
+            $widgets = [];
+            foreach ($activeJenis as $jenis) {
+                if (in_array($jenis, ['ppwp', 'gubernur', 'bupati'], true)) {
+                    $widgets[$jenis] = $this->candidateWidget($jenis, $scope);
+                } elseif ($jenis === 'dpd') {
+                    $widgets[$jenis] = $this->dpdWidget($scope);
+                } elseif (in_array($jenis, ['dpr_ri', 'dprd_prov'], true)) {
+                    $widgets[$jenis] = $this->legislativeWidget($jenis, $scope);
+                } elseif ($jenis === 'dprd_kab') {
+                    $widgets[$jenis] = $this->dprdKabGridWidget($scope);
+                }
+            }
+
             return [
                 'scope_label' => $scope['label'],
-                'sections' => array_values(array_filter($sections)),
+                'active_jenis' => array_values($activeJenis),
+                'documentsSummary' => $this->documentsSummary($scope),
+                'topPartiesDprdKab' => $this->topPartiesDprdKab($scope),
+                'widgets' => $widgets,
+                'sections' => $filteredSections,
+                'summaries' => $filteredSections,
             ];
         });
     }
@@ -408,10 +428,445 @@ class DashboardElectionSummary
         return RekapHeader::JENIS_LABELS[$jenis] ?? strtoupper($jenis);
     }
 
+    private function documentsSummary(array $scope): array
+    {
+        $totalTpsQuery = DB::table('tps as t')
+            ->join('desas as d', 'd.id', '=', 't.desa_id')
+            ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id');
+        $totalTps = $this->applyScope($totalTpsQuery, $scope)->count('t.id');
+
+        $finalizedTpsQuery = DB::table('rekap_headers as h')
+            ->join('tps as t', 't.id', '=', 'h.tps_id')
+            ->join('desas as d', 'd.id', '=', 't.desa_id')
+            ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
+            ->where('h.status', 'final');
+        $finalizedTps = $this->applyScope($finalizedTpsQuery, $scope)->distinct('h.tps_id')->count('h.tps_id');
+
+        $tpsPercent = $totalTps > 0 ? round(($finalizedTps / $totalTps) * 100, 1) : 0;
+
+        $verifiedQuery = DB::table('rekap_headers as h')
+            ->join('tps as t', 't.id', '=', 'h.tps_id')
+            ->join('desas as d', 'd.id', '=', 't.desa_id')
+            ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
+            ->where('h.status', 'final');
+        $verifiedCount = $this->applyScope($verifiedQuery, $scope)->count('h.id');
+
+        $uploadedQuery = DB::table('rekap_headers as h')
+            ->join('tps as t', 't.id', '=', 'h.tps_id')
+            ->join('desas as d', 'd.id', '=', 't.desa_id')
+            ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
+            ->where('h.status', 'draft');
+        $uploadedCount = $this->applyScope($uploadedQuery, $scope)->count('h.id');
+
+        $rejectedQuery = DB::table('rekap_headers as h')
+            ->join('tps as t', 't.id', '=', 'h.tps_id')
+            ->join('desas as d', 'd.id', '=', 't.desa_id')
+            ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
+            ->where('h.status', 'rejected');
+        $rejectedCount = $this->applyScope($rejectedQuery, $scope)->count('h.id');
+
+        return [
+            'total_tps' => $totalTps,
+            'finalized_tps' => $finalizedTps,
+            'tps_percent' => $tpsPercent,
+            'verified_count' => $verifiedCount,
+            'uploaded_count' => $uploadedCount,
+            'rejected_count' => $rejectedCount,
+        ];
+    }
+
+    private function topPartiesDprdKab(array $scope): array
+    {
+        $partais = RekapPartai::query()
+            ->where('jenis', 'dprd_kab')
+            ->get(['id', 'nomor_urut', 'nama_partai']);
+
+        if ($partais->isEmpty()) {
+            return [
+                'total_suara' => 0,
+                'rows' => [],
+            ];
+        }
+
+        $partaiMap = [];
+        foreach ($partais as $p) {
+            $partaiMap[$p->nama_partai] = [
+                'nomor_urut' => $p->nomor_urut,
+                'nama_partai' => $p->nama_partai,
+                'suara' => 0,
+            ];
+        }
+
+        $partaiIds = $partais->pluck('id')->map(fn ($id) => (int) $id)->values()->all();
+
+        $partaiRows = $this->applyScope(
+            DB::table('rekap_partai_suaras as s')
+                ->join('rekap_headers as h', 'h.id', '=', 's.rekap_id')
+                ->join('tps as t', 't.id', '=', 'h.tps_id')
+                ->join('desas as d', 'd.id', '=', 't.desa_id')
+                ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
+                ->join('rekap_partais as p', 'p.id', '=', 's.partai_id')
+                ->where('h.jenis', 'dprd_kab'),
+            $scope
+        )
+            ->whereIn('s.partai_id', $partaiIds)
+            ->select('p.nama_partai', DB::raw('SUM(s.suara) as total_suara'))
+            ->groupBy('p.nama_partai')
+            ->get();
+
+        foreach ($partaiRows as $row) {
+            if (isset($partaiMap[$row->nama_partai])) {
+                $partaiMap[$row->nama_partai]['suara'] += (int) $row->total_suara;
+            }
+        }
+
+        $calegRows = $this->applyScope(
+            DB::table('rekap_caleg_suaras as s')
+                ->join('rekap_headers as h', 'h.id', '=', 's.rekap_id')
+                ->join('tps as t', 't.id', '=', 'h.tps_id')
+                ->join('desas as d', 'd.id', '=', 't.desa_id')
+                ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
+                ->join('rekap_calegs as c', 'c.id', '=', 's.caleg_id')
+                ->join('rekap_partais as p', 'p.id', '=', 'c.partai_id')
+                ->where('h.jenis', 'dprd_kab'),
+            $scope
+        )
+            ->whereIn('c.partai_id', $partaiIds)
+            ->select('p.nama_partai', DB::raw('SUM(s.suara) as total_suara'))
+            ->groupBy('p.nama_partai')
+            ->get();
+
+        foreach ($calegRows as $row) {
+            if (isset($partaiMap[$row->nama_partai])) {
+                $partaiMap[$row->nama_partai]['suara'] += (int) $row->total_suara;
+            }
+        }
+
+        $sortedParties = collect($partaiMap)
+            ->sortByDesc('suara')
+            ->values();
+
+        $totalSuara = $sortedParties->sum('suara');
+
+        $rows = $sortedParties
+            ->take(6)
+            ->values()
+            ->map(function ($row, $index) use ($totalSuara) {
+                $row['rank'] = $index + 1;
+                $row['persentase'] = $totalSuara > 0 ? round(($row['suara'] / $totalSuara) * 100, 2) : 0;
+
+                return $row;
+            })
+            ->toArray();
+
+        return [
+            'total_suara' => $totalSuara,
+            'rows' => $rows,
+        ];
+    }
+
+    private function candidateWidget(string $jenis, array $scope): array
+    {
+        $section = $this->candidateSection($jenis, $scope);
+        $winner = $section['rows'][0] ?? null;
+
+        return [
+            'jenis' => $jenis,
+            'title' => $section['title'],
+            'total_suara' => $section['total_suara'],
+            'winner' => $winner ? [
+                'nama' => $winner['label'],
+                'suara' => $winner['suara'],
+                'persen' => $winner['persentase'],
+            ] : null,
+            'rows' => $section['rows'],
+        ];
+    }
+
+    private function dpdWidget(array $scope): array
+    {
+        $section = $this->candidateSection('dpd', $scope);
+        $winner = $section['rows'][0] ?? null;
+        $top4 = array_slice($section['rows'], 0, 4);
+
+        return [
+            'jenis' => 'dpd',
+            'title' => 'Dewan Perwakilan Daerah (DPD)',
+            'total_suara' => $section['total_suara'],
+            'winner' => $winner ? [
+                'nama' => $winner['label'],
+                'suara' => $winner['suara'],
+                'persen' => $winner['persentase'],
+            ] : null,
+            'top4' => $top4,
+        ];
+    }
+
+    private function legislativeWidget(string $jenis, array $scope): array
+    {
+        $partais = RekapPartai::with('calegs')
+            ->where('jenis', $jenis)
+            ->orderBy('nomor_urut')
+            ->get();
+
+        if ($partais->isEmpty()) {
+            return [
+                'jenis' => $jenis,
+                'title' => RekapHeader::JENIS_LABELS[$jenis] ?? strtoupper($jenis),
+                'total_suara' => 0,
+                'winner' => null,
+                'top5_parties' => [],
+            ];
+        }
+
+        $partyMap = [];
+        foreach ($partais as $p) {
+            $partyMap[$p->id] = [
+                'id' => $p->id,
+                'nama_partai' => $p->nama_partai,
+                'nomor_urut' => $p->nomor_urut,
+                'party_suara' => 0,
+                'caleg_suara' => [],
+            ];
+        }
+
+        $partaiIds = array_keys($partyMap);
+
+        $partaiRows = $this->applyScope(
+            DB::table('rekap_partai_suaras as s')
+                ->join('rekap_headers as h', 'h.id', '=', 's.rekap_id')
+                ->join('tps as t', 't.id', '=', 'h.tps_id')
+                ->join('desas as d', 'd.id', '=', 't.desa_id')
+                ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
+                ->where('h.jenis', $jenis),
+            $scope
+        )
+            ->whereIn('s.partai_id', $partaiIds)
+            ->select('s.partai_id', DB::raw('SUM(s.suara) as total_suara'))
+            ->groupBy('s.partai_id')
+            ->get();
+
+        foreach ($partaiRows as $row) {
+            if (isset($partyMap[$row->partai_id])) {
+                $partyMap[$row->partai_id]['party_suara'] += (int) $row->total_suara;
+            }
+        }
+
+        $calegs = $partais->flatMap(fn ($p) => $p->calegs->map(fn ($c) => [
+            'id' => $c->id,
+            'partai_id' => $p->id,
+            'nama_caleg' => $c->nama_caleg,
+            'nomor_urut' => $c->nomor_urut,
+        ]));
+
+        $calegIds = $calegs->pluck('id')->values()->all();
+
+        $calegSuaraRows = $this->applyScope(
+            DB::table('rekap_caleg_suaras as s')
+                ->join('rekap_headers as h', 'h.id', '=', 's.rekap_id')
+                ->join('tps as t', 't.id', '=', 'h.tps_id')
+                ->join('desas as d', 'd.id', '=', 't.desa_id')
+                ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
+                ->where('h.jenis', $jenis),
+            $scope
+        )
+            ->whereIn('s.caleg_id', $calegIds)
+            ->select('s.caleg_id', DB::raw('SUM(s.suara) as total_suara'))
+            ->groupBy('s.caleg_id')
+            ->pluck('total_suara', 'caleg_id');
+
+        foreach ($calegs as $c) {
+            $suara = (int) ($calegSuaraRows[$c['id']] ?? 0);
+            $partyMap[$c['partai_id']]['caleg_suara'][] = [
+                'nama_caleg' => $c['nama_caleg'],
+                'nomor_urut' => $c['nomor_urut'],
+                'suara' => $suara,
+            ];
+        }
+
+        $partyList = collect($partyMap)->map(function ($p) {
+            $sumCaleg = array_sum(array_column($p['caleg_suara'], 'suara'));
+            $totalSuara = $p['party_suara'] + $sumCaleg;
+
+            usort($p['caleg_suara'], fn ($a, $b) => $b['suara'] <=> $a['suara']);
+            $topCaleg = $p['caleg_suara'][0] ?? null;
+
+            return [
+                'nama_partai' => $p['nama_partai'],
+                'nomor_urut' => $p['nomor_urut'],
+                'suara' => $totalSuara,
+                'top_caleg' => $topCaleg,
+            ];
+        })->sortByDesc('suara')->values();
+
+        $totalSuaraAll = $partyList->sum('suara');
+
+        $top5 = $partyList->take(5)->map(function ($row, $idx) use ($totalSuaraAll) {
+            $row['rank'] = $idx + 1;
+            $row['persentase'] = $totalSuaraAll > 0 ? round(($row['suara'] / $totalSuaraAll) * 100, 2) : 0;
+
+            return $row;
+        })->toArray();
+
+        $winner = $top5[0] ?? null;
+
+        return [
+            'jenis' => $jenis,
+            'title' => RekapHeader::JENIS_LABELS[$jenis] ?? strtoupper($jenis),
+            'total_suara' => $totalSuaraAll,
+            'winner' => $winner ? [
+                'nama' => $winner['nama_partai'],
+                'nomor_urut' => $winner['nomor_urut'],
+                'suara' => $winner['suara'],
+                'persen' => $winner['persentase'],
+            ] : null,
+            'top5_parties' => $top5,
+        ];
+    }
+
+    private function dprdKabGridWidget(array $scope): array
+    {
+        $dapils = Dapil::orderBy('id')->get(['id', 'nama']);
+
+        $dapilCards = [];
+        $totalSuaraKab = 0;
+
+        foreach ($dapils as $dapil) {
+            $partais = RekapPartai::with('calegs')
+                ->where('jenis', 'dprd_kab')
+                ->where('dapil_id', $dapil->id)
+                ->orderBy('nomor_urut')
+                ->get();
+
+            if ($partais->isEmpty()) {
+                $dapilCards[] = [
+                    'dapil_id' => $dapil->id,
+                    'nama_dapil' => $dapil->nama,
+                    'winner_party' => null,
+                    'star_caleg' => null,
+                    'total_suara' => 0,
+                ];
+                continue;
+            }
+
+            $partyMap = [];
+            foreach ($partais as $p) {
+                $partyMap[$p->id] = [
+                    'nama_partai' => $p->nama_partai,
+                    'nomor_urut' => $p->nomor_urut,
+                    'party_suara' => 0,
+                    'caleg_list' => [],
+                ];
+            }
+
+            $partaiIds = array_keys($partyMap);
+
+            $partaiRows = $this->applyScope(
+                DB::table('rekap_partai_suaras as s')
+                    ->join('rekap_headers as h', 'h.id', '=', 's.rekap_id')
+                    ->join('tps as t', 't.id', '=', 'h.tps_id')
+                    ->join('desas as d', 'd.id', '=', 't.desa_id')
+                    ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
+                    ->where('h.jenis', 'dprd_kab'),
+                $scope
+            )
+                ->whereIn('s.partai_id', $partaiIds)
+                ->select('s.partai_id', DB::raw('SUM(s.suara) as total_suara'))
+                ->groupBy('s.partai_id')
+                ->get();
+
+            foreach ($partaiRows as $row) {
+                if (isset($partyMap[$row->partai_id])) {
+                    $partyMap[$row->partai_id]['party_suara'] += (int) $row->total_suara;
+                }
+            }
+
+            $calegs = $partais->flatMap(fn ($p) => $p->calegs->map(fn ($c) => [
+                'id' => $c->id,
+                'partai_id' => $p->id,
+                'nama_caleg' => $c->nama_caleg,
+                'nomor_urut' => $c->nomor_urut,
+                'party_name' => $p->nama_partai,
+            ]));
+
+            $calegIds = $calegs->pluck('id')->values()->all();
+
+            $calegSuaraRows = $this->applyScope(
+                DB::table('rekap_caleg_suaras as s')
+                    ->join('rekap_headers as h', 'h.id', '=', 's.rekap_id')
+                    ->join('tps as t', 't.id', '=', 'h.tps_id')
+                    ->join('desas as d', 'd.id', '=', 't.desa_id')
+                    ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
+                    ->where('h.jenis', 'dprd_kab'),
+                $scope
+            )
+                ->whereIn('s.caleg_id', $calegIds)
+                ->select('s.caleg_id', DB::raw('SUM(s.suara) as total_suara'))
+                ->groupBy('s.caleg_id')
+                ->pluck('total_suara', 'caleg_id');
+
+            $allCalegsWithSuara = [];
+
+            foreach ($calegs as $c) {
+                $suara = (int) ($calegSuaraRows[$c['id']] ?? 0);
+                $partyMap[$c['partai_id']]['caleg_list'][] = [
+                    'nama_caleg' => $c['nama_caleg'],
+                    'nomor_urut' => $c['nomor_urut'],
+                    'suara' => $suara,
+                ];
+                $allCalegsWithSuara[] = [
+                    'nama_caleg' => $c['nama_caleg'],
+                    'nomor_urut' => $c['nomor_urut'],
+                    'party_name' => $c['party_name'],
+                    'suara' => $suara,
+                ];
+            }
+
+            $partyList = collect($partyMap)->map(function ($p) {
+                $sumCaleg = array_sum(array_column($p['caleg_list'], 'suara'));
+                return [
+                    'nama_partai' => $p['nama_partai'],
+                    'nomor_urut' => $p['nomor_urut'],
+                    'suara' => $p['party_suara'] + $sumCaleg,
+                ];
+            })->sortByDesc('suara')->values();
+
+            $dapilTotalSuara = $partyList->sum('suara');
+            $totalSuaraKab += $dapilTotalSuara;
+
+            $winnerParty = $partyList->first();
+            if ($winnerParty) {
+                $winnerParty['persen'] = $dapilTotalSuara > 0 ? round(($winnerParty['suara'] / $dapilTotalSuara) * 100, 1) : 0;
+            }
+
+            usort($allCalegsWithSuara, fn ($a, $b) => $b['suara'] <=> $a['suara']);
+            $starCaleg = $allCalegsWithSuara[0] ?? null;
+
+            $dapilCards[] = [
+                'dapil_id' => $dapil->id,
+                'nama_dapil' => $dapil->nama,
+                'winner_party' => $winnerParty,
+                'star_caleg' => $starCaleg,
+                'total_suara' => $dapilTotalSuara,
+            ];
+        }
+
+        $topPartiesKab = $this->topPartiesDprdKab($scope);
+        $kabWinner = $topPartiesKab['rows'][0] ?? null;
+
+        return [
+            'jenis' => 'dprd_kab',
+            'title' => 'DPRD Kabupaten Banyuwangi',
+            'total_suara' => $totalSuaraKab,
+            'winner_party' => $kabWinner,
+            'dapils' => $dapilCards,
+        ];
+    }
+
     private function cacheParts(User $user, array $scope, array $activeJenis): array
     {
         return [
-            'version' => 4,
+            'version' => 6,
             'user_role' => $user->role,
             'scope' => $scope,
             'active' => $activeJenis,

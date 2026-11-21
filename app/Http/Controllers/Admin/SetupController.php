@@ -34,7 +34,7 @@ class SetupController extends Controller
         $pemiluSettings = \App\Models\PemiluSetting::all()->keyBy('jenis');
         $partaiProfiles = \App\Models\PartaiProfile::orderBy('nomor_urut_aktif')->get();
 
-        return view('admin.setup.index', compact(
+        return \Inertia\Inertia::render('Admin/Setup/Index', compact(
             'ppwpCalons', 'gubernurCalons', 'bupatiCalons', 'dpdCalons',
             'partaiDprRi', 'partaiProv', 'partaiKab', 'dapils', 'kecamatans', 'pemiluSettings',
             'partaiProfiles'
@@ -48,7 +48,7 @@ class SetupController extends Controller
 
         foreach ($jenisList as $jenis) {
             \App\Models\PemiluSetting::where('jenis', $jenis)->update([
-                'is_active' => $request->has("jenis_{$jenis}"),
+                'is_active' => $request->boolean("jenis_{$jenis}"),
             ]);
         }
 

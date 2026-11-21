@@ -54,26 +54,26 @@ export default function AdminLayout({ children, title }) {
 
     const menus = isPartai
         ? [
-              { href: '/admin/rekap/chart', label: 'Grafik & Statistik', icon: BarChart3, isBlade: true },
+              { href: '/admin/rekap/chart', label: 'Grafik & Statistik', icon: BarChart3, isBlade: false },
               { href: '/admin/rekap', label: 'Rekapitulasi Data', icon: BarChart2, isBlade: false },
           ]
         : isKomisioner
         ? [
               { href: '/dashboard/komisioner', label: 'Beranda', icon: LayoutDashboard, isBlade: false },
-              { href: '/admin/rekap/chart', label: 'Grafik & Statistik', icon: BarChart3, isBlade: true },
+              { href: '/admin/rekap/chart', label: 'Grafik & Statistik', icon: BarChart3, isBlade: false },
               { href: '/dokumen/semua', label: 'Rekap Dokumen', icon: FolderOpen, isBlade: false },
               { href: '/admin/rekap', label: 'Rekapitulasi Data', icon: BarChart2, isBlade: false },
           ]
         : [
               { href: '/dashboard/admin', label: 'Beranda', icon: LayoutDashboard, isBlade: false },
               { href: '/admin/users', label: 'Pengguna', icon: Users, isBlade: false },
-              { href: '/admin/rekap/chart', label: 'Grafik & Statistik', icon: BarChart3, isBlade: true },
+              { href: '/admin/rekap/chart', label: 'Grafik & Statistik', icon: BarChart3, isBlade: false },
               { href: '/admin/kecamatan', label: 'Kelola Kecamatan', icon: MapPin, isBlade: false },
               { href: '/admin/desa', label: 'Kelola Desa', icon: Building2, isBlade: false },
               { href: '/admin/tps', label: 'Kelola TPS', icon: Pin, isBlade: false },
               { href: '/dokumen/semua', label: 'Rekap Dokumen', icon: FolderOpen, isBlade: false },
               { href: '/admin/rekap', label: 'Rekapitulasi Data', icon: BarChart2, isBlade: false },
-              { href: '/admin/setup', label: 'Setup Data Pemilu', icon: Settings, isBlade: true },
+              { href: '/admin/setup', label: 'Setup Data Pemilu', icon: Settings, isBlade: false },
           ];
 
     const currentUrl = window.location.pathname;
@@ -83,6 +83,19 @@ export default function AdminLayout({ children, title }) {
         router.get('/clear-view-session', {}, {
             onSuccess: () => window.location.reload()
         });
+    };
+
+    const isMenuActive = (menuHref, url) => {
+        if (menuHref === '/admin/rekap/chart') {
+            return url.startsWith('/admin/rekap/chart');
+        }
+        if (menuHref === '/admin/rekap') {
+            return url.startsWith('/admin/rekap') && !url.startsWith('/admin/rekap/chart');
+        }
+        if (menuHref === '/dashboard/admin' || menuHref === '/dashboard/komisioner') {
+            return url === menuHref;
+        }
+        return url === menuHref || url.startsWith(menuHref);
     };
 
     return (
@@ -119,7 +132,7 @@ export default function AdminLayout({ children, title }) {
                 <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
                     {menus.map((menu, idx) => {
                         const Icon = menu.icon;
-                        const active = currentUrl === menu.href || (menu.href !== '/dashboard/admin' && currentUrl.startsWith(menu.href));
+                        const active = isMenuActive(menu.href, currentUrl);
                         const className = `flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium transition duration-150 ${
                             active
                                 ? 'bg-red-50 dark:bg-red-950/40 text-[#bb152c] dark:text-red-400 font-semibold'
@@ -191,7 +204,7 @@ export default function AdminLayout({ children, title }) {
                     <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
                         {menus.map((menu, idx) => {
                             const Icon = menu.icon;
-                            const active = currentUrl === menu.href || (menu.href !== '/dashboard/admin' && currentUrl.startsWith(menu.href));
+                            const active = isMenuActive(menu.href, currentUrl);
                             const className = `flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium transition duration-150 ${
                                 active
                                     ? 'bg-red-50 dark:bg-red-950/40 text-[#bb152c] dark:text-red-400 font-semibold border-l-4 border-[#bb152c] dark:border-red-500'

@@ -8,12 +8,467 @@ import {
     XCircle,
     ArrowRight,
     Trophy,
-    TrendingUp
+    TrendingUp,
+    Building2,
+    Award,
+    Star,
+    MapPin,
+    Users,
+    ChevronRight
 } from 'lucide-react';
+
+// Sub-component for Candidate Elections (PPWP, Gubernur, Bupati)
+function CandidateWidget({ widget }) {
+    const formatNumber = (num) => (num || 0).toLocaleString('id-ID');
+    const winner = widget.winner;
+
+    return (
+        <div className="bg-white dark:bg-[#151f32] border border-[#e2e8f0] dark:border-[#1e293b] rounded-2xl p-6 shadow-xs space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#f1f5f9] dark:border-[#1e293b]">
+                <div className="flex items-center gap-2.5">
+                    <Vote className="w-5 h-5 text-[#bb152c]" />
+                    <h3 className="font-bold font-heading text-[#0f172a] dark:text-[#f8fafc] text-base">
+                        {widget.title}
+                    </h3>
+                </div>
+                <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-md bg-red-50 dark:bg-red-950/40 text-[#bb152c] dark:text-red-400">
+                    {widget.jenis?.toUpperCase()}
+                </span>
+            </div>
+
+            {/* Unggul Sementara Banner */}
+            {winner ? (
+                <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/20 rounded-xl p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold shrink-0 shadow-sm">
+                            <Trophy className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                                Unggul Sementara (#1)
+                            </span>
+                            <p className="font-bold text-sm text-[#0f172a] dark:text-[#f8fafc]">
+                                {winner.nama}
+                            </p>
+                        </div>
+                    </div>
+                    <div className="text-right">
+                        <p className="text-sm font-extrabold font-mono text-[#bb152c] dark:text-red-400">
+                            {formatNumber(winner.suara)}
+                        </p>
+                        <p className="text-[11px] font-bold text-[#475569] dark:text-[#94a3b8]">{winner.persen}% Suara</p>
+                    </div>
+                </div>
+            ) : (
+                <div className="bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] rounded-xl p-4 text-center text-xs text-[#94a3b8]">
+                    Belum ada data suara masuk.
+                </div>
+            )}
+
+            {/* Perolehan Suara Paslon List */}
+            <div className="space-y-3 pt-1">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-[#94a3b8]">
+                    Perolehan Suara Seluruh Paslon:
+                </p>
+                {widget.rows?.map((row, idx) => (
+                    <div key={idx} className="bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] rounded-xl p-3.5 space-y-2">
+                        <div className="flex items-center justify-between min-w-0">
+                            <div className="flex items-center gap-2.5 min-w-0">
+                                <span className="w-6 h-6 rounded-full bg-[#f1f5f9] dark:bg-[#1f2937] text-xs font-bold flex items-center justify-center text-[#0f172a] dark:text-[#f8fafc] shrink-0">
+                                    {row.rank}
+                                </span>
+                                <div className="min-w-0">
+                                    <p className="text-xs font-bold text-[#0f172a] dark:text-[#f8fafc] truncate">
+                                        {row.label}
+                                    </p>
+                                    <p className="text-[10px] text-[#94a3b8]">{row.meta}</p>
+                                </div>
+                            </div>
+                            <div className="text-right shrink-0">
+                                <p className="text-xs font-bold text-[#bb152c] dark:text-red-400">
+                                    {formatNumber(row.suara)}
+                                </p>
+                                <p className="text-[10px] font-semibold text-[#94a3b8]">{row.persentase}%</p>
+                            </div>
+                        </div>
+                        <div className="w-full h-1.5 bg-[#e2e8f0] dark:bg-[#1e293b] rounded-full overflow-hidden">
+                            <div
+                                className="h-full bg-[#bb152c] rounded-full transition-all duration-300"
+                                style={{ width: `${Math.min(row.persentase || 0, 100)}%` }}
+                            />
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* Footer */}
+            <div className="flex items-center justify-between pt-3 border-t border-[#f1f5f9] dark:border-[#1e293b] text-xs">
+                <span className="text-[#94a3b8] font-medium">
+                    Total Suara Sah: <b className="text-[#0f172a] dark:text-[#f8fafc] font-mono">{formatNumber(widget.total_suara)}</b>
+                </span>
+                <Link
+                    href={`/admin/rekap/${widget.jenis}`}
+                    className="inline-flex items-center gap-1 font-bold text-[#bb152c] dark:text-red-400 hover:underline"
+                >
+                    <span>Detail Rekapitulasi</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+            </div>
+        </div>
+    );
+}
+
+// Sub-component for DPD Election
+function DpdWidget({ widget }) {
+    const formatNumber = (num) => (num || 0).toLocaleString('id-ID');
+    const winner = widget.winner;
+
+    return (
+        <div className="bg-white dark:bg-[#151f32] border border-[#e2e8f0] dark:border-[#1e293b] rounded-2xl p-6 shadow-xs space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#f1f5f9] dark:border-[#1e293b]">
+                <div className="flex items-center gap-2.5">
+                    <Users className="w-5 h-5 text-[#bb152c]" />
+                    <h3 className="font-bold font-heading text-[#0f172a] dark:text-[#f8fafc] text-base">
+                        Dewan Perwakilan Daerah (DPD)
+                    </h3>
+                </div>
+                <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-md bg-red-50 dark:bg-red-950/40 text-[#bb152c] dark:text-red-400">
+                    DPD
+                </span>
+            </div>
+
+            {/* Unggul Sementara */}
+            {winner ? (
+                <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/20 rounded-xl p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold shrink-0 shadow-sm">
+                            <Trophy className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                                Unggul Sementara (#1)
+                            </span>
+                            <p className="font-bold text-sm text-[#0f172a] dark:text-[#f8fafc]">
+                                {winner.nama}
+                            </p>
+                        </div>
+                    </div>
+                    <div className="text-right">
+                        <p className="text-sm font-extrabold font-mono text-[#bb152c] dark:text-red-400">
+                            {formatNumber(winner.suara)}
+                        </p>
+                        <p className="text-[11px] font-bold text-[#475569] dark:text-[#94a3b8]">{winner.persen}% Suara</p>
+                    </div>
+                </div>
+            ) : null}
+
+            {/* Top 4 Candidates */}
+            <div className="space-y-3 pt-1">
+                <div className="flex items-center justify-between">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-[#94a3b8]">
+                        Top 4 Calon Teratas (Potensi Kursi DPD):
+                    </p>
+                    <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded">
+                        Kuota 4 Kursi
+                    </span>
+                </div>
+
+                {widget.top4?.length > 0 ? (
+                    widget.top4.map((row, idx) => (
+                        <div key={idx} className="bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] rounded-xl p-3.5 space-y-2">
+                            <div className="flex items-center justify-between min-w-0">
+                                <div className="flex items-center gap-2.5 min-w-0">
+                                    <span className="w-6 h-6 rounded-full bg-[#f1f5f9] dark:bg-[#1f2937] text-xs font-bold flex items-center justify-center text-[#0f172a] dark:text-[#f8fafc] shrink-0">
+                                        {row.rank}
+                                    </span>
+                                    <div className="min-w-0">
+                                        <p className="text-xs font-bold text-[#0f172a] dark:text-[#f8fafc] truncate">
+                                            {row.label}
+                                        </p>
+                                        <p className="text-[10px] text-[#94a3b8]">{row.meta}</p>
+                                    </div>
+                                </div>
+                                <div className="text-right shrink-0">
+                                    <p className="text-xs font-bold text-[#bb152c] dark:text-red-400">
+                                        {formatNumber(row.suara)}
+                                    </p>
+                                    <p className="text-[10px] font-semibold text-[#94a3b8]">{row.persentase}%</p>
+                                </div>
+                            </div>
+                            <div className="w-full h-1.5 bg-[#e2e8f0] dark:bg-[#1e293b] rounded-full overflow-hidden">
+                                <div
+                                    className="h-full bg-[#bb152c] rounded-full transition-all duration-300"
+                                    style={{ width: `${Math.min(row.persentase || 0, 100)}%` }}
+                                />
+                            </div>
+                        </div>
+                    ))
+                ) : (
+                    <div className="bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] rounded-xl p-4 text-center text-xs text-[#94a3b8]">
+                        Belum ada data DPD masuk.
+                    </div>
+                )}
+            </div>
+
+            {/* Footer */}
+            <div className="flex items-center justify-between pt-3 border-t border-[#f1f5f9] dark:border-[#1e293b] text-xs">
+                <span className="text-[#94a3b8] font-medium">
+                    Total Suara Sah: <b className="text-[#0f172a] dark:text-[#f8fafc] font-mono">{formatNumber(widget.total_suara)}</b>
+                </span>
+                <Link
+                    href="/admin/rekap/dpd"
+                    className="inline-flex items-center gap-1 font-bold text-[#bb152c] dark:text-red-400 hover:underline"
+                >
+                    <span>Detail Rekapitulasi</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+            </div>
+        </div>
+    );
+}
+
+// Sub-component for Legislative Elections (DPR RI, DPRD Prov)
+function LegislativeWidget({ widget }) {
+    const formatNumber = (num) => (num || 0).toLocaleString('id-ID');
+    const winner = widget.winner;
+
+    return (
+        <div className="bg-white dark:bg-[#151f32] border border-[#e2e8f0] dark:border-[#1e293b] rounded-2xl p-6 shadow-xs space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#f1f5f9] dark:border-[#1e293b]">
+                <div className="flex items-center gap-2.5">
+                    <Building2 className="w-5 h-5 text-[#bb152c]" />
+                    <h3 className="font-bold font-heading text-[#0f172a] dark:text-[#f8fafc] text-base">
+                        {widget.title}
+                    </h3>
+                </div>
+                <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-md bg-red-50 dark:bg-red-950/40 text-[#bb152c] dark:text-red-400">
+                    {widget.jenis?.toUpperCase()}
+                </span>
+            </div>
+
+            {/* Unggul Sementara Banner */}
+            {winner ? (
+                <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/20 rounded-xl p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold shrink-0 shadow-sm">
+                            <Trophy className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                                Partai Unggul Sementara (#1)
+                            </span>
+                            <p className="font-bold text-sm text-[#0f172a] dark:text-[#f8fafc]">
+                                {winner.nama} (No. {winner.nomor_urut})
+                            </p>
+                        </div>
+                    </div>
+                    <div className="text-right">
+                        <p className="text-sm font-extrabold font-mono text-[#bb152c] dark:text-red-400">
+                            {formatNumber(winner.suara)}
+                        </p>
+                        <p className="text-[11px] font-bold text-[#475569] dark:text-[#94a3b8]">{winner.persen}% Suara</p>
+                    </div>
+                </div>
+            ) : null}
+
+            {/* Top 5 Parties List */}
+            <div className="space-y-3 pt-1">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-[#94a3b8]">
+                    Top 5 Partai Politik (Suara Akumulatif Partai + Caleg):
+                </p>
+
+                {widget.top5_parties?.length > 0 ? (
+                    widget.top5_parties.map((party, idx) => (
+                        <div key={idx} className="bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] rounded-xl p-3.5 space-y-2">
+                            <div className="flex items-center justify-between min-w-0">
+                                <div className="flex items-center gap-2.5 min-w-0">
+                                    <span className="w-6 h-6 rounded-full bg-[#f1f5f9] dark:bg-[#1f2937] text-xs font-bold flex items-center justify-center text-[#0f172a] dark:text-[#f8fafc] shrink-0">
+                                        {party.rank}
+                                    </span>
+                                    <div className="min-w-0">
+                                        <p className="text-xs font-bold text-[#0f172a] dark:text-[#f8fafc] truncate">
+                                            {party.nama_partai}
+                                        </p>
+                                        <p className="text-[10px] text-[#94a3b8]">No. Urut {party.nomor_urut}</p>
+                                    </div>
+                                </div>
+                                <div className="text-right shrink-0">
+                                    <p className="text-xs font-bold text-[#bb152c] dark:text-red-400">
+                                        {formatNumber(party.suara)}
+                                    </p>
+                                    <p className="text-[10px] font-semibold text-[#94a3b8]">{party.persentase}%</p>
+                                </div>
+                            </div>
+
+                            {/* Mini Progress Bar */}
+                            <div className="w-full h-1.5 bg-[#e2e8f0] dark:bg-[#1e293b] rounded-full overflow-hidden">
+                                <div
+                                    className="h-full bg-[#bb152c] rounded-full transition-all duration-300"
+                                    style={{ width: `${Math.min(party.persentase || 0, 100)}%` }}
+                                />
+                            </div>
+
+                            {/* Star Caleg */}
+                            {party.top_caleg && (
+                                <div className="flex items-center gap-1.5 text-[11px] text-[#475569] dark:text-[#94a3b8] pt-1 border-t border-[#e2e8f0]/60 dark:border-[#1e293b]">
+                                    <Star className="w-3.5 h-3.5 text-amber-500 shrink-0 fill-amber-500" />
+                                    <span className="truncate">
+                                        Caleg Teratas: <b>{party.top_caleg.nama_caleg}</b> ({formatNumber(party.top_caleg.suara)} Suara)
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                    ))
+                ) : (
+                    <div className="bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] rounded-xl p-4 text-center text-xs text-[#94a3b8]">
+                        Belum ada data suara partai masuk.
+                    </div>
+                )}
+            </div>
+
+            {/* Footer */}
+            <div className="flex items-center justify-between pt-3 border-t border-[#f1f5f9] dark:border-[#1e293b] text-xs">
+                <span className="text-[#94a3b8] font-medium">
+                    Total Suara Sah: <b className="text-[#0f172a] dark:text-[#f8fafc] font-mono">{formatNumber(widget.total_suara)}</b>
+                </span>
+                <Link
+                    href={`/admin/rekap/${widget.jenis}`}
+                    className="inline-flex items-center gap-1 font-bold text-[#bb152c] dark:text-red-400 hover:underline"
+                >
+                    <span>Detail Rekapitulasi</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+            </div>
+        </div>
+    );
+}
+
+// Sub-component for DPRD Kabupaten (8 Dapil Grid Widget)
+function DprdKabWidget({ widget }) {
+    const formatNumber = (num) => (num || 0).toLocaleString('id-ID');
+    const winner = widget.winner_party;
+
+    return (
+        <div className="bg-white dark:bg-[#151f32] border border-[#e2e8f0] dark:border-[#1e293b] rounded-2xl p-6 shadow-xs space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#f1f5f9] dark:border-[#1e293b]">
+                <div className="flex items-center gap-2.5">
+                    <Building2 className="w-5 h-5 text-[#bb152c]" />
+                    <div>
+                        <h3 className="font-bold font-heading text-[#0f172a] dark:text-[#f8fafc] text-base">
+                            DPRD Kabupaten Banyuwangi
+                        </h3>
+                        <p className="text-xs text-[#475569] dark:text-[#94a3b8]">
+                            Perolehan suara partai dan calon anggota legislatif per Dapil.
+                        </p>
+                    </div>
+                </div>
+                <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-md bg-red-50 dark:bg-red-950/40 text-[#bb152c] dark:text-red-400">
+                    DPRD KAB (8 DAPIL)
+                </span>
+            </div>
+
+            {/* Unggul Sementara Banner Se-Kabupaten */}
+            {winner ? (
+                <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/20 rounded-xl p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold shrink-0 shadow-sm">
+                            <Trophy className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                                Partai Unggul Akumulatif Se-Kabupaten (#1)
+                            </span>
+                            <p className="font-bold text-sm text-[#0f172a] dark:text-[#f8fafc]">
+                                {winner.nama_partai} (No. {winner.nomor_urut})
+                            </p>
+                        </div>
+                    </div>
+                    <div className="text-right">
+                        <p className="text-sm font-extrabold font-mono text-[#bb152c] dark:text-red-400">
+                            {formatNumber(winner.suara)}
+                        </p>
+                        <p className="text-[11px] font-bold text-[#475569] dark:text-[#94a3b8]">{winner.persentase}% Suara</p>
+                    </div>
+                </div>
+            ) : null}
+
+            {/* 8 Dapil Mini Cards Grid */}
+            <div className="space-y-3 pt-1">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-[#94a3b8]">
+                    Hasil Pemenang Sementara Per Dapil (Dapil 1 - 8):
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    {widget.dapils?.map((dapil, idx) => (
+                        <div
+                            key={idx}
+                            className="bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] rounded-xl p-3.5 space-y-2 flex flex-col justify-between"
+                        >
+                            <div>
+                                <div className="flex items-center justify-between pb-2 border-b border-[#e2e8f0] dark:border-[#1e293b]">
+                                    <span className="text-xs font-extrabold text-[#0f172a] dark:text-[#f8fafc] flex items-center gap-1">
+                                        <MapPin className="w-3.5 h-3.5 text-[#bb152c]" />
+                                        <span>{dapil.nama_dapil}</span>
+                                    </span>
+                                    <span className="text-[10px] text-[#94a3b8] font-mono font-semibold">
+                                        {formatNumber(dapil.total_suara)} Suara
+                                    </span>
+                                </div>
+
+                                {dapil.winner_party ? (
+                                    <div className="pt-2 space-y-1.5">
+                                        <div className="flex items-center justify-between">
+                                            <p className="text-xs font-bold text-[#bb152c] dark:text-red-400 truncate">
+                                                🥇 {dapil.winner_party.nama_partai}
+                                            </p>
+                                            <span className="text-[10px] font-bold text-[#0f172a] dark:text-[#f8fafc]">
+                                                {dapil.winner_party.persen}%
+                                            </span>
+                                        </div>
+
+                                        {dapil.star_caleg && (
+                                            <div className="flex items-center gap-1 text-[10px] text-[#475569] dark:text-[#94a3b8]">
+                                                <Star className="w-3 h-3 text-amber-500 shrink-0 fill-amber-500" />
+                                                <span className="truncate">
+                                                    <b>{dapil.star_caleg.nama_caleg}</b> ({formatNumber(dapil.star_caleg.suara)})
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div className="pt-2 text-center text-[10px] text-[#94a3b8]">
+                                        Belum ada data suara.
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* Footer */}
+            <div className="flex items-center justify-between pt-3 border-t border-[#f1f5f9] dark:border-[#1e293b] text-xs">
+                <span className="text-[#94a3b8] font-medium">
+                    Total Suara Sah DPRD Kab: <b className="text-[#0f172a] dark:text-[#f8fafc] font-mono">{formatNumber(widget.total_suara)}</b>
+                </span>
+                <Link
+                    href="/admin/rekap/dprd_kab"
+                    className="inline-flex items-center gap-1 font-bold text-[#bb152c] dark:text-red-400 hover:underline"
+                >
+                    <span>Lihat Rekap Per Dapil</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+            </div>
+        </div>
+    );
+}
 
 export default function AdminDashboard({ electionSummary }) {
     const docSummary = electionSummary?.documentsSummary || {};
-    const summaries = electionSummary?.summaries || [];
+    const widgets = electionSummary?.widgets || {};
+    const activeJenis = electionSummary?.active_jenis || [];
+
+    const formatNumber = (num) => (num || 0).toLocaleString('id-ID');
 
     return (
         <AdminLayout title="Beranda Administrator">
@@ -21,7 +476,7 @@ export default function AdminDashboard({ electionSummary }) {
 
             <div className="space-y-6">
                 {/* Top Banner Header */}
-                <div className="bg-white dark:bg-[#151f32] border border-[#e2e8f0] dark:border-[#1e293b] rounded-2xl p-6 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)] dark:shadow-[0_10px_15px_-3px_rgba(0,0,0,0.3)]">
+                <div className="bg-white dark:bg-[#151f32] border border-[#e2e8f0] dark:border-[#1e293b] rounded-2xl p-6 shadow-xs">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div>
                             <span className="text-[10px] uppercase font-bold tracking-widest text-[#bb152c] dark:text-red-400 bg-red-50 dark:bg-red-950/40 px-2.5 py-1 rounded-md">
@@ -47,110 +502,114 @@ export default function AdminDashboard({ electionSummary }) {
                     </div>
                 </div>
 
+                {/* Progress Bar Entry TPS Card */}
+                <div className="bg-white dark:bg-[#151f32] border border-[#e2e8f0] dark:border-[#1e293b] rounded-2xl p-6 shadow-xs">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                        <div>
+                            <h3 className="font-bold font-heading text-[#0f172a] dark:text-[#f8fafc] text-sm flex items-center gap-2">
+                                <Vote className="w-4 h-4 text-[#bb152c]" />
+                                <span>Progres Entry Data TPS Final</span>
+                            </h3>
+                            <p className="text-xs text-[#475569] dark:text-[#94a3b8] mt-0.5">
+                                Persentase TPS yang telah memfinalisasi penginputan data C-Hasil.
+                            </p>
+                        </div>
+                        <div className="text-left sm:text-right">
+                            <span className="text-xl font-extrabold font-mono text-[#bb152c] dark:text-red-400">
+                                {docSummary.tps_percent || 0}%
+                            </span>
+                            <span className="text-xs text-[#94a3b8] block">
+                                {formatNumber(docSummary.finalized_tps)} dari {formatNumber(docSummary.total_tps)} TPS
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="w-full h-3 bg-[#f1f5f9] dark:bg-[#0b0f19] rounded-full overflow-hidden border border-[#e2e8f0] dark:border-[#1e293b]">
+                        <div
+                            className="h-full bg-gradient-to-r from-[#bb152c] to-red-500 rounded-full transition-all duration-500"
+                            style={{ width: `${Math.min(docSummary.tps_percent || 0, 100)}%` }}
+                        />
+                    </div>
+                </div>
+
                 {/* KPI Cards Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     {/* Card 1: Total TPS */}
-                    <div className="bg-white dark:bg-[#151f32] border border-[#e2e8f0] dark:border-[#1e293b] rounded-2xl p-5 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)] dark:shadow-[0_10px_15px_-3px_rgba(0,0,0,0.3)] flex items-center gap-4">
+                    <div className="bg-white dark:bg-[#151f32] border border-[#e2e8f0] dark:border-[#1e293b] rounded-2xl p-5 shadow-xs flex items-center gap-4">
                         <div className="w-12 h-12 rounded-xl bg-[#f1f5f9] dark:bg-[#1f2937] flex items-center justify-center text-[#0f172a] dark:text-[#f8fafc] shrink-0">
                             <Vote className="w-6 h-6" />
                         </div>
                         <div>
                             <span className="text-xs font-medium text-[#475569] dark:text-[#94a3b8]">Total TPS</span>
                             <p className="text-xl font-bold font-heading text-[#0f172a] dark:text-[#f8fafc] mt-0.5">
-                                {docSummary.total_tps?.toLocaleString('id-ID') || 0}
+                                {formatNumber(docSummary.total_tps)}
                             </p>
                         </div>
                     </div>
 
                     {/* Card 2: Terverifikasi */}
-                    <div className="bg-white dark:bg-[#151f32] border border-[#e2e8f0] dark:border-[#1e293b] rounded-2xl p-5 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)] dark:shadow-[0_10px_15px_-3px_rgba(0,0,0,0.3)] flex items-center gap-4">
+                    <div className="bg-white dark:bg-[#151f32] border border-[#e2e8f0] dark:border-[#1e293b] rounded-2xl p-5 shadow-xs flex items-center gap-4">
                         <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 flex items-center justify-center text-[#10b981] shrink-0 border border-emerald-100 dark:border-emerald-900/40">
                             <CheckCircle2 className="w-6 h-6" />
                         </div>
                         <div>
                             <span className="text-xs font-medium text-[#475569] dark:text-[#94a3b8]">Dokumen Terverifikasi</span>
                             <p className="text-xl font-bold font-heading text-[#10b981] mt-0.5">
-                                {docSummary.verified_count?.toLocaleString('id-ID') || 0}
+                                {formatNumber(docSummary.verified_count)}
                             </p>
                         </div>
                     </div>
 
                     {/* Card 3: Menunggu Verifikasi */}
-                    <div className="bg-white dark:bg-[#151f32] border border-[#e2e8f0] dark:border-[#1e293b] rounded-2xl p-5 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)] dark:shadow-[0_10px_15px_-3px_rgba(0,0,0,0.3)] flex items-center gap-4">
+                    <div className="bg-white dark:bg-[#151f32] border border-[#e2e8f0] dark:border-[#1e293b] rounded-2xl p-5 shadow-xs flex items-center gap-4">
                         <div className="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-950/40 flex items-center justify-center text-[#f59e0b] shrink-0 border border-amber-100 dark:border-amber-900/40">
                             <Clock className="w-6 h-6" />
                         </div>
                         <div>
                             <span className="text-xs font-medium text-[#475569] dark:text-[#94a3b8]">Menunggu Verifikasi</span>
                             <p className="text-xl font-bold font-heading text-[#f59e0b] mt-0.5">
-                                {docSummary.uploaded_count?.toLocaleString('id-ID') || 0}
+                                {formatNumber(docSummary.uploaded_count)}
                             </p>
                         </div>
                     </div>
 
                     {/* Card 4: Ditolak */}
-                    <div className="bg-white dark:bg-[#151f32] border border-[#e2e8f0] dark:border-[#1e293b] rounded-2xl p-5 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)] dark:shadow-[0_10px_15px_-3px_rgba(0,0,0,0.3)] flex items-center gap-4">
+                    <div className="bg-white dark:bg-[#151f32] border border-[#e2e8f0] dark:border-[#1e293b] rounded-2xl p-5 shadow-xs flex items-center gap-4">
                         <div className="w-12 h-12 rounded-xl bg-red-50 dark:bg-red-950/40 flex items-center justify-center text-[#ef4444] shrink-0 border border-red-100 dark:border-red-900/40">
                             <XCircle className="w-6 h-6" />
                         </div>
                         <div>
                             <span className="text-xs font-medium text-[#475569] dark:text-[#94a3b8]">Dokumen Ditolak</span>
                             <p className="text-xl font-bold font-heading text-[#ef4444] mt-0.5">
-                                {docSummary.rejected_count?.toLocaleString('id-ID') || 0}
+                                {formatNumber(docSummary.rejected_count)}
                             </p>
                         </div>
                     </div>
                 </div>
 
-                {/* Election Summaries per Category Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {summaries.map((item, idx) => (
-                        <div
-                            key={idx}
-                            className="bg-white dark:bg-[#151f32] border border-[#e2e8f0] dark:border-[#1e293b] rounded-2xl p-5 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)] dark:shadow-[0_10px_15px_-3px_rgba(0,0,0,0.3)] flex flex-col justify-between"
-                        >
-                            <div>
-                                <div className="flex items-center justify-between gap-2 pb-3 mb-4 border-b border-[#f1f5f9] dark:border-[#1e293b]">
-                                    <h3 className="font-bold font-heading text-[#0f172a] dark:text-[#f8fafc] text-base">
-                                        {item.label}
-                                    </h3>
-                                    <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded bg-[#f1f5f9] dark:bg-[#1f2937] text-[#475569] dark:text-[#94a3b8]">
-                                        {item.key}
-                                    </span>
-                                </div>
+                {/* ADAPTIVE ELECTION TYPE WIDGETS GRID */}
+                <div className="space-y-6">
+                    {/* Render active candidate widgets (PPWP, Gubernur, Bupati) */}
+                    {['ppwp', 'gubernur', 'bupati'].map((jenis) => {
+                        if (!activeJenis.includes(jenis) || !widgets[jenis]) return null;
+                        return <CandidateWidget key={jenis} widget={widgets[jenis]} />;
+                    })}
 
-                                {item.winner ? (
-                                    <div className="bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] rounded-xl p-4 mb-4">
-                                        <div className="flex items-center gap-2 text-amber-500 text-xs font-bold uppercase tracking-wider mb-1">
-                                            <Trophy className="w-4 h-4" />
-                                            <span>Unggul Sementara</span>
-                                        </div>
-                                        <p className="font-bold font-heading text-[#0f172a] dark:text-[#f8fafc] text-sm">
-                                            {item.winner.nama}
-                                        </p>
-                                        <div className="flex items-center justify-between text-xs text-[#475569] dark:text-[#94a3b8] mt-2 pt-2 border-t border-[#e2e8f0]/60 dark:border-[#1e293b]">
-                                            <span>Total Suara:</span>
-                                            <span className="font-bold text-[#0f172a] dark:text-[#f8fafc]">
-                                                {item.winner.suara?.toLocaleString('id-ID')} ({item.winner.persen}%)
-                                            </span>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] rounded-xl p-4 mb-4 text-center text-xs text-[#94a3b8]">
-                                        Belum ada data masuk.
-                                    </div>
-                                )}
-                            </div>
+                    {/* Render DPD widget */}
+                    {activeJenis.includes('dpd') && widgets.dpd && (
+                        <DpdWidget widget={widgets.dpd} />
+                    )}
 
-                            <Link
-                                href={`/admin/rekap/${item.key}`}
-                                className="inline-flex items-center justify-between w-full text-xs font-semibold text-[#bb152c] dark:text-red-400 hover:underline pt-2 border-t border-[#f1f5f9] dark:border-[#1e293b] transition"
-                            >
-                                <span>Detail Rekapitulasi</span>
-                                <ArrowRight className="w-4 h-4" />
-                            </Link>
-                        </div>
-                    ))}
+                    {/* Render legislative widgets (DPR RI, DPRD Prov) */}
+                    {['dpr_ri', 'dprd_prov'].map((jenis) => {
+                        if (!activeJenis.includes(jenis) || !widgets[jenis]) return null;
+                        return <LegislativeWidget key={jenis} widget={widgets[jenis]} />;
+                    })}
+
+                    {/* Render DPRD Kabupaten 8 Dapil Grid widget */}
+                    {activeJenis.includes('dprd_kab') && widgets.dprd_kab && (
+                        <DprdKabWidget widget={widgets.dprd_kab} />
+                    )}
                 </div>
             </div>
         </AdminLayout>

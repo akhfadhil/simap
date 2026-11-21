@@ -49,8 +49,6 @@ class PartaiProfileSetupTest extends TestCase
             ->get(route('admin.setup.index'));
 
         $response->assertOk();
-        $response->assertSee('Setup Profil');
-        $response->assertSee('Nomor Urut Partai');
         $response->assertSee('Partai Kebangkitan Bangsa');
     }
 

@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import AdminLayout from '../../Layouts/AdminLayout';
 import { BarChart2, ArrowRight, Filter, Vote, CheckCircle2, AlertCircle } from 'lucide-react';
 
-export default function RekapIndex({ kecamatans, rekaps, flaggedJenis }) {
-    const [selectedKec, setSelectedKec] = useState('');
+export default function RekapIndex({ kecamatans, rekapCounts, flaggedJenis, aktifJenis, selectedKecamatanId }) {
+    const [selectedKec, setSelectedKec] = useState(selectedKecamatanId || '');
 
     const handleFilter = (e) => {
         e.preventDefault();
         router.get('/admin/rekap', { kecamatan_id: selectedKec || undefined }, { preserveState: true });
     };
 
-    const jenisOptions = [
+    const allJenisOptions = [
         { key: 'ppwp', label: 'PPWP', desc: 'Pemilihan Presiden dan Wakil Presiden' },
         { key: 'gubernur', label: 'Pilgub', desc: 'Pemilihan Gubernur dan Wakil Gubernur' },
         { key: 'bupati', label: 'Pilbup', desc: 'Pemilihan Bupati dan Wakil Bupati' },
@@ -20,6 +20,12 @@ export default function RekapIndex({ kecamatans, rekaps, flaggedJenis }) {
         { key: 'dprd_prov', label: 'DPRD Prov', desc: 'Pemilihan DPRD Provinsi Jawa Timur' },
         { key: 'dprd_kab', label: 'DPRD Kab', desc: 'Pemilihan DPRD Kabupaten Banyuwangi' },
     ];
+
+    const activeList = Array.isArray(aktifJenis) && aktifJenis.length > 0
+        ? aktifJenis
+        : allJenisOptions.map(o => o.key);
+
+    const filteredJenisOptions = allJenisOptions.filter(o => activeList.includes(o.key));
 
     return (
         <AdminLayout title="Rekapitulasi Data Suara">
@@ -35,7 +41,7 @@ export default function RekapIndex({ kecamatans, rekaps, flaggedJenis }) {
                             Rekapitulasi Tingkat Kabupaten
                         </h1>
                         <p className="text-xs text-[#475569] dark:text-[#94a3b8] mt-1">
-                            Pilih jenis pemilihan untuk melihat perolehan suara per wilayah kecamatan/desa/TPS.
+                            Pilih jenis pemilihan yang aktif di Setup Data Pemilu untuk melihat perolehan suara.
                         </p>
                     </div>
                 </div>
@@ -70,8 +76,8 @@ export default function RekapIndex({ kecamatans, rekaps, flaggedJenis }) {
 
                 {/* Jenis Pemilihan Cards Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {jenisOptions.map((opt) => {
-                        const count = rekaps?.[opt.key]?.length || 0;
+                    {filteredJenisOptions.map((opt) => {
+                        const count = rekapCounts?.[opt.key] || 0;
                         const isFlagged = flaggedJenis && (opt.key in flaggedJenis);
 
                         return (

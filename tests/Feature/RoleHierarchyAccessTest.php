@@ -229,7 +229,10 @@ class RoleHierarchyAccessTest extends TestCase
                 'detail_kecamatan_id' => $this->kecamatanA->id,
             ]))
             ->assertOk()
-            ->assertSee(route('admin.rekap.edit-tps', ['ppwp', $this->tpsA]), false);
+            ->assertInertia(fn ($page) => $page
+                ->component('Rekap/Show')
+                ->where('jenis', 'ppwp')
+            );
 
         $this->actingAs($this->admin)
             ->from(route('admin.rekap.show', ['jenis' => 'ppwp', 'detail' => 1, 'detail_kecamatan_id' => $this->kecamatanA->id]))
@@ -294,7 +297,10 @@ class RoleHierarchyAccessTest extends TestCase
                 'detail_desa_id' => $this->desaA->id,
             ]))
             ->assertOk()
-            ->assertSee('bg-red-500/20', false);
+            ->assertInertia(fn ($page) => $page
+                ->component('Rekap/Show')
+                ->has('tpsCellFlags')
+            );
 
         $this->actingAs($this->ppkA)
             ->get(route('ppk.rekap.show', 'ppwp'))
