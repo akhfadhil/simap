@@ -6,6 +6,8 @@ import { MapPin, Plus, Edit2, Trash2, X, Eye, Search, Building2 } from 'lucide-r
 export default function KecamatanPage({ kecamatans }) {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [editingKec, setEditingKec] = useState(null);
+    const [deletingKec, setDeletingKec] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
     const [search, setSearch] = useState('');
 
     const addForm = useForm({ nama: '' });
@@ -32,10 +34,18 @@ export default function KecamatanPage({ kecamatans }) {
         });
     };
 
-    const handleDelete = (kec) => {
-        if (confirm(`Yakin hapus Kecamatan ${kec.nama}? Semua desa dan TPS di dalamnya akan ikut terhapus.`)) {
-            router.delete(`/admin/kecamatan/${kec.id}`);
-        }
+    const handleConfirmDelete = () => {
+        if (!deletingKec) return;
+        setIsDeleting(true);
+        router.delete(`/admin/kecamatan/${deletingKec.id}`, {
+            onSuccess: () => {
+                setDeletingKec(null);
+                setIsDeleting(false);
+            },
+            onError: () => {
+                setIsDeleting(false);
+            }
+        });
     };
 
     const filteredKecamatans = (kecamatans || []).filter((kec) =>
@@ -148,7 +158,7 @@ export default function KecamatanPage({ kecamatans }) {
                                                     </button>
                                                     <button
                                                         title="Hapus Kecamatan"
-                                                        onClick={() => handleDelete(kec)}
+                                                        onClick={() => setDeletingKec(kec)}
                                                         className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 border border-red-200/80 dark:border-red-900/40 hover:bg-red-100 dark:hover:bg-red-900/60 hover:border-red-300 transition-all duration-150 cursor-pointer shadow-2xs group/btn"
                                                     >
                                                         <Trash2 className="w-4 h-4 transition-transform group-hover/btn:scale-110" />
@@ -289,6 +299,64 @@ export default function KecamatanPage({ kecamatans }) {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal Delete */}
+            {deletingKec && (
+                <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+                    <div className="bg-white dark:bg-[#151f32] border border-[#e2e8f0] dark:border-[#1e293b] rounded-2xl w-full max-w-md p-5 sm:p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+                        <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#f1f5f9] dark:border-[#1e293b]">
+                            <div>
+                                <h3 className="font-bold font-heading text-lg text-red-600 dark:text-red-400">
+                                    Hapus Kecamatan
+                                </h3>
+                                <p className="text-xs text-[#475569] dark:text-[#94a3b8]">
+                                    Konfirmasi penghapusan data wilayah kecamatan.
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => setDeletingKec(null)}
+                                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg transition"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div className="p-4 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200/80 dark:border-red-900/40 flex items-start gap-3">
+                                <div className="w-9 h-9 rounded-lg bg-red-100 dark:bg-red-900/50 flex items-center justify-center text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5">
+                                    <Trash2 className="w-5 h-5" />
+                                </div>
+                                <div className="text-xs space-y-1">
+                                    <p className="font-bold text-[#0f172a] dark:text-[#f8fafc]">
+                                        Hapus Kecamatan {deletingKec.nama}?
+                                    </p>
+                                    <p className="text-[#475569] dark:text-[#94a3b8] leading-relaxed">
+                                        Tindakan ini tidak dapat dibatalkan. Seluruh data <strong>Desa ({deletingKec.desas_count || 0} desa)</strong>, TPS, dan dokumen pemilu yang ada di kecamatan ini akan ikut terhapus secara permanen.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="pt-2 flex items-center justify-end gap-2.5">
+                                <button
+                                    type="button"
+                                    onClick={() => setDeletingKec(null)}
+                                    className="h-10 px-4 rounded-xl text-xs font-semibold bg-[#f1f5f9] dark:bg-[#1e293b] text-slate-700 dark:text-slate-300 hover:bg-[#e2e8f0] dark:hover:bg-[#27354f] transition cursor-pointer"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    type="button"
+                                    disabled={isDeleting}
+                                    onClick={handleConfirmDelete}
+                                    className="h-10 px-5 rounded-xl text-xs font-semibold bg-red-600 hover:bg-red-700 text-white transition disabled:opacity-50 cursor-pointer shadow-md shadow-red-600/20"
+                                >
+                                    {isDeleting ? 'Menghapus...' : 'Ya, Hapus Kecamatan'}
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
