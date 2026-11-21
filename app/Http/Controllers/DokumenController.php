@@ -35,7 +35,7 @@ class DokumenController extends Controller
 
         $request->validate([
             'jenis' => 'required|in:'.implode(',', array_keys(Dokumen::JENIS)),
-            'file' => 'required|file|mimes:pdf|max:10240',
+            'file' => 'required|file|mimes:pdf|max:5120',
         ]);
         abort_if(! in_array(strtolower($request->jenis), \App\Models\PemiluSetting::aktif()), 403, 'Jenis pemilu ini tidak aktif.');
 
@@ -180,7 +180,7 @@ class DokumenController extends Controller
 
         $request->validate([
             'jenis' => 'required|in:'.implode(',', array_keys(Dokumen::JENIS)),
-            'file' => 'required|file|mimes:pdf|max:10240',
+            'file' => 'required|file|mimes:pdf|max:5120',
         ]);
         abort_if(! in_array(strtolower($request->jenis), \App\Models\PemiluSetting::aktif()), 403, 'Jenis pemilu ini tidak aktif.');
 
@@ -217,35 +217,34 @@ class DokumenController extends Controller
         return back()->with('success', Dokumen::JENIS[$request->jenis].' berhasil diupload.');
     }
 
-    // Menampilkan rekap dokumen seluruh wilayah untuk admin (default: Desa Bangorejo, Kecamatan Bangorejo).
+    // Menampilkan rekap dokumen seluruh wilayah untuk admin.
     public function indexAdmin(Request $request)
     {
-        $kecamatans = Kecamatan::all();
+        $kecamatans = Kecamatan::with(['desas' => fn ($query) => $query->orderBy('nama')])
+            ->orderBy('nama')
+            ->get();
 
         if (! $request->has('kecamatan_id') && ! $request->has('desa_id')) {
-            $bangorejoKec = $kecamatans->first(fn ($k) => strtolower($k->nama) === 'bangorejo')
-                ?? $kecamatans->first(fn ($k) => stripos($k->nama, 'bangorejo') !== false);
-            if ($bangorejoKec) {
-                $bangorejoDesa = Desa::where('kecamatan_id', $bangorejoKec->id)
-                    ->where(fn ($q) => $q->whereRaw('LOWER(nama) = ?', ['bangorejo'])->orWhere('nama', 'LIKE', '%bangorejo%'))
-                    ->first();
+            $firstKec = $kecamatans->first();
+            if ($firstKec) {
+                $firstDesa = $firstKec->desas->first();
                 $request->merge([
-                    'kecamatan_id' => $bangorejoKec->id,
-                    'desa_id' => $bangorejoDesa?->id,
+                    'kecamatan_id' => $firstKec->id,
+                    'desa_id' => $firstDesa?->id,
                 ]);
             }
         }
 
-        $desaIds = $request->kecamatan_id
-            ? Desa::where('kecamatan_id', $request->kecamatan_id)->pluck('id')
-            : null;
-
-        $desas = $request->kecamatan_id
-            ? Desa::where('kecamatan_id', $request->kecamatan_id)->get()
-            : collect();
         $selectedKecamatanId = $request->filled('kecamatan_id') && $kecamatans->contains('id', (int) $request->kecamatan_id)
             ? (int) $request->kecamatan_id
             : null;
+
+        $selectedKecamatan = $selectedKecamatanId
+            ? $kecamatans->firstWhere('id', $selectedKecamatanId)
+            : null;
+
+        $desas = $selectedKecamatan?->desas ?? collect();
+
         $selectedDesaId = $request->filled('desa_id') && $desas->contains('id', (int) $request->desa_id)
             ? (int) $request->desa_id
             : null;
@@ -263,10 +262,23 @@ class DokumenController extends Controller
                 ->with(['kecamatan', 'uploader', 'verifier'])
                 ->where('kecamatan_id', $selectedKecamatanId)
                 ->get()
-                ->groupBy('kecamatan_id')
             : collect();
 
-        return \Inertia\Inertia::render('Dokumen/Admin', compact('tpsList', 'kecamatans', 'desas', 'dokumenKecamatan', 'selectedKecamatanId', 'selectedDesaId'));
+        $aktifJenis = \App\Models\PemiluSetting::aktif();
+        $aktifDokumenMap = collect(\App\Models\Dokumen::JENIS)
+            ->filter(fn ($label, $key) => in_array(strtolower($key), $aktifJenis, true))
+            ->toArray();
+
+        return \Inertia\Inertia::render('Dokumen/Admin', compact(
+            'tpsList',
+            'kecamatans',
+            'desas',
+            'dokumenKecamatan',
+            'selectedKecamatanId',
+            'selectedDesaId',
+            'aktifJenis',
+            'aktifDokumenMap'
+        ));
     }
 
     // Memverifikasi atau menolak dokumen oleh admin.
