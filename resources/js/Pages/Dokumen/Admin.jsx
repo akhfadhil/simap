@@ -31,6 +31,7 @@ export default function DokumenAdmin({
 }) {
     const { auth } = usePage().props;
     const currentUser = auth?.user;
+    const isAdmin = currentUser?.role === 'admin';
 
     const [filterKec, setFilterKec] = useState(selectedKecamatanId || '');
     const [filterDesa, setFilterDesa] = useState(selectedDesaId || '');
@@ -243,7 +244,7 @@ export default function DokumenAdmin({
                         <p className="text-xs text-[#475569] dark:text-[#94a3b8]">
                             {activeKec
                                 ? `Wilayah aktif: Kec. ${activeKec.nama}${activeDesa ? ` • Desa ${activeDesa.nama}` : ''}`
-                                : 'Pilih kecamatan dan desa untuk melihat dan memverifikasi dokumen.'}
+                                : (isAdmin ? 'Pilih kecamatan dan desa untuk melihat dan memverifikasi dokumen.' : 'Pilih kecamatan dan desa untuk memantau dokumen.')}
                         </p>
                     </div>
                 </div>
@@ -442,7 +443,7 @@ export default function DokumenAdmin({
                                                             <Download className="w-3.5 h-3.5" />
                                                         </a>
 
-                                                        {isWaiting && (
+                                                        {isAdmin && isWaiting && (
                                                             <>
                                                                 <button
                                                                     type="button"
@@ -465,7 +466,7 @@ export default function DokumenAdmin({
                                                             </>
                                                         )}
 
-                                                        {isRejected && (
+                                                        {isAdmin && isRejected && (
                                                             <button
                                                                 type="button"
                                                                 onClick={() => handleVerify(doc)}
@@ -592,7 +593,7 @@ export default function DokumenAdmin({
                                 Daftar Dokumen C-Hasil TPS {activeDesa ? `(Desa ${activeDesa.nama})` : ''}
                             </h3>
                             <p className="text-xs text-[#475569] dark:text-[#94a3b8]">
-                                Klik berkas untuk membuka preview PDF, atau gunakan tombol centang/silang untuk verifikasi langsung.
+                                {isAdmin ? 'Klik berkas untuk membuka preview PDF, atau gunakan tombol centang/silang untuk verifikasi langsung.' : 'Klik berkas untuk membuka preview PDF atau mengunduh berkas.'}
                             </p>
                         </div>
                         {totalTps > 0 && (
@@ -693,7 +694,7 @@ export default function DokumenAdmin({
                                                                         <span className="text-slate-300 dark:text-slate-700 select-none">|</span>
 
                                                                         {/* Quick Actions (Verifikasi / Tolak Cepat) */}
-                                                                        {isWaiting && (
+                                                                        {isAdmin && isWaiting && (
                                                                             <>
                                                                                 <button
                                                                                     type="button"
@@ -886,7 +887,7 @@ export default function DokumenAdmin({
 
                             {/* Right: Action Buttons */}
                             <div className="flex items-center gap-2 w-full sm:w-auto justify-end shrink-0">
-                                {previewDoc.status !== 'ditolak' && (
+                                {isAdmin && previewDoc.status !== 'ditolak' && (
                                     <button
                                         type="button"
                                         onClick={() => handleOpenReject(previewDoc, previewDoc.tps_nama, previewDoc.kec_nama)}
@@ -898,7 +899,7 @@ export default function DokumenAdmin({
                                     </button>
                                 )}
 
-                                {previewDoc.status !== 'terverifikasi' && (
+                                {isAdmin && previewDoc.status !== 'terverifikasi' && (
                                     <button
                                         type="button"
                                         onClick={() => handleVerify(previewDoc)}

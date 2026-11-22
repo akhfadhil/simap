@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useForm, Head, Link } from '@inertiajs/react';
+import { useForm, Head } from '@inertiajs/react';
 import GuestLayout from '../../Layouts/GuestLayout';
 import { Lock, User, Eye, EyeOff, ArrowRight, ShieldCheck } from 'lucide-react';
 
@@ -97,16 +97,6 @@ export default function Login() {
                         <ArrowRight className="w-4 h-4" />
                     </button>
                 </form>
-
-                {/* Footer link */}
-                <div className="mt-6 pt-5 border-t border-[#f1f5f9] dark:border-[#1e293b] text-center">
-                    <p className="text-xs text-[#475569] dark:text-[#94a3b8]">
-                        Login pengurus partai?{' '}
-                        <Link href="/partai/login" className="text-[#bb152c] dark:text-red-400 hover:underline font-semibold ml-0.5">
-                            Portal Partai →
-                        </Link>
-                    </p>
-                </div>
             </div>
         </GuestLayout>
     );
