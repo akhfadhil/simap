@@ -52,6 +52,8 @@ class SetupController extends Controller
             ]);
         }
 
+        \App\Services\RekapAdminCache::flushAggregate();
+
         return back()->with('success', 'Pengaturan jenis pemilu berhasil disimpan.');
     }
 
@@ -86,18 +88,40 @@ class SetupController extends Controller
         $profile->nama = $request->nama;
         $profile->nama_singkat = $newNamaSingkat;
         $profile->nomor_urut_aktif = $newNomorUrut;
-        $profile->warna_utama = $request->warna_utama;
-        $profile->warna_aksen = $request->warna_aksen;
 
-        $profile->alamat_kantor = $request->alamat_kantor;
-        $profile->status_kantor = $request->status_kantor;
-        $profile->google_maps_url = $request->google_maps_url;
-        $profile->nama_ketua = $request->nama_ketua;
-        $profile->telp_ketua = $request->telp_ketua;
-        $profile->nama_sekretaris = $request->nama_sekretaris;
-        $profile->telp_sekretaris = $request->telp_sekretaris;
-        $profile->nama_bendahara = $request->nama_bendahara;
-        $profile->telp_bendahara = $request->telp_bendahara;
+        if ($request->has('warna_utama')) {
+            $profile->warna_utama = $request->warna_utama;
+        }
+        if ($request->has('warna_aksen')) {
+            $profile->warna_aksen = $request->warna_aksen;
+        }
+        if ($request->has('alamat_kantor')) {
+            $profile->alamat_kantor = $request->alamat_kantor;
+        }
+        if ($request->has('status_kantor')) {
+            $profile->status_kantor = $request->status_kantor;
+        }
+        if ($request->has('google_maps_url')) {
+            $profile->google_maps_url = $request->google_maps_url;
+        }
+        if ($request->has('nama_ketua')) {
+            $profile->nama_ketua = $request->nama_ketua;
+        }
+        if ($request->has('telp_ketua')) {
+            $profile->telp_ketua = $request->telp_ketua;
+        }
+        if ($request->has('nama_sekretaris')) {
+            $profile->nama_sekretaris = $request->nama_sekretaris;
+        }
+        if ($request->has('telp_sekretaris')) {
+            $profile->telp_sekretaris = $request->telp_sekretaris;
+        }
+        if ($request->has('nama_bendahara')) {
+            $profile->nama_bendahara = $request->nama_bendahara;
+        }
+        if ($request->has('telp_bendahara')) {
+            $profile->telp_bendahara = $request->telp_bendahara;
+        }
 
         if ($request->hasFile('logo')) {
             $file = $request->file('logo');
@@ -127,6 +151,8 @@ class SetupController extends Controller
                 'nama_partai' => $newNamaSingkat,
             ]);
 
+        \App\Services\RekapAdminCache::flushAggregate();
+
         if ($request->expectsJson()) {
             return response()->json([
                 'success' => true,
@@ -154,6 +180,7 @@ class SetupController extends Controller
     public function destroyPpwp(RekapPpwpCalon $calon)
     {
         $calon->delete();
+        \App\Services\RekapAdminCache::flushAggregate();
 
         return back()->with('success', 'Paslon dihapus.');
     }
@@ -168,6 +195,7 @@ class SetupController extends Controller
     public function destroyDpd(RekapDpdCalon $calon)
     {
         $calon->delete();
+        \App\Services\RekapAdminCache::flushAggregate();
 
         return back()->with('success', 'Calon DPD dihapus.');
     }
@@ -220,6 +248,8 @@ class SetupController extends Controller
             ]);
         }
 
+        \App\Services\RekapAdminCache::flushAggregate();
+
         return back()->with('success', 'Partai berhasil ditambahkan.');
     }
 
@@ -227,6 +257,8 @@ class SetupController extends Controller
     public function destroyPartai(RekapPartai $partai)
     {
         $partai->delete();
+
+        \App\Services\RekapAdminCache::flushAggregate();
 
         return back()->with('success', 'Partai dan caleg-calegnya dihapus.');
     }
@@ -236,6 +268,8 @@ class SetupController extends Controller
     {
         $request->validate(['nomor_urut' => 'required|integer', 'nama_caleg' => 'required|string|max:200']);
         $caleg = $partai->calegs()->create($request->only('nomor_urut', 'nama_caleg'));
+
+        \App\Services\RekapAdminCache::flushAggregate();
 
         if ($request->expectsJson()) {
             return response()->json([
@@ -257,6 +291,8 @@ class SetupController extends Controller
     public function destroyCaleg(RekapCaleg $caleg)
     {
         $caleg->delete();
+
+        \App\Services\RekapAdminCache::flushAggregate();
 
         if (request()->expectsJson()) {
             return response()->json(['message' => 'Caleg dihapus.']);
@@ -309,6 +345,7 @@ class SetupController extends Controller
     public function destroyGubernur(\App\Models\RekapGubernurCalon $calon)
     {
         $calon->delete();
+        \App\Services\RekapAdminCache::flushAggregate();
 
         return back()->with('success', 'Paslon Gubernur dihapus.');
     }
@@ -323,6 +360,7 @@ class SetupController extends Controller
     public function destroyBupati(\App\Models\RekapBupatiCalon $calon)
     {
         $calon->delete();
+        \App\Services\RekapAdminCache::flushAggregate();
 
         return back()->with('success', 'Paslon Bupati dihapus.');
     }
@@ -371,6 +409,8 @@ class SetupController extends Controller
             ]);
         }
 
+        \App\Services\RekapAdminCache::flushAggregate();
+
         return back()->with('success', $successMessage);
     }
 
@@ -417,6 +457,8 @@ class SetupController extends Controller
                 'nama_calon' => $row['nama_calon'],
             ]);
         }
+
+        \App\Services\RekapAdminCache::flushAggregate();
 
         return back()->with('success', $successMessage);
     }

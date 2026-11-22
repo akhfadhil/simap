@@ -150,10 +150,11 @@ class AdminController extends Controller
         $query = DB::table('rekap_headers as r')
             ->join('tps as t', 't.id', '=', 'r.tps_id')
             ->join('desas as d', 'd.id', '=', 't.desa_id')
+            ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
             ->where('r.jenis', $jenis);
 
         if ($jenis === 'dprd_kab' && $dapilId) {
-            $query->where('d.dapil_id', $dapilId);
+            $query->where('k.dapil_id', $dapilId);
         }
 
         if ($scopeLevel === 'desa') {
@@ -277,18 +278,20 @@ class AdminController extends Controller
                 ->join('rekap_headers as h', 'h.id', '=', 's.rekap_id')
                 ->join('tps as t', 't.id', '=', 'h.tps_id')
                 ->join('desas as d', 'd.id', '=', 't.desa_id')
+                ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
                 ->where('h.jenis', $jenis);
 
             $cq = DB::table('rekap_caleg_suaras as s')
                 ->join('rekap_headers as h', 'h.id', '=', 's.rekap_id')
                 ->join('tps as t', 't.id', '=', 'h.tps_id')
                 ->join('desas as d', 'd.id', '=', 't.desa_id')
+                ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
                 ->join('rekap_calegs as c', 'c.id', '=', 's.caleg_id')
                 ->where('h.jenis', $jenis);
 
             if ($jenis === 'dprd_kab' && $dapilId) {
-                $pq->where('d.dapil_id', $dapilId);
-                $cq->where('d.dapil_id', $dapilId);
+                $pq->where('k.dapil_id', $dapilId);
+                $cq->where('k.dapil_id', $dapilId);
             }
 
             if ($scopeLevel === 'desa') {
@@ -409,7 +412,8 @@ class AdminController extends Controller
                 ->where('jenis', $jenis)
                 ->get();
             $tpsList = collect([$tps]);
-            $master = $this->getAllMaster();
+            $effectiveDapilId = $jenis === 'dprd_kab' ? $tps->desa?->kecamatan?->dapil_id : null;
+            $master = $this->getAllMaster($effectiveDapilId);
             $label = \App\Models\RekapHeader::JENIS_LABELS[$jenis] ?? strtoupper($jenis);
             $wilayah = 'TPS '.$tps->nama.' — Desa '.$tps->desa->nama.' (Kec. '.$tps->desa->kecamatan?->nama.')';
             $filename = 'Rekap_'.strtoupper($jenis).'_TPS_'.str_replace(' ', '_', $tps->nama).'_'.str_replace(' ', '_', $tps->desa->nama).'.xlsx';
@@ -420,10 +424,12 @@ class AdminController extends Controller
 
         $kecId = request('kecamatan_id');
         $desaId = request('desa_id');
+        $dapilId = request('dapil_id');
 
         $desas = \App\Models\Desa::with(['tps', 'kecamatan'])
             ->when($desaId, fn ($q) => $q->where('id', $desaId))
             ->when(! $desaId && $kecId, fn ($q) => $q->where('kecamatan_id', $kecId))
+            ->when(! $desaId && ! $kecId && $dapilId && $jenis === 'dprd_kab', fn ($q) => $q->whereHas('kecamatan', fn ($kq) => $kq->where('dapil_id', $dapilId)))
             ->get();
 
         $tpsIds = $desas->flatMap(fn ($d) => $d->tps->pluck('id'));
@@ -434,20 +440,29 @@ class AdminController extends Controller
             ->get();
 
         $tpsList = $desas->flatMap(fn ($d) => $d->tps)->values();
-        $master = $this->getAllMaster();
 
         if ($desaId && $desas->isNotEmpty()) {
             $desa = $desas->first();
             $wilayah = 'Desa '.$desa->nama.' (Kec. '.$desa->kecamatan?->nama.')';
             $suffix = '_Desa_'.str_replace(' ', '_', $desa->nama);
+            $effectiveDapilId = $desa->kecamatan?->dapil_id;
         } elseif ($kecId) {
             $kec = \App\Models\Kecamatan::find($kecId);
             $wilayah = 'Kec. '.$kec?->nama;
             $suffix = '_Kec_'.str_replace(' ', '_', $kec?->nama ?? (string) $kecId);
+            $effectiveDapilId = $kec?->dapil_id;
+        } elseif ($dapilId && $jenis === 'dprd_kab') {
+            $dapilObj = \App\Models\Dapil::find($dapilId);
+            $wilayah = $dapilObj?->nama ?? ('Dapil '.$dapilId);
+            $suffix = '_'.str_replace(' ', '_', $wilayah);
+            $effectiveDapilId = (int) $dapilId;
         } else {
             $wilayah = 'Semua Kecamatan';
             $suffix = '_Semua';
+            $effectiveDapilId = null;
         }
+
+        $master = $this->getAllMaster($effectiveDapilId);
 
         $filename = 'Rekap_'.strtoupper($jenis).'_Admin'.$suffix.'.xlsx';
 
@@ -602,7 +617,7 @@ class AdminController extends Controller
     }
 
     // Mengambil semua master data untuk kebutuhan export.
-    private function getAllMaster(): array
+    private function getAllMaster(?int $dapilId = null): array
     {
         $partaiNomorDprRi = $this->partaiScopeNomor('dpr_ri');
         $partaiNomorDprdProv = $this->partaiScopeNomor('dprd_prov');
@@ -615,7 +630,7 @@ class AdminController extends Controller
             'dpd' => ['calons' => \App\Models\RekapDpdCalon::orderBy('nomor_urut')->get()],
             'dpr_ri' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dpr_ri')->when($partaiNomorDprRi, fn ($q) => $q->where('nomor_urut', $partaiNomorDprRi))->orderBy('nomor_urut')->get()],
             'dprd_prov' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dprd_prov')->when($partaiNomorDprdProv, fn ($q) => $q->where('nomor_urut', $partaiNomorDprdProv))->orderBy('nomor_urut')->get()],
-            'dprd_kab' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dprd_kab')->when($partaiNomorDprdKab, fn ($q) => $q->where('nomor_urut', $partaiNomorDprdKab))->orderBy('nomor_urut')->get()],
+            'dprd_kab' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dprd_kab')->when($dapilId, fn ($q) => $q->where('dapil_id', $dapilId))->when($partaiNomorDprdKab, fn ($q) => $q->where('nomor_urut', $partaiNomorDprdKab))->orderBy('nomor_urut')->get()],
         ];
     }
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Head, useForm, router } from '@inertiajs/react';
+import { Head, useForm, router, usePage } from '@inertiajs/react';
 import AdminLayout from '../../../Layouts/AdminLayout';
 import {
     Settings,
@@ -13,7 +13,8 @@ import {
     CheckCircle2,
     X,
     Building2,
-    Layers
+    Layers,
+    AlertCircle
 } from 'lucide-react';
 
 export default function SetupIndex({
@@ -29,7 +30,16 @@ export default function SetupIndex({
     kecamatans,
     partaiProfiles
 }) {
+    const { errors } = usePage().props;
     const [activeTab, setActiveTab] = useState('pemilu_settings');
+
+    // Global Custom Delete Modal State
+    const [deleteModal, setDeleteModal] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        url: '',
+    });
 
     // Tab 1: Pemilu Settings Form
     const pemiluForm = useForm({
@@ -85,17 +95,40 @@ export default function SetupIndex({
         });
     };
 
-    const handleDeletePpwp = (id) => {
-        if (confirm('Hapus paslon PPWP ini?')) router.delete(`/admin/setup/ppwp/${id}`, { preserveScroll: true });
+    const handleDeletePpwp = (c) => {
+        setDeleteModal({
+            isOpen: true,
+            title: 'Hapus Paslon PPWP',
+            message: `Apakah Anda yakin ingin menghapus paslon #${c.nomor_urut} ${c.nama_paslon}?`,
+            url: `/admin/setup/ppwp/${c.id}`
+        });
     };
-    const handleDeleteGub = (id) => {
-        if (confirm('Hapus paslon Gubernur ini?')) router.delete(`/admin/setup/gubernur/${id}`, { preserveScroll: true });
+
+    const handleDeleteGub = (c) => {
+        setDeleteModal({
+            isOpen: true,
+            title: 'Hapus Paslon Gubernur',
+            message: `Apakah Anda yakin ingin menghapus paslon #${c.nomor_urut} ${c.nama_paslon}?`,
+            url: `/admin/setup/gubernur/${c.id}`
+        });
     };
-    const handleDeleteBup = (id) => {
-        if (confirm('Hapus paslon Bupati ini?')) router.delete(`/admin/setup/bupati/${id}`, { preserveScroll: true });
+
+    const handleDeleteBup = (c) => {
+        setDeleteModal({
+            isOpen: true,
+            title: 'Hapus Paslon Bupati',
+            message: `Apakah Anda yakin ingin menghapus paslon #${c.nomor_urut} ${c.nama_paslon}?`,
+            url: `/admin/setup/bupati/${c.id}`
+        });
     };
-    const handleDeleteDpd = (id) => {
-        if (confirm('Hapus calon DPD ini?')) router.delete(`/admin/setup/dpd/${id}`, { preserveScroll: true });
+
+    const handleDeleteDpd = (c) => {
+        setDeleteModal({
+            isOpen: true,
+            title: 'Hapus Calon DPD RI',
+            message: `Apakah Anda yakin ingin menghapus calon DPD #${c.nomor_urut} ${c.nama_calon}?`,
+            url: `/admin/setup/dpd/${c.id}`
+        });
     };
 
     // Tab 3: Dapil Forms
@@ -114,8 +147,13 @@ export default function SetupIndex({
         });
     };
 
-    const handleDeleteDapil = (id) => {
-        if (confirm('Hapus Dapil ini?')) router.delete(`/admin/setup/dapil/${id}`, { preserveScroll: true });
+    const handleDeleteDapil = (d) => {
+        setDeleteModal({
+            isOpen: true,
+            title: 'Hapus Daerah Pemilihan (Dapil)',
+            message: `Apakah Anda yakin ingin menghapus ${d.nama}? Kecamatan yang terhubung akan dilepas dari dapil ini.`,
+            url: `/admin/setup/dapil/${d.id}`
+        });
     };
 
     const handleSaveKecamatanDapil = (e) => {
@@ -133,6 +171,7 @@ export default function SetupIndex({
         nomor_urut_aktif: '',
         nama_singkat: '',
         nama: '',
+        warna_utama: '#bb152c',
         nama_ketua: '',
         nama_sekretaris: '',
         nama_bendahara: '',
@@ -144,6 +183,7 @@ export default function SetupIndex({
             nomor_urut_aktif: p.nomor_urut_aktif || '',
             nama_singkat: p.nama_singkat || '',
             nama: p.nama || '',
+            warna_utama: p.warna_utama || '#bb152c',
             nama_ketua: p.nama_ketua || '',
             nama_sekretaris: p.nama_sekretaris || '',
             nama_bendahara: p.nama_bendahara || '',
@@ -180,27 +220,42 @@ export default function SetupIndex({
         });
     };
 
-    const handleDeletePartai = (partaiId) => {
-        if (confirm('Hapus partai ini beserta seluruh calegnya?')) {
-            router.delete(`/admin/setup/partai/${partaiId}`, { preserveScroll: true });
-        }
+    const handleDeletePartai = (p) => {
+        setDeleteModal({
+            isOpen: true,
+            title: 'Hapus Partai',
+            message: `Apakah Anda yakin ingin menghapus partai #${p.nomor_urut} ${p.nama_partai} beserta seluruh caleg yang ada di dalamnya?`,
+            url: `/admin/setup/partai/${p.id}`
+        });
     };
 
     // Inline Add Caleg State
     const [newCalegMap, setNewCalegMap] = useState({});
+    const [calegErrors, setCalegErrors] = useState({});
+
     const handleAddCaleg = (partaiId) => {
         const row = newCalegMap[partaiId];
-        if (!row?.nomor_urut || !row?.nama_caleg) return alert('Isi nomor urut dan nama caleg!');
+        if (!row?.nomor_urut || !row?.nama_caleg) {
+            setCalegErrors(prev => ({ ...prev, [partaiId]: 'Nomor urut dan nama caleg wajib diisi!' }));
+            return;
+        }
+        setCalegErrors(prev => ({ ...prev, [partaiId]: null }));
         router.post(`/admin/setup/partai/${partaiId}/caleg`, row, {
             onSuccess: () => {
                 setNewCalegMap({ ...newCalegMap, [partaiId]: { nomor_urut: '', nama_caleg: '' } });
+                setCalegErrors(prev => ({ ...prev, [partaiId]: null }));
             },
             preserveScroll: true
         });
     };
 
-    const handleDeleteCaleg = (calegId) => {
-        if (confirm('Hapus caleg ini?')) router.delete(`/admin/setup/caleg/${calegId}`, { preserveScroll: true });
+    const handleDeleteCaleg = (c) => {
+        setDeleteModal({
+            isOpen: true,
+            title: 'Hapus Caleg',
+            message: `Apakah Anda yakin ingin menghapus caleg #${c.nomor_urut} ${c.nama_caleg}?`,
+            url: `/admin/setup/caleg/${c.id}`
+        });
     };
 
     const jenisOptions = [
@@ -233,7 +288,7 @@ export default function SetupIndex({
                                 </span>
                             </div>
                             <button
-                                onClick={() => handleDeletePartai(p.id)}
+                                onClick={() => handleDeletePartai(p)}
                                 className="text-[#94a3b8] hover:text-red-600 dark:hover:text-red-400 transition p-1 cursor-pointer"
                                 title="Hapus Partai"
                             >
@@ -254,8 +309,9 @@ export default function SetupIndex({
                                             {c.nama_caleg}
                                         </span>
                                         <button
-                                            onClick={() => handleDeleteCaleg(c.id)}
+                                            onClick={() => handleDeleteCaleg(c)}
                                             className="text-[#94a3b8] hover:text-red-600 dark:hover:text-red-400 transition ml-2 cursor-pointer"
+                                            title="Hapus Caleg"
                                         >
                                             <X className="w-3.5 h-3.5" />
                                         </button>
@@ -269,27 +325,33 @@ export default function SetupIndex({
                         </div>
 
                         {/* Add Caleg Form */}
-                        <div className="pt-2 border-t border-[#f1f5f9] dark:border-[#1e293b] flex gap-1.5">
-                            <input
-                                type="number"
-                                placeholder="No"
-                                value={newCalegMap[p.id]?.nomor_urut || ''}
-                                onChange={(e) => setNewCalegMap({ ...newCalegMap, [p.id]: { ...(newCalegMap[p.id] || {}), nomor_urut: e.target.value } })}
-                                className="w-12 bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] text-[#0f172a] dark:text-[#f8fafc] rounded-xl px-2 py-1.5 text-xs outline-none focus:border-[#bb152c] placeholder-[#94a3b8]"
-                            />
-                            <input
-                                type="text"
-                                placeholder="Nama Caleg Baru"
-                                value={newCalegMap[p.id]?.nama_caleg || ''}
-                                onChange={(e) => setNewCalegMap({ ...newCalegMap, [p.id]: { ...(newCalegMap[p.id] || {}), nama_caleg: e.target.value } })}
-                                className="flex-1 bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] text-[#0f172a] dark:text-[#f8fafc] rounded-xl px-2.5 py-1.5 text-xs outline-none focus:border-[#bb152c] placeholder-[#94a3b8]"
-                            />
-                            <button
-                                onClick={() => handleAddCaleg(p.id)}
-                                className="bg-[#0f172a] dark:bg-[#1f2937] hover:bg-[#334151] dark:hover:bg-[#374151] text-white font-semibold px-3 py-1.5 text-xs rounded-xl transition cursor-pointer"
-                            >
-                                +
-                            </button>
+                        <div className="pt-2 border-t border-[#f1f5f9] dark:border-[#1e293b] space-y-1">
+                            <div className="flex gap-1.5">
+                                <input
+                                    type="number"
+                                    placeholder="No"
+                                    value={newCalegMap[p.id]?.nomor_urut || ''}
+                                    onChange={(e) => setNewCalegMap({ ...newCalegMap, [p.id]: { ...(newCalegMap[p.id] || {}), nomor_urut: e.target.value } })}
+                                    className="w-12 bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] text-[#0f172a] dark:text-[#f8fafc] rounded-xl px-2 py-1.5 text-xs outline-none focus:border-[#bb152c] placeholder-[#94a3b8]"
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Nama Caleg Baru"
+                                    value={newCalegMap[p.id]?.nama_caleg || ''}
+                                    onChange={(e) => setNewCalegMap({ ...newCalegMap, [p.id]: { ...(newCalegMap[p.id] || {}), nama_caleg: e.target.value } })}
+                                    className="flex-1 bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] text-[#0f172a] dark:text-[#f8fafc] rounded-xl px-2.5 py-1.5 text-xs outline-none focus:border-[#bb152c] placeholder-[#94a3b8]"
+                                />
+                                <button
+                                    onClick={() => handleAddCaleg(p.id)}
+                                    className="bg-[#0f172a] dark:bg-[#1f2937] hover:bg-[#334151] dark:hover:bg-[#374151] text-white font-semibold px-3 py-1.5 text-xs rounded-xl transition cursor-pointer"
+                                    title="Tambah Caleg"
+                                >
+                                    +
+                                </button>
+                            </div>
+                            {calegErrors[p.id] && (
+                                <p className="text-red-500 text-[10px] font-medium">{calegErrors[p.id]}</p>
+                            )}
                         </div>
                     </div>
                 ))
@@ -444,7 +506,7 @@ export default function SetupIndex({
                                 {ppwpCalons?.map(c => (
                                     <div key={c.id} className="flex items-center justify-between bg-[#f8fafc] dark:bg-[#0b0f19] p-3 rounded-xl border border-[#e2e8f0] dark:border-[#1e293b] text-xs">
                                         <div><span className="font-bold text-[#bb152c] dark:text-red-400 mr-2">#{c.nomor_urut}</span><span className="text-[#0f172a] dark:text-[#f8fafc] font-medium">{c.nama_paslon}</span></div>
-                                        <button onClick={() => handleDeletePpwp(c.id)} className="text-[#94a3b8] hover:text-red-600 dark:hover:text-red-400"><Trash2 className="w-4 h-4" /></button>
+                                        <button onClick={() => handleDeletePpwp(c)} className="text-[#94a3b8] hover:text-red-600 dark:hover:text-red-400 transition cursor-pointer" title="Hapus Paslon PPWP"><Trash2 className="w-4 h-4" /></button>
                                     </div>
                                 ))}
                             </div>
@@ -453,7 +515,8 @@ export default function SetupIndex({
                                     <input type="number" placeholder="No" value={ppwpRows[0].nomor_urut} onChange={(e) => setPpwpRows([{ ...ppwpRows[0], nomor_urut: e.target.value }])} className="w-16 bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] text-[#0f172a] dark:text-[#f8fafc] rounded-xl px-3 py-2 text-xs outline-none focus:border-[#bb152c]" required />
                                     <input type="text" placeholder="Nama Paslon PPWP" value={ppwpRows[0].nama_paslon} onChange={(e) => setPpwpRows([{ ...ppwpRows[0], nama_paslon: e.target.value }])} className="flex-1 bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] text-[#0f172a] dark:text-[#f8fafc] rounded-xl px-3 py-2 text-xs outline-none focus:border-[#bb152c]" required />
                                 </div>
-                                <button type="submit" className="w-full bg-[#0f172a] dark:bg-[#1f2937] hover:bg-[#334151] dark:hover:bg-[#374151] text-white py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer"><Plus className="w-3.5 h-3.5" /> Tambah Paslon PPWP</button>
+                                {errors?.calons && <p className="text-red-500 text-xs font-medium">{errors.calons}</p>}
+                                <button type="submit" className="w-full bg-[#0f172a] dark:bg-[#1f2937] hover:bg-[#334151] dark:hover:bg-[#374151] text-white py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer transition"><Plus className="w-3.5 h-3.5" /> Tambah Paslon PPWP</button>
                             </form>
                         </div>
 
@@ -464,7 +527,7 @@ export default function SetupIndex({
                                 {gubernurCalons?.map(c => (
                                     <div key={c.id} className="flex items-center justify-between bg-[#f8fafc] dark:bg-[#0b0f19] p-3 rounded-xl border border-[#e2e8f0] dark:border-[#1e293b] text-xs">
                                         <div><span className="font-bold text-[#bb152c] dark:text-red-400 mr-2">#{c.nomor_urut}</span><span className="text-[#0f172a] dark:text-[#f8fafc] font-medium">{c.nama_paslon}</span></div>
-                                        <button onClick={() => handleDeleteGub(c.id)} className="text-[#94a3b8] hover:text-red-600 dark:hover:text-red-400"><Trash2 className="w-4 h-4" /></button>
+                                        <button onClick={() => handleDeleteGub(c)} className="text-[#94a3b8] hover:text-red-600 dark:hover:text-red-400 transition cursor-pointer" title="Hapus Paslon Gubernur"><Trash2 className="w-4 h-4" /></button>
                                     </div>
                                 ))}
                             </div>
@@ -473,7 +536,8 @@ export default function SetupIndex({
                                     <input type="number" placeholder="No" value={gubRows[0].nomor_urut} onChange={(e) => setGubRows([{ ...gubRows[0], nomor_urut: e.target.value }])} className="w-16 bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] text-[#0f172a] dark:text-[#f8fafc] rounded-xl px-3 py-2 text-xs outline-none focus:border-[#bb152c]" required />
                                     <input type="text" placeholder="Nama Paslon Gubernur" value={gubRows[0].nama_paslon} onChange={(e) => setGubRows([{ ...gubRows[0], nama_paslon: e.target.value }])} className="flex-1 bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] text-[#0f172a] dark:text-[#f8fafc] rounded-xl px-3 py-2 text-xs outline-none focus:border-[#bb152c]" required />
                                 </div>
-                                <button type="submit" className="w-full bg-[#0f172a] dark:bg-[#1f2937] hover:bg-[#334151] dark:hover:bg-[#374151] text-white py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer"><Plus className="w-3.5 h-3.5" /> Tambah Paslon Gubernur</button>
+                                {errors?.calons && <p className="text-red-500 text-xs font-medium">{errors.calons}</p>}
+                                <button type="submit" className="w-full bg-[#0f172a] dark:bg-[#1f2937] hover:bg-[#334151] dark:hover:bg-[#374151] text-white py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer transition"><Plus className="w-3.5 h-3.5" /> Tambah Paslon Gubernur</button>
                             </form>
                         </div>
 
@@ -484,7 +548,7 @@ export default function SetupIndex({
                                 {bupatiCalons?.map(c => (
                                     <div key={c.id} className="flex items-center justify-between bg-[#f8fafc] dark:bg-[#0b0f19] p-3 rounded-xl border border-[#e2e8f0] dark:border-[#1e293b] text-xs">
                                         <div><span className="font-bold text-[#bb152c] dark:text-red-400 mr-2">#{c.nomor_urut}</span><span className="text-[#0f172a] dark:text-[#f8fafc] font-medium">{c.nama_paslon}</span></div>
-                                        <button onClick={() => handleDeleteBup(c.id)} className="text-[#94a3b8] hover:text-red-600 dark:hover:text-red-400"><Trash2 className="w-4 h-4" /></button>
+                                        <button onClick={() => handleDeleteBup(c)} className="text-[#94a3b8] hover:text-red-600 dark:hover:text-red-400 transition cursor-pointer" title="Hapus Paslon Bupati"><Trash2 className="w-4 h-4" /></button>
                                     </div>
                                 ))}
                             </div>
@@ -493,7 +557,8 @@ export default function SetupIndex({
                                     <input type="number" placeholder="No" value={bupRows[0].nomor_urut} onChange={(e) => setBupRows([{ ...bupRows[0], nomor_urut: e.target.value }])} className="w-16 bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] text-[#0f172a] dark:text-[#f8fafc] rounded-xl px-3 py-2 text-xs outline-none focus:border-[#bb152c]" required />
                                     <input type="text" placeholder="Nama Paslon Bupati" value={bupRows[0].nama_paslon} onChange={(e) => setBupRows([{ ...bupRows[0], nama_paslon: e.target.value }])} className="flex-1 bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] text-[#0f172a] dark:text-[#f8fafc] rounded-xl px-3 py-2 text-xs outline-none focus:border-[#bb152c]" required />
                                 </div>
-                                <button type="submit" className="w-full bg-[#0f172a] dark:bg-[#1f2937] hover:bg-[#334151] dark:hover:bg-[#374151] text-white py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer"><Plus className="w-3.5 h-3.5" /> Tambah Paslon Bupati</button>
+                                {errors?.calons && <p className="text-red-500 text-xs font-medium">{errors.calons}</p>}
+                                <button type="submit" className="w-full bg-[#0f172a] dark:bg-[#1f2937] hover:bg-[#334151] dark:hover:bg-[#374151] text-white py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer transition"><Plus className="w-3.5 h-3.5" /> Tambah Paslon Bupati</button>
                             </form>
                         </div>
 
@@ -504,7 +569,7 @@ export default function SetupIndex({
                                 {dpdCalons?.map(c => (
                                     <div key={c.id} className="flex items-center justify-between bg-[#f8fafc] dark:bg-[#0b0f19] p-3 rounded-xl border border-[#e2e8f0] dark:border-[#1e293b] text-xs">
                                         <div><span className="font-bold text-[#bb152c] dark:text-red-400 mr-2">#{c.nomor_urut}</span><span className="text-[#0f172a] dark:text-[#f8fafc] font-medium">{c.nama_calon}</span></div>
-                                        <button onClick={() => handleDeleteDpd(c.id)} className="text-[#94a3b8] hover:text-red-600 dark:hover:text-red-400"><Trash2 className="w-4 h-4" /></button>
+                                        <button onClick={() => handleDeleteDpd(c)} className="text-[#94a3b8] hover:text-red-600 dark:hover:text-red-400 transition cursor-pointer" title="Hapus Calon DPD"><Trash2 className="w-4 h-4" /></button>
                                     </div>
                                 ))}
                             </div>
@@ -513,7 +578,8 @@ export default function SetupIndex({
                                     <input type="number" placeholder="No" value={dpdRows[0].nomor_urut} onChange={(e) => setDpdRows([{ ...dpdRows[0], nomor_urut: e.target.value }])} className="w-16 bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] text-[#0f172a] dark:text-[#f8fafc] rounded-xl px-3 py-2 text-xs outline-none focus:border-[#bb152c]" required />
                                     <input type="text" placeholder="Nama Calon DPD" value={dpdRows[0].nama_calon} onChange={(e) => setDpdRows([{ ...dpdRows[0], nama_calon: e.target.value }])} className="flex-1 bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] text-[#0f172a] dark:text-[#f8fafc] rounded-xl px-3 py-2 text-xs outline-none focus:border-[#bb152c]" required />
                                 </div>
-                                <button type="submit" className="w-full bg-[#0f172a] dark:bg-[#1f2937] hover:bg-[#334151] dark:hover:bg-[#374151] text-white py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer"><Plus className="w-3.5 h-3.5" /> Tambah Calon DPD</button>
+                                {errors?.calons && <p className="text-red-500 text-xs font-medium">{errors.calons}</p>}
+                                <button type="submit" className="w-full bg-[#0f172a] dark:bg-[#1f2937] hover:bg-[#334151] dark:hover:bg-[#374151] text-white py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer transition"><Plus className="w-3.5 h-3.5" /> Tambah Calon DPD</button>
                             </form>
                         </div>
                     </div>
@@ -531,24 +597,31 @@ export default function SetupIndex({
                                 {dapils?.map(d => (
                                     <div key={d.id} className="flex items-center justify-between bg-[#f8fafc] dark:bg-[#0b0f19] p-3 rounded-xl border border-[#e2e8f0] dark:border-[#1e293b] text-xs">
                                         <span className="font-bold text-[#0f172a] dark:text-[#f8fafc]">{d.nama}</span>
-                                        <button onClick={() => handleDeleteDapil(d.id)} className="text-[#94a3b8] hover:text-red-600 dark:hover:text-red-400">
+                                        <button
+                                            onClick={() => handleDeleteDapil(d)}
+                                            className="text-[#94a3b8] hover:text-red-600 dark:hover:text-red-400 transition cursor-pointer"
+                                            title="Hapus Dapil"
+                                        >
                                             <Trash2 className="w-4 h-4" />
                                         </button>
                                     </div>
                                 ))}
                             </div>
-                            <form onSubmit={handleAddDapil} className="flex gap-2 pt-2 border-t border-[#f1f5f9] dark:border-[#1e293b]">
-                                <input
-                                    type="text"
-                                    placeholder="Contoh: Dapil 1"
-                                    value={newDapilNama}
-                                    onChange={(e) => setNewDapilNama(e.target.value)}
-                                    className="flex-1 bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] text-[#0f172a] dark:text-[#f8fafc] rounded-xl px-3 py-2 text-xs outline-none focus:border-[#bb152c]"
-                                    required
-                                />
-                                <button type="submit" className="bg-[#bb152c] text-white px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-1 cursor-pointer">
-                                    <Plus className="w-4 h-4" /> Tambah
-                                </button>
+                            <form onSubmit={handleAddDapil} className="space-y-2 pt-2 border-t border-[#f1f5f9] dark:border-[#1e293b]">
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        placeholder="Contoh: Dapil 1"
+                                        value={newDapilNama}
+                                        onChange={(e) => setNewDapilNama(e.target.value)}
+                                        className="flex-1 bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] text-[#0f172a] dark:text-[#f8fafc] rounded-xl px-3 py-2 text-xs outline-none focus:border-[#bb152c]"
+                                        required
+                                    />
+                                    <button type="submit" className="bg-[#bb152c] hover:bg-[#991124] text-white px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-1 cursor-pointer transition">
+                                        <Plus className="w-4 h-4" /> Tambah
+                                    </button>
+                                </div>
+                                {errors?.nama && <p className="text-red-500 text-xs font-medium">{errors.nama}</p>}
                             </form>
                         </div>
 
@@ -575,7 +648,8 @@ export default function SetupIndex({
                                         </div>
                                     ))}
                                 </div>
-                                <button type="submit" className="w-full bg-[#0f172a] dark:bg-[#1f2937] hover:bg-[#334151] text-white py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer">
+                                {errors?.kecamatan_dapil && <p className="text-red-500 text-xs font-medium">{errors.kecamatan_dapil}</p>}
+                                <button type="submit" className="w-full bg-[#0f172a] dark:bg-[#1f2937] hover:bg-[#334151] text-white py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer transition">
                                     <Save className="w-4 h-4" /> Simpan Pemetaan Dapil
                                 </button>
                             </form>
@@ -641,7 +715,17 @@ export default function SetupIndex({
 
                             {/* Tombol Tambah Partai Modal */}
                             <button
-                                onClick={() => setShowAddPartaiModal(true)}
+                                onClick={() => {
+                                    if (tab4SubTab === 'dprd_kab') {
+                                        setNewPartaiJenis('dprd_kab');
+                                        setNewPartaiDapilId(selectedDapilKabId || dapils?.[0]?.id || '');
+                                    } else if (tab4SubTab === 'dprd_prov') {
+                                        setNewPartaiJenis('dprd_prov');
+                                    } else {
+                                        setNewPartaiJenis('dpr_ri');
+                                    }
+                                    setShowAddPartaiModal(true);
+                                }}
                                 className="bg-[#bb152c] hover:bg-[#991124] text-white font-semibold px-4 py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-xs transition cursor-pointer shrink-0"
                             >
                                 <Plus className="w-4 h-4" />
@@ -660,15 +744,34 @@ export default function SetupIndex({
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                                     {partaiProfiles?.map(p => (
                                         <div key={p.id} className="bg-[#f8fafc] dark:bg-[#0b0f19] p-3.5 rounded-xl border border-[#e2e8f0] dark:border-[#1e293b] flex items-center justify-between text-xs hover:border-[#bb152c] dark:hover:border-red-500 transition">
-                                            <div className="flex items-center gap-2 truncate">
-                                                <span className="bg-red-50 dark:bg-red-950/50 text-[#bb152c] dark:text-red-400 font-extrabold text-xs px-2 py-0.5 rounded border border-red-100 dark:border-red-900/50">
+                                            <div className="flex items-center gap-2.5 truncate">
+                                                <span
+                                                    className="font-extrabold text-xs px-2 py-0.5 rounded border"
+                                                    style={{
+                                                        backgroundColor: p.warna_utama ? `${p.warna_utama}18` : undefined,
+                                                        color: p.warna_utama || '#bb152c',
+                                                        borderColor: p.warna_utama ? `${p.warna_utama}35` : undefined
+                                                    }}
+                                                >
                                                     #{p.nomor_urut_aktif}
                                                 </span>
-                                                <span className="font-bold text-[#0f172a] dark:text-[#f8fafc] truncate" title={p.nama}>
-                                                    {p.nama_singkat}
-                                                </span>
+                                                <div className="truncate">
+                                                    <span className="font-bold text-[#0f172a] dark:text-[#f8fafc] block truncate" title={p.nama}>
+                                                        {p.nama_singkat}
+                                                    </span>
+                                                    {p.warna_utama && (
+                                                        <div className="flex items-center gap-1.5 mt-0.5">
+                                                            <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: p.warna_utama }}></span>
+                                                            <span className="text-[10px] text-[#64748b] dark:text-[#94a3b8] font-mono uppercase">{p.warna_utama}</span>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
-                                            <button onClick={() => handleOpenEditProfile(p)} className="text-[#94a3b8] hover:text-[#0f172a] dark:hover:text-[#f8fafc] p-1 cursor-pointer">
+                                            <button
+                                                onClick={() => handleOpenEditProfile(p)}
+                                                className="text-[#94a3b8] hover:text-[#0f172a] dark:hover:text-[#f8fafc] p-1.5 rounded-lg hover:bg-white dark:hover:bg-[#1e293b] transition cursor-pointer"
+                                                title="Edit Profil Partai"
+                                            >
                                                 <Edit2 className="w-3.5 h-3.5" />
                                             </button>
                                         </div>
@@ -745,9 +848,27 @@ export default function SetupIndex({
                                 <label className="block font-semibold mb-1 text-[#0f172a] dark:text-[#f8fafc]">Nama Lengkap Partai</label>
                                 <input type="text" value={profileForm.data.nama} onChange={(e) => profileForm.setData('nama', e.target.value)} className="w-full bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] text-[#0f172a] dark:text-[#f8fafc] rounded-xl px-3 py-2 outline-none focus:border-[#bb152c]" required />
                             </div>
+                            <div>
+                                <label className="block font-semibold mb-1 text-[#0f172a] dark:text-[#f8fafc]">Warna Utama Partai</label>
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="color"
+                                        value={profileForm.data.warna_utama || '#bb152c'}
+                                        onChange={(e) => profileForm.setData('warna_utama', e.target.value)}
+                                        className="w-10 h-9 p-0.5 rounded-lg border border-[#e2e8f0] dark:border-[#1e293b] bg-transparent cursor-pointer"
+                                    />
+                                    <input
+                                        type="text"
+                                        value={profileForm.data.warna_utama || ''}
+                                        onChange={(e) => profileForm.setData('warna_utama', e.target.value)}
+                                        placeholder="#bb152c"
+                                        className="flex-1 bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] text-[#0f172a] dark:text-[#f8fafc] rounded-xl px-3 py-2 outline-none focus:border-[#bb152c] font-mono text-xs uppercase"
+                                    />
+                                </div>
+                            </div>
                             <div className="pt-2 flex justify-end gap-2">
                                 <button type="button" onClick={() => setEditingProfile(null)} className="px-4 py-2 rounded-xl bg-[#f1f5f9] dark:bg-[#1f2937] text-[#475569] dark:text-[#94a3b8] hover:text-[#0f172a] dark:hover:text-[#f8fafc] text-xs font-semibold cursor-pointer">Batal</button>
-                                <button type="submit" disabled={profileForm.processing} className="px-4 py-2 rounded-xl bg-[#bb152c] text-white text-xs font-semibold cursor-pointer">Simpan</button>
+                                <button type="submit" disabled={profileForm.processing} className="px-4 py-2 rounded-xl bg-[#bb152c] hover:bg-[#991124] text-white text-xs font-semibold cursor-pointer">Simpan</button>
                             </div>
                         </form>
                     </div>
@@ -818,11 +939,59 @@ export default function SetupIndex({
                                 />
                             </div>
 
+                            {errors?.partais && <p className="text-red-500 text-xs font-medium">{errors.partais}</p>}
+
                             <div className="pt-2 flex justify-end gap-2">
                                 <button type="button" onClick={() => setShowAddPartaiModal(false)} className="px-4 py-2 rounded-xl bg-[#f1f5f9] dark:bg-[#1f2937] text-[#475569] dark:text-[#94a3b8] hover:text-[#0f172a] dark:hover:text-[#f8fafc] text-xs font-semibold cursor-pointer">Batal</button>
-                                <button type="submit" className="px-4 py-2 rounded-xl bg-[#bb152c] text-white text-xs font-semibold cursor-pointer">Tambah Partai</button>
+                                <button type="submit" className="px-4 py-2 rounded-xl bg-[#bb152c] hover:bg-[#991124] text-white text-xs font-semibold cursor-pointer transition">Tambah Partai</button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Custom Global Delete Modal */}
+            {deleteModal.isOpen && (
+                <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+                    <div className="bg-white dark:bg-[#151f32] border border-[#e2e8f0] dark:border-[#1e293b] rounded-2xl w-full max-w-md p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-150 space-y-4">
+                        <div className="flex items-center justify-between pb-3 border-b border-[#f1f5f9] dark:border-[#1e293b]">
+                            <div className="flex items-center gap-2.5 text-red-600 dark:text-red-400">
+                                <Trash2 className="w-5 h-5" />
+                                <h3 className="font-bold font-heading text-lg text-[#0f172a] dark:text-[#f8fafc]">
+                                    {deleteModal.title}
+                                </h3>
+                            </div>
+                            <button
+                                onClick={() => setDeleteModal({ isOpen: false, title: '', message: '', url: '' })}
+                                className="text-[#94a3b8] hover:text-[#0f172a] dark:hover:text-[#f8fafc] p-1 cursor-pointer transition"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                        <p className="text-xs text-[#475569] dark:text-[#94a3b8] leading-relaxed">
+                            {deleteModal.message}
+                        </p>
+                        <div className="pt-2 flex items-center justify-end gap-2.5">
+                            <button
+                                type="button"
+                                onClick={() => setDeleteModal({ isOpen: false, title: '', message: '', url: '' })}
+                                className="h-9 px-4 rounded-xl text-xs font-semibold bg-[#f1f5f9] dark:bg-[#1e293b] text-[#475569] dark:text-[#94a3b8] hover:text-[#0f172a] dark:hover:text-[#f8fafc] transition cursor-pointer"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    router.delete(deleteModal.url, {
+                                        preserveScroll: true,
+                                        onFinish: () => setDeleteModal({ isOpen: false, title: '', message: '', url: '' }),
+                                    });
+                                }}
+                                className="h-9 px-4 rounded-xl text-xs font-semibold bg-[#bb152c] hover:bg-[#991124] text-white transition cursor-pointer shadow-md shadow-[#bb152c]/20"
+                            >
+                                Ya, Hapus
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
