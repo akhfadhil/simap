@@ -21,6 +21,7 @@ import {
 function CandidateWidget({ widget }) {
     const formatNumber = (num) => (num || 0).toLocaleString('id-ID');
     const winner = widget.winner;
+    const hasVotes = (widget.total_suara || 0) > 0 && (winner?.suara || 0) > 0;
 
     return (
         <div className="bg-white dark:bg-[#151f32] border border-[#e2e8f0] dark:border-[#1e293b] rounded-2xl p-6 shadow-xs space-y-4">
@@ -37,7 +38,7 @@ function CandidateWidget({ widget }) {
             </div>
 
             {/* Unggul Sementara Banner */}
-            {winner ? (
+            {hasVotes ? (
                 <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/20 rounded-xl p-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold shrink-0 shadow-sm">
@@ -122,6 +123,7 @@ function CandidateWidget({ widget }) {
 function DpdWidget({ widget }) {
     const formatNumber = (num) => (num || 0).toLocaleString('id-ID');
     const winner = widget.winner;
+    const hasVotes = (widget.total_suara || 0) > 0 && (winner?.suara || 0) > 0;
 
     return (
         <div className="bg-white dark:bg-[#151f32] border border-[#e2e8f0] dark:border-[#1e293b] rounded-2xl p-6 shadow-xs space-y-4">
@@ -138,7 +140,7 @@ function DpdWidget({ widget }) {
             </div>
 
             {/* Unggul Sementara */}
-            {winner ? (
+            {hasVotes ? (
                 <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/20 rounded-xl p-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold shrink-0 shadow-sm">
@@ -173,7 +175,7 @@ function DpdWidget({ widget }) {
                     </span>
                 </div>
 
-                {widget.top4?.length > 0 ? (
+                {hasVotes && widget.top4?.length > 0 ? (
                     widget.top4.map((row, idx) => (
                         <div key={idx} className="bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] rounded-xl p-3.5 space-y-2">
                             <div className="flex items-center justify-between min-w-0">
@@ -231,6 +233,7 @@ function DpdWidget({ widget }) {
 function LegislativeWidget({ widget }) {
     const formatNumber = (num) => (num || 0).toLocaleString('id-ID');
     const winner = widget.winner;
+    const hasVotes = (widget.total_suara || 0) > 0 && (winner?.suara || 0) > 0;
 
     return (
         <div className="bg-white dark:bg-[#151f32] border border-[#e2e8f0] dark:border-[#1e293b] rounded-2xl p-6 shadow-xs space-y-4">
@@ -247,7 +250,7 @@ function LegislativeWidget({ widget }) {
             </div>
 
             {/* Unggul Sementara Banner */}
-            {winner ? (
+            {hasVotes ? (
                 <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/20 rounded-xl p-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold shrink-0 shadow-sm">
@@ -277,7 +280,7 @@ function LegislativeWidget({ widget }) {
                     Top 5 Partai Politik (Suara Akumulatif Partai + Caleg):
                 </p>
 
-                {widget.top5_parties?.length > 0 ? (
+                {hasVotes && widget.top5_parties?.length > 0 ? (
                     widget.top5_parties.map((party, idx) => (
                         <div key={idx} className="bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] rounded-xl p-3.5 space-y-2">
                             <div className="flex items-center justify-between min-w-0">
@@ -309,7 +312,7 @@ function LegislativeWidget({ widget }) {
                             </div>
 
                             {/* Star Caleg */}
-                            {party.top_caleg && (
+                            {party.top_caleg && (party.top_caleg.suara || 0) > 0 && (
                                 <div className="flex items-center gap-1.5 text-[11px] text-[#475569] dark:text-[#94a3b8] pt-1 border-t border-[#e2e8f0]/60 dark:border-[#1e293b]">
                                     <Star className="w-3.5 h-3.5 text-amber-500 shrink-0 fill-amber-500" />
                                     <span className="truncate">
@@ -347,6 +350,7 @@ function LegislativeWidget({ widget }) {
 function DprdKabWidget({ widget }) {
     const formatNumber = (num) => (num || 0).toLocaleString('id-ID');
     const winner = widget.winner_party;
+    const hasVotes = (widget.total_suara || 0) > 0 && (winner?.suara || 0) > 0;
 
     return (
         <div className="bg-white dark:bg-[#151f32] border border-[#e2e8f0] dark:border-[#1e293b] rounded-2xl p-6 shadow-xs space-y-4">
@@ -368,7 +372,7 @@ function DprdKabWidget({ widget }) {
             </div>
 
             {/* Unggul Sementara Banner Se-Kabupaten */}
-            {winner ? (
+            {hasVotes ? (
                 <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/20 rounded-xl p-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold shrink-0 shadow-sm">
@@ -415,7 +419,7 @@ function DprdKabWidget({ widget }) {
                                     </span>
                                 </div>
 
-                                {dapil.winner_party ? (
+                                {dapil.winner_party && (dapil.total_suara || 0) > 0 && (dapil.winner_party?.suara || 0) > 0 ? (
                                     <div className="pt-2 space-y-1.5">
                                         <div className="flex items-center justify-between">
                                             <p className="text-xs font-bold text-[#bb152c] dark:text-red-400 truncate">
@@ -426,7 +430,7 @@ function DprdKabWidget({ widget }) {
                                             </span>
                                         </div>
 
-                                        {dapil.star_caleg && (
+                                        {dapil.star_caleg && (dapil.star_caleg.suara || 0) > 0 && (
                                             <div className="flex items-center gap-1 text-[10px] text-[#475569] dark:text-[#94a3b8]">
                                                 <Star className="w-3 h-3 text-amber-500 shrink-0 fill-amber-500" />
                                                 <span className="truncate">

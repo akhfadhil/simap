@@ -409,6 +409,19 @@ class DashboardElectionSummary
         };
     }
 
+    private function applyDocumentScope(Builder $query, array $scope): Builder
+    {
+        return match ($scope['type']) {
+            'kecamatan' => $query->where(function ($q) use ($scope) {
+                $q->where('k.id', $scope['id'])
+                    ->orWhere('doc.kecamatan_id', $scope['id']);
+            }),
+            'desa' => $query->where('d.id', $scope['id']),
+            'tps' => $query->where('t.id', $scope['id']),
+            default => $query,
+        };
+    }
+
     private function candidateConfig(string $jenis): array
     {
         return match ($jenis) {
@@ -444,26 +457,15 @@ class DashboardElectionSummary
 
         $tpsPercent = $totalTps > 0 ? round(($finalizedTps / $totalTps) * 100, 1) : 0;
 
-        $verifiedQuery = DB::table('rekap_headers as h')
-            ->join('tps as t', 't.id', '=', 'h.tps_id')
-            ->join('desas as d', 'd.id', '=', 't.desa_id')
-            ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
-            ->where('h.status', 'final');
-        $verifiedCount = $this->applyScope($verifiedQuery, $scope)->count('h.id');
+        $baseDocQuery = DB::table('dokumens as doc')
+            ->leftJoin('tps as t', 't.id', '=', 'doc.tps_id')
+            ->leftJoin('desas as d', 'd.id', '=', 't.desa_id')
+            ->leftJoin('kecamatans as k', 'k.id', '=', 'd.kecamatan_id');
+        $baseDocQuery = $this->applyDocumentScope($baseDocQuery, $scope);
 
-        $uploadedQuery = DB::table('rekap_headers as h')
-            ->join('tps as t', 't.id', '=', 'h.tps_id')
-            ->join('desas as d', 'd.id', '=', 't.desa_id')
-            ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
-            ->where('h.status', 'draft');
-        $uploadedCount = $this->applyScope($uploadedQuery, $scope)->count('h.id');
-
-        $rejectedQuery = DB::table('rekap_headers as h')
-            ->join('tps as t', 't.id', '=', 'h.tps_id')
-            ->join('desas as d', 'd.id', '=', 't.desa_id')
-            ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
-            ->where('h.status', 'rejected');
-        $rejectedCount = $this->applyScope($rejectedQuery, $scope)->count('h.id');
+        $verifiedCount = (clone $baseDocQuery)->where('doc.status', 'terverifikasi')->count('doc.id');
+        $uploadedCount = (clone $baseDocQuery)->where('doc.status', 'menunggu_verifikasi')->count('doc.id');
+        $rejectedCount = (clone $baseDocQuery)->where('doc.status', 'ditolak')->count('doc.id');
 
         return [
             'total_tps' => $totalTps,
@@ -866,7 +868,7 @@ class DashboardElectionSummary
     private function cacheParts(User $user, array $scope, array $activeJenis): array
     {
         return [
-            'version' => 6,
+            'version' => 7,
             'user_role' => $user->role,
             'scope' => $scope,
             'active' => $activeJenis,
