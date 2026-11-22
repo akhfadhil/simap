@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Rekap;
 use App\Http\Controllers\Controller;
 use App\Models\Dapil;
 use App\Models\Kecamatan;
-use App\Models\RekapCellFlag;
 use App\Models\RekapHeader;
 use App\Models\Tps;
 use App\Services\RekapAdminCache;
@@ -18,42 +17,23 @@ class AdminController extends Controller
     // Menampilkan daftar rekap kabupaten dengan filter kecamatan.
     public function index()
     {
-        $kecamatans = Kecamatan::all();
+        $kecamatans = Kecamatan::orderBy('nama')->get();
         $kecId = request('kecamatan_id');
         $tpsIds = Tps::when($kecId, fn ($q) => $q->whereHas('desa', fn ($q2) => $q2->where('kecamatan_id', $kecId)))->pluck('id');
+        $totalTps = $tpsIds->count();
+
         $rekapCounts = RekapHeader::query()
             ->when($kecId, fn ($q) => $q->whereIn('tps_id', $tpsIds))
             ->select('jenis', DB::raw('count(distinct tps_id) as total_tps'))
             ->groupBy('jenis')
             ->pluck('total_tps', 'jenis');
 
-        $desaIds = \App\Models\Desa::when($kecId, fn ($q) => $q->where('kecamatan_id', $kecId))->pluck('id');
-        $kecamatanIds = $kecId ? collect([(int) $kecId]) : $kecamatans->pluck('id');
-        $flaggedJenis = RekapCellFlag::query()
-            ->when($kecId, function ($query) use ($tpsIds, $desaIds, $kecamatanIds) {
-                $query->where(function ($query) use ($tpsIds, $desaIds, $kecamatanIds) {
-                    $query->where(function ($query) use ($tpsIds) {
-                        $query->where('level', 'tps')
-                            ->whereIn('entity_id', $tpsIds);
-                    })->orWhere(function ($query) use ($desaIds) {
-                        $query->where('level', 'desa')
-                            ->whereIn('entity_id', $desaIds);
-                    })->orWhere(function ($query) use ($kecamatanIds) {
-                        $query->where('level', 'kecamatan')
-                            ->whereIn('entity_id', $kecamatanIds);
-                    });
-                });
-            })
-            ->pluck('jenis')
-            ->unique()
-            ->flip();
-
         $aktifJenis = \App\Models\PemiluSetting::aktif();
 
         return \Inertia\Inertia::render('Rekap/Index', [
             'kecamatans' => $kecamatans,
+            'totalTps' => $totalTps,
             'rekapCounts' => $rekapCounts,
-            'flaggedJenis' => $flaggedJenis,
             'aktifJenis' => $aktifJenis,
             'selectedKecamatanId' => $kecId ? (int) $kecId : null,
         ]);
@@ -88,10 +68,22 @@ class AdminController extends Controller
             'gubernur' => \App\Models\RekapGubernurCalon::orderBy('nomor_urut')->get(['id', 'nomor_urut', 'nama_paslon as nama']),
             'bupati' => \App\Models\RekapBupatiCalon::orderBy('nomor_urut')->get(['id', 'nomor_urut', 'nama_paslon as nama']),
             'dpd' => \App\Models\RekapDpdCalon::orderBy('nomor_urut')->get(['id', 'nomor_urut', 'nama_calon as nama']),
-            default => \App\Models\RekapPartai::where('jenis', $jenis)
+            default => \App\Models\RekapPartai::with('calegs')
+                ->where('jenis', $jenis)
                 ->when($jenis === 'dprd_kab' && $selectedDapilId, fn ($q) => $q->where('dapil_id', $selectedDapilId))
                 ->orderBy('nomor_urut')
-                ->get(['id', 'nomor_urut', 'nama_partai as nama']),
+                ->get()
+                ->map(fn ($p) => [
+                    'id' => $p->id,
+                    'nomor_urut' => $p->nomor_urut,
+                    'nama' => $p->nama_partai,
+                    'calegs' => $p->calegs->map(fn ($c) => [
+                        'id' => $c->id,
+                        'partai_id' => $c->partai_id,
+                        'nomor_urut' => $c->nomor_urut,
+                        'nama' => $c->nama_caleg,
+                    ])->values()->all(),
+                ])->values()->all(),
         };
 
         return \Inertia\Inertia::render('Rekap/Show', [
@@ -113,10 +105,8 @@ class AdminController extends Controller
             'scopeStats' => $scopeData['scopeStats'],
             'scopeCalonTotals' => $scopeData['calonTotals'],
             'scopePartaiGrandTotals' => $scopeData['partaiTotals'],
-            'tpsCellFlags' => $scopeData['tpsCellFlags'] ?? collect(),
-            'desaCellFlags' => $scopeData['desaCellFlags'] ?? collect(),
-            'kecCellFlags' => $scopeData['kecCellFlags'] ?? collect(),
-            'kecDirectCellFlags' => $scopeData['kecDirectCellFlags'] ?? collect(),
+            'scopePartaiOnlyTotals' => $scopeData['partaiOnlyTotals'] ?? [],
+            'scopeCalegTotals' => $scopeData['calegTotals'] ?? [],
             'aktifJenis' => \App\Models\PemiluSetting::aktif(),
             'jenisLabels' => RekapHeader::JENIS_LABELS,
         ]);
@@ -137,6 +127,7 @@ class AdminController extends Controller
         $scopeLevel = 'kabupaten';
         $columnList = [];
         $totalTitle = 'TOTAL KABUPATEN';
+        $targetKec = $kecId ? $kecamatans->firstWhere('id', $kecId) : null;
 
         if ($desaId) {
             $scopeLevel = 'desa';
@@ -145,13 +136,10 @@ class AdminController extends Controller
                 $totalTitle = 'TOTAL DESA '.strtoupper($targetDesa->nama);
                 $columnList = $targetDesa->tps->map(fn ($t) => ['id' => $t->id, 'nama' => 'TPS '.$t->nama])->values()->all();
             }
-        } elseif ($kecId) {
+        } elseif ($kecId && $targetKec) {
             $scopeLevel = 'kecamatan';
-            $targetKec = $kecamatans->firstWhere('id', $kecId);
-            if ($targetKec) {
-                $totalTitle = 'TOTAL KEC. '.strtoupper($targetKec->nama);
-                $columnList = $targetKec->desas->map(fn ($d) => ['id' => $d->id, 'nama' => 'Desa '.$d->nama])->values()->all();
-            }
+            $totalTitle = 'TOTAL KEC. '.strtoupper($targetKec->nama);
+            $columnList = $targetKec->desas->map(fn ($d) => ['id' => $d->id, 'nama' => 'Desa '.$d->nama])->values()->all();
         }
 
         if (empty($columnList)) {
@@ -221,7 +209,16 @@ class AdminController extends Controller
             $scopeStats[$col['id']] = array_fill_keys($fieldNames, 0);
             $scopeStats[$col['id']]['suara_sah'] = 0;
             $scopeStats[$col['id']]['suara_total'] = 0;
-            $scopeStats[$col['id']]['tps_count'] = 1;
+
+            if ($scopeLevel === 'desa') {
+                $scopeStats[$col['id']]['tps_count'] = 1;
+            } elseif ($scopeLevel === 'kecamatan') {
+                $desaObj = $targetKec?->desas->firstWhere('id', $col['id']);
+                $scopeStats[$col['id']]['tps_count'] = $desaObj ? $desaObj->tps->count() : 0;
+            } else {
+                $kecObj = $kecamatans->firstWhere('id', $col['id']);
+                $scopeStats[$col['id']]['tps_count'] = $kecObj ? $kecObj->desas->sum(fn ($d) => $d->tps->count()) : 0;
+            }
 
             if (isset($headerRows[$col['id']])) {
                 $st = (array) $headerRows[$col['id']];
@@ -236,6 +233,8 @@ class AdminController extends Controller
         $isCandidateType = in_array($jenis, ['ppwp', 'gubernur', 'bupati', 'dpd'], true);
         $calonTotals = [];
         $partaiTotals = [];
+        $partaiOnlyTotals = [];
+        $calegTotals = [];
 
         if ($isCandidateType) {
             $candidateTables = [
@@ -287,21 +286,27 @@ class AdminController extends Controller
                 ->join('rekap_calegs as c', 'c.id', '=', 's.caleg_id')
                 ->where('h.jenis', $jenis);
 
+            if ($jenis === 'dprd_kab' && $dapilId) {
+                $pq->where('d.dapil_id', $dapilId);
+                $cq->where('d.dapil_id', $dapilId);
+            }
+
             if ($scopeLevel === 'desa') {
                 $pq->where('t.desa_id', $desaId)->select('t.id as entity_id', 's.partai_id', DB::raw('SUM(s.suara) as total_suara'))->groupBy('t.id', 's.partai_id');
-                $cq->where('t.desa_id', $desaId)->select('t.id as entity_id', 'c.partai_id', DB::raw('SUM(s.suara) as total_suara'))->groupBy('t.id', 'c.partai_id');
+                $cq->where('t.desa_id', $desaId)->select('t.id as entity_id', 's.caleg_id', 'c.partai_id', DB::raw('SUM(s.suara) as total_suara'))->groupBy('t.id', 's.caleg_id', 'c.partai_id');
             } elseif ($scopeLevel === 'kecamatan') {
                 $pq->where('d.kecamatan_id', $kecId)->select('d.id as entity_id', 's.partai_id', DB::raw('SUM(s.suara) as total_suara'))->groupBy('d.id', 's.partai_id');
-                $cq->where('d.kecamatan_id', $kecId)->select('d.id as entity_id', 'c.partai_id', DB::raw('SUM(s.suara) as total_suara'))->groupBy('d.id', 'c.partai_id');
+                $cq->where('d.kecamatan_id', $kecId)->select('d.id as entity_id', 's.caleg_id', 'c.partai_id', DB::raw('SUM(s.suara) as total_suara'))->groupBy('d.id', 's.caleg_id', 'c.partai_id');
             } else {
                 $pq->select('d.kecamatan_id as entity_id', 's.partai_id', DB::raw('SUM(s.suara) as total_suara'))->groupBy('d.kecamatan_id', 's.partai_id');
-                $cq->select('d.kecamatan_id as entity_id', 'c.partai_id', DB::raw('SUM(s.suara) as total_suara'))->groupBy('d.kecamatan_id', 'c.partai_id');
+                $cq->select('d.kecamatan_id as entity_id', 's.caleg_id', 'c.partai_id', DB::raw('SUM(s.suara) as total_suara'))->groupBy('d.kecamatan_id', 's.caleg_id', 'c.partai_id');
             }
 
             foreach ($pq->get() as $row) {
                 $entId = (int) $row->entity_id;
                 $pId = (int) $row->partai_id;
                 $tot = (int) $row->total_suara;
+                $partaiOnlyTotals[$entId][$pId] = $tot;
                 $partaiTotals[$entId][$pId] = ($partaiTotals[$entId][$pId] ?? 0) + $tot;
                 if (isset($scopeStats[$entId])) {
                     $scopeStats[$entId]['suara_sah'] += $tot;
@@ -310,8 +315,10 @@ class AdminController extends Controller
 
             foreach ($cq->get() as $row) {
                 $entId = (int) $row->entity_id;
+                $cId = (int) $row->caleg_id;
                 $pId = (int) $row->partai_id;
                 $tot = (int) $row->total_suara;
+                $calegTotals[$entId][$cId] = $tot;
                 $partaiTotals[$entId][$pId] = ($partaiTotals[$entId][$pId] ?? 0) + $tot;
                 if (isset($scopeStats[$entId])) {
                     $scopeStats[$entId]['suara_sah'] += $tot;
@@ -323,25 +330,6 @@ class AdminController extends Controller
             $scopeStats[$entId]['suara_total'] = $st['suara_sah'] + $st['suara_tidak_sah'];
         }
 
-        $flagRows = RekapCellFlag::query()
-            ->where('jenis', $jenis)
-            ->get();
-        $tpsCellFlags = collect();
-        $desaCellFlags = collect();
-        $kecCellFlags = collect();
-        $kecDirectCellFlags = collect();
-
-        foreach ($flagRows as $flag) {
-            if ($flag->level === 'tps') {
-                $tpsCellFlags->put($flag->entity_id.':'.$flag->row_key, true);
-            } elseif ($flag->level === 'desa') {
-                $desaCellFlags->put($flag->entity_id.':'.$flag->row_key, true);
-            } elseif ($flag->level === 'kecamatan') {
-                $kecCellFlags->put($flag->entity_id.':'.$flag->row_key, true);
-                $kecDirectCellFlags->put($flag->entity_id.':'.$flag->row_key, true);
-            }
-        }
-
         return [
             'scopeLevel' => $scopeLevel,
             'columnList' => $columnList,
@@ -349,10 +337,8 @@ class AdminController extends Controller
             'scopeStats' => $scopeStats,
             'calonTotals' => $calonTotals,
             'partaiTotals' => $partaiTotals,
-            'tpsCellFlags' => $tpsCellFlags,
-            'desaCellFlags' => $desaCellFlags,
-            'kecCellFlags' => $kecCellFlags,
-            'kecDirectCellFlags' => $kecDirectCellFlags,
+            'partaiOnlyTotals' => $partaiOnlyTotals,
+            'calegTotals' => $calegTotals,
         ];
     }
 
@@ -415,9 +401,29 @@ class AdminController extends Controller
     // Mengekspor rekap admin untuk jenis pemilihan.
     public function export(string $jenis)
     {
+        $tpsId = request('tps_id');
+        if ($tpsId) {
+            $tps = \App\Models\Tps::with('desa.kecamatan')->findOrFail($tpsId);
+            $rekaps = \App\Models\RekapHeader::with(['ppwpSuaras', 'gubernurSuaras', 'bupatiSuaras', 'dpdSuaras', 'partaiSuaras', 'calegSuaras'])
+                ->where('tps_id', $tps->id)
+                ->where('jenis', $jenis)
+                ->get();
+            $tpsList = collect([$tps]);
+            $master = $this->getAllMaster();
+            $label = \App\Models\RekapHeader::JENIS_LABELS[$jenis] ?? strtoupper($jenis);
+            $wilayah = 'TPS '.$tps->nama.' — Desa '.$tps->desa->nama.' (Kec. '.$tps->desa->kecamatan?->nama.')';
+            $filename = 'Rekap_'.strtoupper($jenis).'_TPS_'.str_replace(' ', '_', $tps->nama).'_'.str_replace(' ', '_', $tps->desa->nama).'.xlsx';
+            $sheet = new \App\Exports\RekapSheetExport($jenis, $label, $rekaps, $master, $tpsList, 'kpps', $wilayah);
+
+            return \Maatwebsite\Excel\Facades\Excel::download($sheet, $filename);
+        }
+
         $kecId = request('kecamatan_id');
-        $desas = \App\Models\Desa::with('tps')
-            ->when($kecId, fn ($q) => $q->where('kecamatan_id', $kecId))
+        $desaId = request('desa_id');
+
+        $desas = \App\Models\Desa::with(['tps', 'kecamatan'])
+            ->when($desaId, fn ($q) => $q->where('id', $desaId))
+            ->when(! $desaId && $kecId, fn ($q) => $q->where('kecamatan_id', $kecId))
             ->get();
 
         $tpsIds = $desas->flatMap(fn ($d) => $d->tps->pluck('id'));
@@ -429,13 +435,20 @@ class AdminController extends Controller
 
         $tpsList = $desas->flatMap(fn ($d) => $d->tps)->values();
         $master = $this->getAllMaster();
-        $masterJenis = $master[$jenis] ?? [];
 
-        $wilayah = $kecId
-            ? 'Kec. '.\App\Models\Kecamatan::find($kecId)?->nama
-            : 'Semua Kecamatan';
+        if ($desaId && $desas->isNotEmpty()) {
+            $desa = $desas->first();
+            $wilayah = 'Desa '.$desa->nama.' (Kec. '.$desa->kecamatan?->nama.')';
+            $suffix = '_Desa_'.str_replace(' ', '_', $desa->nama);
+        } elseif ($kecId) {
+            $kec = \App\Models\Kecamatan::find($kecId);
+            $wilayah = 'Kec. '.$kec?->nama;
+            $suffix = '_Kec_'.str_replace(' ', '_', $kec?->nama ?? (string) $kecId);
+        } else {
+            $wilayah = 'Semua Kecamatan';
+            $suffix = '_Semua';
+        }
 
-        $suffix = $kecId ? '_Kec_'.$kecId : '_Semua';
         $filename = 'Rekap_'.strtoupper($jenis).'_Admin'.$suffix.'.xlsx';
 
         return \Maatwebsite\Excel\Facades\Excel::download(

@@ -25,11 +25,14 @@ export default function RekapShow({
     scopeStats = {},
     scopeCalonTotals = {},
     scopePartaiGrandTotals = {},
+    scopePartaiOnlyTotals = {},
+    scopeCalegTotals = {},
     aktifJenis = [],
     jenisLabels = {}
 }) {
     const [kecIdState, setKecIdState] = useState(selectedKecamatanId ? String(selectedKecamatanId) : '');
     const [desaIdState, setDesaIdState] = useState(selectedDesaId ? String(selectedDesaId) : '');
+    const [collapsedParties, setCollapsedParties] = useState({});
 
     useEffect(() => {
         setKecIdState(selectedKecamatanId ? String(selectedKecamatanId) : '');
@@ -44,6 +47,27 @@ export default function RekapShow({
         : kecamatans.map(k => ({ id: k.id, nama: `Kec. ${k.nama}` }));
 
     const items = Array.isArray(masterList) ? masterList : [];
+
+    const allCollapsed = !isCandidateType && items.length > 0 && items.every((p) => !!collapsedParties[p.id]);
+
+    const togglePartyCollapse = (partaiId) => {
+        setCollapsedParties((prev) => ({
+            ...prev,
+            [partaiId]: !prev[partaiId],
+        }));
+    };
+
+    const toggleCollapseAll = () => {
+        if (allCollapsed) {
+            setCollapsedParties({});
+        } else {
+            const next = {};
+            items.forEach((p) => {
+                next[p.id] = true;
+            });
+            setCollapsedParties(next);
+        }
+    };
 
     // Find current selected kecamatan to populate desa options
     const currentKecObj = kecamatans.find(k => String(k.id) === String(kecIdState));
@@ -68,7 +92,7 @@ export default function RekapShow({
         suara_tidak_sah: cols.reduce((sum, c) => sum + (scopeStats[c.id]?.suara_tidak_sah || 0), 0),
         suara_sah: cols.reduce((sum, c) => sum + (scopeStats[c.id]?.suara_sah || 0), 0),
         final: cols.reduce((sum, c) => sum + (scopeStats[c.id]?.final || 0), 0),
-        tps_count: cols.reduce((sum, c) => sum + (scopeStats[c.id]?.tps_count || 1), 0),
+        tps_count: cols.reduce((sum, c) => sum + (scopeStats[c.id]?.tps_count || 0), 0),
     };
 
     scopeTotals.total_dpt = scopeTotals.dpt_lk + scopeTotals.dpt_pr;
@@ -80,8 +104,8 @@ export default function RekapShow({
     const handleDapilChange = (dapilId) => {
         const params = {};
         if (dapilId) params.dapil_id = dapilId;
-        if (kecIdState) params.kecamatan_id = kecIdState;
-        if (desaIdState) params.desa_id = desaIdState;
+        setKecIdState('');
+        setDesaIdState('');
         router.get(`/admin/rekap/${jenis}`, params, { preserveState: true });
     };
 
@@ -143,8 +167,8 @@ export default function RekapShow({
         { label: 'Disabilitas Jumlah', getVal: (st) => (st.disabilitas_lk || 0) + (st.disabilitas_pr || 0), isBold: true, isGroupSum: true },
     ];
 
-    const stickyRightStyle = "sticky right-0 z-10 bg-[#fffbeb] dark:bg-[#1e293b] text-[#bb152c] dark:text-red-400 font-extrabold border-l border-amber-300 dark:border-amber-900/60 shadow-sm";
-    const stickyRightHeaderStyle = "sticky right-0 z-30 bg-[#fef3c7] dark:bg-[#1a2332] text-amber-800 dark:text-amber-300 font-extrabold border-l border-amber-300 dark:border-amber-900/60 shadow-sm";
+    const stickyRightStyle = "md:sticky md:right-0 z-10 bg-[#fffbeb] dark:bg-[#1e293b] text-[#bb152c] dark:text-red-400 font-extrabold md:border-l border-amber-300 dark:border-amber-900/60 shadow-sm";
+    const stickyRightHeaderStyle = "md:sticky md:right-0 z-30 bg-[#fef3c7] dark:bg-[#1a2332] text-amber-800 dark:text-amber-300 font-extrabold md:border-l border-amber-300 dark:border-amber-900/60 shadow-sm";
 
     return (
         <AdminLayout title={`Rekap ${jenisLabel}`}>
@@ -175,7 +199,14 @@ export default function RekapShow({
 
                         <div className="flex items-center gap-3">
                             <a
-                                href={`/admin/rekap/${jenis}/export${selectedDapilId ? '?dapil_id=' + selectedDapilId : ''}`}
+                                href={(() => {
+                                    const params = new URLSearchParams();
+                                    if (selectedDapilId) params.set('dapil_id', selectedDapilId);
+                                    if (kecIdState) params.set('kecamatan_id', kecIdState);
+                                    if (desaIdState) params.set('desa_id', desaIdState);
+                                    const q = params.toString();
+                                    return `/admin/rekap/${jenis}/export${q ? '?' + q : ''}`;
+                                })()}
                                 className="inline-flex items-center gap-2 bg-[#bb152c] hover:bg-[#991124] text-white font-semibold px-4 py-2.5 rounded-xl text-xs shadow-md shadow-[#bb152c]/20 transition"
                             >
                                 <Download className="w-4 h-4" />
@@ -193,10 +224,16 @@ export default function RekapShow({
                             {Object.entries(jenisLabels || {}).map(([key, label]) => {
                                 if (Array.isArray(aktifJenis) && !aktifJenis.includes(key)) return null;
                                 const active = jenis === key;
+                                const params = new URLSearchParams();
+                                if (kecIdState) params.set('kecamatan_id', kecIdState);
+                                if (desaIdState) params.set('desa_id', desaIdState);
+                                const q = params.toString();
+                                const tabHref = `/admin/rekap/${key}${q ? '?' + q : ''}`;
+
                                 return (
                                     <Link
                                         key={key}
-                                        href={`/admin/rekap/${key}`}
+                                        href={tabHref}
                                         className={`px-3 py-2 rounded-xl text-xs font-bold transition border ${
                                             active
                                                 ? 'bg-[#bb152c] text-white border-[#bb152c] shadow-xs'
@@ -241,12 +278,12 @@ export default function RekapShow({
                         </span>
 
                         {/* Dropdown 1: Kecamatan */}
-                        <div className="flex items-center gap-1.5">
-                            <MapPin className="w-3.5 h-3.5 text-[#94a3b8]" />
+                        <div className="flex items-center gap-1.5 w-full sm:w-auto">
+                            <MapPin className="w-3.5 h-3.5 text-[#94a3b8] shrink-0" />
                             <select
                                 value={kecIdState}
                                 onChange={(e) => handleKecamatanFilterChange(e.target.value)}
-                                className="bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] text-[#0f172a] dark:text-[#f8fafc] rounded-xl px-3 py-1.5 text-xs outline-none focus:border-[#bb152c]"
+                                className="w-full sm:w-auto bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] text-[#0f172a] dark:text-[#f8fafc] rounded-xl px-3 py-1.5 text-xs outline-none focus:border-[#bb152c]"
                             >
                                 <option value="">🌐 Seluruh Kabupaten (Ringkasan Per-Kecamatan)</option>
                                 {kecamatans.map((k) => (
@@ -257,12 +294,12 @@ export default function RekapShow({
 
                         {/* Dropdown 2: Desa (Active when Kecamatan selected) */}
                         {kecIdState && (
-                            <div className="flex items-center gap-1.5">
-                                <Building2 className="w-3.5 h-3.5 text-[#94a3b8]" />
+                            <div className="flex items-center gap-1.5 w-full sm:w-auto">
+                                <Building2 className="w-3.5 h-3.5 text-[#94a3b8] shrink-0" />
                                 <select
                                     value={desaIdState}
                                     onChange={(e) => handleDesaFilterChange(e.target.value)}
-                                    className="bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] text-[#0f172a] dark:text-[#f8fafc] rounded-xl px-3 py-1.5 text-xs outline-none focus:border-[#bb152c]"
+                                    className="w-full sm:w-auto bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] text-[#0f172a] dark:text-[#f8fafc] rounded-xl px-3 py-1.5 text-xs outline-none focus:border-[#bb152c]"
                                 >
                                     <option value="">🏢 Seluruh Desa di Kecamatan Ini (Ringkasan Per-Desa)</option>
                                     {desaOptions.map((d) => (
@@ -322,17 +359,17 @@ export default function RekapShow({
                     <div className="bg-white dark:bg-[#151f32] border border-[#e2e8f0] dark:border-[#1e293b] rounded-2xl p-5 shadow-xs">
                         <p className="text-[10px] uppercase font-bold tracking-widest text-[#94a3b8]">Progress Rekap</p>
                         <p className="text-2xl font-extrabold font-mono text-emerald-500 mt-2">
-                            {scopeTotals.tps_count > 0 ? Math.round((scopeTotals.final / scopeTotals.tps_count) * 100) : 0}%
+                            {scopeTotals.tps_count > 0 ? Math.min(100, Math.round((scopeTotals.final / scopeTotals.tps_count) * 100)) : 0}%
                         </p>
                         <p className="text-xs text-[#475569] dark:text-[#94a3b8] mt-1">
-                            {formatNumber(scopeTotals.final)} TPS Final
+                            {formatNumber(scopeTotals.final)} / {formatNumber(scopeTotals.tps_count)} TPS Final
                         </p>
                     </div>
                 </div>
 
                 {/* UNIFIED C-HASIL FORM REKAPITULASI TABLE */}
                 <div className="bg-white dark:bg-[#151f32] border border-[#e2e8f0] dark:border-[#1e293b] rounded-2xl shadow-xs overflow-hidden">
-                    <div className="p-5 border-b border-[#f1f5f9] dark:border-[#1e293b] flex items-center justify-between">
+                    <div className="p-5 border-b border-[#f1f5f9] dark:border-[#1e293b] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <div>
                             <h3 className="font-bold font-heading text-[#0f172a] dark:text-[#f8fafc] text-base">
                                 Tabel Rekapitulasi C-Hasil Resmi ({jenisLabel})
@@ -341,6 +378,9 @@ export default function RekapShow({
                                 Format gabungan data pemilih, surat suara, disabilitas, dan perolehan suara ({totalTitle}).
                             </p>
                         </div>
+                        <span className="inline-flex items-center gap-1 text-[11px] text-slate-400 dark:text-slate-500 font-medium md:hidden">
+                            👉 Geser tabel ke kanan untuk data wilayah
+                        </span>
                     </div>
 
                     <div className="overflow-x-auto max-h-[650px] relative">
@@ -352,7 +392,18 @@ export default function RekapShow({
                                     </th>
                                     {cols.map((c) => (
                                         <th key={c.id} className="px-4 py-3 text-right min-w-[130px]">
-                                            {c.nama}
+                                            <div className="flex items-center justify-end gap-1.5">
+                                                <span>{c.nama}</span>
+                                                {scopeLevel === 'desa' && (
+                                                    <a
+                                                        href={`/admin/rekap/${jenis}/export?tps_id=${c.id}`}
+                                                        title={`Download Excel C-Hasil ${c.nama}`}
+                                                        className="p-1 rounded-md text-slate-400 hover:text-[#bb152c] dark:hover:text-red-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                                                    >
+                                                        <Download className="w-3.5 h-3.5" />
+                                                    </a>
+                                                )}
+                                            </div>
                                         </th>
                                     ))}
                                     <th className={`px-4 py-3 text-right min-w-[160px] ${stickyRightHeaderStyle}`}>
@@ -443,39 +494,166 @@ export default function RekapShow({
                                 {/* ── SECTION 4: PEROLEHAN SUARA CALON / PARTAI ── */}
                                 <tr className="bg-[#f1f5f9]/80 dark:bg-[#1e293b]/60 text-[#0f172a] dark:text-[#f8fafc]">
                                     <td colSpan={cols.length + 1} className="px-4 py-2.5 font-extrabold text-xs uppercase tracking-wider text-[#bb152c]">
-                                        IV. PEROLEHAN SUARA {isCandidateType ? 'CALON / PASLON' : 'PARTAI POLITIK & CALEG'}
+                                        <div className="flex items-center justify-between">
+                                            <span>IV. PEROLEHAN SUARA {isCandidateType ? 'CALON / PASLON' : 'PARTAI POLITIK & CALEG'}</span>
+                                            {!isCandidateType && items.length > 0 && (
+                                                <button
+                                                    type="button"
+                                                    onClick={toggleCollapseAll}
+                                                    className="text-[11px] font-semibold text-slate-500 hover:text-[#bb152c] dark:text-slate-400 dark:hover:text-[#ff4d6d] normal-case tracking-normal px-2.5 py-0.5 rounded-lg border border-slate-300 dark:border-slate-700 hover:border-[#bb152c] transition-colors"
+                                                >
+                                                    {allCollapsed ? 'Buka Semua Caleg' : 'Tutup Semua Caleg'}
+                                                </button>
+                                            )}
+                                        </div>
                                     </td>
                                     <td className={stickyRightStyle}></td>
                                 </tr>
-                                {items.map((item, idx) => {
-                                    const scopeItemTotal = cols.reduce((sum, c) => {
-                                        const calonTotals = (scopeCalonTotals && scopeCalonTotals[c.id]) || {};
-                                        const partaiGrandTotals = (scopePartaiGrandTotals && scopePartaiGrandTotals[c.id]) || {};
-                                        return sum + (isCandidateType ? (calonTotals[item.id] || 0) : (partaiGrandTotals[item.id] || 0));
-                                    }, 0);
+                                {isCandidateType ? (
+                                    items.map((item, idx) => {
+                                        const scopeItemTotal = cols.reduce((sum, c) => {
+                                            const calonTotals = (scopeCalonTotals && scopeCalonTotals[c.id]) || {};
+                                            return sum + (calonTotals[item.id] || 0);
+                                        }, 0);
 
-                                    return (
-                                        <tr key={item.id || idx} className="hover:bg-[#f8fafc] dark:hover:bg-[#0b0f19]/50">
-                                            <td className="px-4 py-2.5 font-bold text-[#0f172a] dark:text-[#f8fafc] sticky left-0 z-10 bg-white dark:bg-[#151f32] border-r border-[#e2e8f0] dark:border-[#1e293b]">
-                                                {item.nama}
-                                            </td>
-                                            {cols.map((c) => {
-                                                const calonTotals = (scopeCalonTotals && scopeCalonTotals[c.id]) || {};
-                                                const partaiGrandTotals = (scopePartaiGrandTotals && scopePartaiGrandTotals[c.id]) || {};
-                                                const val = isCandidateType ? (calonTotals[item.id] || 0) : (partaiGrandTotals[item.id] || 0);
+                                        return (
+                                            <tr key={item.id || idx} className="hover:bg-[#f8fafc] dark:hover:bg-[#0b0f19]/50">
+                                                <td className="px-4 py-2.5 font-bold text-[#0f172a] dark:text-[#f8fafc] sticky left-0 z-10 bg-white dark:bg-[#151f32] border-r border-[#e2e8f0] dark:border-[#1e293b]">
+                                                    <div className="flex items-center gap-2">
+                                                        {item.nomor_urut && (
+                                                            <span className="text-xs text-slate-400 dark:text-slate-500 font-mono">
+                                                                {item.nomor_urut}.
+                                                            </span>
+                                                        )}
+                                                        <span>{item.nama}</span>
+                                                    </div>
+                                                </td>
+                                                {cols.map((c) => {
+                                                    const calonTotals = (scopeCalonTotals && scopeCalonTotals[c.id]) || {};
+                                                    const val = calonTotals[item.id] || 0;
 
-                                                return (
-                                                    <td key={c.id} className="px-4 py-2.5 text-right font-mono text-[#0f172a] dark:text-[#f8fafc]">
-                                                        {formatNumber(val)}
+                                                    return (
+                                                        <td key={c.id} className="px-4 py-2.5 text-right font-mono text-[#0f172a] dark:text-[#f8fafc]">
+                                                            {formatNumber(val)}
+                                                        </td>
+                                                    );
+                                                })}
+                                                <td className={`px-4 py-2.5 text-right font-mono ${stickyRightStyle}`}>
+                                                    {formatNumber(scopeItemTotal)}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })
+                                ) : (
+                                    items.map((partai) => {
+                                        const isCollapsed = !!collapsedParties[partai.id];
+                                        const partaiOnlyRowTotal = cols.reduce((sum, c) => sum + (scopePartaiOnlyTotals?.[c.id]?.[partai.id] || 0), 0);
+                                        const grandTotal = cols.reduce((sum, c) => sum + (scopePartaiGrandTotals?.[c.id]?.[partai.id] || 0), 0);
+
+                                        return (
+                                            <React.Fragment key={partai.id}>
+                                                {/* Header Partai */}
+                                                <tr
+                                                    onClick={() => togglePartyCollapse(partai.id)}
+                                                    className="cursor-pointer bg-[#f8fafc] dark:bg-[#1e293b]/70 hover:bg-[#f1f5f9] dark:hover:bg-[#1e293b] border-t-2 border-[#e2e8f0] dark:border-[#334155] select-none transition-colors"
+                                                >
+                                                    <td className="px-4 py-2 font-bold text-xs uppercase tracking-wide text-[#0f172a] dark:text-[#f8fafc] sticky left-0 z-10 bg-[#f8fafc] dark:bg-[#1e293b] border-r border-[#e2e8f0] dark:border-[#334155]">
+                                                        <div className="flex items-center justify-between">
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="inline-flex items-center justify-center min-w-[22px] h-5 px-1.5 rounded bg-[#bb152c] text-white font-extrabold text-[11px] shadow-sm">
+                                                                    {partai.nomor_urut}
+                                                                </span>
+                                                                <span className="text-[#0f172a] dark:text-white font-bold">{partai.nama}</span>
+                                                            </div>
+                                                            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-normal ml-2">
+                                                                {isCollapsed ? `(Tampilkan ${(partai.calegs || []).length} caleg ▶)` : `(Sembunyikan ▼)`}
+                                                            </span>
+                                                        </div>
                                                     </td>
-                                                );
-                                            })}
-                                            <td className={`px-4 py-2.5 text-right font-mono ${stickyRightStyle}`}>
-                                                {formatNumber(scopeItemTotal)}
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
+                                                    <td colSpan={cols.length} className="px-4 py-2 text-xs text-slate-400 dark:text-slate-500 font-medium">
+                                                        Rincian Suara Partai & Caleg
+                                                    </td>
+                                                    <td className={`px-4 py-2 text-right font-mono text-xs font-semibold ${stickyRightStyle}`}>
+                                                        {isCollapsed ? formatNumber(grandTotal) : ''}
+                                                    </td>
+                                                </tr>
+
+                                                {!isCollapsed && (
+                                                    <>
+                                                        {/* Row: Suara Partai Sahaja */}
+                                                        <tr className="hover:bg-slate-50/70 dark:hover:bg-[#0b0f19]/40 border-b border-slate-100 dark:border-slate-800/60">
+                                                            <td className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 sticky left-0 z-10 bg-white dark:bg-[#151f32] border-r border-[#e2e8f0] dark:border-[#1e293b] pl-8">
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                                                                    <span>Suara Partai</span>
+                                                                </div>
+                                                            </td>
+                                                            {cols.map((c) => {
+                                                                const val = scopePartaiOnlyTotals?.[c.id]?.[partai.id] || 0;
+                                                                return (
+                                                                    <td key={c.id} className="px-4 py-2 text-right font-mono text-xs text-slate-700 dark:text-slate-300">
+                                                                        {formatNumber(val)}
+                                                                    </td>
+                                                                );
+                                                            })}
+                                                            <td className={`px-4 py-2 text-right font-mono text-xs ${stickyRightStyle}`}>
+                                                                {formatNumber(partaiOnlyRowTotal)}
+                                                            </td>
+                                                        </tr>
+
+                                                        {/* Rows: Tiap Caleg */}
+                                                        {(partai.calegs || []).map((caleg) => {
+                                                            const calegRowTotal = cols.reduce((sum, c) => sum + (scopeCalegTotals?.[c.id]?.[caleg.id] || 0), 0);
+                                                            return (
+                                                                <tr key={caleg.id} className="hover:bg-slate-50/70 dark:hover:bg-[#0b0f19]/40 border-b border-slate-100 dark:border-slate-800/60">
+                                                                    <td className="px-4 py-1.5 text-xs text-slate-700 dark:text-slate-300 sticky left-0 z-10 bg-white dark:bg-[#151f32] border-r border-[#e2e8f0] dark:border-[#1e293b] pl-8">
+                                                                        <div className="flex items-center gap-2">
+                                                                            <span className="text-[11px] text-slate-400 dark:text-slate-500 min-w-[18px] text-right font-mono">
+                                                                                {caleg.nomor_urut}.
+                                                                            </span>
+                                                                            <span className="truncate max-w-[280px]" title={caleg.nama}>
+                                                                                {caleg.nama}
+                                                                            </span>
+                                                                        </div>
+                                                                    </td>
+                                                                    {cols.map((c) => {
+                                                                        const val = scopeCalegTotals?.[c.id]?.[caleg.id] || 0;
+                                                                        return (
+                                                                            <td key={c.id} className="px-4 py-1.5 text-right font-mono text-xs text-slate-700 dark:text-slate-300">
+                                                                                {formatNumber(val)}
+                                                                            </td>
+                                                                        );
+                                                                    })}
+                                                                    <td className={`px-4 py-1.5 text-right font-mono text-xs ${stickyRightStyle}`}>
+                                                                        {formatNumber(calegRowTotal)}
+                                                                    </td>
+                                                                </tr>
+                                                            );
+                                                        })}
+
+                                                        {/* Row: Total Suara Sah Partai */}
+                                                        <tr className="bg-emerald-50/40 dark:bg-emerald-950/20 font-bold text-xs border-b-2 border-[#e2e8f0] dark:border-[#334155]">
+                                                            <td className="px-4 py-2 text-emerald-800 dark:text-emerald-400 sticky left-0 z-10 bg-emerald-50/80 dark:bg-[#132828] border-r border-[#e2e8f0] dark:border-[#1e293b] pl-6 uppercase">
+                                                                Total Suara Sah {partai.nama}
+                                                            </td>
+                                                            {cols.map((c) => {
+                                                                const val = scopePartaiGrandTotals?.[c.id]?.[partai.id] || 0;
+                                                                return (
+                                                                    <td key={c.id} className="px-4 py-2 text-right font-mono font-bold text-emerald-700 dark:text-emerald-400">
+                                                                        {formatNumber(val)}
+                                                                    </td>
+                                                                );
+                                                            })}
+                                                            <td className={`px-4 py-2 text-right font-mono font-bold text-emerald-700 dark:text-emerald-400 ${stickyRightStyle}`}>
+                                                                {formatNumber(grandTotal)}
+                                                            </td>
+                                                        </tr>
+                                                    </>
+                                                )}
+                                            </React.Fragment>
+                                        );
+                                    })
+                                )}
 
                                 {/* ── SECTION 5: SUARA SAH & TIDAK SAH ── */}
                                 <tr className="bg-[#f1f5f9]/80 dark:bg-[#1e293b]/60 text-[#0f172a] dark:text-[#f8fafc]">
