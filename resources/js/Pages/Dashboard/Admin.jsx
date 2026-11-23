@@ -274,32 +274,34 @@ function LegislativeWidget({ widget }) {
                 </div>
             ) : null}
 
-            {/* Top 5 Parties List */}
+            {/* Top 5 Calegs List */}
             <div className="space-y-3 pt-1">
                 <p className="text-[11px] font-bold uppercase tracking-wider text-[#94a3b8]">
-                    Top 5 Partai Politik (Suara Akumulatif Partai + Caleg):
+                    Top 5 Calon Legislatif (Suara Terbanyak):
                 </p>
 
-                {hasVotes && widget.top5_parties?.length > 0 ? (
-                    widget.top5_parties.map((party, idx) => (
+                {hasVotes && widget.top5_calegs?.length > 0 ? (
+                    widget.top5_calegs.map((caleg, idx) => (
                         <div key={idx} className="bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] rounded-xl p-3.5 space-y-2">
                             <div className="flex items-center justify-between min-w-0">
                                 <div className="flex items-center gap-2.5 min-w-0">
                                     <span className="w-6 h-6 rounded-full bg-[#f1f5f9] dark:bg-[#1f2937] text-xs font-bold flex items-center justify-center text-[#0f172a] dark:text-[#f8fafc] shrink-0">
-                                        {party.rank}
+                                        {caleg.rank}
                                     </span>
                                     <div className="min-w-0">
                                         <p className="text-xs font-bold text-[#0f172a] dark:text-[#f8fafc] truncate">
-                                            {party.nama_partai}
+                                            {caleg.nama_caleg}
                                         </p>
-                                        <p className="text-[10px] text-[#94a3b8]">No. Urut {party.nomor_urut}</p>
+                                        <p className="text-[10px] text-[#94a3b8]">
+                                            {caleg.nama_partai} (No. Urut {caleg.nomor_urut})
+                                        </p>
                                     </div>
                                 </div>
                                 <div className="text-right shrink-0">
                                     <p className="text-xs font-bold text-[#bb152c] dark:text-red-400">
-                                        {formatNumber(party.suara)}
+                                        {formatNumber(caleg.suara)}
                                     </p>
-                                    <p className="text-[10px] font-semibold text-[#94a3b8]">{party.persentase}%</p>
+                                    <p className="text-[10px] font-semibold text-[#94a3b8]">{caleg.persentase}%</p>
                                 </div>
                             </div>
 
@@ -307,24 +309,14 @@ function LegislativeWidget({ widget }) {
                             <div className="w-full h-1.5 bg-[#e2e8f0] dark:bg-[#1e293b] rounded-full overflow-hidden">
                                 <div
                                     className="h-full bg-[#bb152c] rounded-full transition-all duration-300"
-                                    style={{ width: `${Math.min(party.persentase || 0, 100)}%` }}
+                                    style={{ width: `${Math.min(caleg.persentase || 0, 100)}%` }}
                                 />
                             </div>
-
-                            {/* Star Caleg */}
-                            {party.top_caleg && (party.top_caleg.suara || 0) > 0 && (
-                                <div className="flex items-center gap-1.5 text-[11px] text-[#475569] dark:text-[#94a3b8] pt-1 border-t border-[#e2e8f0]/60 dark:border-[#1e293b]">
-                                    <Star className="w-3.5 h-3.5 text-amber-500 shrink-0 fill-amber-500" />
-                                    <span className="truncate">
-                                        Caleg Teratas: <b>{party.top_caleg.nama_caleg}</b> ({formatNumber(party.top_caleg.suara)} Suara)
-                                    </span>
-                                </div>
-                            )}
                         </div>
                     ))
                 ) : (
                     <div className="bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] rounded-xl p-4 text-center text-xs text-[#94a3b8]">
-                        Belum ada data suara partai masuk.
+                        Belum ada data suara caleg masuk.
                     </div>
                 )}
             </div>
@@ -396,8 +388,55 @@ function DprdKabWidget({ widget }) {
                 </div>
             ) : null}
 
-            {/* 8 Dapil Mini Cards Grid */}
+            {/* Top 5 Calegs List */}
             <div className="space-y-3 pt-1">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-[#94a3b8]">
+                    Top 5 Calon Legislatif (Suara Terbanyak Se-Kabupaten):
+                </p>
+
+                {hasVotes && widget.top5_calegs?.length > 0 ? (
+                    widget.top5_calegs.map((caleg, idx) => (
+                        <div key={idx} className="bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] rounded-xl p-3.5 space-y-2">
+                            <div className="flex items-center justify-between min-w-0">
+                                <div className="flex items-center gap-2.5 min-w-0">
+                                    <span className="w-6 h-6 rounded-full bg-[#f1f5f9] dark:bg-[#1f2937] text-xs font-bold flex items-center justify-center text-[#0f172a] dark:text-[#f8fafc] shrink-0">
+                                        {caleg.rank}
+                                    </span>
+                                    <div className="min-w-0">
+                                        <p className="text-xs font-bold text-[#0f172a] dark:text-[#f8fafc] truncate">
+                                            {caleg.nama_caleg}
+                                        </p>
+                                        <p className="text-[10px] text-[#94a3b8]">
+                                            {caleg.nama_partai} (No. Urut {caleg.nomor_urut}) • {caleg.nama_dapil}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="text-right shrink-0">
+                                    <p className="text-xs font-bold text-[#bb152c] dark:text-red-400">
+                                        {formatNumber(caleg.suara)}
+                                    </p>
+                                    <p className="text-[10px] font-semibold text-[#94a3b8]">{caleg.persentase}%</p>
+                                </div>
+                            </div>
+
+                            {/* Mini Progress Bar */}
+                            <div className="w-full h-1.5 bg-[#e2e8f0] dark:bg-[#1e293b] rounded-full overflow-hidden">
+                                <div
+                                    className="h-full bg-[#bb152c] rounded-full transition-all duration-300"
+                                    style={{ width: `${Math.min(caleg.persentase || 0, 100)}%` }}
+                                />
+                            </div>
+                        </div>
+                    ))
+                ) : (
+                    <div className="bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] rounded-xl p-4 text-center text-xs text-[#94a3b8]">
+                        Belum ada data suara caleg masuk.
+                    </div>
+                )}
+            </div>
+
+            {/* 8 Dapil Mini Cards Grid */}
+            <div className="space-y-3 pt-2 border-t border-[#f1f5f9] dark:border-[#1e293b]">
                 <p className="text-[11px] font-bold uppercase tracking-wider text-[#94a3b8]">
                     Hasil Pemenang Sementara Per Dapil (Dapil 1 - 8):
                 </p>
@@ -515,7 +554,7 @@ export default function AdminDashboard({ electionSummary }) {
                                 <span>Progres Entry Data TPS Final</span>
                             </h3>
                             <p className="text-xs text-[#475569] dark:text-[#94a3b8] mt-0.5">
-                                Persentase TPS yang telah memfinalisasi penginputan data C-Hasil.
+                                Persentase TPS yang telah memfinalisasi seluruh jenis pemilihan yang aktif ({docSummary.active_jenis_count || activeJenis.length} jenis pemilu).
                             </p>
                         </div>
                         <div className="text-left sm:text-right">
@@ -523,7 +562,7 @@ export default function AdminDashboard({ electionSummary }) {
                                 {docSummary.tps_percent || 0}%
                             </span>
                             <span className="text-xs text-[#94a3b8] block">
-                                {formatNumber(docSummary.finalized_tps)} dari {formatNumber(docSummary.total_tps)} TPS
+                                {formatNumber(docSummary.finalized_tps)} dari {formatNumber(docSummary.total_tps)} TPS Selesai Penuh
                             </span>
                         </div>
                     </div>

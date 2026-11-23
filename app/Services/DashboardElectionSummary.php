@@ -61,7 +61,7 @@ class DashboardElectionSummary
             return [
                 'scope_label' => $scope['label'],
                 'active_jenis' => array_values($activeJenis),
-                'documentsSummary' => $this->documentsSummary($scope),
+                'documentsSummary' => $this->documentsSummary($scope, $activeJenis),
                 'topPartiesDprdKab' => $this->topPartiesDprdKab($scope),
                 'widgets' => $widgets,
                 'sections' => $filteredSections,
@@ -441,19 +441,32 @@ class DashboardElectionSummary
         return RekapHeader::JENIS_LABELS[$jenis] ?? strtoupper($jenis);
     }
 
-    private function documentsSummary(array $scope): array
+    private function documentsSummary(array $scope, array $activeJenis = []): array
     {
         $totalTpsQuery = DB::table('tps as t')
             ->join('desas as d', 'd.id', '=', 't.desa_id')
             ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id');
         $totalTps = $this->applyScope($totalTpsQuery, $scope)->count('t.id');
 
-        $finalizedTpsQuery = DB::table('rekap_headers as h')
-            ->join('tps as t', 't.id', '=', 'h.tps_id')
-            ->join('desas as d', 'd.id', '=', 't.desa_id')
-            ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
-            ->where('h.status', 'final');
-        $finalizedTps = $this->applyScope($finalizedTpsQuery, $scope)->distinct('h.tps_id')->count('h.tps_id');
+        $activeJenisList = array_values(array_filter($activeJenis));
+        $activeJenisCount = count($activeJenisList);
+
+        $finalizedTps = 0;
+        if ($activeJenisCount > 0) {
+            $finalizedTpsQuery = DB::table('rekap_headers as h')
+                ->join('tps as t', 't.id', '=', 'h.tps_id')
+                ->join('desas as d', 'd.id', '=', 't.desa_id')
+                ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
+                ->where('h.status', 'final')
+                ->whereIn('h.jenis', $activeJenisList);
+
+            $finalizedTps = $this->applyScope($finalizedTpsQuery, $scope)
+                ->select('h.tps_id')
+                ->groupBy('h.tps_id')
+                ->havingRaw('COUNT(DISTINCT h.jenis) >= ?', [$activeJenisCount])
+                ->get()
+                ->count();
+        }
 
         $tpsPercent = $totalTps > 0 ? round(($finalizedTps / $totalTps) * 100, 1) : 0;
 
@@ -471,6 +484,7 @@ class DashboardElectionSummary
             'total_tps' => $totalTps,
             'finalized_tps' => $finalizedTps,
             'tps_percent' => $tpsPercent,
+            'active_jenis_count' => $activeJenisCount,
             'verified_count' => $verifiedCount,
             'uploaded_count' => $uploadedCount,
             'rejected_count' => $rejectedCount,
@@ -677,11 +691,20 @@ class DashboardElectionSummary
             ->groupBy('s.caleg_id')
             ->pluck('total_suara', 'caleg_id');
 
+        $allCalegs = [];
+
         foreach ($calegs as $c) {
             $suara = (int) ($calegSuaraRows[$c['id']] ?? 0);
             $partyMap[$c['partai_id']]['caleg_suara'][] = [
                 'nama_caleg' => $c['nama_caleg'],
                 'nomor_urut' => $c['nomor_urut'],
+                'suara' => $suara,
+            ];
+            $allCalegs[] = [
+                'nama_caleg' => $c['nama_caleg'],
+                'nomor_urut' => $c['nomor_urut'],
+                'nama_partai' => $partyMap[$c['partai_id']]['nama_partai'] ?? '',
+                'nomor_urut_partai' => $partyMap[$c['partai_id']]['nomor_urut'] ?? '',
                 'suara' => $suara,
             ];
         }
@@ -710,6 +733,14 @@ class DashboardElectionSummary
             return $row;
         })->toArray();
 
+        usort($allCalegs, fn ($a, $b) => $b['suara'] <=> $a['suara']);
+        $top5Calegs = collect($allCalegs)->take(5)->map(function ($row, $idx) use ($totalSuaraAll) {
+            $row['rank'] = $idx + 1;
+            $row['persentase'] = $totalSuaraAll > 0 ? round(($row['suara'] / $totalSuaraAll) * 100, 2) : 0;
+
+            return $row;
+        })->toArray();
+
         $winner = $top5[0] ?? null;
 
         return [
@@ -723,6 +754,7 @@ class DashboardElectionSummary
                 'persen' => $winner['persentase'],
             ] : null,
             'top5_parties' => $top5,
+            'top5_calegs' => $top5Calegs,
         ];
     }
 
@@ -732,6 +764,7 @@ class DashboardElectionSummary
 
         $dapilCards = [];
         $totalSuaraKab = 0;
+        $allKabCalegs = [];
 
         foreach ($dapils as $dapil) {
             $partais = RekapPartai::with('calegs')
@@ -789,6 +822,7 @@ class DashboardElectionSummary
                 'nama_caleg' => $c->nama_caleg,
                 'nomor_urut' => $c->nomor_urut,
                 'party_name' => $p->nama_partai,
+                'party_nomor' => $p->nomor_urut,
             ]));
 
             $calegIds = $calegs->pluck('id')->values()->all();
@@ -816,12 +850,17 @@ class DashboardElectionSummary
                     'nomor_urut' => $c['nomor_urut'],
                     'suara' => $suara,
                 ];
-                $allCalegsWithSuara[] = [
+                $calegItem = [
                     'nama_caleg' => $c['nama_caleg'],
                     'nomor_urut' => $c['nomor_urut'],
                     'party_name' => $c['party_name'],
+                    'nama_partai' => $c['party_name'],
+                    'nomor_urut_partai' => $c['party_nomor'],
+                    'nama_dapil' => $dapil->nama,
                     'suara' => $suara,
                 ];
+                $allCalegsWithSuara[] = $calegItem;
+                $allKabCalegs[] = $calegItem;
             }
 
             $partyList = collect($partyMap)->map(function ($p) {
@@ -856,11 +895,20 @@ class DashboardElectionSummary
         $topPartiesKab = $this->topPartiesDprdKab($scope);
         $kabWinner = $topPartiesKab['rows'][0] ?? null;
 
+        usort($allKabCalegs, fn ($a, $b) => $b['suara'] <=> $a['suara']);
+        $top5Calegs = collect($allKabCalegs)->take(5)->map(function ($row, $idx) use ($totalSuaraKab) {
+            $row['rank'] = $idx + 1;
+            $row['persentase'] = $totalSuaraKab > 0 ? round(($row['suara'] / $totalSuaraKab) * 100, 2) : 0;
+
+            return $row;
+        })->toArray();
+
         return [
             'jenis' => 'dprd_kab',
             'title' => 'DPRD Kabupaten Banyuwangi',
             'total_suara' => $totalSuaraKab,
             'winner_party' => $kabWinner,
+            'top5_calegs' => $top5Calegs,
             'dapils' => $dapilCards,
         ];
     }

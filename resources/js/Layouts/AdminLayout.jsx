@@ -10,6 +10,7 @@ import {
     FolderOpen,
     BarChart2,
     Settings,
+    Upload,
     Lock,
     LogOut,
     Menu,
@@ -42,12 +43,15 @@ export default function AdminLayout({ children, title }) {
 
     const isKomisioner = user?.role === 'komisioner';
     const isPartai = user?.role === 'partai';
+    const isPpk = user?.role === 'ppk';
     const isAdmin = user?.role === 'admin';
 
     const roleLabel = isPartai
         ? 'Partai'
         : isKomisioner
         ? 'Komisioner'
+        : isPpk
+        ? 'PPK Kecamatan'
         : isAdmin
         ? 'Administrator'
         : user?.role?.toUpperCase();
@@ -63,6 +67,14 @@ export default function AdminLayout({ children, title }) {
               { href: '/admin/rekap/chart', label: 'Grafik & Statistik', icon: BarChart3, isBlade: false },
               { href: '/dokumen/semua', label: 'Rekap Dokumen', icon: FolderOpen, isBlade: false },
               { href: '/admin/rekap', label: 'Rekapitulasi Data', icon: BarChart2, isBlade: false },
+          ]
+        : isPpk
+        ? [
+              { href: '/dashboard/ppk', label: 'Beranda', icon: LayoutDashboard, isBlade: false },
+              { href: '/dokumen/kecamatan', label: 'Rekap Dokumen', icon: FolderOpen, isBlade: true },
+              { href: '/ppk/data-pps', label: 'Data PPS', icon: Building2, isBlade: true },
+              { href: '/ppk/upload', label: 'Upload Dokumen', icon: Upload, isBlade: true },
+              { href: '/ppk/rekap', label: 'Rekapitulasi Data', icon: BarChart2, isBlade: true },
           ]
         : [
               { href: '/dashboard/admin', label: 'Beranda', icon: LayoutDashboard, isBlade: false },
@@ -92,7 +104,10 @@ export default function AdminLayout({ children, title }) {
         if (menuHref === '/admin/rekap') {
             return url.startsWith('/admin/rekap') && !url.startsWith('/admin/rekap/chart');
         }
-        if (menuHref === '/dashboard/admin' || menuHref === '/dashboard/komisioner') {
+        if (menuHref === '/ppk/rekap') {
+            return url.startsWith('/ppk/rekap');
+        }
+        if (menuHref === '/dashboard/admin' || menuHref === '/dashboard/komisioner' || menuHref === '/dashboard/ppk') {
             return url === menuHref;
         }
         return url === menuHref || url.startsWith(menuHref);
