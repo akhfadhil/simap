@@ -14,6 +14,7 @@ export default function RekapIndex({
     pageSubtitle = 'Pilih jenis pemilihan yang aktif di Setup Data Pemilu untuk melihat perolehan suara.',
     badgeLabel = 'Rekapitulasi Suara',
     isPpk = false,
+    isPps = false,
 }) {
     const [selectedKec, setSelectedKec] = useState(selectedKecamatanId ? String(selectedKecamatanId) : '');
 
@@ -63,7 +64,26 @@ export default function RekapIndex({
                 </div>
 
                 {/* Filter Form Card */}
-                {isPpk ? (
+                {isPps ? (
+                    <div className="bg-white dark:bg-[#151f32] border border-[#e2e8f0] dark:border-[#1e293b] rounded-2xl p-4 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="flex items-center gap-2.5 text-xs text-[#475569] dark:text-[#94a3b8]">
+                            <div className="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-950/40 text-[#bb152c] dark:text-red-400 flex items-center justify-center shrink-0">
+                                <Vote className="w-4 h-4" />
+                            </div>
+                            <div>
+                                <span className="text-[10px] uppercase tracking-wider text-[#94a3b8] font-bold block">Wilayah Kerja PPS</span>
+                                <span className="font-bold text-[#0f172a] dark:text-[#f8fafc] text-sm">
+                                    Desa {kecamatans[0]?.desas?.[0]?.nama || '-'} (Kec. {kecamatans[0]?.nama || '-'})
+                                </span>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <span className="text-xs font-semibold px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-[#1e293b] text-[#0f172a] dark:text-[#f8fafc] border border-slate-200 dark:border-slate-700">
+                                {totalTps} Total TPS Terdaftar
+                            </span>
+                        </div>
+                    </div>
+                ) : isPpk ? (
                     <div className="bg-white dark:bg-[#151f32] border border-[#e2e8f0] dark:border-[#1e293b] rounded-2xl p-4 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div className="flex items-center gap-2.5 text-xs text-[#475569] dark:text-[#94a3b8]">
                             <div className="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-950/40 text-[#bb152c] dark:text-red-400 flex items-center justify-center shrink-0">

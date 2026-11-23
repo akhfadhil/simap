@@ -106,8 +106,8 @@ export default function AdminLayout({ children, title }) {
         ? [
               { href: '/dashboard/pps', label: 'Beranda', icon: LayoutDashboard, isBlade: false },
               { href: '/dokumen/verifikasi', label: 'Rekap Dokumen', icon: FolderOpen, isBlade: false },
-              { href: '/pps/data-tps', label: 'Data TPS', icon: Building2, isBlade: true },
-              { href: '/pps/rekap', label: 'Rekapitulasi Data', icon: BarChart2, isBlade: true },
+              { href: '/pps/data-tps', label: 'Data TPS', icon: Building2, isBlade: false },
+              { href: '/pps/rekap', label: 'Rekapitulasi Data', icon: BarChart2, isBlade: false },
           ]
         : isKpps
         ? [

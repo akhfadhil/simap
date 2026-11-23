@@ -32,6 +32,7 @@ export default function RekapShow({
     baseRoute = '/admin/rekap',
     exportUrl = null,
     isPpk = false,
+    isPps = false,
 }) {
     const [kecIdState, setKecIdState] = useState(selectedKecamatanId ? String(selectedKecamatanId) : '');
     const [desaIdState, setDesaIdState] = useState(selectedDesaId ? String(selectedDesaId) : '');
@@ -190,13 +191,15 @@ export default function RekapShow({
                                 <span>Kembali ke Daftar Rekap</span>
                             </Link>
                             <span className="text-[10px] uppercase font-bold tracking-widest text-[#bb152c] dark:text-red-400 bg-red-50 dark:bg-red-950/40 px-2.5 py-1 rounded-md ml-3">
-                                {isPpk ? 'PPK Kecamatan' : 'Admin Rekapitulasi'}
+                                {isPps ? 'PPS Desa' : isPpk ? 'PPK Kecamatan' : 'Admin Rekapitulasi'}
                             </span>
                             <h1 className="text-2xl font-bold font-heading text-[#0f172a] dark:text-[#f8fafc] tracking-tight mt-2">
                                 Rekapitulasi {jenisLabel}
                             </h1>
                             <p className="text-xs text-[#475569] dark:text-[#94a3b8] mt-1">
-                                {isPpk
+                                {isPps
+                                    ? `Formulir C-Hasil resmi perolehan suara seluruh TPS di Desa ${kecamatans[0]?.desas?.[0]?.nama || ''} (Kec. ${kecamatans[0]?.nama || ''}).`
+                                    : isPpk
                                     ? `Formulir C-Hasil resmi perolehan suara Kecamatan ${kecamatans[0]?.nama || ''}.`
                                     : 'Formulir C-Hasil resmi agregat data pemilih, surat suara, dan perolehan suara Kabupaten Banyuwangi.'}
                             </p>
@@ -230,8 +233,8 @@ export default function RekapShow({
                                 if (Array.isArray(aktifJenis) && !aktifJenis.includes(key)) return null;
                                 const active = jenis === key;
                                 const params = new URLSearchParams();
-                                if (!isPpk && kecIdState) params.set('kecamatan_id', kecIdState);
-                                if (desaIdState) params.set('desa_id', desaIdState);
+                                if (!isPpk && !isPps && kecIdState) params.set('kecamatan_id', kecIdState);
+                                if (!isPps && desaIdState) params.set('desa_id', desaIdState);
                                 const q = params.toString();
                                 const tabHref = `${baseRoute}/${key}${q ? '?' + q : ''}`;
 
@@ -254,7 +257,7 @@ export default function RekapShow({
                 </div>
 
                 {/* Dapil Filter (DPRD Kab Only - Admin only) */}
-                {!isPpk && jenis === 'dprd_kab' && Array.isArray(dapils) && dapils.length > 0 && (
+                {!isPpk && !isPps && jenis === 'dprd_kab' && Array.isArray(dapils) && dapils.length > 0 && (
                     <div className="bg-white dark:bg-[#151f32] border border-[#e2e8f0] dark:border-[#1e293b] rounded-2xl p-5 shadow-xs flex items-center gap-4">
                         <Building2 className="w-5 h-5 text-[#bb152c]" />
                         <div className="flex-1">
@@ -275,84 +278,106 @@ export default function RekapShow({
                 )}
 
                 {/* DRILL-DOWN WILAYAH FILTER BAR (Kabupaten -> Kecamatan -> Desa) */}
-                <div className="bg-white dark:bg-[#151f32] border border-[#e2e8f0] dark:border-[#1e293b] rounded-2xl p-5 shadow-xs flex flex-wrap items-center justify-between gap-4">
-                    <div className="flex flex-wrap items-center gap-3 flex-1">
-                        <Filter className="w-4 h-4 text-[#bb152c]" />
-                        <span className="text-xs font-bold text-[#0f172a] dark:text-[#f8fafc]">
-                            Fokus Tingkat Wilayah:
-                        </span>
-
-                        {/* Dropdown 1: Kecamatan (Or Fixed Badge for PPK) */}
-                        {isPpk ? (
+                {isPps ? (
+                    <div className="bg-white dark:bg-[#151f32] border border-[#e2e8f0] dark:border-[#1e293b] rounded-2xl p-5 shadow-xs flex flex-wrap items-center justify-between gap-4">
+                        <div className="flex flex-wrap items-center gap-3">
+                            <Filter className="w-4 h-4 text-[#bb152c]" />
+                            <span className="text-xs font-bold text-[#0f172a] dark:text-[#f8fafc]">
+                                Wilayah Kerja PPS:
+                            </span>
                             <div className="flex items-center gap-1.5">
-                                <MapPin className="w-3.5 h-3.5 text-[#bb152c] shrink-0" />
+                                <Building2 className="w-3.5 h-3.5 text-[#bb152c] shrink-0" />
                                 <span className="text-xs font-bold text-[#0f172a] dark:text-[#f8fafc] bg-slate-100 dark:bg-[#1e293b] px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
-                                    Kec. {kecamatans[0]?.nama || '-'}
+                                    Desa {kecamatans[0]?.desas?.[0]?.nama || '-'} (Kec. {kecamatans[0]?.nama || '-'})
                                 </span>
                             </div>
-                        ) : (
-                            <div className="flex items-center gap-1.5 w-full sm:w-auto">
-                                <MapPin className="w-3.5 h-3.5 text-[#94a3b8] shrink-0" />
-                                <select
-                                    value={kecIdState}
-                                    onChange={(e) => handleKecamatanFilterChange(e.target.value)}
-                                    className="w-full sm:w-auto bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] text-[#0f172a] dark:text-[#f8fafc] rounded-xl px-3 py-1.5 text-xs outline-none focus:border-[#bb152c]"
-                                >
-                                    <option value="">🌐 Seluruh Kabupaten (Ringkasan Per-Kecamatan)</option>
-                                    {kecamatans.map((k) => (
-                                        <option key={k.id} value={k.id}>📍 Kec. {k.nama}</option>
-                                    ))}
-                                </select>
-                            </div>
-                        )}
-
-                        {/* Dropdown 2: Desa (Active when Kecamatan selected or in PPK mode) */}
-                        {(isPpk || kecIdState) && (
-                            <div className="flex items-center gap-1.5 w-full sm:w-auto">
-                                <Building2 className="w-3.5 h-3.5 text-[#94a3b8] shrink-0" />
-                                <select
-                                    value={desaIdState}
-                                    onChange={(e) => handleDesaFilterChange(e.target.value)}
-                                    className="w-full sm:w-auto bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] text-[#0f172a] dark:text-[#f8fafc] rounded-xl px-3 py-1.5 text-xs outline-none focus:border-[#bb152c]"
-                                >
-                                    <option value="">🏢 Seluruh Desa di Kecamatan Ini (Ringkasan Per-Desa)</option>
-                                    {desaOptions.map((d) => (
-                                        <option key={d.id} value={d.id}>🏘️ Desa {d.nama}</option>
-                                    ))}
-                                </select>
-                            </div>
-                        )}
-
-                        {/* Reset Filter Button */}
-                        {isPpk ? (
-                            desaIdState && (
-                                <button
-                                    onClick={handleResetFilter}
-                                    className="inline-flex items-center gap-1 bg-[#f1f5f9] dark:bg-[#1f2937] text-[#475569] dark:text-[#94a3b8] font-bold px-3 py-1.5 rounded-xl text-xs border border-[#e2e8f0] dark:border-[#1e293b] hover:text-[#bb152c] transition cursor-pointer"
-                                >
-                                    <RotateCcw className="w-3 h-3" />
-                                    <span>Reset Ke Semua Desa</span>
-                                </button>
-                            )
-                        ) : (
-                            (kecIdState || desaIdState) && (
-                                <button
-                                    onClick={handleResetFilter}
-                                    className="inline-flex items-center gap-1 bg-[#f1f5f9] dark:bg-[#1f2937] text-[#475569] dark:text-[#94a3b8] font-bold px-3 py-1.5 rounded-xl text-xs border border-[#e2e8f0] dark:border-[#1e293b] hover:text-[#bb152c] transition cursor-pointer"
-                                >
-                                    <RotateCcw className="w-3 h-3" />
-                                    <span>Reset Ke Kabupaten</span>
-                                </button>
-                            )
-                        )}
+                        </div>
+                        <div className="text-right">
+                            <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-red-50 dark:bg-red-950/40 text-[#bb152c] dark:text-red-400">
+                                Scope: {cols.length} TPS Desa
+                            </span>
+                        </div>
                     </div>
+                ) : (
+                    <div className="bg-white dark:bg-[#151f32] border border-[#e2e8f0] dark:border-[#1e293b] rounded-2xl p-5 shadow-xs flex flex-wrap items-center justify-between gap-4">
+                        <div className="flex flex-wrap items-center gap-3 flex-1">
+                            <Filter className="w-4 h-4 text-[#bb152c]" />
+                            <span className="text-xs font-bold text-[#0f172a] dark:text-[#f8fafc]">
+                                Fokus Tingkat Wilayah:
+                            </span>
 
-                    <div className="text-right">
-                        <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-red-50 dark:bg-red-950/40 text-[#bb152c] dark:text-red-400">
-                            Scope: {scopeLevel.toUpperCase()} ({cols.length} Kolom)
-                        </span>
+                            {/* Dropdown 1: Kecamatan (Or Fixed Badge for PPK) */}
+                            {isPpk ? (
+                                <div className="flex items-center gap-1.5">
+                                    <MapPin className="w-3.5 h-3.5 text-[#bb152c] shrink-0" />
+                                    <span className="text-xs font-bold text-[#0f172a] dark:text-[#f8fafc] bg-slate-100 dark:bg-[#1e293b] px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
+                                        Kec. {kecamatans[0]?.nama || '-'}
+                                    </span>
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-1.5 w-full sm:w-auto">
+                                    <MapPin className="w-3.5 h-3.5 text-[#94a3b8] shrink-0" />
+                                    <select
+                                        value={kecIdState}
+                                        onChange={(e) => handleKecamatanFilterChange(e.target.value)}
+                                        className="w-full sm:w-auto bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] text-[#0f172a] dark:text-[#f8fafc] rounded-xl px-3 py-1.5 text-xs outline-none focus:border-[#bb152c]"
+                                    >
+                                        <option value="">🌐 Seluruh Kabupaten (Ringkasan Per-Kecamatan)</option>
+                                        {kecamatans.map((k) => (
+                                            <option key={k.id} value={k.id}>📍 Kec. {k.nama}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+
+                            {/* Dropdown 2: Desa (Active when Kecamatan selected or in PPK mode) */}
+                            {(isPpk || kecIdState) && (
+                                <div className="flex items-center gap-1.5 w-full sm:w-auto">
+                                    <Building2 className="w-3.5 h-3.5 text-[#94a3b8] shrink-0" />
+                                    <select
+                                        value={desaIdState}
+                                        onChange={(e) => handleDesaFilterChange(e.target.value)}
+                                        className="w-full sm:w-auto bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] text-[#0f172a] dark:text-[#f8fafc] rounded-xl px-3 py-1.5 text-xs outline-none focus:border-[#bb152c]"
+                                    >
+                                        <option value="">🏢 Seluruh Desa di Kecamatan Ini (Ringkasan Per-Desa)</option>
+                                        {desaOptions.map((d) => (
+                                            <option key={d.id} value={d.id}>🏘️ Desa {d.nama}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+
+                            {/* Reset Filter Button */}
+                            {isPpk ? (
+                                desaIdState && (
+                                    <button
+                                        onClick={handleResetFilter}
+                                        className="inline-flex items-center gap-1 bg-[#f1f5f9] dark:bg-[#1f2937] text-[#475569] dark:text-[#94a3b8] font-bold px-3 py-1.5 rounded-xl text-xs border border-[#e2e8f0] dark:border-[#1e293b] hover:text-[#bb152c] transition cursor-pointer"
+                                    >
+                                        <RotateCcw className="w-3 h-3" />
+                                        <span>Reset Ke Semua Desa</span>
+                                    </button>
+                                )
+                            ) : (
+                                (kecIdState || desaIdState) && (
+                                    <button
+                                        onClick={handleResetFilter}
+                                        className="inline-flex items-center gap-1 bg-[#f1f5f9] dark:bg-[#1f2937] text-[#475569] dark:text-[#94a3b8] font-bold px-3 py-1.5 rounded-xl text-xs border border-[#e2e8f0] dark:border-[#1e293b] hover:text-[#bb152c] transition cursor-pointer"
+                                    >
+                                        <RotateCcw className="w-3 h-3" />
+                                        <span>Reset Ke Kabupaten</span>
+                                    </button>
+                                )
+                            )}
+                        </div>
+
+                        <div className="text-right">
+                            <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-red-50 dark:bg-red-950/40 text-[#bb152c] dark:text-red-400">
+                                Scope: {scopeLevel.toUpperCase()} ({cols.length} Kolom)
+                            </span>
+                        </div>
                     </div>
-                </div>
+                )}
 
                 {/* KPI Metrics Summary Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

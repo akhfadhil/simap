@@ -4,65 +4,104 @@ namespace App\Http\Controllers\Rekap;
 
 use App\Http\Controllers\Controller;
 use App\Models\Desa;
+use App\Models\PemiluSetting;
 use App\Models\RekapCellFlag;
 use App\Models\RekapHeader;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class PpsController extends Controller
 {
     // Menampilkan daftar rekap TPS dalam desa PPS.
-    public function index()
+    public function index(): Response
     {
         $desa = $this->activeDesa();
         $tpsIds = $desa->tps->pluck('id');
-        $rekaps = RekapHeader::whereIn('tps_id', $tpsIds)->get()
-            ->groupBy('jenis');
-        $flaggedJenis = RekapCellFlag::query()
-            ->where(function ($query) use ($tpsIds, $desa) {
-                $query->where(function ($query) use ($tpsIds) {
-                    $query->where('level', 'tps')
-                        ->whereIn('entity_id', $tpsIds);
-                })->orWhere(function ($query) use ($desa) {
-                    $query->where('level', 'desa')
-                        ->where('entity_id', $desa->id);
-                })->orWhere(function ($query) use ($desa) {
-                    $query->where('level', 'kecamatan')
-                        ->where('entity_id', $desa->kecamatan_id);
-                });
-            })
-            ->pluck('jenis')
-            ->unique()
-            ->flip();
+        $totalTps = $tpsIds->count();
 
-        return view('rekap.pps.index', compact('desa', 'rekaps', 'flaggedJenis'));
+        $rekapCounts = RekapHeader::query()
+            ->whereIn('tps_id', $tpsIds)
+            ->where('status', 'final')
+            ->select('jenis', DB::raw('count(distinct tps_id) as total_tps'))
+            ->groupBy('jenis')
+            ->pluck('total_tps', 'jenis');
+
+        $aktifJenis = PemiluSetting::aktif();
+
+        return Inertia::render('Rekap/Index', [
+            'kecamatans' => [
+                [
+                    'id' => $desa->kecamatan_id,
+                    'nama' => $desa->kecamatan?->nama ?? 'Kecamatan',
+                    'desas' => [
+                        [
+                            'id' => $desa->id,
+                            'nama' => $desa->nama,
+                        ],
+                    ],
+                ],
+            ],
+            'totalTps' => $totalTps,
+            'rekapCounts' => $rekapCounts,
+            'aktifJenis' => $aktifJenis,
+            'selectedKecamatanId' => $desa->kecamatan_id,
+            'selectedDesaId' => $desa->id,
+            'baseRoute' => '/pps/rekap',
+            'pageTitle' => 'Rekapitulasi Suara - Desa '.$desa->nama,
+            'pageSubtitle' => 'Monitoring perolehan suara Formulir C-Hasil seluruh TPS di Desa '.$desa->nama.' (Kec. '.($desa->kecamatan?->nama ?? '').')',
+            'badgeLabel' => 'PPS Desa',
+            'isPps' => true,
+        ]);
     }
 
     // Memastikan jenis pemilihan sedang aktif.
     private function cekAktif(string $jenis): void
     {
-        abort_if(! in_array($jenis, \App\Models\PemiluSetting::aktif()), 403, 'Jenis pemilu ini tidak aktif.');
+        abort_if(! in_array($jenis, PemiluSetting::aktif()), 403, 'Jenis pemilu ini tidak aktif.');
     }
 
     // Menampilkan rekap per TPS untuk jenis pemilihan.
-    public function show(string $jenis)
+    public function show(string $jenis): Response
     {
         $this->cekAktif($jenis);
         $desa = $this->activeDesa();
-        $tpsIds = $desa->tps->pluck('id');
-        $relations = match ($jenis) {
-            'ppwp' => ['tps', 'ppwpSuaras.calon'],
-            'gubernur' => ['tps', 'gubernurSuaras.calon'],
-            'bupati' => ['tps', 'bupatiSuaras.calon'],
-            'dpd' => ['tps', 'dpdSuaras.calon'],
-            default => ['tps', 'partaiSuaras.partai', 'calegSuaras.caleg'],
+        $kecamatan = $desa->kecamatan;
+
+        $scopeData = AdminController::getScopeAggregateData(
+            $jenis,
+            $desa->kecamatan_id,
+            $desa->id,
+            $kecamatan?->dapil_id,
+            collect([$kecamatan])
+        );
+
+        $candidateOrPartyList = match ($jenis) {
+            'ppwp' => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get(['id', 'nomor_urut', 'nama_paslon as nama']),
+            'gubernur' => \App\Models\RekapGubernurCalon::orderBy('nomor_urut')->get(['id', 'nomor_urut', 'nama_paslon as nama']),
+            'bupati' => \App\Models\RekapBupatiCalon::orderBy('nomor_urut')->get(['id', 'nomor_urut', 'nama_paslon as nama']),
+            'dpd' => \App\Models\RekapDpdCalon::orderBy('nomor_urut')->get(['id', 'nomor_urut', 'nama_calon as nama']),
+            default => \App\Models\RekapPartai::with('calegs')
+                ->where('jenis', $jenis)
+                ->when($jenis === 'dprd_kab' && $kecamatan?->dapil_id, fn ($q) => $q->where('dapil_id', $kecamatan->dapil_id))
+                ->orderBy('nomor_urut')
+                ->get()
+                ->map(fn ($p) => [
+                    'id' => $p->id,
+                    'nomor_urut' => $p->nomor_urut,
+                    'nama' => $p->nama_partai,
+                    'calegs' => $p->calegs->map(fn ($c) => [
+                        'id' => $c->id,
+                        'partai_id' => $c->partai_id,
+                        'nomor_urut' => $c->nomor_urut,
+                        'nama' => $c->nama_caleg,
+                    ])->values()->all(),
+                ])->values()->all(),
         };
-        $rekaps = RekapHeader::with($relations)
-            ->whereIn('tps_id', $tpsIds)
-            ->where('jenis', $jenis)
-            ->get()->keyBy('tps_id');
-        $tpsList = $desa->tps;
-        $flagRows = RekapCellFlag::query()
-            ->where('jenis', $jenis)
+
+        $tpsIds = $desa->tps->pluck('id');
+        $flagRows = RekapCellFlag::where('jenis', $jenis)
             ->where(function ($query) use ($tpsIds, $desa) {
                 $query->where(function ($query) use ($tpsIds) {
                     $query->where('level', 'tps')
@@ -76,28 +115,51 @@ class PpsController extends Controller
                 });
             })
             ->get();
+
         $tpsCellFlags = collect();
         $cellFlags = collect();
-
         foreach ($flagRows as $flag) {
             if ($flag->level === 'tps') {
                 $tpsCellFlags->put($flag->entity_id.':'.$flag->row_key, true);
                 $cellFlags->put($flag->row_key, true);
-
-                continue;
-            }
-
-            if ($flag->level === 'desa') {
-                $cellFlags->put($flag->row_key, true);
-            }
-
-            if ($flag->level === 'kecamatan') {
+            } else {
                 $cellFlags->put($flag->row_key, true);
             }
         }
-        $master = $this->getMaster($jenis, $desa);
 
-        return view('rekap.pps.show', compact('desa', 'jenis', 'rekaps', 'tpsList', 'master', 'tpsCellFlags', 'cellFlags'));
+        return Inertia::render('Rekap/Show', [
+            'kecamatans' => [
+                [
+                    'id' => $desa->kecamatan_id,
+                    'nama' => $kecamatan?->nama ?? 'Kecamatan',
+                    'desas' => [
+                        ['id' => $desa->id, 'nama' => $desa->nama],
+                    ],
+                ],
+            ],
+            'jenis' => $jenis,
+            'jenisLabel' => RekapHeader::JENIS_LABELS[$jenis] ?? strtoupper($jenis),
+            'scopeLevel' => 'desa',
+            'selectedKecamatanId' => $desa->kecamatan_id,
+            'selectedDesaId' => $desa->id,
+            'columnList' => $scopeData['columnList'],
+            'totalTitle' => $scopeData['totalTitle'],
+            'masterList' => $candidateOrPartyList,
+            'dapils' => [],
+            'selectedDapilId' => $kecamatan?->dapil_id,
+            'scopeStats' => $scopeData['scopeStats'],
+            'scopeCalonTotals' => $scopeData['calonTotals'],
+            'scopePartaiGrandTotals' => $scopeData['partaiTotals'],
+            'scopePartaiOnlyTotals' => $scopeData['partaiOnlyTotals'] ?? [],
+            'scopeCalegTotals' => $scopeData['calegTotals'] ?? [],
+            'tpsCellFlags' => $tpsCellFlags,
+            'cellFlags' => $cellFlags,
+            'aktifJenis' => PemiluSetting::aktif(),
+            'jenisLabels' => RekapHeader::JENIS_LABELS,
+            'baseRoute' => '/pps/rekap',
+            'exportUrl' => route('pps.rekap.export', $jenis),
+            'isPps' => true,
+        ]);
     }
 
     // Mengekspor rekap desa untuk jenis pemilihan.

@@ -397,11 +397,14 @@ class RoleHierarchyAccessTest extends TestCase
                 ->has('tpsCellFlags')
             );
 
-        $ppsResponse = $this->actingAs($this->ppsA)
+        $this->actingAs($this->ppsA)
             ->get(route('pps.rekap.show', 'ppwp'))
             ->assertOk()
-            ->assertSee('bg-red-500/20', false);
-        $this->assertGreaterThanOrEqual(2, substr_count($ppsResponse->getContent(), 'ring-red-400/60'));
+            ->assertInertia(fn ($page) => $page
+                ->component('Rekap/Show')
+                ->has('cellFlags')
+                ->has('tpsCellFlags')
+            );
 
         $this->actingAs($this->ppkA)
             ->postJson(route('admin.rekap.cell-flag', 'ppwp'), [
