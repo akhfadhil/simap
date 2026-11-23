@@ -101,14 +101,30 @@ class UserManagementController extends Controller
             'partai_id' => 'required_if:role,partai|nullable|exists:rekap_partais,id',
         ]);
 
+        $kecamatanId = null;
+        $desaId = null;
+        $tpsId = null;
+
+        if ($request->role === 'ppk') {
+            $kecamatanId = $request->kecamatan_id;
+        } elseif ($request->role === 'pps') {
+            $desaId = $request->desa_id;
+            $kecamatanId = Desa::find($desaId)?->kecamatan_id;
+        } elseif ($request->role === 'kpps') {
+            $tpsId = $request->tps_id;
+            $tps = Tps::with('desa')->find($tpsId);
+            $desaId = $tps?->desa_id;
+            $kecamatanId = $tps?->desa?->kecamatan_id;
+        }
+
         User::create([
             'name' => $request->name,
             'username' => $request->username,
             'password' => Hash::make($request->filled('password') ? $request->password : $request->username),
             'role' => $request->role,
-            'kecamatan_id' => $request->role === 'ppk' ? $request->kecamatan_id : null,
-            'desa_id' => $request->role === 'pps' ? $request->desa_id : null,
-            'tps_id' => $request->role === 'kpps' ? $request->tps_id : null,
+            'kecamatan_id' => $kecamatanId,
+            'desa_id' => $desaId,
+            'tps_id' => $tpsId,
             'partai_id' => $request->role === 'partai' ? $request->partai_id : null,
         ]);
 
@@ -122,18 +138,34 @@ class UserManagementController extends Controller
             'name' => 'required|string|max:100',
             'username' => 'required|string|max:50|unique:users,username,'.$user->id,
             'password' => 'nullable|string|min:6',
-            'kecamatan_id' => 'nullable|exists:kecamatans,id',
-            'desa_id' => 'nullable|exists:desas,id',
-            'tps_id' => 'nullable|exists:tps,id',
+            'kecamatan_id' => ($user->role === 'ppk' ? 'required' : 'nullable').'|exists:kecamatans,id',
+            'desa_id' => ($user->role === 'pps' ? 'required' : 'nullable').'|exists:desas,id',
+            'tps_id' => ($user->role === 'kpps' ? 'required' : 'nullable').'|exists:tps,id',
             'partai_id' => ($user->role === 'partai' ? 'required' : 'nullable').'|exists:rekap_partais,id',
         ]);
+
+        $kecamatanId = null;
+        $desaId = null;
+        $tpsId = null;
+
+        if ($user->role === 'ppk') {
+            $kecamatanId = $request->kecamatan_id;
+        } elseif ($user->role === 'pps') {
+            $desaId = $request->desa_id;
+            $kecamatanId = Desa::find($desaId)?->kecamatan_id;
+        } elseif ($user->role === 'kpps') {
+            $tpsId = $request->tps_id;
+            $tps = Tps::with('desa')->find($tpsId);
+            $desaId = $tps?->desa_id;
+            $kecamatanId = $tps?->desa?->kecamatan_id;
+        }
 
         $data = [
             'name' => $request->name,
             'username' => $request->username,
-            'kecamatan_id' => $user->role === 'ppk' ? $request->kecamatan_id : null,
-            'desa_id' => $user->role === 'pps' ? $request->desa_id : null,
-            'tps_id' => $user->role === 'kpps' ? $request->tps_id : null,
+            'kecamatan_id' => $kecamatanId,
+            'desa_id' => $desaId,
+            'tps_id' => $tpsId,
             'partai_id' => $user->role === 'partai' ? $request->partai_id : null,
         ];
 

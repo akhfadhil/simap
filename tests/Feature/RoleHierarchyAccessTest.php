@@ -525,6 +525,86 @@ class RoleHierarchyAccessTest extends TestCase
         ]);
     }
 
+    public function test_admin_can_create_ppk_pps_kpps_with_territory_assignment(): void
+    {
+        // 1. Create PPK with kecamatan
+        $this->actingAs($this->admin)
+            ->post(route('admin.users.store'), [
+                'name' => 'Operator PPK Test',
+                'username' => 'ppk_test',
+                'password' => 'ppk12345',
+                'role' => 'ppk',
+                'kecamatan_id' => $this->kecamatanA->id,
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('users', [
+            'username' => 'ppk_test',
+            'role' => 'ppk',
+            'kecamatan_id' => $this->kecamatanA->id,
+            'desa_id' => null,
+            'tps_id' => null,
+        ]);
+
+        // 2. Create PPS with desa (should resolve kecamatan)
+        $this->actingAs($this->admin)
+            ->post(route('admin.users.store'), [
+                'name' => 'Operator PPS Test',
+                'username' => 'pps_test',
+                'password' => 'pps12345',
+                'role' => 'pps',
+                'desa_id' => $this->desaA->id,
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('users', [
+            'username' => 'pps_test',
+            'role' => 'pps',
+            'desa_id' => $this->desaA->id,
+            'kecamatan_id' => $this->kecamatanA->id,
+            'tps_id' => null,
+        ]);
+
+        // 3. Create KPPS with tps (should resolve desa and kecamatan)
+        $this->actingAs($this->admin)
+            ->post(route('admin.users.store'), [
+                'name' => 'Operator KPPS Test',
+                'username' => 'kpps_test',
+                'password' => 'kpps12345',
+                'role' => 'kpps',
+                'tps_id' => $this->tpsA->id,
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('users', [
+            'username' => 'kpps_test',
+            'role' => 'kpps',
+            'tps_id' => $this->tpsA->id,
+            'desa_id' => $this->desaA->id,
+            'kecamatan_id' => $this->kecamatanA->id,
+        ]);
+    }
+
+    public function test_admin_can_update_user_territory_and_profile(): void
+    {
+        $ppk = $this->user('ppk', ['kecamatan_id' => $this->kecamatanA->id]);
+
+        $this->actingAs($this->admin)
+            ->put(route('admin.users.update', $ppk), [
+                'name' => 'Updated PPK Name',
+                'username' => 'ppk_updated',
+                'kecamatan_id' => $this->kecamatanB->id,
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('users', [
+            'id' => $ppk->id,
+            'name' => 'Updated PPK Name',
+            'username' => 'ppk_updated',
+            'kecamatan_id' => $this->kecamatanB->id,
+        ]);
+    }
+
     public function test_admin_cannot_delete_current_account(): void
     {
         $this->actingAs($this->admin)
