@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Rekap;
 use App\Http\Controllers\Controller;
 use App\Models\Dapil;
 use App\Models\Kecamatan;
+use App\Models\RekapCellFlag;
 use App\Models\RekapHeader;
 use App\Models\Tps;
 use App\Services\RekapAdminCache;
@@ -86,6 +87,18 @@ class AdminController extends Controller
                 ])->values()->all(),
         };
 
+        $tpsCellFlags = collect();
+        $cellFlags = collect();
+        $flagRows = RekapCellFlag::where('jenis', $jenis)->get();
+        foreach ($flagRows as $flag) {
+            if ($flag->level === 'tps') {
+                $tpsCellFlags->put($flag->entity_id.':'.$flag->row_key, true);
+                $cellFlags->put($flag->row_key, true);
+            } else {
+                $cellFlags->put($flag->row_key, true);
+            }
+        }
+
         return \Inertia\Inertia::render('Rekap/Show', [
             'kecamatans' => $kecamatans->map(fn ($k) => [
                 'id' => $k->id,
@@ -107,6 +120,8 @@ class AdminController extends Controller
             'scopePartaiGrandTotals' => $scopeData['partaiTotals'],
             'scopePartaiOnlyTotals' => $scopeData['partaiOnlyTotals'] ?? [],
             'scopeCalegTotals' => $scopeData['calegTotals'] ?? [],
+            'tpsCellFlags' => $tpsCellFlags,
+            'cellFlags' => $cellFlags,
             'aktifJenis' => \App\Models\PemiluSetting::aktif(),
             'jenisLabels' => RekapHeader::JENIS_LABELS,
         ]);

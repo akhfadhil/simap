@@ -211,26 +211,6 @@ export default function DokumenPpk({
             <Head title={`Rekap Dokumen - Kecamatan ${kecamatan?.nama || ''}`} />
 
             <div className="space-y-5 sm:space-y-6">
-                {/* Banner Mode View Admin */}
-                {isAdminView && (
-                    <div className="bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-900/60 rounded-2xl px-5 py-3.5 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <span className="text-orange-600 dark:text-orange-400 text-xs font-bold uppercase tracking-wider">
-                                👁 Mode Monitoring Admin
-                            </span>
-                            <span className="text-xs text-slate-600 dark:text-slate-300">
-                                Anda sedang melihat rekap dokumen Kecamatan {kecamatan?.nama} sebagai Administrator.
-                            </span>
-                        </div>
-                        <a
-                            href="/admin/kecamatan"
-                            className="text-xs font-bold text-orange-600 dark:text-orange-400 hover:underline"
-                        >
-                            ← Kembali ke Kelola Kecamatan
-                        </a>
-                    </div>
-                )}
-
                 {/* Header Card (Tombol upload di header telah dihapus) */}
                 <div className="bg-white dark:bg-[#151f32] border border-[#e2e8f0] dark:border-[#1e293b] rounded-2xl p-4 sm:p-6 shadow-sm">
                     <div className="space-y-1">

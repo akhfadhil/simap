@@ -33,12 +33,24 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard/kpps', [DashboardController::class, 'kpps'])->name('dashboard.kpps');
 
     // Clear session view — accessible by all roles
-    Route::get('/clear-view-session', function () {
+    Route::get('/clear-view-session', function (\Illuminate\Http\Request $request) {
+        $user = Auth::user();
         session()->forget('admin_view_kecamatan_id');
         session()->forget('admin_view_desa_id');
         session()->forget('admin_view_tps_id');
 
-        return response()->noContent();
+        if ($request->has('redirect')) {
+            return redirect($request->query('redirect'));
+        }
+
+        $target = match ($user?->role) {
+            'admin' => route('dashboard.admin'),
+            'ppk' => route('dashboard.ppk'),
+            'pps' => route('dashboard.pps'),
+            default => '/',
+        };
+
+        return redirect($target);
     })->name('clear.view.session');
 
     // Dokumen — KPPS, PPS (view as kpps), & Admin

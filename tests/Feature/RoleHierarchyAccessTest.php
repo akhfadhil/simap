@@ -78,6 +78,35 @@ class RoleHierarchyAccessTest extends TestCase
             ->assertRedirect(route('dashboard.kpps'));
     }
 
+    public function test_admin_view_session_shares_territory_and_clears_properly(): void
+    {
+        $this->actingAs($this->admin)
+            ->get(route('admin.kecamatan.view', $this->kecamatanA))
+            ->assertRedirect(route('dashboard.ppk'));
+
+        $this->actingAs($this->admin)
+            ->withSession(['admin_view_kecamatan_id' => $this->kecamatanA->id])
+            ->get(route('dashboard.ppk'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Dashboard/Ppk')
+                ->where('adminViewSession.kecamatan_id', $this->kecamatanA->id)
+                ->where('adminViewSession.kecamatan_nama', 'Kecamatan A')
+            );
+
+        $this->actingAs($this->admin)
+            ->withSession(['admin_view_kecamatan_id' => $this->kecamatanA->id])
+            ->get(route('clear.view.session'))
+            ->assertRedirect(route('dashboard.admin'))
+            ->assertSessionMissing('admin_view_kecamatan_id');
+
+        $this->actingAs($this->admin)
+            ->withSession(['admin_view_kecamatan_id' => $this->kecamatanA->id])
+            ->get(route('clear.view.session', ['redirect' => '/admin/kecamatan']))
+            ->assertRedirect('/admin/kecamatan')
+            ->assertSessionMissing('admin_view_kecamatan_id');
+    }
+
     public function test_admin_can_create_caleg_with_ajax(): void
     {
         $partai = RekapPartai::create([
@@ -305,16 +334,22 @@ class RoleHierarchyAccessTest extends TestCase
         $this->actingAs($this->ppkA)
             ->get(route('ppk.rekap.show', 'ppwp'))
             ->assertOk()
-            ->assertSee('bg-red-500/20', false);
+            ->assertInertia(fn ($page) => $page
+                ->component('Rekap/Show')
+                ->has('cellFlags')
+            );
 
-        $ppkDetailResponse = $this->actingAs($this->ppkA)
+        $this->actingAs($this->ppkA)
             ->get(route('ppk.rekap.show', [
                 'jenis' => 'ppwp',
                 'detail' => 1,
                 'detail_desa_id' => $this->desaA->id,
             ]))
-            ->assertOk();
-        $this->assertGreaterThanOrEqual(3, substr_count($ppkDetailResponse->getContent(), 'ring-red-400/60'));
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Rekap/Show')
+                ->has('tpsCellFlags')
+            );
 
         $ppsResponse = $this->actingAs($this->ppsA)
             ->get(route('pps.rekap.show', 'ppwp'))

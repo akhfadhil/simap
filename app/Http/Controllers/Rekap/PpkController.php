@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Rekap;
 use App\Http\Controllers\Controller;
 use App\Models\Kecamatan;
 use App\Models\PemiluSetting;
+use App\Models\RekapCellFlag;
 use App\Models\RekapHeader;
 use App\Models\Tps;
 use Illuminate\Support\Facades\Auth;
@@ -98,6 +99,33 @@ class PpkController extends Controller
                 ])->values()->all(),
         };
 
+        $tpsIds = Tps::whereHas('desa', fn ($q) => $q->where('kecamatan_id', $kecamatan->id))->pluck('id');
+        $desaIds = $kecamatan->desas()->pluck('id');
+        $flagRows = RekapCellFlag::where('jenis', $jenis)
+            ->where(function ($query) use ($tpsIds, $desaIds, $kecamatan) {
+                $query->where(function ($query) use ($tpsIds) {
+                    $query->where('level', 'tps')
+                        ->whereIn('entity_id', $tpsIds);
+                })->orWhere(function ($query) use ($desaIds) {
+                    $query->where('level', 'desa')
+                        ->whereIn('entity_id', $desaIds);
+                })->orWhere(function ($query) use ($kecamatan) {
+                    $query->where('level', 'kecamatan')
+                        ->where('entity_id', $kecamatan->id);
+                });
+            })
+            ->get();
+        $tpsCellFlags = collect();
+        $cellFlags = collect();
+        foreach ($flagRows as $flag) {
+            if ($flag->level === 'tps') {
+                $tpsCellFlags->put($flag->entity_id.':'.$flag->row_key, true);
+                $cellFlags->put($flag->row_key, true);
+            } else {
+                $cellFlags->put($flag->row_key, true);
+            }
+        }
+
         return Inertia::render('Rekap/Show', [
             'kecamatans' => [
                 [
@@ -121,6 +149,8 @@ class PpkController extends Controller
             'scopePartaiGrandTotals' => $scopeData['partaiTotals'],
             'scopePartaiOnlyTotals' => $scopeData['partaiOnlyTotals'] ?? [],
             'scopeCalegTotals' => $scopeData['calegTotals'] ?? [],
+            'tpsCellFlags' => $tpsCellFlags,
+            'cellFlags' => $cellFlags,
             'aktifJenis' => PemiluSetting::aktif(),
             'jenisLabels' => RekapHeader::JENIS_LABELS,
             'baseRoute' => '/ppk/rekap',

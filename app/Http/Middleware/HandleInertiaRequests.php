@@ -54,6 +54,9 @@ class HandleInertiaRequests extends Middleware
                 'kecamatan_id' => fn () => session('admin_view_kecamatan_id'),
                 'desa_id' => fn () => session('admin_view_desa_id'),
                 'tps_id' => fn () => session('admin_view_tps_id'),
+                'kecamatan_nama' => fn () => session('admin_view_kecamatan_id') ? \App\Models\Kecamatan::find(session('admin_view_kecamatan_id'))?->nama : null,
+                'desa_nama' => fn () => session('admin_view_desa_id') ? \App\Models\Desa::find(session('admin_view_desa_id'))?->nama : null,
+                'tps_nama' => fn () => session('admin_view_tps_id') ? \App\Models\Tps::find(session('admin_view_tps_id'))?->nama : null,
             ],
         ]);
     }

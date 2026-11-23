@@ -19,7 +19,9 @@ import {
     Moon,
     CheckCircle2,
     AlertCircle,
-    ChevronRight
+    ChevronRight,
+    Eye,
+    ArrowLeft
 } from 'lucide-react';
 
 export default function AdminLayout({ children, title }) {
@@ -41,20 +43,53 @@ export default function AdminLayout({ children, title }) {
         }
     }, [darkMode]);
 
-    const isKomisioner = user?.role === 'komisioner';
-    const isPartai = user?.role === 'partai';
-    const isPpk = user?.role === 'ppk';
+    const currentUrl = typeof window !== 'undefined' ? window.location.pathname : '';
     const isAdmin = user?.role === 'admin';
+    const isAdminPath = currentUrl.startsWith('/admin');
+    const isSimulated = !isAdminPath && Boolean(adminViewSession?.kecamatan_id || adminViewSession?.desa_id || adminViewSession?.tps_id);
+
+    // Tentukan role efektif yang sedang ditampilkan di layout
+    const activeRole = isSimulated
+        ? (adminViewSession?.tps_id ? 'kpps' : adminViewSession?.desa_id ? 'pps' : 'ppk')
+        : user?.role;
+
+    const isKomisioner = activeRole === 'komisioner';
+    const isPartai = activeRole === 'partai';
+    const isPpk = activeRole === 'ppk';
+    const isPps = activeRole === 'pps';
+    const isKpps = activeRole === 'kpps';
+
+    const simulatedTerritory = adminViewSession?.tps_nama
+        ? `TPS ${adminViewSession.tps_nama}`
+        : adminViewSession?.desa_nama
+        ? `Desa ${adminViewSession.desa_nama}`
+        : adminViewSession?.kecamatan_nama
+        ? `Kecamatan ${adminViewSession.kecamatan_nama}`
+        : 'Wilayah';
 
     const roleLabel = isPartai
         ? 'Partai'
         : isKomisioner
         ? 'Komisioner'
+        : isKpps
+        ? (isSimulated ? `KPPS (${simulatedTerritory})` : 'KPPS')
+        : isPps
+        ? (isSimulated ? `PPS (${simulatedTerritory})` : 'PPS Desa')
         : isPpk
-        ? 'PPK Kecamatan'
+        ? (isSimulated ? `PPK (${simulatedTerritory})` : 'PPK Kecamatan')
         : isAdmin
         ? 'Administrator'
         : user?.role?.toUpperCase();
+
+    const backLink = user?.role === 'ppk'
+        ? { href: '/clear-view-session?redirect=' + encodeURIComponent('/ppk/data-pps'), label: 'Data PPS' }
+        : adminViewSession?.tps_id
+        ? { href: '/clear-view-session?redirect=' + encodeURIComponent('/admin/tps'), label: 'Kelola TPS' }
+        : adminViewSession?.desa_id
+        ? { href: '/clear-view-session?redirect=' + encodeURIComponent('/admin/desa'), label: 'Kelola Desa' }
+        : adminViewSession?.kecamatan_id
+        ? { href: '/clear-view-session?redirect=' + encodeURIComponent('/admin/kecamatan'), label: 'Kelola Kecamatan' }
+        : null;
 
     const menus = isPartai
         ? [
@@ -75,6 +110,18 @@ export default function AdminLayout({ children, title }) {
               { href: '/ppk/data-pps', label: 'Data PPS', icon: Building2, isBlade: false },
               { href: '/ppk/rekap', label: 'Rekapitulasi Data', icon: BarChart2, isBlade: false },
           ]
+        : isPps
+        ? [
+              { href: '/dashboard/pps', label: 'Beranda', icon: LayoutDashboard, isBlade: false },
+              { href: '/dokumen/verifikasi', label: 'Rekap Dokumen', icon: FolderOpen, isBlade: true },
+              { href: '/pps/data-tps', label: 'Data TPS', icon: Building2, isBlade: true },
+              { href: '/pps/rekap', label: 'Rekapitulasi Data', icon: BarChart2, isBlade: true },
+          ]
+        : isKpps
+        ? [
+              { href: '/dashboard/kpps', label: 'Beranda', icon: LayoutDashboard, isBlade: false },
+              { href: '/dokumen/upload', label: 'Upload C-Hasil', icon: Upload, isBlade: true },
+          ]
         : [
               { href: '/dashboard/admin', label: 'Beranda', icon: LayoutDashboard, isBlade: false },
               { href: '/admin/users', label: 'Pengguna', icon: Users, isBlade: false },
@@ -87,13 +134,9 @@ export default function AdminLayout({ children, title }) {
               { href: '/admin/setup', label: 'Setup Data Pemilu', icon: Settings, isBlade: false },
           ];
 
-    const currentUrl = window.location.pathname;
-
     const clearViewSession = (e) => {
-        e.preventDefault();
-        router.get('/clear-view-session', {}, {
-            onSuccess: () => window.location.reload()
-        });
+        if (e) e.preventDefault();
+        window.location.href = '/clear-view-session';
     };
 
     const isMenuActive = (menuHref, url) => {
@@ -106,7 +149,10 @@ export default function AdminLayout({ children, title }) {
         if (menuHref === '/ppk/rekap') {
             return url.startsWith('/ppk/rekap');
         }
-        if (menuHref === '/dashboard/admin' || menuHref === '/dashboard/komisioner' || menuHref === '/dashboard/ppk') {
+        if (menuHref === '/pps/rekap') {
+            return url.startsWith('/pps/rekap');
+        }
+        if (menuHref === '/dashboard/admin' || menuHref === '/dashboard/komisioner' || menuHref === '/dashboard/ppk' || menuHref === '/dashboard/pps' || menuHref === '/dashboard/kpps') {
             return url === menuHref;
         }
         return url === menuHref || url.startsWith(menuHref);
@@ -311,12 +357,37 @@ export default function AdminLayout({ children, title }) {
                     </header>
 
                     {/* View As Session Notice Banner */}
-                    {(adminViewSession?.kecamatan_id || adminViewSession?.desa_id || adminViewSession?.tps_id) && (
-                        <div className="bg-amber-500/10 border-b border-amber-500/20 px-6 py-2 flex items-center justify-between text-xs text-amber-700 dark:text-amber-400 font-medium">
-                            <span>⚠️ Anda sedang dalam mode simulasi tampilan wilayah (View As).</span>
-                            <button onClick={clearViewSession} className="underline hover:text-amber-900 dark:hover:text-amber-200 font-bold ml-2">
-                                Kembalikan Tampilan Admin ×
-                            </button>
+                    {isSimulated && (
+                        <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs text-amber-900 dark:text-amber-300 font-medium">
+                            <div className="flex items-center gap-2.5 flex-wrap">
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider text-[10px] bg-amber-500/20 text-amber-900 dark:text-amber-200 border border-amber-500/30">
+                                    <Eye className="w-3 h-3" />
+                                    Mode Simulasi
+                                </span>
+                                <span>
+                                    Anda sedang melihat tampilan sebagai <strong className="font-semibold">{roleLabel}</strong>.
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-2 sm:gap-3">
+                                {backLink && (
+                                    <a
+                                        href={backLink.href}
+                                        className="text-amber-800 dark:text-amber-300 hover:text-amber-950 dark:hover:text-amber-100 hover:underline inline-flex items-center gap-1 font-semibold text-xs"
+                                    >
+                                        <ArrowLeft className="w-3.5 h-3.5" />
+                                        <span>Kembali ke {backLink.label}</span>
+                                    </a>
+                                )}
+                                <span className="text-amber-400 dark:text-amber-600">|</span>
+                                <button
+                                    onClick={clearViewSession}
+                                    className="px-2.5 py-1 rounded-lg bg-amber-600/15 hover:bg-amber-600/25 text-amber-950 dark:text-amber-100 font-bold transition inline-flex items-center gap-1 text-xs cursor-pointer"
+                                    title="Hentikan simulasi dan kembali ke akun Admin"
+                                >
+                                    <span>Kembalikan Tampilan Admin</span>
+                                    <span className="font-bold text-sm leading-none">×</span>
+                                </button>
+                            </div>
                         </div>
                     )}
 
