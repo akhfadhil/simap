@@ -526,21 +526,10 @@ class AdminController extends Controller
         return ['partais' => $partais->orderBy('nomor_urut')->get()];
     }
 
-    // Mengambil nomor partai untuk akun partai pada jenis legislatif.
+    // Mengambil nomor partai untuk akun partai pada jenis legislatif (dinonaktifkan seiring penghapusan role partai).
     private function partaiScopeNomor(string $jenis): ?int
     {
-        if (! Auth::check() || Auth::user()->role !== 'partai') {
-            return null;
-        }
-
-        if (! in_array($jenis, ['dpr_ri', 'dprd_prov', 'dprd_kab'], true)) {
-            return null;
-        }
-
-        $partai = Auth::user()->partai;
-        abort_if(! $partai, 403, 'Akun partai belum dihubungkan ke master partai.');
-
-        return (int) $partai->nomor_urut;
+        return null;
     }
 
     // Menghitung agregat suara per kecamatan.

@@ -19,7 +19,7 @@ import {
     CheckCircle2
 } from 'lucide-react';
 
-export default function UserIndex({ users, usersLoaded, kecamatans = [], desas = [], tpsList = [], partais = [], filters = {} }) {
+export default function UserIndex({ users, usersLoaded, kecamatans = [], desas = [], tpsList = [], filters = {} }) {
     const { auth } = usePage().props;
     const currentUserId = auth?.user?.id;
 
@@ -50,7 +50,6 @@ export default function UserIndex({ users, usersLoaded, kecamatans = [], desas =
         kecamatan_id: '',
         desa_id: '',
         tps_id: '',
-        partai_id: '',
     });
 
     // Edit Form Hook
@@ -61,7 +60,6 @@ export default function UserIndex({ users, usersLoaded, kecamatans = [], desas =
         kecamatan_id: '',
         desa_id: '',
         tps_id: '',
-        partai_id: '',
     });
 
     // Handle Filter
@@ -123,7 +121,6 @@ export default function UserIndex({ users, usersLoaded, kecamatans = [], desas =
             kecamatan_id: u.role === 'ppk' ? (u.kecamatan_id || '') : '',
             desa_id: u.role === 'pps' ? (u.desa_id || '') : '',
             tps_id: u.role === 'kpps' ? (u.tps_id || '') : '',
-            partai_id: u.role === 'partai' ? (u.partai_id || '') : '',
         });
     };
 
@@ -181,7 +178,7 @@ export default function UserIndex({ users, usersLoaded, kecamatans = [], desas =
                                 Kelola Pengguna & Akun Petugas
                             </h1>
                             <p className="text-xs text-[#475569] dark:text-[#94a3b8] mt-1">
-                                Kelola hak akses akun operator, PPK, PPS, KPPS, komisioner, dan partai politik.
+                                Kelola hak akses akun operator, PPK, PPS, KPPS, dan komisioner.
                             </p>
                         </div>
 
@@ -222,7 +219,6 @@ export default function UserIndex({ users, usersLoaded, kecamatans = [], desas =
                                 <option value="ppk">PPK (Kecamatan)</option>
                                 <option value="pps">PPS (Desa)</option>
                                 <option value="kpps">KPPS (TPS)</option>
-                                <option value="partai">Partai Politik</option>
                             </select>
                         </div>
 
@@ -324,7 +320,7 @@ export default function UserIndex({ users, usersLoaded, kecamatans = [], desas =
                                                             ? 'bg-teal-50 text-teal-700 dark:bg-teal-950/40 dark:text-teal-400 border border-teal-100 dark:border-teal-900/50'
                                                             : u.role === 'kpps'
                                                             ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/50'
-                                                            : 'bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-400 border border-purple-100 dark:border-purple-900/50'
+                                                            : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
                                                     }`}>
                                                         {u.role}
                                                     </span>
@@ -345,12 +341,7 @@ export default function UserIndex({ users, usersLoaded, kecamatans = [], desas =
                                                             TPS {u.tps?.nama || '-'} <span className="text-[#94a3b8] text-[11px]">({u.tps?.desa?.nama ? `Desa ${u.tps.desa.nama}` : ''})</span>
                                                         </span>
                                                     )}
-                                                    {u.role === 'partai' && (
-                                                        <span className="font-medium text-[#0f172a] dark:text-[#f8fafc]">
-                                                            Partai {u.partai?.nama_partai || '-'}
-                                                        </span>
-                                                    )}
-                                                    {!['ppk', 'pps', 'kpps', 'partai'].includes(u.role) && (
+                                                    {!['ppk', 'pps', 'kpps'].includes(u.role) && (
                                                         <span className="text-slate-500 dark:text-slate-400 italic">
                                                             Tingkat Kabupaten (Wewenang Penuh)
                                                         </span>
@@ -519,7 +510,6 @@ export default function UserIndex({ users, usersLoaded, kecamatans = [], desas =
                                             kecamatan_id: '',
                                             desa_id: '',
                                             tps_id: '',
-                                            partai_id: '',
                                         }));
                                         setAddKecId('');
                                         setAddDesaId('');
@@ -531,7 +521,6 @@ export default function UserIndex({ users, usersLoaded, kecamatans = [], desas =
                                     <option value="ppk">PPK (Kecamatan)</option>
                                     <option value="pps">PPS (Desa)</option>
                                     <option value="kpps">KPPS (TPS)</option>
-                                    <option value="partai">Partai Politik</option>
                                 </select>
                             </div>
 
@@ -667,29 +656,6 @@ export default function UserIndex({ users, usersLoaded, kecamatans = [], desas =
                                             <p className="text-red-500 text-[10px] font-medium mt-1">{addForm.errors.tps_id}</p>
                                         )}
                                     </div>
-                                </div>
-                            )}
-
-                            {/* PARTAI -> Pilih Partai Politik */}
-                            {addForm.data.role === 'partai' && (
-                                <div className="p-3.5 bg-purple-50/50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-900/40 rounded-xl space-y-2">
-                                    <label className="block text-xs font-semibold text-purple-900 dark:text-purple-300">
-                                        Pilih Partai Politik <span className="text-red-500">*</span>
-                                    </label>
-                                    <select
-                                        value={addForm.data.partai_id}
-                                        onChange={(e) => addForm.setData('partai_id', e.target.value)}
-                                        className="w-full bg-white dark:bg-[#0b0f19] border border-purple-200 dark:border-purple-900/60 text-[#0f172a] dark:text-[#f8fafc] rounded-xl px-3 py-2 text-xs outline-none focus:border-purple-500"
-                                        required
-                                    >
-                                        <option value="">-- Pilih Partai --</option>
-                                        {partais.map(p => (
-                                            <option key={p.id} value={p.id}>No. {p.nomor_urut} - {p.nama_partai}</option>
-                                        ))}
-                                    </select>
-                                    {addForm.errors.partai_id && (
-                                        <p className="text-red-500 text-[10px] font-medium">{addForm.errors.partai_id}</p>
-                                    )}
                                 </div>
                             )}
 
@@ -929,29 +895,6 @@ export default function UserIndex({ users, usersLoaded, kecamatans = [], desas =
                                             <p className="text-red-500 text-[10px] font-medium mt-1">{editForm.errors.tps_id}</p>
                                         )}
                                     </div>
-                                </div>
-                            )}
-
-                            {/* PARTAI -> Pilih Partai Politik */}
-                            {editingUser.role === 'partai' && (
-                                <div className="p-3.5 bg-purple-50/50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-900/40 rounded-xl space-y-2">
-                                    <label className="block text-xs font-semibold text-purple-900 dark:text-purple-300">
-                                        Partai Politik <span className="text-red-500">*</span>
-                                    </label>
-                                    <select
-                                        value={editForm.data.partai_id}
-                                        onChange={(e) => editForm.setData('partai_id', e.target.value)}
-                                        className="w-full bg-white dark:bg-[#0b0f19] border border-purple-200 dark:border-purple-900/60 text-[#0f172a] dark:text-[#f8fafc] rounded-xl px-3 py-2 text-xs outline-none focus:border-purple-500"
-                                        required
-                                    >
-                                        <option value="">-- Pilih Partai --</option>
-                                        {partais.map(p => (
-                                            <option key={p.id} value={p.id}>No. {p.nomor_urut} - {p.nama_partai}</option>
-                                        ))}
-                                    </select>
-                                    {editForm.errors.partai_id && (
-                                        <p className="text-red-500 text-[10px] font-medium">{editForm.errors.partai_id}</p>
-                                    )}
                                 </div>
                             )}
 

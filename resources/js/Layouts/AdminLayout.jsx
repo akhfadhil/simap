@@ -54,7 +54,6 @@ export default function AdminLayout({ children, title }) {
         : user?.role;
 
     const isKomisioner = activeRole === 'komisioner';
-    const isPartai = activeRole === 'partai';
     const isPpk = activeRole === 'ppk';
     const isPps = activeRole === 'pps';
     const isKpps = activeRole === 'kpps';
@@ -67,9 +66,7 @@ export default function AdminLayout({ children, title }) {
         ? `Kecamatan ${adminViewSession.kecamatan_nama}`
         : 'Wilayah';
 
-    const roleLabel = isPartai
-        ? 'Partai'
-        : isKomisioner
+    const roleLabel = isKomisioner
         ? 'Komisioner'
         : isKpps
         ? (isSimulated ? `KPPS (${simulatedTerritory})` : 'KPPS')
@@ -91,12 +88,7 @@ export default function AdminLayout({ children, title }) {
         ? { href: '/clear-view-session?redirect=' + encodeURIComponent('/admin/kecamatan'), label: 'Kelola Kecamatan' }
         : null;
 
-    const menus = isPartai
-        ? [
-              { href: '/admin/rekap/chart', label: 'Grafik & Statistik', icon: BarChart3, isBlade: false },
-              { href: '/admin/rekap', label: 'Rekapitulasi Data', icon: BarChart2, isBlade: false },
-          ]
-        : isKomisioner
+    const menus = isKomisioner
         ? [
               { href: '/dashboard/komisioner', label: 'Beranda', icon: LayoutDashboard, isBlade: false },
               { href: '/admin/rekap/chart', label: 'Grafik & Statistik', icon: BarChart3, isBlade: false },

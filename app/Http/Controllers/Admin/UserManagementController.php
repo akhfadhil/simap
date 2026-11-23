@@ -34,7 +34,6 @@ class UserManagementController extends Controller
         $kecamatans = Kecamatan::orderBy('nama')->get();
         $desas = Desa::orderBy('nama')->get(['id', 'nama', 'kecamatan_id']);
         $tpsList = Tps::orderBy('nama')->get(['id', 'nama', 'desa_id']);
-        $partais = RekapPartai::where('jenis', 'dpr_ri')->orderBy('nomor_urut')->get(['id', 'nomor_urut', 'nama_partai']);
 
         return \Inertia\Inertia::render('Admin/Users/Index', [
             'users' => $users,
@@ -42,7 +41,6 @@ class UserManagementController extends Controller
             'kecamatans' => $kecamatans,
             'desas' => $desas,
             'tpsList' => $tpsList,
-            'partais' => $partais,
             'filters' => $request->only(['role', 'kecamatan_id', 'desa_id']),
         ]);
     }
@@ -94,11 +92,10 @@ class UserManagementController extends Controller
             'name' => 'required|string|max:100',
             'username' => 'required|string|unique:users|max:50',
             'password' => 'nullable|string|min:6',
-            'role' => 'required|in:admin,komisioner,partai,ppk,pps,kpps',
+            'role' => 'required|in:admin,komisioner,ppk,pps,kpps',
             'kecamatan_id' => 'required_if:role,ppk|nullable|exists:kecamatans,id',
             'desa_id' => 'required_if:role,pps|nullable|exists:desas,id',
             'tps_id' => 'required_if:role,kpps|nullable|exists:tps,id',
-            'partai_id' => 'required_if:role,partai|nullable|exists:rekap_partais,id',
         ]);
 
         $kecamatanId = null;
@@ -125,7 +122,6 @@ class UserManagementController extends Controller
             'kecamatan_id' => $kecamatanId,
             'desa_id' => $desaId,
             'tps_id' => $tpsId,
-            'partai_id' => $request->role === 'partai' ? $request->partai_id : null,
         ]);
 
         return back()->with('success', 'User berhasil ditambahkan.');
@@ -141,7 +137,6 @@ class UserManagementController extends Controller
             'kecamatan_id' => ($user->role === 'ppk' ? 'required' : 'nullable').'|exists:kecamatans,id',
             'desa_id' => ($user->role === 'pps' ? 'required' : 'nullable').'|exists:desas,id',
             'tps_id' => ($user->role === 'kpps' ? 'required' : 'nullable').'|exists:tps,id',
-            'partai_id' => ($user->role === 'partai' ? 'required' : 'nullable').'|exists:rekap_partais,id',
         ]);
 
         $kecamatanId = null;
@@ -166,7 +161,6 @@ class UserManagementController extends Controller
             'kecamatan_id' => $kecamatanId,
             'desa_id' => $desaId,
             'tps_id' => $tpsId,
-            'partai_id' => $user->role === 'partai' ? $request->partai_id : null,
         ];
 
         if ($request->filled('password')) {
@@ -216,14 +210,14 @@ class UserManagementController extends Controller
             'kpps' => $selectedDesaId ? $this->bulkKppsRows($selectedDesaId) : collect(),
         };
 
-        return view('admin.users.bulk', compact(
-            'role',
-            'kecamatans',
-            'desas',
-            'rows',
-            'selectedKecamatanId',
-            'selectedDesaId'
-        ));
+        return \Inertia\Inertia::render('Admin/Users/Bulk', [
+            'role' => $role,
+            'kecamatans' => $kecamatans,
+            'desas' => $desas,
+            'rows' => $rows,
+            'selectedKecamatanId' => $selectedKecamatanId,
+            'selectedDesaId' => $selectedDesaId,
+        ]);
     }
 
     // Menyimpan hasil bulk input user.
@@ -294,13 +288,29 @@ class UserManagementController extends Controller
                     ]);
                 }
 
+                $kecamatanId = null;
+                $desaId = null;
+                $tpsId = null;
+
+                if ($role === 'ppk') {
+                    $kecamatanId = $entityId;
+                } elseif ($role === 'pps') {
+                    $desaId = $entityId;
+                    $kecamatanId = Desa::find($entityId)?->kecamatan_id;
+                } elseif ($role === 'kpps') {
+                    $tpsId = $entityId;
+                    $tps = Tps::with('desa')->find($entityId);
+                    $desaId = $tps?->desa_id;
+                    $kecamatanId = $tps?->desa?->kecamatan_id;
+                }
+
                 $payload = [
                     'name' => $name,
                     'username' => $username,
                     'role' => $role,
-                    'kecamatan_id' => $role === 'ppk' ? $entityId : null,
-                    'desa_id' => $role === 'pps' ? $entityId : null,
-                    'tps_id' => $role === 'kpps' ? $entityId : null,
+                    'kecamatan_id' => $kecamatanId,
+                    'desa_id' => $desaId,
+                    'tps_id' => $tpsId,
                 ];
 
                 if ($password !== '') {
@@ -323,7 +333,7 @@ class UserManagementController extends Controller
 
         return redirect()
             ->route('admin.users.bulk', $request->only('role', 'kecamatan_id', 'desa_id'))
-            ->with('success', "Bulk user selesai. Dibuat: {$created}, diperbarui: {$updated}.");
+            ->with('success', "Bulk user selesai diproses. Dibuat: {$created}, diperbarui: {$updated}.");
     }
 
     // Menyiapkan baris bulk user PPK per kecamatan.
@@ -434,7 +444,7 @@ class UserManagementController extends Controller
     // Membentuk query user sesuai filter.
     private function filteredUsers(Request $request)
     {
-        return User::with('kecamatan', 'desa.kecamatan', 'tps.desa.kecamatan', 'partai')
+        return User::with('kecamatan', 'desa.kecamatan', 'tps.desa.kecamatan')
             ->when($request->filled('role'), fn ($query) => $query->where('role', $request->role))
             ->when($request->filled('kecamatan_id'), function ($query) use ($request) {
                 $query->where(function ($query) use ($request) {
@@ -458,7 +468,6 @@ class UserManagementController extends Controller
             'ppk' => $user->kecamatan?->nama ?? '',
             'pps' => $user->desa?->kecamatan?->nama ?? '',
             'kpps' => $user->tps?->desa?->kecamatan?->nama ?? '',
-            'partai' => $user->partai?->nama_partai ?? '',
             default => '',
         };
     }
