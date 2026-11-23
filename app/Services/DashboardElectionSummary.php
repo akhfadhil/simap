@@ -604,6 +604,7 @@ class DashboardElectionSummary
         $section = $this->candidateSection('dpd', $scope);
         $winner = $section['rows'][0] ?? null;
         $top4 = array_slice($section['rows'], 0, 4);
+        $top5 = array_slice($section['rows'], 0, 5);
 
         return [
             'jenis' => 'dpd',
@@ -615,6 +616,8 @@ class DashboardElectionSummary
                 'persen' => $winner['persentase'],
             ] : null,
             'top4' => $top4,
+            'top5' => $top5,
+            'rows' => $section['rows'] ?? [],
         ];
     }
 
@@ -907,7 +910,14 @@ class DashboardElectionSummary
             'jenis' => 'dprd_kab',
             'title' => 'DPRD Kabupaten Banyuwangi',
             'total_suara' => $totalSuaraKab,
-            'winner_party' => $kabWinner,
+            'winner_party' => $kabWinner ? [
+                'nama' => $kabWinner['nama_partai'] ?? $kabWinner['nama'] ?? '',
+                'nama_partai' => $kabWinner['nama_partai'] ?? $kabWinner['nama'] ?? '',
+                'nomor_urut' => $kabWinner['nomor_urut'] ?? 0,
+                'suara' => $kabWinner['suara'] ?? 0,
+                'persen' => $kabWinner['persentase'] ?? $kabWinner['persen'] ?? 0,
+                'persentase' => $kabWinner['persentase'] ?? $kabWinner['persen'] ?? 0,
+            ] : null,
             'top5_calegs' => $top5Calegs,
             'dapils' => $dapilCards,
         ];
@@ -916,7 +926,7 @@ class DashboardElectionSummary
     private function cacheParts(User $user, array $scope, array $activeJenis): array
     {
         return [
-            'version' => 7,
+            'version' => 8,
             'user_role' => $user->role,
             'scope' => $scope,
             'active' => $activeJenis,

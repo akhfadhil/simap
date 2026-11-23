@@ -55,7 +55,8 @@ class DashboardController extends Controller
         $viewDesa = null;
 
         if ($user->role === 'pps') {
-            // PPS membuka dashboard wilayahnya sendiri.
+            abort_if(! $user->desa_id, 403, 'Akun PPS belum di-assign ke Desa.');
+            $viewDesa = $user->desa ? $user->desa()->with('kecamatan')->first() : null;
         } else {
             abort_if(! session('admin_view_desa_id'), 403, 'Pilih desa yang ingin dilihat.');
             $viewDesa = Desa::with('kecamatan')->findOrFail(session('admin_view_desa_id'));
@@ -65,7 +66,7 @@ class DashboardController extends Controller
         return \Inertia\Inertia::render('Dashboard/Pps', [
             'electionSummary' => $summary->forUser($user),
             'viewDesa' => $viewDesa,
-            'isAdminView' => (bool) $viewDesa,
+            'isAdminView' => $user->role !== 'pps',
         ]);
     }
 

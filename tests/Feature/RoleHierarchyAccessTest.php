@@ -172,6 +172,16 @@ class RoleHierarchyAccessTest extends TestCase
     public function test_pps_can_access_only_kpps_inside_own_desa(): void
     {
         $this->actingAs($this->ppsA)
+            ->get(route('dashboard.pps'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Dashboard/Pps')
+                ->where('viewDesa.id', $this->desaA->id)
+                ->where('viewDesa.nama', 'Desa A')
+                ->where('isAdminView', false)
+            );
+
+        $this->actingAs($this->ppsA)
             ->get(route('pps.view-tps', $this->tpsA))
             ->assertRedirect(route('dashboard.kpps'));
 
