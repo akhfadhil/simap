@@ -198,6 +198,16 @@ class RoleHierarchyAccessTest extends TestCase
             ->withSession(['admin_view_tps_id' => $this->tpsB->id])
             ->get(route('dokumen.upload'))
             ->assertForbidden();
+
+        // PPS can access its own dokumen verifikasi page rendered via Inertia
+        $this->actingAs($this->ppsA)
+            ->get(route('dokumen.pps'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Dokumen/Pps')
+                ->has('tpsList')
+                ->has('desa')
+            );
     }
 
     public function test_parent_roles_cannot_mutate_lower_level_documents_or_rekap(): void
@@ -242,6 +252,32 @@ class RoleHierarchyAccessTest extends TestCase
             ->withSession(['admin_view_tps_id' => $this->tpsA->id])
             ->post(route('rekap.finalisasi', 'ppwp'))
             ->assertForbidden();
+
+        // But PPS itself can verify document in own desa
+        $this->actingAs($this->ppsA)
+            ->post(route('dokumen.verifikasi', $dokumen), ['aksi' => 'terverifikasi'])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('dokumens', [
+            'id' => $dokumen->id,
+            'status' => 'terverifikasi',
+            'verified_by' => $this->ppsA->id,
+        ]);
+
+        // And PPS can reject document with reason
+        $this->actingAs($this->ppsA)
+            ->post(route('dokumen.verifikasi', $dokumen), [
+                'aksi' => 'ditolak',
+                'komentar' => 'Foto dokumen kurang jelas',
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('dokumens', [
+            'id' => $dokumen->id,
+            'status' => 'ditolak',
+            'komentar' => 'Foto dokumen kurang jelas',
+            'verified_by' => $this->ppsA->id,
+        ]);
     }
 
     public function test_admin_can_temporarily_edit_rekap_from_admin_detail(): void

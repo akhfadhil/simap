@@ -86,11 +86,27 @@ class DokumenController extends Controller
 
         $tpsList = $selectedTpsId
             ? Tps::where('id', $selectedTpsId)
-                ->with(['dokumens' => fn ($q) => $q->with('uploader', 'verifier')])
+                ->with(['desa.kecamatan', 'dokumens' => fn ($q) => $q->with('uploader', 'verifier')])
                 ->get()
-            : collect();
+            : Tps::where('desa_id', $desa->id)
+                ->with(['desa.kecamatan', 'dokumens' => fn ($q) => $q->with('uploader', 'verifier')])
+                ->orderBy('nama')
+                ->get();
 
-        return view('dokumen.pps', compact('tpsList', 'tpsOptions', 'selectedTpsId', 'desa', 'isAdminView'));
+        $aktifJenis = \App\Models\PemiluSetting::aktif();
+        $aktifDokumenMap = collect(\App\Models\Dokumen::JENIS)
+            ->filter(fn ($label, $key) => in_array(strtolower($key), $aktifJenis, true))
+            ->toArray();
+
+        return \Inertia\Inertia::render('Dokumen/Pps', [
+            'desa' => $desa,
+            'tpsList' => $tpsList,
+            'tpsOptions' => $tpsOptions,
+            'selectedTpsId' => $selectedTpsId,
+            'aktifJenis' => $aktifJenis,
+            'aktifDokumenMap' => $aktifDokumenMap,
+            'isAdminView' => $isAdminView,
+        ]);
     }
 
     // Memverifikasi atau menolak dokumen TPS oleh PPS.
