@@ -61,7 +61,7 @@ class AdminController extends Controller
             $kecamatans = Kecamatan::with(['desas.tps'])->orderBy('nama')->get();
         }
 
-        $scopeData = $this->getScopeAggregateData($jenis, $detailKecamatanId, $detailDesaId, $selectedDapilId, $kecamatans);
+        $scopeData = self::getScopeAggregateData($jenis, $detailKecamatanId, $detailDesaId, $selectedDapilId, $kecamatans);
 
         $candidateOrPartyList = match ($jenis) {
             'ppwp' => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get(['id', 'nomor_urut', 'nama_paslon as nama']),
@@ -112,7 +112,7 @@ class AdminController extends Controller
         ]);
     }
 
-    private function getScopeAggregateData(string $jenis, ?int $kecId, ?int $desaId, ?int $dapilId, $kecamatans): array
+    public static function getScopeAggregateData(string $jenis, ?int $kecId, ?int $desaId, ?int $dapilId, $kecamatans): array
     {
         $fieldNames = [
             'dpt_lk', 'dpt_pr',
@@ -134,16 +134,25 @@ class AdminController extends Controller
             $targetDesa = \App\Models\Desa::with(['tps', 'kecamatan'])->find($desaId);
             if ($targetDesa) {
                 $totalTitle = 'TOTAL DESA '.strtoupper($targetDesa->nama);
-                $columnList = $targetDesa->tps->map(fn ($t) => ['id' => $t->id, 'nama' => 'TPS '.$t->nama])->values()->all();
+                $columnList = $targetDesa->tps->map(fn ($t) => [
+                    'id' => $t->id,
+                    'nama' => str_starts_with($t->nama, 'TPS') ? $t->nama : 'TPS '.$t->nama
+                ])->values()->all();
             }
         } elseif ($kecId && $targetKec) {
             $scopeLevel = 'kecamatan';
             $totalTitle = 'TOTAL KEC. '.strtoupper($targetKec->nama);
-            $columnList = $targetKec->desas->map(fn ($d) => ['id' => $d->id, 'nama' => 'Desa '.$d->nama])->values()->all();
+            $columnList = $targetKec->desas->map(fn ($d) => [
+                'id' => $d->id,
+                'nama' => str_starts_with($d->nama, 'Desa') ? $d->nama : 'Desa '.$d->nama
+            ])->values()->all();
         }
 
         if (empty($columnList)) {
-            $columnList = $kecamatans->map(fn ($k) => ['id' => $k->id, 'nama' => 'Kec. '.$k->nama])->values()->all();
+            $columnList = $kecamatans->map(fn ($k) => [
+                'id' => $k->id,
+                'nama' => str_starts_with($k->nama, 'Kec.') ? $k->nama : 'Kec. '.$k->nama
+            ])->values()->all();
         }
 
         // Header Stats DB Query

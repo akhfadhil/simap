@@ -73,8 +73,7 @@ export default function AdminLayout({ children, title }) {
               { href: '/dashboard/ppk', label: 'Beranda', icon: LayoutDashboard, isBlade: false },
               { href: '/dokumen/kecamatan', label: 'Rekap Dokumen', icon: FolderOpen, isBlade: false },
               { href: '/ppk/data-pps', label: 'Data PPS', icon: Building2, isBlade: false },
-              { href: '/ppk/upload', label: 'Upload Dokumen', icon: Upload, isBlade: true },
-              { href: '/ppk/rekap', label: 'Rekapitulasi Data', icon: BarChart2, isBlade: true },
+              { href: '/ppk/rekap', label: 'Rekapitulasi Data', icon: BarChart2, isBlade: false },
           ]
         : [
               { href: '/dashboard/admin', label: 'Beranda', icon: LayoutDashboard, isBlade: false },

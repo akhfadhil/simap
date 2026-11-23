@@ -184,14 +184,7 @@ class DokumenController extends Controller
     // Menampilkan form upload dokumen kecamatan.
     public function uploadFormPpk()
     {
-        $kecamatan = $this->activePpkKecamatan();
-
-        $uploaded = Dokumen::where('kecamatan_id', $kecamatan->id)
-            ->where('level', 'kecamatan')
-            ->get()
-            ->keyBy('jenis');
-
-        return view('dokumen.upload_ppk', compact('kecamatan', 'uploaded'));
+        return redirect()->route('dokumen.ppk');
     }
 
     // Menyimpan atau mengganti dokumen kecamatan.

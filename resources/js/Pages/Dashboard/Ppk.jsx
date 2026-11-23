@@ -563,7 +563,7 @@ export default function PpkDashboard({ electionSummary, viewKecamatan, isAdminVi
                 </div>
 
                 {/* Quick Action Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <a
                         href="/dokumen/kecamatan"
                         className="group bg-white dark:bg-[#151f32] border border-[#e2e8f0] dark:border-[#1e293b] rounded-2xl p-4 shadow-xs hover:border-[#bb152c] dark:hover:border-red-500/50 transition duration-150 flex items-center justify-between"
@@ -576,7 +576,7 @@ export default function PpkDashboard({ electionSummary, viewKecamatan, isAdminVi
                                 <h4 className="text-xs font-bold text-[#0f172a] dark:text-[#f8fafc] group-hover:text-[#bb152c] dark:group-hover:text-red-400 transition">
                                     Rekap Dokumen
                                 </h4>
-                                <p className="text-[10px] text-[#94a3b8]">Periksa C-Hasil TPS</p>
+                                <p className="text-[10px] text-[#94a3b8]">Periksa C-Hasil & Upload D-Hasil</p>
                             </div>
                         </div>
                         <ArrowRight className="w-4 h-4 text-[#94a3b8] group-hover:text-[#bb152c] dark:group-hover:text-red-400 group-hover:translate-x-0.5 transition" />
@@ -595,24 +595,6 @@ export default function PpkDashboard({ electionSummary, viewKecamatan, isAdminVi
                                     Data PPS
                                 </h4>
                                 <p className="text-[10px] text-[#94a3b8]">Daftar Desa & Progres</p>
-                            </div>
-                        </div>
-                        <ArrowRight className="w-4 h-4 text-[#94a3b8] group-hover:text-[#bb152c] dark:group-hover:text-red-400 group-hover:translate-x-0.5 transition" />
-                    </a>
-
-                    <a
-                        href="/ppk/upload"
-                        className="group bg-white dark:bg-[#151f32] border border-[#e2e8f0] dark:border-[#1e293b] rounded-2xl p-4 shadow-xs hover:border-[#bb152c] dark:hover:border-red-500/50 transition duration-150 flex items-center justify-between"
-                    >
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
-                                <Upload className="w-5 h-5" />
-                            </div>
-                            <div>
-                                <h4 className="text-xs font-bold text-[#0f172a] dark:text-[#f8fafc] group-hover:text-[#bb152c] dark:group-hover:text-red-400 transition">
-                                    Upload Dokumen
-                                </h4>
-                                <p className="text-[10px] text-[#94a3b8]">Unggah D-Hasil Kecamatan</p>
                             </div>
                         </div>
                         <ArrowRight className="w-4 h-4 text-[#94a3b8] group-hover:text-[#bb152c] dark:group-hover:text-red-400 group-hover:translate-x-0.5 transition" />

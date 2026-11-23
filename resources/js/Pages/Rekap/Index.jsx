@@ -8,18 +8,23 @@ export default function RekapIndex({
     totalTps = 0,
     rekapCounts = {},
     aktifJenis = [],
-    selectedKecamatanId = null
+    selectedKecamatanId = null,
+    baseRoute = '/admin/rekap',
+    pageTitle = 'Rekapitulasi Tingkat Kabupaten',
+    pageSubtitle = 'Pilih jenis pemilihan yang aktif di Setup Data Pemilu untuk melihat perolehan suara.',
+    badgeLabel = 'Rekapitulasi Suara',
+    isPpk = false,
 }) {
     const [selectedKec, setSelectedKec] = useState(selectedKecamatanId ? String(selectedKecamatanId) : '');
 
     const handleFilterChange = (newKecId) => {
         setSelectedKec(newKecId);
-        router.get('/admin/rekap', { kecamatan_id: newKecId || undefined }, { preserveState: true });
+        router.get(baseRoute, { kecamatan_id: newKecId || undefined }, { preserveState: true });
     };
 
     const handleFilterSubmit = (e) => {
         e.preventDefault();
-        router.get('/admin/rekap', { kecamatan_id: selectedKec || undefined }, { preserveState: true });
+        router.get(baseRoute, { kecamatan_id: selectedKec || undefined }, { preserveState: true });
     };
 
     const allJenisOptions = [
@@ -46,44 +51,63 @@ export default function RekapIndex({
                 <div className="bg-white dark:bg-[#151f32] border border-[#e2e8f0] dark:border-[#1e293b] rounded-2xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                         <span className="text-[10px] uppercase font-bold tracking-widest text-[#bb152c] dark:text-red-400 bg-red-50 dark:bg-red-950/40 px-2.5 py-1 rounded-md">
-                            Rekapitulasi Suara
+                            {badgeLabel}
                         </span>
                         <h1 className="text-2xl font-bold font-heading text-[#0f172a] dark:text-[#f8fafc] tracking-tight mt-2">
-                            Rekapitulasi Tingkat Kabupaten
+                            {pageTitle}
                         </h1>
                         <p className="text-xs text-[#475569] dark:text-[#94a3b8] mt-1">
-                            Pilih jenis pemilihan yang aktif di Setup Data Pemilu untuk melihat perolehan suara.
+                            {pageSubtitle}
                         </p>
                     </div>
                 </div>
 
                 {/* Filter Form Card */}
-                <div className="bg-white dark:bg-[#151f32] border border-[#e2e8f0] dark:border-[#1e293b] rounded-2xl p-5 shadow-xs">
-                    <form onSubmit={handleFilterSubmit} className="flex flex-col sm:flex-row items-end gap-3">
-                        <div className="flex-1">
-                            <label className="block text-xs font-semibold text-[#0f172a] dark:text-[#f8fafc] mb-1.5">
-                                Filter Kecamatan
-                            </label>
-                            <select
-                                value={selectedKec}
-                                onChange={(e) => handleFilterChange(e.target.value)}
-                                className="w-full bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] text-[#0f172a] dark:text-[#f8fafc] rounded-xl px-3 py-2 text-xs outline-none focus:border-[#bb152c]"
-                            >
-                                <option value="">Semua Kecamatan (Kabupaten)</option>
-                                {kecamatans?.map(kec => (
-                                    <option key={kec.id} value={kec.id}>{kec.nama}</option>
-                                ))}
-                            </select>
+                {isPpk ? (
+                    <div className="bg-white dark:bg-[#151f32] border border-[#e2e8f0] dark:border-[#1e293b] rounded-2xl p-4 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="flex items-center gap-2.5 text-xs text-[#475569] dark:text-[#94a3b8]">
+                            <div className="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-950/40 text-[#bb152c] dark:text-red-400 flex items-center justify-center shrink-0">
+                                <Vote className="w-4 h-4" />
+                            </div>
+                            <div>
+                                <span className="text-[10px] uppercase tracking-wider text-[#94a3b8] font-bold block">Wilayah Kerja PPK</span>
+                                <span className="font-bold text-[#0f172a] dark:text-[#f8fafc] text-sm">Kecamatan {kecamatans[0]?.nama || '-'}</span>
+                            </div>
                         </div>
-                        <button
-                            type="submit"
-                            className="bg-[#0f172a] dark:bg-[#1f2937] hover:bg-[#334151] text-white font-semibold py-2 px-5 rounded-xl text-xs flex items-center gap-2 transition cursor-pointer"
-                        >
-                            <Filter className="w-3.5 h-3.5" />
-                            <span>Filter Rekap</span>
-                        </button>
-                    </form>
-                </div>
+                        <div className="flex items-center gap-2">
+                            <span className="text-xs font-semibold px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-[#1e293b] text-[#0f172a] dark:text-[#f8fafc] border border-slate-200 dark:border-slate-700">
+                                {totalTps} Total TPS Terdaftar
+                            </span>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="bg-white dark:bg-[#151f32] border border-[#e2e8f0] dark:border-[#1e293b] rounded-2xl p-5 shadow-xs">
+                        <form onSubmit={handleFilterSubmit} className="flex flex-col sm:flex-row items-end gap-3">
+                            <div className="flex-1">
+                                <label className="block text-xs font-semibold text-[#0f172a] dark:text-[#f8fafc] mb-1.5">
+                                    Filter Kecamatan
+                                </label>
+                                <select
+                                    value={selectedKec}
+                                    onChange={(e) => handleFilterChange(e.target.value)}
+                                    className="w-full bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] text-[#0f172a] dark:text-[#f8fafc] rounded-xl px-3 py-2 text-xs outline-none focus:border-[#bb152c]"
+                                >
+                                    <option value="">Semua Kecamatan (Kabupaten)</option>
+                                    {kecamatans?.map(kec => (
+                                        <option key={kec.id} value={kec.id}>{kec.nama}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <button
+                                type="submit"
+                                className="bg-[#0f172a] dark:bg-[#1f2937] hover:bg-[#334151] text-white font-semibold py-2 px-5 rounded-xl text-xs flex items-center gap-2 transition cursor-pointer"
+                            >
+                                <Filter className="w-3.5 h-3.5" />
+                                <span>Filter Rekap</span>
+                            </button>
+                        </form>
+                    </div>
+                )}
 
                 {/* Jenis Pemilihan Cards Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -92,9 +116,11 @@ export default function RekapIndex({
                         const percentage = totalTps > 0 ? Math.min(100, Math.round((count / totalTps) * 100)) : 0;
                         const isCompleted = totalTps > 0 && count >= totalTps;
 
-                        const targetUrl = selectedKec
-                            ? `/admin/rekap/${opt.key}?kecamatan_id=${selectedKec}`
-                            : `/admin/rekap/${opt.key}`;
+                        const targetUrl = isPpk
+                            ? `${baseRoute}/${opt.key}`
+                            : selectedKec
+                            ? `${baseRoute}/${opt.key}?kecamatan_id=${selectedKec}`
+                            : `${baseRoute}/${opt.key}`;
 
                         return (
                             <Link
@@ -152,7 +178,7 @@ export default function RekapIndex({
 
                                 <div className="flex items-center justify-between pt-3 border-t border-[#f1f5f9] dark:border-[#1e293b]">
                                     <span className="text-xs text-[#94a3b8] font-medium">
-                                        {selectedKec ? 'Filter Kecamatan Aktif' : 'Semua Wilayah'}
+                                        {isPpk ? `Kec. ${kecamatans[0]?.nama || ''}` : selectedKec ? 'Filter Kecamatan Aktif' : 'Semua Wilayah'}
                                     </span>
                                     <span className="text-xs font-bold text-[#bb152c] dark:text-red-400 group-hover:translate-x-1 transition transform flex items-center gap-1">
                                         Buka Rekap <ArrowRight className="w-3.5 h-3.5" />

@@ -28,7 +28,10 @@ export default function RekapShow({
     scopePartaiOnlyTotals = {},
     scopeCalegTotals = {},
     aktifJenis = [],
-    jenisLabels = {}
+    jenisLabels = {},
+    baseRoute = '/admin/rekap',
+    exportUrl = null,
+    isPpk = false,
 }) {
     const [kecIdState, setKecIdState] = useState(selectedKecamatanId ? String(selectedKecamatanId) : '');
     const [desaIdState, setDesaIdState] = useState(selectedDesaId ? String(selectedDesaId) : '');
@@ -70,7 +73,7 @@ export default function RekapShow({
     };
 
     // Find current selected kecamatan to populate desa options
-    const currentKecObj = kecamatans.find(k => String(k.id) === String(kecIdState));
+    const currentKecObj = kecamatans.find(k => String(k.id) === String(kecIdState)) || kecamatans[0];
     const desaOptions = currentKecObj?.desas || [];
 
     // Calculate Scope Grand Totals
@@ -106,7 +109,7 @@ export default function RekapShow({
         if (dapilId) params.dapil_id = dapilId;
         setKecIdState('');
         setDesaIdState('');
-        router.get(`/admin/rekap/${jenis}`, params, { preserveState: true });
+        router.get(`${baseRoute}/${jenis}`, params, { preserveState: true });
     };
 
     const handleKecamatanFilterChange = (newKecId) => {
@@ -115,24 +118,24 @@ export default function RekapShow({
         const params = {};
         if (selectedDapilId) params.dapil_id = selectedDapilId;
         if (newKecId) params.kecamatan_id = newKecId;
-        router.get(`/admin/rekap/${jenis}`, params, { preserveState: true });
+        router.get(`${baseRoute}/${jenis}`, params, { preserveState: true });
     };
 
     const handleDesaFilterChange = (newDesaId) => {
         setDesaIdState(newDesaId);
         const params = {};
-        if (selectedDapilId) params.dapil_id = selectedDapilId;
-        if (kecIdState) params.kecamatan_id = kecIdState;
+        if (!isPpk && selectedDapilId) params.dapil_id = selectedDapilId;
+        if (!isPpk && kecIdState) params.kecamatan_id = kecIdState;
         if (newDesaId) params.desa_id = newDesaId;
-        router.get(`/admin/rekap/${jenis}`, params, { preserveState: true });
+        router.get(`${baseRoute}/${jenis}`, params, { preserveState: true });
     };
 
     const handleResetFilter = () => {
         setKecIdState('');
         setDesaIdState('');
         const params = {};
-        if (selectedDapilId) params.dapil_id = selectedDapilId;
-        router.get(`/admin/rekap/${jenis}`, params, { preserveState: true });
+        if (!isPpk && selectedDapilId) params.dapil_id = selectedDapilId;
+        router.get(`${baseRoute}/${jenis}`, params, { preserveState: true });
     };
 
     // Form C-Hasil Standard Row Schema
@@ -180,32 +183,34 @@ export default function RekapShow({
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div>
                             <Link
-                                href="/admin/rekap"
+                                href={baseRoute}
                                 className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#475569] dark:text-[#94a3b8] hover:text-[#bb152c] dark:hover:text-red-400 transition mb-3"
                             >
                                 <ArrowLeft className="w-4 h-4" />
                                 <span>Kembali ke Daftar Rekap</span>
                             </Link>
                             <span className="text-[10px] uppercase font-bold tracking-widest text-[#bb152c] dark:text-red-400 bg-red-50 dark:bg-red-950/40 px-2.5 py-1 rounded-md ml-3">
-                                Admin Rekapitulasi
+                                {isPpk ? 'PPK Kecamatan' : 'Admin Rekapitulasi'}
                             </span>
                             <h1 className="text-2xl font-bold font-heading text-[#0f172a] dark:text-[#f8fafc] tracking-tight mt-2">
                                 Rekapitulasi {jenisLabel}
                             </h1>
                             <p className="text-xs text-[#475569] dark:text-[#94a3b8] mt-1">
-                                Formulir C-Hasil resmi agregat data pemilih, surat suara, dan perolehan suara Kabupaten Banyuwangi.
+                                {isPpk
+                                    ? `Formulir C-Hasil resmi perolehan suara Kecamatan ${kecamatans[0]?.nama || ''}.`
+                                    : 'Formulir C-Hasil resmi agregat data pemilih, surat suara, dan perolehan suara Kabupaten Banyuwangi.'}
                             </p>
                         </div>
 
                         <div className="flex items-center gap-3">
                             <a
-                                href={(() => {
+                                href={exportUrl || (() => {
                                     const params = new URLSearchParams();
                                     if (selectedDapilId) params.set('dapil_id', selectedDapilId);
                                     if (kecIdState) params.set('kecamatan_id', kecIdState);
                                     if (desaIdState) params.set('desa_id', desaIdState);
                                     const q = params.toString();
-                                    return `/admin/rekap/${jenis}/export${q ? '?' + q : ''}`;
+                                    return `${baseRoute}/${jenis}/export${q ? '?' + q : ''}`;
                                 })()}
                                 className="inline-flex items-center gap-2 bg-[#bb152c] hover:bg-[#991124] text-white font-semibold px-4 py-2.5 rounded-xl text-xs shadow-md shadow-[#bb152c]/20 transition"
                             >
@@ -225,10 +230,10 @@ export default function RekapShow({
                                 if (Array.isArray(aktifJenis) && !aktifJenis.includes(key)) return null;
                                 const active = jenis === key;
                                 const params = new URLSearchParams();
-                                if (kecIdState) params.set('kecamatan_id', kecIdState);
+                                if (!isPpk && kecIdState) params.set('kecamatan_id', kecIdState);
                                 if (desaIdState) params.set('desa_id', desaIdState);
                                 const q = params.toString();
-                                const tabHref = `/admin/rekap/${key}${q ? '?' + q : ''}`;
+                                const tabHref = `${baseRoute}/${key}${q ? '?' + q : ''}`;
 
                                 return (
                                     <Link
@@ -248,8 +253,8 @@ export default function RekapShow({
                     </div>
                 </div>
 
-                {/* Dapil Filter (DPRD Kab Only) */}
-                {jenis === 'dprd_kab' && Array.isArray(dapils) && dapils.length > 0 && (
+                {/* Dapil Filter (DPRD Kab Only - Admin only) */}
+                {!isPpk && jenis === 'dprd_kab' && Array.isArray(dapils) && dapils.length > 0 && (
                     <div className="bg-white dark:bg-[#151f32] border border-[#e2e8f0] dark:border-[#1e293b] rounded-2xl p-5 shadow-xs flex items-center gap-4">
                         <Building2 className="w-5 h-5 text-[#bb152c]" />
                         <div className="flex-1">
@@ -277,23 +282,32 @@ export default function RekapShow({
                             Fokus Tingkat Wilayah:
                         </span>
 
-                        {/* Dropdown 1: Kecamatan */}
-                        <div className="flex items-center gap-1.5 w-full sm:w-auto">
-                            <MapPin className="w-3.5 h-3.5 text-[#94a3b8] shrink-0" />
-                            <select
-                                value={kecIdState}
-                                onChange={(e) => handleKecamatanFilterChange(e.target.value)}
-                                className="w-full sm:w-auto bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] text-[#0f172a] dark:text-[#f8fafc] rounded-xl px-3 py-1.5 text-xs outline-none focus:border-[#bb152c]"
-                            >
-                                <option value="">🌐 Seluruh Kabupaten (Ringkasan Per-Kecamatan)</option>
-                                {kecamatans.map((k) => (
-                                    <option key={k.id} value={k.id}>📍 Kec. {k.nama}</option>
-                                ))}
-                            </select>
-                        </div>
+                        {/* Dropdown 1: Kecamatan (Or Fixed Badge for PPK) */}
+                        {isPpk ? (
+                            <div className="flex items-center gap-1.5">
+                                <MapPin className="w-3.5 h-3.5 text-[#bb152c] shrink-0" />
+                                <span className="text-xs font-bold text-[#0f172a] dark:text-[#f8fafc] bg-slate-100 dark:bg-[#1e293b] px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
+                                    Kec. {kecamatans[0]?.nama || '-'}
+                                </span>
+                            </div>
+                        ) : (
+                            <div className="flex items-center gap-1.5 w-full sm:w-auto">
+                                <MapPin className="w-3.5 h-3.5 text-[#94a3b8] shrink-0" />
+                                <select
+                                    value={kecIdState}
+                                    onChange={(e) => handleKecamatanFilterChange(e.target.value)}
+                                    className="w-full sm:w-auto bg-[#f8fafc] dark:bg-[#0b0f19] border border-[#e2e8f0] dark:border-[#1e293b] text-[#0f172a] dark:text-[#f8fafc] rounded-xl px-3 py-1.5 text-xs outline-none focus:border-[#bb152c]"
+                                >
+                                    <option value="">🌐 Seluruh Kabupaten (Ringkasan Per-Kecamatan)</option>
+                                    {kecamatans.map((k) => (
+                                        <option key={k.id} value={k.id}>📍 Kec. {k.nama}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
 
-                        {/* Dropdown 2: Desa (Active when Kecamatan selected) */}
-                        {kecIdState && (
+                        {/* Dropdown 2: Desa (Active when Kecamatan selected or in PPK mode) */}
+                        {(isPpk || kecIdState) && (
                             <div className="flex items-center gap-1.5 w-full sm:w-auto">
                                 <Building2 className="w-3.5 h-3.5 text-[#94a3b8] shrink-0" />
                                 <select
@@ -310,14 +324,26 @@ export default function RekapShow({
                         )}
 
                         {/* Reset Filter Button */}
-                        {(kecIdState || desaIdState) && (
-                            <button
-                                onClick={handleResetFilter}
-                                className="inline-flex items-center gap-1 bg-[#f1f5f9] dark:bg-[#1f2937] text-[#475569] dark:text-[#94a3b8] font-bold px-3 py-1.5 rounded-xl text-xs border border-[#e2e8f0] dark:border-[#1e293b] hover:text-[#bb152c] transition cursor-pointer"
-                            >
-                                <RotateCcw className="w-3 h-3" />
-                                <span>Reset Ke Kabupaten</span>
-                            </button>
+                        {isPpk ? (
+                            desaIdState && (
+                                <button
+                                    onClick={handleResetFilter}
+                                    className="inline-flex items-center gap-1 bg-[#f1f5f9] dark:bg-[#1f2937] text-[#475569] dark:text-[#94a3b8] font-bold px-3 py-1.5 rounded-xl text-xs border border-[#e2e8f0] dark:border-[#1e293b] hover:text-[#bb152c] transition cursor-pointer"
+                                >
+                                    <RotateCcw className="w-3 h-3" />
+                                    <span>Reset Ke Semua Desa</span>
+                                </button>
+                            )
+                        ) : (
+                            (kecIdState || desaIdState) && (
+                                <button
+                                    onClick={handleResetFilter}
+                                    className="inline-flex items-center gap-1 bg-[#f1f5f9] dark:bg-[#1f2937] text-[#475569] dark:text-[#94a3b8] font-bold px-3 py-1.5 rounded-xl text-xs border border-[#e2e8f0] dark:border-[#1e293b] hover:text-[#bb152c] transition cursor-pointer"
+                                >
+                                    <RotateCcw className="w-3 h-3" />
+                                    <span>Reset Ke Kabupaten</span>
+                                </button>
+                            )
                         )}
                     </div>
 
@@ -396,7 +422,7 @@ export default function RekapShow({
                                                 <span>{c.nama}</span>
                                                 {scopeLevel === 'desa' && (
                                                     <a
-                                                        href={`/admin/rekap/${jenis}/export?tps_id=${c.id}`}
+                                                        href={`${baseRoute}/${jenis}/export?tps_id=${c.id}`}
                                                         title={`Download Excel C-Hasil ${c.nama}`}
                                                         className="p-1 rounded-md text-slate-400 hover:text-[#bb152c] dark:hover:text-red-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
                                                     >
