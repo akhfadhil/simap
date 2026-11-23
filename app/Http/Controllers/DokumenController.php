@@ -143,20 +143,42 @@ class DokumenController extends Controller
         }
 
         $kecamatan = \App\Models\Kecamatan::findOrFail($kecamatanId);
-        $desaIds = \App\Models\Desa::where('kecamatan_id', $kecamatanId)->pluck('id');
-
         $desas = \App\Models\Desa::where('kecamatan_id', $kecamatanId)->get();
+
+        if (! $request->filled('desa_id') && $desas->isNotEmpty()) {
+            $request->merge(['desa_id' => $desas->first()->id]);
+        }
+
         $selectedDesaId = $request->filled('desa_id') && $desas->contains('id', (int) $request->desa_id)
             ? (int) $request->desa_id
             : null;
 
         $tpsList = $selectedDesaId
             ? Tps::where('desa_id', $selectedDesaId)
-                ->with(['desa', 'dokumens.uploader', 'dokumens.verifier'])
+                ->with(['desa.kecamatan', 'dokumens.uploader', 'dokumens.verifier'])
                 ->get()
             : collect();
 
-        return view('dokumen.ppk', compact('tpsList', 'desas', 'kecamatan', 'isAdminView'));
+        $dokumenKecamatan = Dokumen::where('level', 'kecamatan')
+            ->with(['kecamatan', 'uploader', 'verifier'])
+            ->where('kecamatan_id', $kecamatanId)
+            ->get();
+
+        $aktifJenis = \App\Models\PemiluSetting::aktif();
+        $aktifDokumenMap = collect(\App\Models\Dokumen::JENIS)
+            ->filter(fn ($label, $key) => in_array(strtolower($key), $aktifJenis, true))
+            ->toArray();
+
+        return \Inertia\Inertia::render('Dokumen/Ppk', compact(
+            'tpsList',
+            'desas',
+            'kecamatan',
+            'dokumenKecamatan',
+            'selectedDesaId',
+            'aktifJenis',
+            'aktifDokumenMap',
+            'isAdminView'
+        ));
     }
 
     // Menampilkan form upload dokumen kecamatan.
