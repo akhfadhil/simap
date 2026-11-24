@@ -93,7 +93,7 @@ Route::middleware('auth')->group(function () {
     // Admin write actions
     Route::middleware('role:admin')->group(function () {
         Route::post('/dokumen/{dokumen}/verifikasi-admin', [DokumenController::class, 'verifikasiAdmin'])->name('dokumen.verifikasi.admin');
-        Route::post('/dokumen/{dokumen}/restore', [DokumenController::class, 'restore'])->name('dokumen.restore')->middleware('role:admin');
+        Route::post('/dokumen/{dokumen}/restore', [DokumenController::class, 'restore'])->name('dokumen.restore');
         Route::post('admin/tools/backup', [App\Http\Controllers\Admin\ToolsController::class, 'backup'])->name('admin.tools.backup');
     });
 
@@ -158,15 +158,15 @@ Route::middleware('auth')->group(function () {
     // ── REKAP VIEW (PPS) ─────────────────────────────────────
     Route::prefix('pps/rekap')->name('pps.rekap.')->middleware('role:pps,ppk,admin')->group(function () {
         Route::get('/', [App\Http\Controllers\Rekap\PpsController::class, 'index'])->name('index');
-        Route::get('{jenis}', [App\Http\Controllers\Rekap\PpsController::class, 'show'])->name('show');
         Route::get('{jenis}/export', [App\Http\Controllers\Rekap\PpsController::class, 'export'])->name('export');
+        Route::get('{jenis}', [App\Http\Controllers\Rekap\PpsController::class, 'show'])->name('show');
     });
 
     // ── REKAP VIEW (PPK) ─────────────────────────────────────
     Route::prefix('ppk/rekap')->name('ppk.rekap.')->middleware('role:ppk,admin')->group(function () {
         Route::get('/', [App\Http\Controllers\Rekap\PpkController::class, 'index'])->name('index');
-        Route::get('{jenis}', [App\Http\Controllers\Rekap\PpkController::class, 'show'])->name('show');
         Route::get('{jenis}/export', [App\Http\Controllers\Rekap\PpkController::class, 'export'])->name('export');
+        Route::get('{jenis}', [App\Http\Controllers\Rekap\PpkController::class, 'show'])->name('show');
     });
 
     // ── REKAP VIEW (Admin) ───────────────────────────────────
@@ -177,13 +177,11 @@ Route::middleware('auth')->group(function () {
         Route::get('export/download', [App\Http\Controllers\Rekap\AdminController::class, 'exportDownload'])->name('export.download'); // ← tambah, SEBELUM {jenis}
         Route::post('{jenis}/cell-flag', [App\Http\Controllers\Rekap\AdminController::class, 'toggleCellFlag'])->middleware('role:admin')->name('cell-flag');
         Route::post('{jenis}/inline-update', [App\Http\Controllers\Rekap\AdminController::class, 'inlineUpdate'])->middleware('role:admin')->name('inline-update');
+        Route::post('{jenis}/unlock', [App\Http\Controllers\Rekap\AdminController::class, 'unlock'])->middleware('role:admin')->name('unlock');
         Route::get('{jenis}/edit-tps/{tps}', [App\Http\Controllers\Rekap\AdminController::class, 'editTps'])->middleware('role:admin')->name('edit-tps');
         Route::get('{jenis}/export', [App\Http\Controllers\Rekap\AdminController::class, 'export'])->name('export');
         Route::get('{jenis}', [App\Http\Controllers\Rekap\AdminController::class, 'show'])->name('show');
     });
-    Route::post('admin/rekap/{jenis}/unlock', [App\Http\Controllers\Rekap\AdminController::class, 'unlock'])
-        ->middleware('role:admin')
-        ->name('admin.rekap.unlock');
 });
 
 // API endpoint for sub-projects to fetch legislative candidate vote totals

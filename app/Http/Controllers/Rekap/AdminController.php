@@ -647,14 +647,6 @@ class AdminController extends Controller
         ];
     }
 
-    // Menampilkan halaman export rekap.
-    public function exportPage()
-    {
-        $kecamatans = \App\Models\Kecamatan::orderBy('nama')->get();
-
-        return view('rekap.admin.export', compact('kecamatans'));
-    }
-
     // Mengunduh export rekap sesuai level wilayah.
     public function exportDownload(Request $request)
     {
