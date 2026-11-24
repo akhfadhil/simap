@@ -101,7 +101,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
         Route::resource('kecamatan', KecamatanController::class)->only(['index', 'store', 'update', 'destroy']);
         Route::resource('desa', DesaController::class)->only(['index', 'store', 'update', 'destroy']);
-        Route::resource('tps', TpsController::class)->only(['index', 'store', 'update', 'destroy']);
+        Route::resource('tps', TpsController::class)->parameters(['tps' => 'tps'])->only(['index', 'store', 'update', 'destroy']);
         Route::get('users/bulk', [UserManagementController::class, 'bulk'])->name('users.bulk');
         Route::post('users/bulk', [UserManagementController::class, 'bulkStore'])->name('users.bulk.store');
         Route::get('users/export', [UserManagementController::class, 'export'])->name('users.export');
