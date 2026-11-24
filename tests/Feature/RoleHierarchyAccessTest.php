@@ -449,6 +449,41 @@ class RoleHierarchyAccessTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_kpps_can_access_modernized_inertia_pages(): void
+    {
+        $this->actingAs($this->kppsA)
+            ->get(route('dashboard.kpps'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->component('Dashboard/Kpps'));
+
+        $this->actingAs($this->kppsA)
+            ->get(route('dokumen.upload'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Dokumen/Upload')
+                ->has('tps')
+                ->has('uploaded')
+            );
+
+        $this->actingAs($this->kppsA)
+            ->get(route('rekap.index'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Rekap/Kpps/Index')
+                ->has('tps')
+                ->has('rekaps')
+            );
+
+        $this->actingAs($this->kppsA)
+            ->get(route('rekap.form', 'ppwp'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Rekap/Kpps/Form')
+                ->has('tps')
+                ->has('data')
+            );
+    }
+
     public function test_komisioner_can_only_read_admin_documents_rekap_and_charts(): void
     {
         $this->post(route('login.post'), [

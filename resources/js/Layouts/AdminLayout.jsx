@@ -112,7 +112,8 @@ export default function AdminLayout({ children, title }) {
         : isKpps
         ? [
               { href: '/dashboard/kpps', label: 'Beranda', icon: LayoutDashboard, isBlade: false },
-              { href: '/dokumen/upload', label: 'Upload C-Hasil', icon: Upload, isBlade: true },
+              { href: '/rekap', label: 'Input Rekap Suara', icon: BarChart2, isBlade: false },
+              { href: '/dokumen/upload', label: 'Upload C-Hasil', icon: Upload, isBlade: false },
           ]
         : [
               { href: '/dashboard/admin', label: 'Beranda', icon: LayoutDashboard, isBlade: false },

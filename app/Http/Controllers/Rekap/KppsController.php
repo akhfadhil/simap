@@ -27,8 +27,15 @@ class KppsController extends Controller
         $tps = $this->activeTps();
         $rekaps = RekapHeader::where('tps_id', $tps->id)
             ->get()->keyBy('jenis');
+        $canEditRekap = Auth::user()->role === 'kpps';
 
-        return view('rekap.kpps.index', compact('tps', 'rekaps'));
+        return \Inertia\Inertia::render('Rekap/Kpps/Index', [
+            'tps' => $tps->load('desa.kecamatan'),
+            'rekaps' => $rekaps,
+            'aktifJenis' => \App\Models\PemiluSetting::aktif(),
+            'jenisLabels' => RekapHeader::JENIS_LABELS,
+            'canEditRekap' => $canEditRekap,
+        ]);
     }
 
     // Memastikan jenis pemilihan sedang aktif.
@@ -46,8 +53,21 @@ class KppsController extends Controller
         $tps = $this->activeTps();
         $rekap = RekapHeader::where('tps_id', $tps->id)->where('jenis', $jenis)->first();
         $data = $this->getMasterData($jenis, $rekap, $tps);
+        $isAdminRekapEdit = Auth::user()->role === 'admin';
+        $canEditRekap = Auth::user()->role === 'kpps' || $isAdminRekapEdit;
 
-        return view('rekap.kpps.form', compact('tps', 'jenis', 'rekap', 'data'));
+        return \Inertia\Inertia::render('Rekap/Kpps/Form', [
+            'tps' => $tps->load('desa.kecamatan.dapil'),
+            'jenis' => $jenis,
+            'jenisLabel' => RekapHeader::JENIS_LABELS[$jenis] ?? strtoupper($jenis),
+            'rekap' => $rekap,
+            'data' => $data,
+            'isAdminRekapEdit' => $isAdminRekapEdit,
+            'canEditRekap' => $canEditRekap,
+            'backUrl' => $isAdminRekapEdit
+                ? (session('admin_rekap_return_url') ?: route('admin.rekap.show', $jenis))
+                : route('rekap.index'),
+        ]);
     }
 
     // Menyimpan draft rekap atau langsung finalisasi.

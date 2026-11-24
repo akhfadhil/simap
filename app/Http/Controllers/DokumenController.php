@@ -22,7 +22,15 @@ class DokumenController extends Controller
             ->get()
             ->keyBy('jenis');
 
-        return view('dokumen.upload', compact('tps', 'uploaded', 'isAdminView'));
+        return \Inertia\Inertia::render('Dokumen/Upload', [
+            'tps' => $tps->load('desa.kecamatan'),
+            'uploaded' => $uploaded,
+            'isAdminView' => $isAdminView,
+            'aktifJenis' => \App\Models\PemiluSetting::aktif(),
+            'jenisLabels' => Dokumen::JENIS,
+            'statusLabels' => Dokumen::STATUS_LABELS,
+            'statusColors' => Dokumen::STATUS_COLORS,
+        ]);
     }
 
     // Menyimpan atau mengganti dokumen TPS.
