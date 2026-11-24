@@ -13,7 +13,7 @@ return new class extends Migration
             $table->foreignId('tps_id')->nullable()->constrained('tps')->onDelete('cascade');
             $table->foreignId('kecamatan_id')->nullable()->constrained('kecamatans')->onDelete('cascade');
             $table->foreignId('uploaded_by')->constrained('users')->onDelete('cascade');
-            $table->enum('jenis', ['PPWP', 'DPR_RI', 'DPD', 'DPRD_PROV', 'DPRD_KAB']);
+            $table->enum('jenis', ['PPWP', 'GUBERNUR', 'BUPATI', 'DPD', 'DPR_RI', 'DPRD_PROV', 'DPRD_KAB']);
             $table->enum('level', ['tps', 'kecamatan'])->default('tps');
             $table->enum('status', ['menunggu_verifikasi', 'terverifikasi', 'ditolak'])->default('menunggu_verifikasi');
             $table->text('komentar')->nullable();

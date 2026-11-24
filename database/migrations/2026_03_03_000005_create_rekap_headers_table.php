@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('rekap_headers', function (Blueprint $table) {
             $table->id();
             $table->foreignId('tps_id')->constrained('tps')->onDelete('cascade');
-            $table->enum('jenis', ['ppwp', 'dpd', 'dpr_ri', 'dprd_prov', 'dprd_kab']);
+            $table->enum('jenis', ['ppwp', 'gubernur', 'bupati', 'dpd', 'dpr_ri', 'dprd_prov', 'dprd_kab']);
             $table->enum('status', ['draft', 'final'])->default('draft');
 
             // Section I
